@@ -315,7 +315,7 @@ ax.set_xlim(-ax_L, ax_L)
 ax.set_ylim(-ax_L, ax_L)
 
 # plot the field with desired parameters as specidfied above
-plottedfield = stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale)
+plottedfield = stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)
 
 # reduce white space on the plot figure
 fig.tight_layout()
@@ -391,7 +391,7 @@ def vect_type_response(tensor):
     # 0 is just stacks, 1 is for only arrows and 2 is for both
     if tensor == 0:
         arrows = False
-        stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale)
+        stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)
         canvas.draw()
     elif tensor == 1:
         ax.quiver(xg, yg, u, v, pivot=orientation, scale=scale, scale_units='xy')
@@ -399,7 +399,7 @@ def vect_type_response(tensor):
         canvas.draw()
     elif tensor == 2:
         arrows = True
-        stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale)
+        stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)
         # repeat the displaying of the figure so that it updates in GUI
         canvas.draw()
 
@@ -432,7 +432,7 @@ def PLOT_response():
     u *= a
     v *= a
     # plot the new field
-    stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale)
+    stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)
     # put it onto the screen
     canvas.draw()
     # change the radio button ticks back to stack only
