@@ -16,7 +16,7 @@ from matplotlib.backend_bases import key_press_handler
 start = timeit.default_timer()
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# define needed functions
+# define needed functions for the initial plot
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # deifne a fucntion to check number parity
@@ -43,12 +43,16 @@ def G(s, n, c):
 
 
 # define a function that will complete all stack plotting:
-def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows='True', orientation='mid', scale=1, a=1):
+def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows='True', orientation='mid', scale=1):
     # get axis lengths:
     x_len = len(xg[:, 0])
     y_len = len(yg[:, 0])
-    # set us parameters that need to be global:
-    global ax_L
+    
+    # Scaling of axes and setting equal proportions circles look like circles
+    ax.set_aspect('equal')
+    ax_L = L + L/delta_factor
+    ax.set_xlim(-ax_L, ax_L)
+    ax.set_ylim(-ax_L, ax_L)
     
     # define an empty array of magnitudes, to then fill with integer rel. mags
     R_int = np.zeros(shape=((x_len), (y_len)))
@@ -190,11 +194,6 @@ def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows='True', orienta
 
     plt.close()
 
-
-# defina a function that will respond to radio buttons behind choosing vector types:
-# def vect_type_response(var):
-    
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # set up basic layout of the window
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -203,77 +202,36 @@ def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows='True', orienta
 root = tk.Tk()
 
 # set the icon
-#root.iconbitmap('C:\\Users\\macus\\Desktop\\Uni\\summer internships\\Moustafa - Differential Forms\\Greek-omega icon.ico')
+root.iconbitmap('C:\\Users\\macus\\Desktop\\Uni\\summer internships\\Moustafa - Differential Forms\\images\\Greek-omega icon.ico')
 
 # set its title
 root.title('Vector field analyser - differential forms')
 
 # set a window size for it all to initially appear in
-root.geometry("1300x920")
+root.geometry("1400x920")
 
 # set up frames for each of:
 # bottom side (field, scalings etc) and the right side (with detailed options)
 # and top left for plot
 
 # right frame:
-right_frame = tk.LabelFrame(root, text='options frame', padx=150, pady=300)
+right_frame = tk.LabelFrame(root, text='options frame', padx=160, pady=298)
 right_frame.grid(row=0, column=1)
 
-# put something in it for now
-right_frame_dummy_label = tk.Label(right_frame, text='options frame').pack()
-
 # bot frame:
-bot_frame = tk.LabelFrame(root, text='field frame', padx=400, pady=100)
+bot_frame = tk.LabelFrame(root, text='field frame', padx=192, pady=87)
 bot_frame.grid(row=1, column=0)
-
-# put something in it for now
-bot_frame_dummy_label = tk.Label(bot_frame, text='field frame').pack()
 
 # plot frame:
 plot_frame = tk.LabelFrame(root, text='plot frame', padx=10, pady=10)
 plot_frame.grid(row=0, column=0)
 
 # plot characteristics frame and plot button
-small_frame = tk.LabelFrame(root, text='plot frame', padx=136, pady=100)
+small_frame = tk.LabelFrame(root, text='plot frame', padx=29, pady=41)
 small_frame.grid(row=1, column=1)
 
-# put something in it for now
-small_frame_dummy_label = tk.Label(small_frame, text='axis options frame').pack()
-
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# define wanted standard buttons
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# define wanted Radio buttons
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-'''define buttons to choose quiver, quiver and stack or just stack plots'''
-# define a number that will tarck which vector field is wanted
-tensor = tk.IntVar()
-
-# define each button and put them on the screen, in the right_frame
-#vector_type_btn1 = tk.Radiobutton(right_frame, text='arrow', variable=tensor, value=1, command=lambda:vect_type_response(tensor.get())).grid(row=10, column=0)
-#vector_type_btn2 = tk.Radiobutton(right_frame, text='both', variable=tensor, value=2, command=lambda:vect_type_response(tensor.get())).grid(row=10, column=1)
-#vector_type_btn2 = tk.Radiobutton(right_frame, text='stack', variable=tensor, value=3, command=lambda:vect_type_response(tensor.get())).grid(row=10, column=2)
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# define wanted sliders
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# define wanted checkboxes
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# define the input boxes for fileds in the field frame
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#  plot the graph and put down the plot in its plot frame
-# do this with the initialfield to be plotted
+# set up initial parameters and plot the initial graph, put it in plot frame
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # define scale of the graph
@@ -288,10 +246,10 @@ y = np.linspace(-L, L, pt_den)
 xg, yg = np.meshgrid(x, y)
 
 # define an example vector field
-a = 0.01
-u = 2*xg  # x component
-v = np.zeros(np.shape(xg))  # y component
-# for no dependance, use : np.zeros(np.shape(grid))
+a = 0.2
+u = a*yg*np.sin(xg)  # x component
+v = -a*xg*np.cos(yg)  # y component
+# for no dependance, use : np.zeros(np.shape(xg))  ----- or yg
 
 '''
 To define it in polar:
@@ -353,7 +311,7 @@ ax.set_xlim(-ax_L, ax_L)
 ax.set_ylim(-ax_L, ax_L)
 
 # plot the field with desired parameters as specidfied above
-plottedfield = stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, a)
+plottedfield = stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale)
 
 # reduce white space on the plot figure
 fig.tight_layout()
@@ -377,25 +335,172 @@ def on_key_press(event):
 canvas.mpl_connect("key_press_event", on_key_press)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# define the axis options in the axis frame
+# define other needed functions, for input reponses
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# input to set the graph L
 
-# input to change the s_max
+# define a function to replace input string to be 'python understood'
+def format_eq(string):
+    # replace all the x and y with xg and yg:
+    string = string.replace('x', 'xg')
+    string = string.replace('y', 'yg')
+    # where there are special functions, replace them with library directions
+    string = string.replace('pi', 'np.pi')
+    string = string.replace('sqrt', 'np.sqrt')
+    string = string.replace('sin', 'np.sin')
+    string = string.replace('cos', 'np.cos')
+    string = string.replace('tan', 'np.tan')
+    string = string.replace('^', '**')
+    string = string.replace('ln', 'np.log')        
+    return string
 
-# input to change pt_den
 
-# input to change scale
+# define a function that takes input string that is python understood and turn into vector components:
+def eq_to_comps(string_x, string_y, xg, yg, u, v):
+    global equation_x, equation_y
+    # use this fucntion to replace given string to python understood equations:
+    equation_x = format_eq(string_x)
+    equation_y = format_eq(string_y)
+    # use these to define the field:
+    # also: check if equation equals zero, to then replace it with an array and not just 0:
+    if equation_x == '0':
+        u = np.zeros(np.shape(xg))
+        v = eval(equation_y)
+    elif equation_y == '0':
+        u = eval(equation_x)
+        v = np.zeros(np.shape(yg))
+    else:
+        u = eval(equation_x)
+        v = eval(equation_y)
+    # return these
+    return u, v
 
-# input to change fract
+
+# defina a function that will respond to radio buttons behind choosing vector types:
+def vect_type_response(tensor):
+    # clear the plot that is already there:
+    ax.clear()
+    # use the tensor to determine what to plot:
+    # 0 is just stacks, 1 is for only arrows and 2 is for both
+    if tensor == 0:
+        arrows = False
+        stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale)
+        canvas.draw()
+    elif tensor == 1:
+        ax.quiver(xg, yg, u, v, pivot=orientation, scale=scale, scale_units='xy')
+        # repeat the displaying of the figure so that it updates in GUI
+        canvas.draw()
+    elif tensor == 2:
+        arrows = True
+        stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale)
+        # repeat the displaying of the figure so that it updates in GUI
+        canvas.draw()
 
 
+# define the PLOT button response function
+def PLOT_response():
+    global u
+    global v
+    global L, pt_den, s_max, a, x, y, xg, yg, u, v, tensor, ax
+    # clear the current axis
+    ax.clear()
+    # take the new axis parameters and field definitions out of the boxes
+    L = float(L_entry.get())
+    pt_den = int(pt_den_entry.get())
+    s_max = int(s_max_entry.get())
+    a = float(a_entry.get())
+    string_x = str(x_comp_entry.get())
+    string_y = str(y_comp_entry.get())
+    # from L redefine the axis
+    ax_L = L + L/delta_factor
+    ax.set_xlim(-ax_L, ax_L)
+    ax.set_ylim(-ax_L, ax_L)
+    # from pt_den and L, change the axis coordinates and the grid:
+    x = np.linspace(-L, L, pt_den)
+    y = np.linspace(-L, L, pt_den)
+    xg, yg = np.meshgrid(x, y)
+    # take all these values, and the input from field component bnoxes to set up the field:
+    u, v = eq_to_comps(string_x, string_y, xg, yg, u, v)
+    # scale with given a:
+    u *= a
+    v *= a
+    # plot the new field
+    stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale)
+    # put it onto the screen
+    canvas.draw()
+    # change the radio button ticks back to stack only
+    tensor.set(0)
 
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# define wanted standard buttons
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+# define the PLOT button
+PLOT_btn = tk.Button(small_frame, text='PLOT', padx=60, pady=30, command=PLOT_response)
+PLOT_btn.grid(row=0, column=0, columnspan=2, rowspan=2)
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# define wanted entry boxes
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+''' define entry boxes to update: L, pt_den, s_max and a  and a PLOT button '''
+# define entry boxes for each (in order): L, pt_den, s_max and a ; and info txt
+# Also input into them the initial values
+L_label = tk.Label(small_frame, text='Size').grid(row=2, column=0)
+L_entry = tk.Entry(small_frame, width=13, borderwidth=1)
+L_entry.grid(row=3, column=0, padx = 2)
+L_entry.insert(0, L)
 
+pt_den_label = tk.Label(small_frame, text='grid').grid(row=2, column=1)
+pt_den_entry = tk.Entry(small_frame, width=13, borderwidth=1)
+pt_den_entry.grid(row=3, column=1, padx = 2)
+pt_den_entry.insert(0, pt_den)
+
+s_max_label = tk.Label(small_frame, text='max sheets').grid(row=2, column=2)
+s_max_entry = tk.Entry(small_frame, width=13, borderwidth=1)
+s_max_entry.grid(row=3, column=2, padx = 2)
+s_max_entry.insert(0, s_max)
+
+a_label = tk.Label(small_frame, text='field scaling  \'a\'').grid(row=2, column=3)
+a_entry = tk.Entry(small_frame, width=13, borderwidth=1)
+a_entry.grid(row=3, column=3, padx = 2)
+a_entry.insert(0, a)
+
+# define entry boxes for the field equations in x and y
+x_comp_label = tk.Label(bot_frame, text='x component').grid(row=0, column=0)
+x_comp_entry = tk.Entry(bot_frame, width=30, borderwidth=2)
+x_comp_entry.grid(row=1, column=0)
+x_comp_entry.insert(0, 'a*y*sin(x)')
+
+y_comp_label = tk.Label(bot_frame, text='y component').grid(row=0, column=1)
+y_comp_entry = tk.Entry(bot_frame, width=30, borderwidth=2)
+y_comp_entry.grid(row=1, column=1)
+y_comp_entry.insert(0, '-x*cos(y)')
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# define wanted Radio buttons
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+'''define buttons to choose quiver, quiver and stack or just stack plots'''
+# define a number that will tarck which vector field is wanted
+tensor = tk.IntVar()
+
+# define each button and put them on the screen, in the right_frame
+arrow_btn = tk.Radiobutton(right_frame, text='arrow', variable=tensor, value=1, command=lambda: vect_type_response(tensor.get())).grid(row=10, column=0)
+arrow_stack_btn = tk.Radiobutton(right_frame, text='both', variable=tensor, value=2, command=lambda: vect_type_response(tensor.get())).grid(row=10, column=1)
+stack_btn = tk.Radiobutton(right_frame, text='stack', variable=tensor, value=0, command=lambda: vect_type_response(tensor.get())).grid(row=10, column=2)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# define wanted sliders
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# define wanted checkboxes
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# define wanted checkboxes
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 # return time to run
