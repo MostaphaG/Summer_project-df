@@ -43,7 +43,7 @@ def G(s, n, c):
 
 
 # define a function that will complete all stack plotting:
-def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows='True', orientation='mid', scale=1):
+def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows='True', orientation='mid', scale=1, w_head=8, h_head=4):
     # get axis lengths:
     x_len = len(xg[:, 0])
     y_len = len(yg[:, 0])
@@ -106,20 +106,20 @@ def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows='True', orienta
     B_y = yg + (sheet_L/2)*np.cos(theta)
     
     # define points of stack arrowheads as arrays for all stacks
-    p_sh1x = xg + (s_L/2)*np.cos(theta) + (sheet_L/8)*np.sin(theta)
-    p_sh1y = yg + (s_L/2)*np.sin(theta) - (sheet_L/8)*np.cos(theta)
-    p_sh2x = xg + (s_L/2)*np.cos(theta) - (sheet_L/8)*np.sin(theta)
-    p_sh2y = yg + (s_L/2)*np.sin(theta) + (sheet_L/8)*np.cos(theta)
-    p_sh3x = xg + (3*s_L/4)*np.cos(theta)
-    p_sh3y = yg + (3*s_L/4)*np.sin(theta)
+    p_sh1x = xg + (s_L/2)*np.cos(theta) + (sheet_L/w_head)*np.sin(theta)
+    p_sh1y = yg + (s_L/2)*np.sin(theta) - (sheet_L/w_head)*np.cos(theta)
+    p_sh2x = xg + (s_L/2)*np.cos(theta) - (sheet_L/w_head)*np.sin(theta)
+    p_sh2y = yg + (s_L/2)*np.sin(theta) + (sheet_L/w_head)*np.cos(theta)
+    p_sh3x = xg + (s_L*0.5 + s_L/h_head)*np.cos(theta)
+    p_sh3y = yg + (s_L*0.5 + s_L/h_head)*np.sin(theta)
     
     # define these for when there is only 1 line in the stack plot:
-    P_sh1x = xg + (sheet_L/8)*np.sin(theta)
-    P_sh1y = yg - (sheet_L/8)*np.cos(theta)
-    P_sh2x = xg - (sheet_L/8)*np.sin(theta)
-    P_sh2y = yg + (sheet_L/8)*np.cos(theta)
-    P_sh3x = xg + (s_L/4)*np.cos(theta)
-    P_sh3y = yg + (s_L/4)*np.sin(theta)
+    P_sh1x = xg + (sheet_L/w_head)*np.sin(theta)
+    P_sh1y = yg - (sheet_L/w_head)*np.cos(theta)
+    P_sh2x = xg - (sheet_L/w_head)*np.sin(theta)
+    P_sh2y = yg + (sheet_L/w_head)*np.cos(theta)
+    P_sh3x = xg + (s_L/h_head)*np.cos(theta)
+    P_sh3y = yg + (s_L/h_head)*np.sin(theta)
     
     # loop over each arrow coordinate in x and y
     for i in range(x_len):
@@ -202,7 +202,7 @@ def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows='True', orienta
 root = tk.Tk()
 
 # set the icon
-root.iconbitmap('C:\\Users\\macus\\Desktop\\Uni\\summer internships\\Moustafa - Differential Forms\\images\\Greek-omega icon.ico')
+root.iconbitmap('OMEGA_ICON.ico')  # you will need your directory for this code to be set correctly
 
 # set its title
 root.title('Vector field analyser - differential forms')
@@ -294,6 +294,10 @@ s_max = 10
 # set screen dpi
 my_dpi = 100
 
+# define denominator of fractional height and width of arrowhead based on stack size
+w_head = 8
+h_head = 4
+    
 # create a figure
 fig = plt.figure(figsize=(855/my_dpi, 573/my_dpi), dpi=my_dpi)
 
@@ -368,6 +372,9 @@ def eq_to_comps(string_x, string_y, xg, yg, u, v):
         v = eval(equation_y)
     elif equation_y == '0':
         u = eval(equation_x)
+        v = np.zeros(np.shape(yg))
+    elif equation_x and equation_y == '0':
+        u = np.zeros(np.shape(xg))
         v = np.zeros(np.shape(yg))
     else:
         u = eval(equation_x)
