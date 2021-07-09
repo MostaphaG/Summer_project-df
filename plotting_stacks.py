@@ -1,5 +1,5 @@
 # Lats attempt to plot stack fileds - optimised
-# import modules
+# import nec. modules
 import timeit
 import numpy as np
 import matplotlib.pyplot as plt
