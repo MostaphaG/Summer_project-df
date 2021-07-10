@@ -449,6 +449,8 @@ def custom_submition():
     stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)
     # put it onto the screen
     canvas.draw()
+    # change the radio button ticks back to stack only
+    tensor.set(0)
     # then close the window
     arrowH_opt_window.destroy()
 
