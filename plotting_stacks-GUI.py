@@ -201,9 +201,6 @@ def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows='True', orienta
 # define an object tracker - for GUI set up
 root = tk.Tk()
 
-# set the icon
-root.iconbitmap('OMEGA_ICON.ico')  # you will need your directory for this code to be set correctly
-
 # set its title
 root.title('Vector field analyser - differential forms')
 
