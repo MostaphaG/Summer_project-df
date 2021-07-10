@@ -437,7 +437,7 @@ def PLOT_response():
 
 
 # define a function to respond to submitting arrohead changes in the new window
-def custom_submition():
+def custom_submission():
     # first, take from entry boxes, wanted parameters and make them global:
     global w_head, h_head, fract
     w_head = float(w_entry.get())
@@ -461,7 +461,7 @@ def custom_btn_reponse():
     global w_entry, h_entry, fract_entry, arrowH_opt_window
     # open a titled new window
     arrowH_opt_window = tk.Toplevel()
-    arrowH_opt_window.title('arrowhead settings')
+    arrowH_opt_window.title('optimisation settings')
     # define and label a first entry, for width
     tk.Label(arrowH_opt_window, text='arrowhead base width as sheet width fraction:').grid(row=0, column=0)
     w_entry = tk.Entry(arrowH_opt_window, width=30, borderwidth=1)
@@ -478,7 +478,7 @@ def custom_btn_reponse():
     fract_entry.insert(0, fract)
     fract_entry.grid(row=5, column=0)
     # define a button to submit those changes:
-    submit_arr_btn = tk.Button(arrowH_opt_window, text='SUBMIT ALL', padx=20, pady=10, command=custom_submition)
+    submit_arr_btn = tk.Button(arrowH_opt_window, text='SUBMIT ALL', padx=20, pady=10, command=custom_submission)
     submit_arr_btn.grid(row=6, column=0, pady=10)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
