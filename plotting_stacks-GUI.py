@@ -43,7 +43,7 @@ def G(s, n, c):
 
 
 # define a function that will complete all stack plotting:
-def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows='True', orientation='mid', scale=1, w_head=8, h_head=4):
+def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows='True', orientation='mid', scale=1, w_head=1/8, h_head=1/4):
     # get axis lengths:
     x_len = len(xg[:, 0])
     y_len = len(yg[:, 0])
@@ -106,20 +106,20 @@ def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows='True', orienta
     B_y = yg + (sheet_L/2)*np.cos(theta)
     
     # define points of stack arrowheads as arrays for all stacks
-    p_sh1x = xg + (s_L/2)*np.cos(theta) + (sheet_L/w_head)*np.sin(theta)
-    p_sh1y = yg + (s_L/2)*np.sin(theta) - (sheet_L/w_head)*np.cos(theta)
-    p_sh2x = xg + (s_L/2)*np.cos(theta) - (sheet_L/w_head)*np.sin(theta)
-    p_sh2y = yg + (s_L/2)*np.sin(theta) + (sheet_L/w_head)*np.cos(theta)
-    p_sh3x = xg + (s_L*0.5 + s_L/h_head)*np.cos(theta)
-    p_sh3y = yg + (s_L*0.5 + s_L/h_head)*np.sin(theta)
+    p_sh1x = xg + (s_L/2)*np.cos(theta) + (sheet_L*w_head)*np.sin(theta)
+    p_sh1y = yg + (s_L/2)*np.sin(theta) - (sheet_L*w_head)*np.cos(theta)
+    p_sh2x = xg + (s_L/2)*np.cos(theta) - (sheet_L*w_head)*np.sin(theta)
+    p_sh2y = yg + (s_L/2)*np.sin(theta) + (sheet_L*w_head)*np.cos(theta)
+    p_sh3x = xg + (s_L*0.5 + s_L*h_head)*np.cos(theta)
+    p_sh3y = yg + (s_L*0.5 + s_L*h_head)*np.sin(theta)
     
     # define these for when there is only 1 line in the stack plot:
-    P_sh1x = xg + (sheet_L/w_head)*np.sin(theta)
-    P_sh1y = yg - (sheet_L/w_head)*np.cos(theta)
-    P_sh2x = xg - (sheet_L/w_head)*np.sin(theta)
-    P_sh2y = yg + (sheet_L/w_head)*np.cos(theta)
-    P_sh3x = xg + (s_L/h_head)*np.cos(theta)
-    P_sh3y = yg + (s_L/h_head)*np.sin(theta)
+    P_sh1x = xg + (sheet_L*w_head)*np.sin(theta)
+    P_sh1y = yg - (sheet_L*w_head)*np.cos(theta)
+    P_sh2x = xg - (sheet_L*w_head)*np.sin(theta)
+    P_sh2y = yg + (sheet_L*w_head)*np.cos(theta)
+    P_sh3x = xg + (s_L*h_head)*np.cos(theta)
+    P_sh3y = yg + (s_L*h_head)*np.sin(theta)
     
     # loop over each arrow coordinate in x and y
     for i in range(x_len):
@@ -292,8 +292,8 @@ s_max = 10
 my_dpi = 100
 
 # define denominator of fractional height and width of arrowhead based on stack size
-w_head = 8
-h_head = 4
+w_head = 1/8
+h_head = 1/4
     
 # create a figure
 fig = plt.figure(figsize=(855/my_dpi, 573/my_dpi), dpi=my_dpi)
@@ -436,6 +436,49 @@ def PLOT_response():
     tensor.set(0)
 
 
+# define a function to respond to submitting arrohead changes in the new window
+def custom_submition():
+    # first, take from entry boxes, wanted parameters and make them global:
+    global w_head, h_head, fract
+    w_head = float(w_entry.get())
+    h_head = float(h_entry.get())
+    fract = float(fract_entry.get())
+    # clear the axis
+    ax.clear()
+    # replot the graph with new arrows:
+    stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)
+    # put it onto the screen
+    canvas.draw()
+    # then close the window
+    arrowH_opt_window.destroy()
+
+
+
+# define a reponse function to open a new window when arrowh_btn is pressed:
+def custom_btn_reponse():
+    global w_entry, h_entry, fract_entry, arrowH_opt_window
+    # open a titled new window
+    arrowH_opt_window = tk.Toplevel()
+    arrowH_opt_window.title('arrowhead settings')
+    # define and label a first entry, for width
+    tk.Label(arrowH_opt_window, text='arrowhead base width as sheet width fraction:').grid(row=0, column=0)
+    w_entry = tk.Entry(arrowH_opt_window, width=30, borderwidth=1)
+    w_entry.insert(0, w_head)
+    w_entry.grid(row=1, column=0)
+    # define and label second entry, for height
+    tk.Label(arrowH_opt_window, text='arrowhead perp. height as sheet length fraction:').grid(row=2, column=0)
+    h_entry = tk.Entry(arrowH_opt_window, width=30, borderwidth=1)
+    h_entry.insert(0, h_head)
+    h_entry.grid(row=3, column=0)
+    # define an entry for fract update, to change the size of each stack as a frac of graph size L
+    tk.Label(arrowH_opt_window, text='fraction of graph to be set as the stack size:').grid(row=4, column=0)
+    fract_entry = tk.Entry(arrowH_opt_window, width=30, borderwidth=1)
+    fract_entry.insert(0, fract)
+    fract_entry.grid(row=5, column=0)
+    # define a button to submit those changes:
+    submit_arr_btn = tk.Button(arrowH_opt_window, text='SUBMIT ALL', padx=20, pady=10, command=custom_submition)
+    submit_arr_btn.grid(row=6, column=0, pady=10)
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # define wanted standard buttons
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -443,6 +486,10 @@ def PLOT_response():
 # define the PLOT button
 PLOT_btn = tk.Button(small_frame, text='PLOT', padx=60, pady=30, command=PLOT_response)
 PLOT_btn.grid(row=0, column=0, columnspan=2, rowspan=2)
+
+# define a small button in small frame that will open new window to adjust arrowheads
+arrowh_btn = tk.Button(small_frame, text='customise', padx=1, pady=1, command=custom_btn_reponse)
+arrowh_btn.grid(row=0, column=3)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # define wanted entry boxes
