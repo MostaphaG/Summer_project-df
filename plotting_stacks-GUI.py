@@ -250,27 +250,20 @@ v = -a*xg*np.cos(yg)  # y component
 
 '''
 To define it in polar:
-
 hash out the above u and v, then:
-
 # define polar axis
 theta = np.arange(0, 361, 10) * np.pi/180
 radius = np.arange(0.2, 1, 0.1)
-
 # set up grid in polar coordinates
 thetag, rg = np.meshgrid(theta, radius)
-
 # set up wanted constants
 a = 1
-
 # define the field in polar coordiantes
 Fr = thetag
 Ftheta = - a/rg
-
 # convert to cartesian
 u = Fr*np.cos(thetag) - Ftheta*np.sin(thetag)  # x component
 v = Fr*np.sin(thetag) + Ftheta*np.cos(thetag)  # y component
-
 CONTINUE FROM THERE
 '''
 
@@ -500,35 +493,35 @@ arrowh_btn.grid(row=0, column=3)
 # define entry boxes for each (in order): L, pt_den, s_max and a ; and info txt
 # Also input into them the initial values
 L_label = tk.Label(small_frame, text='Size').grid(row=2, column=0)
-L_entry = tk.Entry(small_frame, width=13, borderwidth=1)
+L_entry = tk.Entry(small_frame, width=11, borderwidth=1)
 L_entry.grid(row=3, column=0, padx = 2)
 L_entry.insert(0, L)
 
 pt_den_label = tk.Label(small_frame, text='grid').grid(row=2, column=1)
-pt_den_entry = tk.Entry(small_frame, width=13, borderwidth=1)
+pt_den_entry = tk.Entry(small_frame, width=11, borderwidth=1)
 pt_den_entry.grid(row=3, column=1, padx = 2)
 pt_den_entry.insert(0, pt_den)
 
 s_max_label = tk.Label(small_frame, text='max sheets').grid(row=2, column=2)
-s_max_entry = tk.Entry(small_frame, width=13, borderwidth=1)
+s_max_entry = tk.Entry(small_frame, width=11, borderwidth=1)
 s_max_entry.grid(row=3, column=2, padx = 2)
 s_max_entry.insert(0, s_max)
 
 a_label = tk.Label(small_frame, text='field scaling  \'a\'').grid(row=2, column=3)
-a_entry = tk.Entry(small_frame, width=13, borderwidth=1)
+a_entry = tk.Entry(small_frame, width=11, borderwidth=1)
 a_entry.grid(row=3, column=3, padx = 2)
 a_entry.insert(0, a)
 
 # define entry boxes for the field equations in x and y
 x_comp_label = tk.Label(bot_frame, text='x component').grid(row=0, column=0)
-x_comp_entry = tk.Entry(bot_frame, width=30, borderwidth=2)
+x_comp_entry = tk.Entry(bot_frame, width=20, borderwidth=2)
 x_comp_entry.grid(row=1, column=0)
 x_comp_entry.insert(0, 'a*y*sin(x)')
 
 y_comp_label = tk.Label(bot_frame, text='y component').grid(row=0, column=1)
-y_comp_entry = tk.Entry(bot_frame, width=30, borderwidth=2)
+y_comp_entry = tk.Entry(bot_frame, width=20, borderwidth=2)
 y_comp_entry.grid(row=1, column=1)
-y_comp_entry.insert(0, '-x*cos(y)')
+y_comp_entry.insert(0, '-a*x*cos(y)')
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # define wanted Radio buttons
@@ -562,4 +555,3 @@ print('Time: ', stop - start)
 
 # keep the program running until otherwise specified by user
 tk.mainloop()
-
