@@ -100,26 +100,26 @@ def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows='True', orienta
     I_cos = np.cos(theta)
     
     # define the points that set out a line of the stack sheet (middle line)
-    A_x = xg + (sheet_L/2)*np.sin(theta)
-    A_y = yg - (sheet_L/2)*np.cos(theta)
-    B_x = xg - (sheet_L/2)*np.sin(theta)
-    B_y = yg + (sheet_L/2)*np.cos(theta)
+    A_x = xg + (sheet_L/2)*I_sin
+    A_y = yg - (sheet_L/2)*I_cos
+    B_x = xg - (sheet_L/2)*I_sin
+    B_y = yg + (sheet_L/2)*I_cos
     
     # define points of stack arrowheads as arrays for all stacks
-    p_sh1x = xg + (s_L/2)*np.cos(theta) + (sheet_L*w_head)*np.sin(theta)
-    p_sh1y = yg + (s_L/2)*np.sin(theta) - (sheet_L*w_head)*np.cos(theta)
-    p_sh2x = xg + (s_L/2)*np.cos(theta) - (sheet_L*w_head)*np.sin(theta)
-    p_sh2y = yg + (s_L/2)*np.sin(theta) + (sheet_L*w_head)*np.cos(theta)
-    p_sh3x = xg + (s_L*0.5 + s_L*h_head)*np.cos(theta)
-    p_sh3y = yg + (s_L*0.5 + s_L*h_head)*np.sin(theta)
+    p_sh1x = xg + (s_L/2)*I_cos + (sheet_L*w_head)*I_sin
+    p_sh1y = yg + (s_L/2)*I_sin - (sheet_L*w_head)*I_cos
+    p_sh2x = xg + (s_L/2)*I_cos - (sheet_L*w_head)*I_sin
+    p_sh2y = yg + (s_L/2)*I_sin + (sheet_L*w_head)*I_cos
+    p_sh3x = xg + (s_L*0.5 + s_L*h_head)*I_cos
+    p_sh3y = yg + (s_L*0.5 + s_L*h_head)*I_sin
     
     # define these for when there is only 1 line in the stack plot:
-    P_sh1x = xg + (sheet_L*w_head)*np.sin(theta)
-    P_sh1y = yg - (sheet_L*w_head)*np.cos(theta)
-    P_sh2x = xg - (sheet_L*w_head)*np.sin(theta)
-    P_sh2y = yg + (sheet_L*w_head)*np.cos(theta)
-    P_sh3x = xg + (s_L*h_head)*np.cos(theta)
-    P_sh3y = yg + (s_L*h_head)*np.sin(theta)
+    P_sh1x = xg + (sheet_L*w_head)*I_sin
+    P_sh1y = yg - (sheet_L*w_head)*I_cos
+    P_sh2x = xg - (sheet_L*w_head)*I_sin
+    P_sh2y = yg + (sheet_L*w_head)*I_cos
+    P_sh3x = xg + (s_L*h_head)*I_cos
+    P_sh3y = yg + (s_L*h_head)*I_sin
     
     # loop over each arrow coordinate in x and y
     for i in range(x_len):
@@ -212,19 +212,19 @@ root.geometry("1400x920")
 # and top left for plot
 
 # right frame:
-right_frame = tk.LabelFrame(root, text='options frame', padx=160, pady=298)
+right_frame = tk.LabelFrame(root, text='Options Frame', padx=160, pady=298)
 right_frame.grid(row=0, column=1)
 
 # bot frame:
-bot_frame = tk.LabelFrame(root, text='field frame', padx=192, pady=87)
+bot_frame = tk.LabelFrame(root, text='Field Input Frame', padx=192, pady=87)
 bot_frame.grid(row=1, column=0)
 
 # plot frame:
-plot_frame = tk.LabelFrame(root, text='plot frame', padx=10, pady=10)
+plot_frame = tk.LabelFrame(root, text='Vector Field Frame', padx=10, pady=10)
 plot_frame.grid(row=0, column=0)
 
 # plot characteristics frame and plot button
-small_frame = tk.LabelFrame(root, text='plot frame', padx=29, pady=41)
+small_frame = tk.LabelFrame(root, text='Plot Customisation Frame', padx=29, pady=41)
 small_frame.grid(row=1, column=1)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -233,7 +233,7 @@ small_frame.grid(row=1, column=1)
 
 # define scale of the graph
 L = 5
-pt_den = 26   # number of points on each axis
+pt_den = 20   # number of points on each axis
 
 # define x and y values
 x = np.linspace(-L, L, pt_den)
@@ -279,7 +279,7 @@ delta_factor = 10
 fract = 0.05
 
 # define the maximum number of stack to plot, dep. on magnitude
-s_max = 10
+s_max = 6
 
 # set screen dpi
 my_dpi = 100
@@ -345,7 +345,8 @@ def format_eq(string):
     string = string.replace('cos', 'np.cos')
     string = string.replace('tan', 'np.tan')
     string = string.replace('^', '**')
-    string = string.replace('ln', 'np.log')        
+    string = string.replace('ln', 'np.log') 
+    string = string.replace('exp', 'np.exp')       
     return string
 
 
@@ -370,8 +371,9 @@ def eq_to_comps(string_x, string_y, xg, yg, u, v):
         u = eval(equation_x)
         v = eval(equation_y)
     # scale with given a:
-    u *= a
-    v *= a
+    #This was causing an error when input field is linear in x and y (coefficients of 1)
+    #u *= a
+    #v *= a
     # return these
     return u, v
 
@@ -399,8 +401,6 @@ def vect_type_response(tensor):
 
 # define the PLOT button response function
 def PLOT_response():
-    global u
-    global v
     global L, pt_den, s_max, a, x, y, xg, yg, u, v, tensor, ax
     # clear the current axis
     ax.clear()
