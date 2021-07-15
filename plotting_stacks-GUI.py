@@ -371,7 +371,6 @@ def eq_to_comps(string_x, string_y, xg, yg, u, v):
         u = eval(equation_x)
         v = eval(equation_y)
     # scale with given a:
-    #This was causing an error when input field is linear in x and y (coefficients of 1)
     u *= a
     v *= a
     # return these
