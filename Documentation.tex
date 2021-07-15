@@ -2,6 +2,7 @@
 \usepackage{graphicx}
 \usepackage[a4paper]{geometry}
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{float}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
@@ -182,5 +183,28 @@ This has been implemented in code. The parameters for this are as follows:
 \textbf{custom\textunderscore btn\textunderscore response}: when the button called `customise' is pressed, this function responds by opening a new (`optimisation settings') window, in which features can be customised. It includes entry boxes where the user can input new values for parameters such as `fract', `w\textunderscore head' and `h\textunderscore head' (described previously). These are initially filled with current values, changing them and pressing `SUBMIT ALL' updates the plot.\\
 \textbf{custom\textunderscore submission}: Responds to the `SUBMIT ALL' in the new `optimisation settings' window. When the button is pressed, the input values are globally saved. The current axis are cleared, a new plot is constructed as per the new specifications and it is displayed on the `canvas' of the correct frame. The updated plot is initially only a stack plot, therefore the radio-buttons are returned to the original position of `stacks'. The new window is then closed.
 
+\section{2-forms from 1-forms, exterior derivative (on $\mathbb{R}^{m}$)}
+The code includes a script that calculates 2-forms from a given 1-form in a specified number of dimensions.
+It requires input of the 1-form components respectively to their elemental 1-form (in code: string\textunderscore x, string\textunderscore y, etc.), variable arrays (in code: $x$, $y$ etc.) as well as grids (in code: $xg$, $yg$, etc.) of these and a list of symbols for each variable used in the equations (coords).\\
+The code, so far, has to be changed manually to include the change of all given components from \textbf{string} type to \textbf{sympy.core.mul.Mul}. The number of used dimensions has to also be input as an integer ('$m$' in the code). The variable, expressions has to also be appended with the correct number of components.
+Python then cycles over the components and the given symbols for variables, differentiating each. To improve efficiency, the derivatives have not been completed when components are to be differentiated with respect to their corresponding elementary 1-form (these go to zero). The results are saved into an (m $\times$ m) array called $ext\textunderscore ds$'. The array is of data type 'object', as it must store strings of arbitrary length in each of its components. It stores all the found derivatives, with components changing along the rows, and variables changing along the columns.
+Each derivative expression is also changed into a string, This is done to append needed prefixes onto them and to later use them with the eval() function. It creates an issue, more on issues on the end of this subsection.\\
+
+\noindent This, completed, array is then taken through loops that extract the components of each elementary 2-form. This is done by appending (string) elements form the forward skewed diagonals of $ext\textunderscore ds$. Again, an issue was noticed here, more on those issues at the end.
+Cycling over diagonals was completed by numbering them using a variable $d$', from position $(0, 0)$ (when $d=0$). The loop had to be split to the upper right and lower left sections. Components $i$ and $j$ are found using the fact that $i + j = d$. The limits that restrict values of $d$ were established by considering the number of diagonals in an $m \times m$ matrix, excluding the edge diagonals, where there only exists 1 element (always equal to zero for this matrix).\\
+The resulting components of the 2-form, are saved in a vector named 'result'. The length of which is established by the dimensions of the given 1-form. It was found that the number of components of 2 forms on $\mathbb{R}^{m}$ follows triangular numbers. The components of this vector have to be strings for previously given reasons.
+
+These are then converted to numerical 2-forms using $xg$ and $yg$ (and others, when $m > 2$) via the eval() function. The resulting numerical 2-form is a vector of $m$ dimensional arrays, extracted by evaluating 'results' with grids corresponding to each variable. This is not very elegant, I will admit.
+
+\begin{center}
+	\LARGE
+	IMPORTANT - ISSUES\\
+	\normalsize
+	\begin{itemize}
+	\item The lower-left bottom of \textbf{ext\textunderscore ds} is then appended with a minus sign and the other half, with a positive. This was done in hopes of correcting for the changes in elementary 2-forms, when merging expressions together. However, the conventional directions for these elementary 2 forms are not so easily implemented in code. Therefore, (so far) the code returns the result, not in standard directional form, meaning that not all signs in the expression are correct. This is still to be corrected.
+	\item The pattern of taking diagonals to obtain 2-form components was noticed in the case of $m=2$ and $m=3$. It was implemented without notice that it is no longer true for higher dimensions.
+	\end{itemize}
+\textbf{Further advancements are on their way and once these are implemented, this document will be altered accordingly. This is simply a note on current progress.}
+\end{center}
 
 \end{document}
