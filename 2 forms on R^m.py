@@ -145,8 +145,15 @@ for i in range(1, m):
         # extract opposing elements
         temp = ext_ds[i, j]
         temp1 = ext_ds[j, i]
-        # combine them into the 2-form component
-        result[pair, 0] += temp + temp1
+        # check these against zero entries:
+        if (temp == '0') or (temp == '-(0)') or (temp == '0*x'):
+            pass
+        else:
+            result[pair, 0] += temp
+        if (temp1 == '0') or (temp1 == '-(0)') or (temp1 == '0*x'):
+            pass
+        else:
+            result[pair, 0] += temp1
         # update the result row counter
         pair += 1
 
