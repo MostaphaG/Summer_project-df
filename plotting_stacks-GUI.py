@@ -596,11 +596,12 @@ def deriv_calc(x_m,y_m):
     d_canvas.draw()
     d_canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
     plt.close()
-    
-    
+
+
 # Define button to open the derivative plot
 # deriv_button = tk.Button(right_frame, pady=10, text='Local Derivative', command=deriv_calc(x_m,y_m)).grid(row=1, column=1)
 # not needed, clicking event used instead
+
 
 def onclick(event):
     global ix, iy, coords, x_m, y_m
@@ -612,7 +613,8 @@ def onclick(event):
     y_m = float(iy_plot)
     
     deriv_calc(x_m,y_m)
-        
+
+
 cid = fig.canvas.mpl_connect('button_press_event', onclick)
 
 # return time to run
