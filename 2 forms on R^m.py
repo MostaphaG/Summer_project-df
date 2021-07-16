@@ -78,7 +78,7 @@ string_z = 'z*y*sin(x)'  # z component
 # to define a 2 from, need to perform the exterior derrivative on
 # the given 1 form (vector field).
 # To do this, seed to define partial derrivatives.
-# to make it general, need to define it through derrivatives w.r.t. not
+# to make it general, need to define it through derivatives w.r.t. not
 # already present coordinates.
 
 # set the dimensionality
@@ -94,7 +94,7 @@ sympy_expr_z = parse_expr(string_z, evaluate=False)
 # define a sympy expression for string 0
 sympy_expr_zero = parse_expr('0*x', evaluate=False)
 
-# combine the 2 intoa list:
+# combine the 2 into a list:
 expressions = np.array([sympy_expr_x, sympy_expr_y, sympy_expr_z])
 
 # set up an array to store derrivatives.
