@@ -550,45 +550,39 @@ stack_btn = tk.Radiobutton(right_frame, text='stack', variable=tensor, value=0, 
 # Derivative Plot - works well for linear fields!
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+
 def deriv_calc():
-    #index of point where derivative is taken
+    # index of point where derivative is taken
     i = 5
     j = 12
-    
-    # constant to change the size of the arrows 
+    # constant to change the size of the arrows
     b = 0.2
-    
-    #subtract the components of the point i,j from the rest of the vectors
-    du = u[i,j]
-    dv = v[i,j]
+    # subtract the components of the point i,j from the rest of the vectors
+    du = u[i, j]
+    dv = v[i, j]
     DF_u = u - du
     DF_v = v - dv
-    
     # create arrays local to the point. P is the point density in the plot
     P = 5
     K = int((P-1)/2)
-    z_xg = xg[(i-K):(i+K)+1,(j-K):(j+K+1)] 
-    z_yg = yg[(i-K):(i+K)+1,(j-K):(j+K+1)]
-    DFz_u = b*DF_u[(i-K):(i+K)+1,(j-K):(j+K+1)] 
-    DFz_v = b*DF_v[(i-K):(i+K)+1,(j-K):(j+K+1)] 
-    
+    z_xg = xg[(i-K):(i+K)+1, (j-K):(j+K+1)]
+    z_yg = yg[(i-K):(i+K)+1, (j-K):(j+K+1)]
+    DFz_u = b*DF_u[(i-K):(i+K)+1, (j-K):(j+K+1)]
+    DFz_v = b*DF_v[(i-K):(i+K)+1, (j-K):(j+K+1)]
     # create new window for the plot - edit size?
     deriv_window = tk.Toplevel()
-    
     # to do - give coord rather than the index - more useful for user
-    deriv_window.title('(Approximate) Derivative Field at index: (i='+str(i)+', j='+str(j)+')')
-    d_fig = plt.figure() 
+    deriv_window.title('(Approximate) Derivative Field at index: (i=' + str(i) + ', j=' + str(j) + ')')
+    d_fig = plt.figure()
     d_ax = d_fig.gca()
-    
     # local quiver plot
-    d_ax.quiver(z_xg,z_yg,DFz_u,DFz_v,pivot='mid', scale_units='xy')
-    
-    #draw the plot on new window
+    d_ax.quiver(z_xg, z_yg, DFz_u, DFz_v, pivot='mid', scale_units='xy')
+    # draw the plot on new window
     d_canvas = FigureCanvasTkAgg(d_fig, master=deriv_window)
     d_canvas.draw()
     d_canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-    
     plt.close()
+
 
 # Define button to open the derivative plot
 deriv_button = tk.Button(right_frame, pady=10, text='Local Derivative', command=deriv_calc).grid(row=1, column=1)
