@@ -212,7 +212,7 @@ root.geometry("1400x920")
 # and top left for plot
 
 # right frame:
-right_frame = tk.LabelFrame(root, text='Options Frame', padx=160, pady=298)
+right_frame = tk.LabelFrame(root, text='Options Frame', padx=120, pady=228)
 right_frame.grid(row=0, column=1)
 
 # bot frame:
@@ -514,12 +514,12 @@ a_entry.insert(0, a)
 x_comp_label = tk.Label(bot_frame, text='x component').grid(row=0, column=0)
 x_comp_entry = tk.Entry(bot_frame, width=20, borderwidth=2)
 x_comp_entry.grid(row=1, column=0)
-x_comp_entry.insert(0, 'a*y*sin(x)')
+x_comp_entry.insert(0, 'a*y')
 
 y_comp_label = tk.Label(bot_frame, text='y component').grid(row=0, column=1)
 y_comp_entry = tk.Entry(bot_frame, width=20, borderwidth=2)
 y_comp_entry.grid(row=1, column=1)
-y_comp_entry.insert(0, '-a*x*cos(y)')
+y_comp_entry.insert(0, '-a*x')
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # define wanted Radio buttons
