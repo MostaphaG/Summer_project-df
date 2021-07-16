@@ -18,6 +18,7 @@ def format_eq(string):
     # replace all the x and y with xg and yg:
     string = string.replace('x', 'xg')
     string = string.replace('y', 'yg')
+    string = string.replace('z', 'zg')
     # where there are special functions, replace them with library directions
     string = string.replace('pi', 'np.pi')
     string = string.replace('sqrt', 'np.sqrt')
@@ -63,8 +64,7 @@ y = np.linspace(-L, L, pt_den)
 z = np.linspace(-L, L, pt_den)
 
 # create a grid on x-y plane
-xg, yg = np.meshgrid(x, y)
-zg = np.meshgrid(z)
+xg, yg, zg = np.meshgrid(x, y, z)
 
 # define a scaling factor
 a = 0.05
@@ -123,43 +123,34 @@ for coord_index in range(len(coords)):
         elif comp_index != coord_index:
             ext_ds[comp_index, coord_index] = str(diff(expressions[comp_index], coords[coord_index]))
         # change the signs for wedges in wrong order, this will include lower left side of the matrix ext_ds
-        if comp_index > coord_index:
+        if comp_index < coord_index:
             ext_ds[comp_index, coord_index] = ' - (' + str(ext_ds[comp_index, coord_index]) + ')'
-        elif comp_index < coord_index:
+        elif comp_index > coord_index:
             ext_ds[comp_index, coord_index] = ' + ' + str(ext_ds[comp_index, coord_index])
 
+'''
+merge the results into a 2 form (for 2-form on R^2, the result is a single component (dx^xy))
+do so by adding opposite elements along the diagonal ( / ) components of ext_ds
+this  includes taking elemets with switched i and j
+'''
 
-# merge the results into a 2 form (for 2-form on R^2, the result is a single component (dx^xy))
-# do so by adding the diagonal ( / ) components of ext_ds
+# set up a variable to count pairs (pairs because we are forming 2 forms):
+pair = 0
 
-# loop to extract the values from each diagonal ( / )
-for d in range(1, 2*m - 2):
-    if d <= m-1:  
-        # extract all values from the diagonal ( / )
-        for i in range(d+1):
-            if i == 0:
-                result[d-1, 0] = ''
-            j = d-i
-            temp = ext_ds[i, j]
-            # to exclude the zeros from derivatives:
-            if (temp == '0') or (temp == '-(0)') or (temp == '0*x'):
-                pass
-            else:
-                result[d-1, 0] += temp
-    if d > m-1:
-        for j in range(1, d):
-            if j == 1:
-                result[d-1, 0] = ''
-            i = d-j
-            temp = ext_ds[i, j]
-            # to exclude the zeros from derivatives:
-            if (temp == '0') or (temp == '-(0)') or (temp == '0*x'):
-                pass
-            else:
-                result[d-1, 0] += temp
-    # format the result to be 'python understood' to be able to use the eval()
-    result[d-1, 0] = format_eq(result[d-1, 0])
+# loop over opposing elements (matching elementary 2-forms)
+for i in range(1, m):
+    for j in range(i):
+        # initially clear the element from its Nonetype placeholder
+        result[pair, 0] = ''
+        # extract opposing elements
+        temp = ext_ds[i, j]
+        temp1 = ext_ds[j, i]
+        # combine them into the 2-form component
+        result[pair, 0] += temp + temp1
+        # update the result row counter
+        pair += 1
 
+# return them for user to inspect, note- objects thereofre cant do so in var. explorer.
 print('\n')
 print(' the resulting 2 form is :')
 print(result)
@@ -168,12 +159,18 @@ print('the matrix of derrivatives was:')
 print(ext_ds)
 print('\n')
 
-# set up a vector to store the 2 form numerically, from xg and yg
-form_2 = np.empty((m, pt_den, pt_den, pt_den))
+# format string in each result row
+for d in range(pair):
+    # format the result to be 'python understood' to be able to use the eval()
+    result[d, 0] = format_eq(result[d, 0])
 
-# convert the sympy expressions back into strings to evaluate:
-for d in range(0, 2*m-3):
-    form_2[d, :, :, :] = eval(result[d, 0])  # numerical evaluation of the 2 form on R^2, at all defined grid points in R^2
+# set up a vector to store the 2 form numerically, from xg and yg
+form_2 = np.empty((m, pt_den, pt_den, pt_den))    # Note - need pt_den m times.
+
+# evaluate the expressions again:
+for d in range(0, len(result[:, 0])):
+    # numerical evaluation of the 2 form on R^2, at all defined grid points in R^2
+    form_2[d, :, :, :] = eval(result[d, 0])  # Note, need : m times
 
 # return time to run
 stop = timeit.default_timer()
