@@ -172,7 +172,7 @@ for d in range(pair):
     result[d, 0] = format_eq(result[d, 0])
 
 # set up a vector to store the 2 form numerically, from xg and yg
-form_2 = np.empty((m, pt_den, pt_den, pt_den))    # Note - need pt_den m times.
+form_2 = np.empty((len(result[:, 0]), pt_den, pt_den, pt_den))    # Note - need pt_den m times.
 
 # evaluate the expressions again:
 for d in range(0, len(result[:, 0])):
