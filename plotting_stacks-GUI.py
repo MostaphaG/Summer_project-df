@@ -547,32 +547,46 @@ stack_btn = tk.Radiobutton(right_frame, text='stack', variable=tensor, value=0, 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Mouse Click Plotting for the Derivative Field
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Derivative Plot - works well for linear fields!
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+#Comment out this section if not working on derivatives! 
 
-def deriv_calc():
+# Open the window for the derivative plot
+x_m = float(0)
+y_m = float(0)
+
+def deriv_calc(x_m,y_m):
     # index of point where derivative is taken
-    i = 5
-    j = 12
+    # Set index from the x_mouse and y_mouse coords    
+    global i_m, j_m
+    i_m = int(round(((y_m/(2*L))*(pt_den))+(pt_den/2),0))
+    j_m = int(round(((x_m/(2*L))*(pt_den))+(pt_den/2),0))
     # constant to change the size of the arrows
     b = 0.2
     # subtract the components of the point i,j from the rest of the vectors
-    du = u[i, j]
-    dv = v[i, j]
+    du = u[i_m, j_m]
+    dv = v[i_m, j_m]
     DF_u = u - du
     DF_v = v - dv
     # create arrays local to the point. P is the point density in the plot
     P = 5
     K = int((P-1)/2)
-    z_xg = xg[(i-K):(i+K)+1, (j-K):(j+K+1)]
-    z_yg = yg[(i-K):(i+K)+1, (j-K):(j+K+1)]
-    DFz_u = b*DF_u[(i-K):(i+K)+1, (j-K):(j+K+1)]
-    DFz_v = b*DF_v[(i-K):(i+K)+1, (j-K):(j+K+1)]
+    
+    z_xg = xg[(i_m-K):(i_m+K)+1, (j_m-K):(j_m+K+1)]
+    z_yg = yg[(i_m-K):(i_m+K)+1, (j_m-K):(j_m+K+1)]
+    
+    DFz_u = b*DF_u[(i_m-K):(i_m+K)+1, (j_m-K):(j_m+K+1)]
+    DFz_v = b*DF_v[(i_m-K):(i_m+K)+1, (j_m-K):(j_m+K+1)]
+    
     # create new window for the plot - edit size?
     deriv_window = tk.Toplevel()
     # to do - give coord rather than the index - more useful for user
-    deriv_window.title('(Approximate) Derivative Field at index: (i=' + str(i) + ', j=' + str(j) + ')')
+    deriv_window.title('(Approximate) Derivative Field at coord: (x=' + str(x_m) + ', y=' + str(y_m) + ')')
     d_fig = plt.figure()
     d_ax = d_fig.gca()
     # local quiver plot
@@ -585,7 +599,23 @@ def deriv_calc():
 
 
 # Define button to open the derivative plot
-deriv_button = tk.Button(right_frame, pady=10, text='Local Derivative', command=deriv_calc).grid(row=1, column=1)
+# deriv_button = tk.Button(right_frame, pady=10, text='Local Derivative', command=deriv_calc(x_m,y_m)).grid(row=1, column=1)
+# not needed, clicking event used instead
+
+
+def onclick(event):
+    global ix, iy, coords, x_m, y_m
+
+    ix_plot,iy_plot = event.xdata,event.ydata
+    print (ix_plot,iy_plot)
+    
+    x_m = float(ix_plot)
+    y_m = float(iy_plot)
+    
+    deriv_calc(x_m,y_m)
+
+
+cid = fig.canvas.mpl_connect('button_press_event', onclick)
 
 # return time to run
 stop = timeit.default_timer()
