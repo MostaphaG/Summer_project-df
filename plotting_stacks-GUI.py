@@ -599,7 +599,8 @@ def deriv_calc(x_m,y_m):
     
     
 # Define button to open the derivative plot
-deriv_button = tk.Button(right_frame, pady=10, text='Local Derivative', command=deriv_calc(x_m,y_m)).grid(row=1, column=1)
+# deriv_button = tk.Button(right_frame, pady=10, text='Local Derivative', command=deriv_calc(x_m,y_m)).grid(row=1, column=1)
+# not needed, clicking event used instead
 
 def onclick(event):
     global ix, iy, coords, x_m, y_m
