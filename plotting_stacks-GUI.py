@@ -431,25 +431,20 @@ def PLOT_response():
 # define a function to respond to submitting arrohead changes in the new window
 def custom_submission():
     # first, take from entry boxes, wanted parameters and make them global:
-    global w_head, h_head, fract
+    global w_head, h_head, fract, scale
     w_head = float(w_entry.get())
     h_head = float(h_entry.get())
     fract = float(fract_entry.get())
-    # clear the axis
-    ax.clear()
-    # replot the graph with new arrows:
-    stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)
-    # put it onto the screen
-    canvas.draw()
-    # change the radio button ticks back to stack only
-    tensor.set(0)
+    scale =  float(arr_scale_entry.get())
+    # depending on the Radio buttons, replot the graph and put it onto the GUI
+    vect_type_response(tensor.get())
     # then close the window
     arrowH_opt_window.destroy()
 
 
 # define a reponse function to open a new window when arrowh_btn is pressed:
 def custom_btn_reponse():
-    global w_entry, h_entry, fract_entry, arrowH_opt_window
+    global w_entry, h_entry, fract_entry, arr_scale_entry, arrowH_opt_window
     # open a titled new window
     arrowH_opt_window = tk.Toplevel()
     arrowH_opt_window.title('optimisation settings')
@@ -468,9 +463,14 @@ def custom_btn_reponse():
     fract_entry = tk.Entry(arrowH_opt_window, width=30, borderwidth=1)
     fract_entry.insert(0, fract)
     fract_entry.grid(row=5, column=0)
+    # define an entry for fract update, to change the size of each stack as a frac of graph size L
+    tk.Label(arrowH_opt_window, text='arrow size linear scaling:').grid(row=6, column=0)
+    arr_scale_entry = tk.Entry(arrowH_opt_window, width=30, borderwidth=1)
+    arr_scale_entry.insert(0, scale)
+    arr_scale_entry.grid(row=7, column=0)
     # define a button to submit those changes:
     submit_arr_btn = tk.Button(arrowH_opt_window, text='SUBMIT ALL', padx=20, pady=10, command=custom_submission)
-    submit_arr_btn.grid(row=6, column=0, pady=10)
+    submit_arr_btn.grid(row=8, column=0, pady=10)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # define wanted standard buttons
@@ -481,8 +481,8 @@ PLOT_btn = tk.Button(small_frame, text='PLOT', padx=60, pady=30, command=PLOT_re
 PLOT_btn.grid(row=0, column=0, columnspan=2, rowspan=2)
 
 # define a small button in small frame that will open new window to adjust arrowheads
-arrowh_btn = tk.Button(small_frame, text='customise', padx=1, pady=1, command=custom_btn_reponse)
-arrowh_btn.grid(row=0, column=3)
+custom_btn = tk.Button(small_frame, text='customise', padx=1, pady=1, command=custom_btn_reponse)
+custom_btn.grid(row=0, column=3)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # define wanted entry boxes
