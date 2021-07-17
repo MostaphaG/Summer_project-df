@@ -46,7 +46,7 @@ def G(s, n, c):
 def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows='True', orientation='mid', scale=1, w_head=1/8, h_head=1/4):
     # get axis lengths:
     x_len = len(xg[:, 0])
-    y_len = len(yg[:, 0])
+    y_len = len(yg[0, :])
     
     # Scaling of axes and setting equal proportions circles look like circles
     ax.set_aspect('equal')
@@ -304,6 +304,28 @@ ax_L = L + L/delta_factor
 ax.set_xlim(-ax_L, ax_L)
 ax.set_ylim(-ax_L, ax_L)
 
+
+# define the initial polar plot also. Despite it not being plotted.
+# needed for when Polar plot option is used.
+r_max = 2
+r_den = 10
+theta_den = 20
+
+# define the axis
+r = np.linspace(0.001, r_max, r_den)
+theta = np.linspace(0, 360, theta_den) * np.pi/180
+
+# define a polar grid
+rg, thetag = np.meshgrid(r, theta)
+
+# define an initial polar field (same as initial cartesian field.)
+F_r = a*rg*np.sin(thetag)
+F_theta = -a*rg*np.cos(thetag)
+
+# convert to cartesian
+u_p = F_r*np.cos(thetag) - F_theta*np.sin(thetag)  # x component
+v_p = F_r*np.sin(thetag) + F_theta*np.cos(thetag)  # y component
+
 # plot the field with desired parameters as specidfied above
 plottedfield = stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)
 
@@ -338,6 +360,9 @@ def format_eq(string):
     # replace all the x and y with xg and yg:
     string = string.replace('x', 'xg')
     string = string.replace('y', 'yg')
+    string = string.replace('z', 'zg')
+    string = string.replace('r', 'rg')
+    string = string.replace('theta', 'thetag')
     # where there are special functions, replace them with library directions
     string = string.replace('pi', 'np.pi')
     string = string.replace('sqrt', 'np.sqrt')
@@ -448,7 +473,7 @@ def custom_btn_reponse():
     # open a titled new window
     arrowH_opt_window = tk.Toplevel()
     arrowH_opt_window.title('optimisation settings')
-    # define and label a first entry, for width
+    # define and label and first entry, for width
     tk.Label(arrowH_opt_window, text='arrowhead base width as sheet width fraction:').grid(row=0, column=0)
     w_entry = tk.Entry(arrowH_opt_window, width=30, borderwidth=1)
     w_entry.insert(0, w_head)
@@ -472,6 +497,122 @@ def custom_btn_reponse():
     submit_arr_btn = tk.Button(arrowH_opt_window, text='SUBMIT ALL', padx=20, pady=10, command=custom_submission)
     submit_arr_btn.grid(row=8, column=0, pady=10)
 
+
+def polar_submit():
+    # take the input values into new variables
+    global F_r, F_theta, r_max, r_den, theta_den, a, r, theta, rg, thetag, u_p, v_p
+    F_r = Fr_entry.get()
+    F_theta = Ftheta_entry.get()
+    r_max = float(r_max_entry.get())
+    r_den = int(r_den_entry.get())
+    theta_den = int(theta_den_entry.get())
+    a = float(a_scale_entry.get())
+    # based on these, change the axis coordinates
+    r = np.linspace(0.001, r_max, r_den)
+    theta = np.linspace(0, 361, theta_den) * np.pi/180
+    # and mesh the new ones
+    rg, thetag = np.meshgrid(r, theta)
+    # format radial and angular components to be python understood
+    F_r = format_eq(F_r)
+    F_theta = format_eq(F_theta)
+    # valueate them, bearing in mind the process to follow when user inputs 0
+    if F_r == '0':
+        F_r = np.zeros(np.shape(rg))
+        F_theta = eval(F_theta)
+    elif F_theta == '0':
+        F_r = eval(F_r)
+        F_theta = np.zeros(np.shape(thetag))
+    elif F_r and F_theta == '0':
+        F_r = np.zeros(np.shape(rg))
+        F_theta = np.zeros(np.shape(thetag))
+    else:
+        F_r = eval(F_r)
+        F_theta = eval(F_theta)
+    # redefine the field with these (in cartesian)
+    u_p = F_r*np.cos(thetag) - F_theta*np.sin(thetag)  # x component
+    v_p = F_r*np.sin(thetag) + F_theta*np.cos(thetag)  # y component
+    # scale these linearly
+    u_p *= a
+    v_p *= a
+    # convert the cooridnates rg and thetag back to cartesian:
+    xg = rg*np.cos(thetag)
+    yg = rg*np.sin(thetag)
+    # clear the plot that is already there:
+    ax.clear()
+    # use these o create a stack plot (default)
+    stack_plot(xg, yg, ax, u_p, v_p, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)
+    # put it onto the screen
+    canvas.draw()
+    # change the radio button ticks back to stack only
+    tensor.set(0)
+    # display in x and y components that these are not used now
+    x_comp_entry.delete(0, 'end')
+    y_comp_entry.delete(0, 'end')
+    x_comp_entry.insert(0, '0')
+    y_comp_entry.insert(0, '0')
+    # then close the window
+    polar_fld_window.destroy()
+
+
+# define a function that responds to the polar button, to allow user to input
+# details about the polar field they fish to plot
+def Polar_btn_response():
+    global polar_fld_window, Fr_entry, Ftheta_entry, r_max_entry, r_den_entry, theta_den_entry, a_scale_entry
+    # open a window with input fields to enter polar components
+    polar_fld_window = tk.Toplevel()
+    polar_fld_window.title('polar field input')
+    # define and label and first entry, for radial
+    tk.Label(polar_fld_window, text='polar component in terms of \'r\':').grid(row=0, column=0)
+    Fr_entry = tk.Entry(polar_fld_window, width=30, borderwidth=1)
+    Fr_entry.insert(0, 'a*r*sin(theta)')
+    Fr_entry.grid(row=1, column=0)
+    # define and label second entry, for height
+    tk.Label(polar_fld_window, text='angular component in terms of \'theta\' :').grid(row=2, column=0)
+    Ftheta_entry = tk.Entry(polar_fld_window, width=30, borderwidth=1)
+    Ftheta_entry.insert(0, '-a*r*cos(theta)')
+    Ftheta_entry.grid(row=3, column=0)
+    # define an entry for radius limit r_max
+    tk.Label(polar_fld_window, text='maximum radius:').grid(row=4, column=0)
+    r_max_entry = tk.Entry(polar_fld_window, width=30, borderwidth=1)
+    r_max_entry.insert(0, r_max)
+    r_max_entry.grid(row=5, column=0)
+    # define an entry for number of points along r
+    tk.Label(polar_fld_window, text='number of points along r:').grid(row=6, column=0)
+    r_den_entry = tk.Entry(polar_fld_window, width=30, borderwidth=1)
+    r_den_entry.insert(0, r_den)
+    r_den_entry.grid(row=7, column=0)
+    # define an entry for number of points along theta
+    tk.Label(polar_fld_window, text='number of ponts along theta:').grid(row=8, column=0)
+    theta_den_entry = tk.Entry(polar_fld_window, width=30, borderwidth=1)
+    theta_den_entry.insert(0, theta_den)
+    theta_den_entry.grid(row=9, column=0)
+        # define a linear scaling for the poalr field a_p
+    tk.Label(polar_fld_window, text='linear scaling factor:').grid(row=10, column=0)
+    a_scale_entry = tk.Entry(polar_fld_window, width=30, borderwidth=1)
+    a_scale_entry.insert(0, a)
+    a_scale_entry.grid(row=11, column=0)
+    # define a submit button to respond to these changes
+    submit_polar_btn = tk.Button(polar_fld_window, text='SUBMIT', padx=20, pady=20, command=polar_submit)
+    submit_polar_btn.grid(row=12, column=0)
+
+
+'''
+theta = np.arange(0, 361, 10) * np.pi/180
+radius = np.arange(0.2, 1, 0.1)
+# set up grid in polar coordinates
+thetag, rg = np.meshgrid(theta, radius)
+# set up wanted constants
+a = 1
+# define the field in polar coordiantes
+Fr = thetag
+Ftheta = - a/rg
+# convert to cartesian
+u = Fr*np.cos(thetag) - Ftheta*np.sin(thetag)  # x component
+v = Fr*np.sin(thetag) + Ftheta*np.cos(thetag)  # y component
+CONTINUE FROM THERE
+'''
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # define wanted standard buttons
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -483,6 +624,10 @@ PLOT_btn.grid(row=0, column=0, columnspan=2, rowspan=2)
 # define a small button in small frame that will open new window to adjust arrowheads
 custom_btn = tk.Button(small_frame, text='customise', padx=1, pady=1, command=custom_btn_reponse)
 custom_btn.grid(row=0, column=3)
+
+# button to open a window to input a polar field
+polar_btn = tk.Button(bot_frame, text='Polar', padx=50, pady=20, command=Polar_btn_response)
+polar_btn.grid(row=0, column=0)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # define wanted entry boxes
@@ -511,14 +656,14 @@ a_entry.grid(row=3, column=3, padx = 2)
 a_entry.insert(0, a)
 
 # define entry boxes for the field equations in x and y
-x_comp_label = tk.Label(bot_frame, text='x component').grid(row=0, column=0)
+x_comp_label = tk.Label(bot_frame, text='x component').grid(row=1, column=0)
 x_comp_entry = tk.Entry(bot_frame, width=20, borderwidth=2)
-x_comp_entry.grid(row=1, column=0)
+x_comp_entry.grid(row=2, column=0)
 x_comp_entry.insert(0, 'a*y')
 
-y_comp_label = tk.Label(bot_frame, text='y component').grid(row=0, column=1)
+y_comp_label = tk.Label(bot_frame, text='y component').grid(row=1, column=1)
 y_comp_entry = tk.Entry(bot_frame, width=20, borderwidth=2)
-y_comp_entry.grid(row=1, column=1)
+y_comp_entry.grid(row=2, column=1)
 y_comp_entry.insert(0, '-a*x')
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
