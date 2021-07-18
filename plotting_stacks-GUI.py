@@ -1,6 +1,5 @@
-# Attempt 1 - zooming tool on the stack plot
 
-# import modules
+#%% Import Modules
 import timeit
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,7 +9,7 @@ from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg, NavigationToolbar2Tk)
 from matplotlib.backend_bases import key_press_handler
 
-# %%
+# %% VFA GUI
 
 # start the timer
 start = timeit.default_timer()
@@ -233,7 +232,7 @@ small_frame.grid(row=1, column=1)
 
 # define scale of the graph
 L = 5
-pt_den = 20   # number of points on each axis
+pt_den = 10   # number of points on each axis
 
 # define x and y values
 x = np.linspace(-L, L, pt_den)
@@ -244,28 +243,10 @@ xg, yg = np.meshgrid(x, y)
 
 # define an example vector field
 a = 0.2
-u = a*yg  # x component
-v = -a*xg  # y component
+u = a*np.sin(xg)  # x component
+v = -a*xg*np.cos(yg)  # y component
 # for no dependance, use : np.zeros(np.shape(xg))  ----- or yg
 
-'''
-To define it in polar:
-hash out the above u and v, then:
-# define polar axis
-theta = np.arange(0, 361, 10) * np.pi/180
-radius = np.arange(0.2, 1, 0.1)
-# set up grid in polar coordinates
-thetag, rg = np.meshgrid(theta, radius)
-# set up wanted constants
-a = 1
-# define the field in polar coordiantes
-Fr = thetag
-Ftheta = - a/rg
-# convert to cartesian
-u = Fr*np.cos(thetag) - Ftheta*np.sin(thetag)  # x component
-v = Fr*np.sin(thetag) + Ftheta*np.cos(thetag)  # y component
-CONTINUE FROM THERE
-'''
 
 # set up quiver factors
 arrows = False  # set up if arrows should be plotted on stacks or not.
@@ -279,7 +260,7 @@ delta_factor = 10
 fract = 0.05
 
 # define the maximum number of stack to plot, dep. on magnitude
-s_max = 6
+s_max = 2
 
 # set screen dpi
 my_dpi = 100
@@ -344,16 +325,25 @@ canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
 # tack the mouse presses for the toolbar to respond to
 def on_key_press(event):
-    print("you pressed {}".format(event.key))
-    key_press_handler(event, canvas, toolbar)
-
+    
+    if click_option == 0:       
+        print("you pressed {}".format(event.key))
+        key_press_handler(event, canvas, toolbar)
+        
+    if click_option == 1:
+        global x_m, y_m
+        ix_plot,iy_plot = event.xdata,event.ydata
+        print (ix_plot,iy_plot)    
+        x_m = float(ix_plot)
+        y_m = float(iy_plot)    
+        deriv_calc(x_m,y_m)
+        
 # connect the space to function that records clicks
-canvas.mpl_connect("key_press_event", on_key_press)
+fig.canvas.mpl_connect("key_press_event", on_key_press)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # define other needed functions, for input reponses
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 
 # define a function to replace input string to be 'python understood'
 def format_eq(string):
@@ -376,7 +366,7 @@ def format_eq(string):
 
 
 # define a function that takes input string that is python understood and turn into vector components:
-def eq_to_comps(string_x, string_y, xg, yg, u, v):
+def eq_to_comps(string_x, string_y, xg, yg):
     global equation_x, equation_y
     # use this fucntion to replace given string to python understood equations:
     equation_x = format_eq(string_x)
@@ -425,7 +415,7 @@ def vect_type_response(tensor):
 
 # define the PLOT button response function
 def PLOT_response():
-    global L, pt_den, s_max, a, x, y, xg, yg, u, v, tensor, ax
+    global L, pt_den, s_max, a, x, y, xg, yg, u, v, tensor, ax, string_x, string_y
     # clear the current axis
     ax.clear()
     # take the new axis parameters and field definitions out of the boxes
@@ -444,7 +434,7 @@ def PLOT_response():
     y = np.linspace(-L, L, pt_den)
     xg, yg = np.meshgrid(x, y)
     # take all these values, and the input from field component bnoxes to set up the field:
-    u, v = eq_to_comps(string_x, string_y, xg, yg, u, v)
+    u, v = eq_to_comps(string_x, string_y, xg, yg)
     # plot the new field
     stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)
     # put it onto the screen
@@ -582,7 +572,7 @@ def Polar_btn_response():
     r_den_entry.insert(0, r_den)
     r_den_entry.grid(row=7, column=0)
     # define an entry for number of points along theta
-    tk.Label(polar_fld_window, text='number of ponts along theta:').grid(row=8, column=0)
+    tk.Label(polar_fld_window, text='number of points along theta:').grid(row=8, column=0)
     theta_den_entry = tk.Entry(polar_fld_window, width=30, borderwidth=1)
     theta_den_entry.insert(0, theta_den)
     theta_den_entry.grid(row=9, column=0)
@@ -659,12 +649,15 @@ a_entry.insert(0, a)
 x_comp_label = tk.Label(bot_frame, text='x component').grid(row=1, column=0)
 x_comp_entry = tk.Entry(bot_frame, width=20, borderwidth=2)
 x_comp_entry.grid(row=2, column=0)
-x_comp_entry.insert(0, 'a*y')
+x_comp_entry.insert(0, 'a*sin(x)')
 
 y_comp_label = tk.Label(bot_frame, text='y component').grid(row=1, column=1)
 y_comp_entry = tk.Entry(bot_frame, width=20, borderwidth=2)
 y_comp_entry.grid(row=2, column=1)
-y_comp_entry.insert(0, '-a*x')
+y_comp_entry.insert(0, '-a*x*cos(y)')
+
+string_x = str(x_comp_entry.get())
+string_y = str(y_comp_entry.get())
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # define wanted Radio buttons
@@ -709,24 +702,24 @@ def deriv_calc(x_m,y_m):
     # index of point where derivative is taken
     # Set index from the x_mouse and y_mouse coords    
     global i_m, j_m
-    i_m = int(round(((y_m/(2*L))*(pt_den))+(pt_den/2),0))
-    j_m = int(round(((x_m/(2*L))*(pt_den))+(pt_den/2),0))
-    # constant to change the size of the arrows
-    b = 0.2
-    # subtract the components of the point i,j from the rest of the vectors
-    du = u[i_m, j_m]
-    dv = v[i_m, j_m]
-    DF_u = u - du
-    DF_v = v - dv
-    # create arrays local to the point. P is the point density in the plot
-    P = 5
-    K = int((P-1)/2)
     
-    z_xg = xg[(i_m-K):(i_m+K)+1, (j_m-K):(j_m+K+1)]
-    z_yg = yg[(i_m-K):(i_m+K)+1, (j_m-K):(j_m+K+1)]
+    # Range and point density of the derivative plot   
+    d_range = 0.5
+    dpd = 5
     
-    DFz_u = b*DF_u[(i_m-K):(i_m+K)+1, (j_m-K):(j_m+K+1)]
-    DFz_v = b*DF_v[(i_m-K):(i_m+K)+1, (j_m-K):(j_m+K+1)]
+    i_m = int(round(dpd/2))
+    j_m = int(round(dpd/2))
+    
+    # New Grids
+    dx = np.linspace(-d_range+x_m,d_range+x_m,dpd)
+    dy = np.linspace(-d_range+y_m,d_range+y_m,dpd)
+
+    dxg , dyg = np.meshgrid(dx,dy)
+
+    u1 , v1 = eq_to_comps(string_x, string_y, dxg, dyg)
+    
+    du1 = u1 - u1[i_m,j_m]
+    dv1 = v1 - v1[i_m,j_m]
     
     # create new window for the plot - edit size?
     deriv_window = tk.Toplevel()
@@ -735,8 +728,9 @@ def deriv_calc(x_m,y_m):
     d_fig = plt.figure()
     d_ax = d_fig.gca()
     # local quiver plot
-    d_ax.quiver(z_xg, z_yg, DFz_u, DFz_v, pivot='mid', scale_units='xy')
+    d_ax.quiver(dxg, dyg, du1, dv1, pivot='mid', scale_units='xy')
     # draw the plot on new window
+    
     d_canvas = FigureCanvasTkAgg(d_fig, master=deriv_window)
     d_canvas.draw()
     d_canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
@@ -746,7 +740,6 @@ def deriv_calc(x_m,y_m):
 # Define button to open the derivative plot
 # deriv_button = tk.Button(right_frame, pady=10, text='Local Derivative', command=deriv_calc(x_m,y_m)).grid(row=1, column=1)
 # not needed, clicking event used instead
-
 
 def onclick(event):
     global ix, iy, coords, x_m, y_m
@@ -759,8 +752,19 @@ def onclick(event):
     
     deriv_calc(x_m,y_m)
 
-
 cid = fig.canvas.mpl_connect('button_press_event', onclick)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Radiobutton to select what happens when clicking the plot
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+click_option = tk.IntVar()
+click_option.set(0)
+
+click_option_Tools_btn = tk.Radiobutton(right_frame, text='Tools', value=0, variable=click_option)
+click_option_Deriv_btn = tk.Radiobutton(right_frame, text='Derivative Plot', value=1, variable=click_option)
+
+click_option_Tools_btn.grid(row = 0,column=0)
+click_option_Deriv_btn.grid(row = 0,column=1)
 
 # return time to run
 stop = timeit.default_timer()
