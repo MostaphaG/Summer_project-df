@@ -8,6 +8,7 @@ import tkinter as tk
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg, NavigationToolbar2Tk)
 from matplotlib.backend_bases import key_press_handler
+import matplotlib as mpl
 
 # %% VFA GUI
 
@@ -200,11 +201,11 @@ def format_eq(string):
     string = string.replace('x', 'xg')
     string = string.replace('y', 'yg')
     string = string.replace('z', 'zg')
-    string = string.replace('r', 'rg')
+    string = string.replace('R', 'rg')
     string = string.replace('theta', 'thetag')
     # where there are special functions, replace them with library directions
     string = string.replace('pi', 'np.pi')
-    string = string.replace('sqt', 'np.sqrt')  # sqrt does not work, becaue of the r in it
+    string = string.replace('sqrt', 'np.sqrt')  # sqrt does not work, becaue of the r in it
     string = string.replace('sin', 'np.sin')
     string = string.replace('cos', 'np.cos')
     string = string.replace('tan', 'np.tan')
@@ -360,16 +361,14 @@ def on_key_press(event):
     elif click_opt_int == 1:
         global ix, iy, coords, x_m, y_m
         ix_plot, iy_plot = event.xdata, event.ydata
-        print (ix_plot,iy_plot)
+        print(ix_plot, iy_plot)
         x_m = float(ix_plot)
         y_m = float(iy_plot)
+        mpl.rcParams['toolbar'] = 'None'  # this does not do what it should yet
         deriv_calc(x_m, y_m)
     else:
-        print('NONE')
+        pass
 
-
-# connect the space to function that records clicks
-fig.canvas.mpl_connect("key_press_event", on_key_press)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # define other needed functions, for input reponses
@@ -377,7 +376,7 @@ fig.canvas.mpl_connect("key_press_event", on_key_press)
 
 # define a function that will change r and theta components to equivalents in x and y
 def p_cart(string):
-    string = string.replace('r', 'sqt(x**2 + y**2)')
+    string = string.replace('r', 'sqrt(x**2 + y**2)')
     string = string.replace('theta', 'invta(y/x)')
     return string
 
@@ -587,7 +586,7 @@ def Polar_btn_response():
     polar_fld_window = tk.Toplevel()
     polar_fld_window.title('polar field input')
     # define and label and first entry, for radial
-    tk.Label(polar_fld_window, text='polar component in terms of \'r\':').grid(row=0, column=0)
+    tk.Label(polar_fld_window, text='polar component in terms of \'R\':').grid(row=0, column=0)
     Fr_entry = tk.Entry(polar_fld_window, width=30, borderwidth=1)
     Fr_entry.insert(0, str(F_r_str_initial))
     Fr_entry.grid(row=1, column=0)

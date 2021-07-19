@@ -381,8 +381,8 @@ stack_plot(xg, yg, ax, zero_field, v, s_max, L, pt_den, fract, False, 'mid', 1)
 
 '''
 
-using the magnitude of the 2-form component before dx^dy, define
-direction via a colour map
+using the magnitude of the 2-form component (dx^dy), define
+direction by finding the total 2-form over that area and checkiong signs
 
 '''
 
