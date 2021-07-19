@@ -8,6 +8,7 @@ from sympy import symbols, diff
 from sympy.parsing.sympy_parser import parse_expr
 from matplotlib.lines import Line2D
 from matplotlib import cm
+from matplotlib import patches as patch
 
 # %%
 
@@ -215,6 +216,7 @@ def G(s, n, c):
 
 # define a function that will complete all stack plotting:
 def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows='True', orientation='mid', scale=1):
+    global s_L
     # get axis lengths:
     x_len = len(xg[:, 0])
     y_len = len(yg[:, 0])
@@ -307,15 +309,15 @@ def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows='True', orienta
                     By2 = B_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
                     
                     # from these, define the 2 lines, for this run
-                    ax.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=1, color='green'))
-                    ax.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=1, color='green'))
+                    ax.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=0.5, color='green'))
+                    ax.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=0.7, color='green'))
                     
                     # update parameter to reapet and draw all needed arrows
                     s += 1
             # deal with the odd number of stacks:
             elif parity(n) is False:
                 # Add the centre line for odd numbers of stacks
-                ax.add_line(Line2D((A_x[i, j], B_x[i, j]), (A_y[i, j], B_y[i, j]), linewidth=1, color='green'))
+                ax.add_line(Line2D((A_x[i, j], B_x[i, j]), (A_y[i, j], B_y[i, j]), linewidth=0.7, color='green'))
                 
                 # then loop over the remaining lines as per the recursion formula:
                 s = 1  # change the looping parametr to exclude already completed 0 (corr. to middle sheet here)
@@ -333,8 +335,8 @@ def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows='True', orienta
                     By2 = B_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
                     
                     # from these, define the 2 displaced lines
-                    ax.add_line(Line2D((Ax1,Bx1),(Ay1,By1), linewidth=1, color='green'))
-                    ax.add_line(Line2D((Ax2,Bx2),(Ay2,By2), linewidth=1, color='green'))
+                    ax.add_line(Line2D((Ax1,Bx1),(Ay1,By1), linewidth=0.7, color='green'))
+                    ax.add_line(Line2D((Ax2,Bx2),(Ay2,By2), linewidth=0.7, color='green'))
                     
                     # change the parameter to loop over all changes in displacement for current magnitude
                     s += 1
@@ -386,11 +388,36 @@ direction by finding the total 2-form over that area and checkiong signs
 
 '''
 
-# plot the coliur map to distinguish direction
-cp = ax.contourf(xg, yg, form_2[0], cmap='bwr')
+# integration is not needed, as grid is evenly spaced
+# as form_2 is defined in terms of xg and yg that are the same as the ones used
+# when defining stacks:
+# determine the sign of the 2 form at each grid point
+# based on put a coloured region inside the stack ; blue (-ve) or red (+ive)
 
-# set up a colour bar
+# change the 2-form array to 0s 1s and (-1)s:
+form_2_sgn = np.sign(form_2[0])  # as it is a 2_form on R^2, it only has one component, only select that one
+
+# loop over all grid points
+for i in range(len(xg[:, 0])):
+    for j in range(len(yg[0, :])):
+        # depending on sign, colour the area of the stack
+        if form_2_sgn[i, j] == -1:
+            rect1 = patch.Rectangle((xg[i, j] - s_L/4, yg[i, j] - s_L/4), s_L/2, s_L/2, color='blue')
+            ax.add_patch(rect1)
+        elif form_2_sgn[i, j] == 1:
+            rect2 = patch.Rectangle((xg[i, j] - s_L/4, yg[i, j] - s_L/4), s_L/2, s_L/2, color='red')
+            ax.add_patch(rect2)
+        else:  # for when it is exacly equal to zero (just in case)
+            print('ZERO!')
+
+
+
+
+# can add a background colourmap to see between gridpoints by the following:
+'''
+cp = ax.contourf(xg, yg, form_2[0], cmap='bwr')
 fig.colorbar(cp)
+'''
 
 # return time to run
 stop = timeit.default_timer()
