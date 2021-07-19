@@ -351,21 +351,14 @@ toolbar = NavigationToolbar2Tk(canvas, plot_frame)
 toolbar.update()
 canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
+
 # tack the mouse presses for the toolbar to respond to
 def on_key_press(event):
-    
-    if click_option == 0:       
+    if click_opt_int == 0:
         print("you pressed {}".format(event.key))
         key_press_handler(event, canvas, toolbar)
-        
-    if click_option == 1:
-        global x_m, y_m
-        ix_plot,iy_plot = event.xdata,event.ydata
-        print (ix_plot,iy_plot)    
-        x_m = float(ix_plot)
-        y_m = float(iy_plot)    
-        deriv_calc(x_m,y_m)
-        
+
+
 # connect the space to function that records clicks
 fig.canvas.mpl_connect("key_press_event", on_key_press)
 
@@ -765,18 +758,26 @@ def deriv_calc(x_m, y_m):
 # deriv_button = tk.Button(right_frame, pady=10, text='Local Derivative', command=deriv_calc(x_m,y_m)).grid(row=1, column=1)
 # not needed, clicking event used instead
 
+click_opt_int = 0
+
+
 def onclick(event):
-    global ix, iy, coords, x_m, y_m
+    if click_opt_int == 1:
+        global ix, iy, coords, x_m, y_m
+        ix_plot, iy_plot = event.xdata, event.ydata
+        print (ix_plot,iy_plot)
+        x_m = float(ix_plot)
+        y_m = float(iy_plot)
+        deriv_calc(x_m, y_m)
 
-    ix_plot, iy_plot = event.xdata, event.ydata
-    print (ix_plot,iy_plot)
-    
-    x_m = float(ix_plot)
-    y_m = float(iy_plot)
-    
-    deriv_calc(x_m, y_m)
+cid = fig.canvas.mpl_connect("button_press_event", onclick)
 
-cid = fig.canvas.mpl_connect('button_press_event', onclick)
+
+def click_option_handler(click_option):
+    global click_opt_int
+    click_opt_int = click_option
+    print(click_opt_int)
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Radiobutton to select what happens when clicking the plot
@@ -784,8 +785,8 @@ cid = fig.canvas.mpl_connect('button_press_event', onclick)
 click_option = tk.IntVar()
 click_option.set(0)
 
-click_option_Tools_btn = tk.Radiobutton(right_frame, text='Tools', value=0, variable=click_option)
-click_option_Deriv_btn = tk.Radiobutton(right_frame, text='Derivative Plot', value=1, variable=click_option)
+click_option_Tools_btn = tk.Radiobutton(right_frame, text='Tools', variable=click_option, value=0, command=lambda: click_option_handler(click_option.get()))
+click_option_Deriv_btn = tk.Radiobutton(right_frame, text='Derivative Plot', variable=click_option, value=1, command=lambda: click_option_handler(click_option.get()))
 
 click_option_Tools_btn.grid(row=0, column=0)
 click_option_Deriv_btn.grid(row=0, column=1)
