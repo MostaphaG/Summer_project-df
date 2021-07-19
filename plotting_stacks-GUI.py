@@ -576,26 +576,6 @@ def polar_submit(tensorp):
     polar_fld_window.destroy()
 
 
-#define a function that will check the vector type from the polar option
-def polar_vect_type_response(tensorp):
-    # clear the plot that is already there:
-    ax.clear()
-    # use the tensor to determine what to plot:
-    # 0 is just stacks, 1 is for only arrows and 2 is for both
-    if tensorp == 0:
-        arrows = False
-        stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)
-        canvas.draw()
-    elif tensorp == 1:
-        ax.quiver(xg, yg, u, v, pivot=orientation, scale=scale, scale_units='xy')
-        # repeat the displaying of the figure so that it updates in GUI
-        canvas.draw()
-    elif tensorp == 2:
-        arrows = True
-        stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)
-        # repeat the displaying of the figure so that it updates in GUI
-        canvas.draw()
-
 # define a function that responds to the polar button, to allow user to input
 # details about the polar field they fish to plot
 def Polar_btn_response():
@@ -645,23 +625,6 @@ def Polar_btn_response():
     p_arr_btn = tk.Radiobutton(polar_fld_window, text='arrow', variable=tensorp, value=1, command=lambda: polar_submit(tensorp.get())).grid(row=7, column=1)
     p_both_btn = tk.Radiobutton(polar_fld_window, text='both', variable=tensorp, value=2, command=lambda: polar_submit(tensorp.get())).grid(row=7, column=2)
     p_stack_btn = tk.Radiobutton(polar_fld_window, text='stack', variable=tensorp, value=0, command=lambda: polar_submit(tensorp.get())).grid(row=7, column=3)
-
-
-'''
-theta = np.arange(0, 361, 10) * np.pi/180
-radius = np.arange(0.2, 1, 0.1)
-# set up grid in polar coordinates
-thetag, rg = np.meshgrid(theta, radius)
-# set up wanted constants
-a = 1
-# define the field in polar coordiantes
-Fr = thetag
-Ftheta = - a/rg
-# convert to cartesian
-u = Fr*np.cos(thetag) - Ftheta*np.sin(thetag)  # x component
-v = Fr*np.sin(thetag) + Ftheta*np.cos(thetag)  # y component
-CONTINUE FROM THERE
-'''
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -759,7 +722,7 @@ stack_btn = tk.Radiobutton(right_frame, text='stack', variable=tensor, value=0, 
 x_m = float(0)
 y_m = float(0)
 
-def deriv_calc(x_m,y_m):
+def deriv_calc(x_m, y_m):
     # index of point where derivative is taken
     # Set index from the x_mouse and y_mouse coords    
     global i_m, j_m
@@ -772,15 +735,15 @@ def deriv_calc(x_m,y_m):
     j_m = int(round(dpd/2))
     
     # New Grids
-    dx = np.linspace(-d_range+x_m,d_range+x_m,dpd)
-    dy = np.linspace(-d_range+y_m,d_range+y_m,dpd)
+    dx = np.linspace(-d_range+x_m, d_range+x_m, dpd)
+    dy = np.linspace(-d_range+y_m, d_range+y_m, dpd)
 
-    dxg , dyg = np.meshgrid(dx,dy)
+    dxg , dyg = np.meshgrid(dx, dy)
 
     u1 , v1 = eq_to_comps(string_x, string_y, dxg, dyg)
     
-    du1 = u1 - u1[i_m,j_m]
-    dv1 = v1 - v1[i_m,j_m]
+    du1 = u1 - u1[i_m, j_m]
+    dv1 = v1 - v1[i_m, j_m]
     
     # create new window for the plot - edit size?
     deriv_window = tk.Toplevel()
@@ -805,13 +768,13 @@ def deriv_calc(x_m,y_m):
 def onclick(event):
     global ix, iy, coords, x_m, y_m
 
-    ix_plot,iy_plot = event.xdata,event.ydata
+    ix_plot, iy_plot = event.xdata, event.ydata
     print (ix_plot,iy_plot)
     
     x_m = float(ix_plot)
     y_m = float(iy_plot)
     
-    deriv_calc(x_m,y_m)
+    deriv_calc(x_m, y_m)
 
 cid = fig.canvas.mpl_connect('button_press_event', onclick)
 
@@ -824,8 +787,8 @@ click_option.set(0)
 click_option_Tools_btn = tk.Radiobutton(right_frame, text='Tools', value=0, variable=click_option)
 click_option_Deriv_btn = tk.Radiobutton(right_frame, text='Derivative Plot', value=1, variable=click_option)
 
-click_option_Tools_btn.grid(row = 0,column=0)
-click_option_Deriv_btn.grid(row = 0,column=1)
+click_option_Tools_btn.grid(row=0, column=0)
+click_option_Deriv_btn.grid(row=0, column=1)
 
 # return time to run
 stop = timeit.default_timer()
