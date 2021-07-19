@@ -359,8 +359,12 @@ def on_key_press(event):
         print("you pressed {}".format(event.key))
         key_press_handler(event, canvas, toolbar)
     elif click_opt_int == 1:
-        global ix, iy, coords, x_m, y_m
+        global x_pix, y_pix, x_m, y_m
+        # Cartesian Coordinates of click
         ix_plot, iy_plot = event.xdata, event.ydata
+        # Pixels Coords of click
+        x_pix, y_pix = event.x , event.y
+        
         print(ix_plot, iy_plot)
         x_m = float(ix_plot)
         y_m = float(iy_plot)
@@ -724,17 +728,17 @@ stack_btn = tk.Radiobutton(right_frame, text='stack', variable=tensor, value=0, 
 x_m = float(0)
 y_m = float(0)
 
-def deriv_calc(x_m, y_m):
-    # index of point where derivative is taken
-    # Set index from the x_mouse and y_mouse coords    
+def deriv_calc(x_m, y_m):  
     global i_m, j_m
     
     # Range and point density of the derivative plot   
-    d_range = 0.5
-    dpd = 5
+    d_range = 0.25
+    dpd = dpd_select.get()
+    d_length = 0.3
     
-    i_m = int(round(dpd/2))
-    j_m = int(round(dpd/2))
+    # Select index
+    i_m = int(round((dpd/2)-0.1))
+    j_m = int(round((dpd/2)-0.1))
     
     # New Grids
     dx = np.linspace(-d_range+x_m, d_range+x_m, dpd)
@@ -744,40 +748,26 @@ def deriv_calc(x_m, y_m):
 
     u1 , v1 = eq_to_comps(string_x, string_y, dxg, dyg)
     
+    # Calculate derivative field components
     du1 = u1 - u1[i_m, j_m]
-    dv1 = v1 - v1[i_m, j_m]
-    
-    # Plot at click location?
-    
-    deriv_inset_ax = ax.inset_axes([1.07,0.70,0.25,0.25])
-    deriv_inset_ax.set_title('Derivative Plot')
-    #deriv_inset_ax.set_title('Derivative Plot at x=' + str(round(x_m,2)) + ', y =' + str(round(y_m,2)),fontsize=8)
+    dv1 = v1 - v1[i_m, j_m]    
 
-    # create new window for the plot - edit size?
-    # deriv_window = tk.Toplevel()
-    # # to do - give coord rather than the index - more useful for user
-    # deriv_window.title('(Approximate) Derivative Field at coord: (x=' + str(x_m) + ', y=' + str(y_m) + ')')
-    # d_fig = plt.figure()
-    # d_ax = d_fig.gca()
-    # local quiver plot
-    deriv_inset_ax.quiver(dxg, dyg, du1, dv1, pivot='mid', scale_units='xy')
+    # Create axes as clicked position    
+    deriv_inset_ax = ax.inset_axes([(x_pix-178)/500 - (d_length/2),(y_pix-59)/500 - (d_length/2), d_length, d_length])
+    # print(str((x_pix-178)/500))
+    # print(str((y_pix-59)/500))
+    
+    # Quiver plot derivative field 
+    deriv_inset_ax.quiver(dxg, dyg, du1, dv1, pivot='mid', scale_units='xy')  
+    
+    # Hide the x and y axis values
+    deriv_inset_ax.set_xticks([])
+    deriv_inset_ax.set_yticks([])
+    
+    # Redraw the figure anvas, showing the inset axis
     fig.canvas.draw()
     deriv_inset_ax.clear()
     deriv_inset_ax.remove()
-
-    # draw the plot on new window
-    #deriv_inset_ax.show()
-    
-    # d_canvas = FigureCanvasTkAgg(d_fig, master=deriv_window)
-    # d_canvas.draw()
-    # d_canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-    
-    #plt.close()
-
-
-# Define button to open the derivative plot
-# deriv_button = tk.Button(right_frame, pady=10, text='Local Derivative', command=deriv_calc(x_m,y_m)).grid(row=1, column=1)
-# not needed, clicking event used instead
 
 # set up the initial variable, code starts in option to use matplotlib tools
 click_opt_int = 0
@@ -795,9 +785,9 @@ def click_option_handler(click_option):
         fig.canvas.draw()
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# =============================================================================
 # Radiobutton to select what happens when clicking the plot
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# =============================================================================
 click_option = tk.IntVar()
 click_option.set(0)
 
@@ -807,7 +797,18 @@ click_option_Deriv_btn = tk.Radiobutton(right_frame, text='Derivative Plot', var
 click_option_Tools_btn.grid(row=0, column=0)
 click_option_Deriv_btn.grid(row=0, column=1)
 
+# =============================================================================
+# Drop down to select the derivative plot point density (dpd)
+# =============================================================================
 
+dpd_select = tk.IntVar()
+dpd_select.set(5)
+dpd_list = [3,5,7]
+
+dpd_drop_label = tk.Label(right_frame,text='Select Derivative Plot Point Density:')
+dpd_drop_label.grid(row=1, column=0)
+dpd_drop = tk.OptionMenu(right_frame, dpd_select, *dpd_list)
+dpd_drop.grid(row=1, column=1)
 
 # return time to run
 stop = timeit.default_timer()
