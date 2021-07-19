@@ -212,7 +212,7 @@ def format_eq(string):
     string = string.replace('invta', 'np.arctan')  # arctan does not work because of r and tan in it.
     string = string.replace('^', '**')
     string = string.replace('ln', 'np.log')
-    string = string.replace('exp', 'np.exp')
+    string = string.replace('exp', 'np.exp')  # exp shouldn't work becasue of x?
     return string
 
 
@@ -746,20 +746,32 @@ def deriv_calc(x_m, y_m):
     du1 = u1 - u1[i_m, j_m]
     dv1 = v1 - v1[i_m, j_m]
     
-    # create new window for the plot - edit size?
-    deriv_window = tk.Toplevel()
-    # to do - give coord rather than the index - more useful for user
-    deriv_window.title('(Approximate) Derivative Field at coord: (x=' + str(x_m) + ', y=' + str(y_m) + ')')
-    d_fig = plt.figure()
-    d_ax = d_fig.gca()
-    # local quiver plot
-    d_ax.quiver(dxg, dyg, du1, dv1, pivot='mid', scale_units='xy')
-    # draw the plot on new window
+    # Plot at click location?
     
-    d_canvas = FigureCanvasTkAgg(d_fig, master=deriv_window)
-    d_canvas.draw()
-    d_canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-    plt.close()
+    deriv_inset_ax = ax.inset_axes([1.07,0.70,0.25,0.25])
+    deriv_inset_ax.set_title('Derivative Plot')
+    #deriv_inset_ax.set_title('Derivative Plot at x=' + str(round(x_m,2)) + ', y =' + str(round(y_m,2)),fontsize=8)
+
+    # create new window for the plot - edit size?
+    # deriv_window = tk.Toplevel()
+    # # to do - give coord rather than the index - more useful for user
+    # deriv_window.title('(Approximate) Derivative Field at coord: (x=' + str(x_m) + ', y=' + str(y_m) + ')')
+    # d_fig = plt.figure()
+    # d_ax = d_fig.gca()
+    # local quiver plot
+    deriv_inset_ax.quiver(dxg, dyg, du1, dv1, pivot='mid', scale_units='xy')
+    fig.canvas.draw()
+    deriv_inset_ax.clear()
+    deriv_inset_ax.remove()
+
+    # draw the plot on new window
+    #deriv_inset_ax.show()
+    
+    # d_canvas = FigureCanvasTkAgg(d_fig, master=deriv_window)
+    # d_canvas.draw()
+    # d_canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+    
+    #plt.close()
 
 
 # Define button to open the derivative plot
@@ -777,6 +789,9 @@ def click_option_handler(click_option):
     global click_opt_int
     click_opt_int = click_option
     print(click_opt_int)
+    
+    if click_opt_int == 0:
+        fig.canvas.draw()
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -790,6 +805,8 @@ click_option_Deriv_btn = tk.Radiobutton(right_frame, text='Derivative Plot', var
 
 click_option_Tools_btn.grid(row=0, column=0)
 click_option_Deriv_btn.grid(row=0, column=1)
+
+
 
 # return time to run
 stop = timeit.default_timer()
