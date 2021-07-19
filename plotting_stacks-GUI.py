@@ -341,14 +341,14 @@ plottedfield = stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, ori
 # reduce white space on the plot figure
 fig.tight_layout()
 
-# set up the space foe the plot to be put into AKA the plot frame
+# set up the space for the plot to be put into AKA the plot frame
 canvas = FigureCanvasTkAgg(fig, master=plot_frame)
 canvas.draw()
 canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
 # put the default matplotlib toolbar, below the figure
 toolbar = NavigationToolbar2Tk(canvas, plot_frame)
-toolbar.update()
+toolbar.update()  # allow the plot to update based on the toolbar
 canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
 
@@ -357,6 +357,15 @@ def on_key_press(event):
     if click_opt_int == 0:
         print("you pressed {}".format(event.key))
         key_press_handler(event, canvas, toolbar)
+    elif click_opt_int == 1:
+        global ix, iy, coords, x_m, y_m
+        ix_plot, iy_plot = event.xdata, event.ydata
+        print (ix_plot,iy_plot)
+        x_m = float(ix_plot)
+        y_m = float(iy_plot)
+        deriv_calc(x_m, y_m)
+    else:
+        print('NONE')
 
 
 # connect the space to function that records clicks
@@ -758,21 +767,13 @@ def deriv_calc(x_m, y_m):
 # deriv_button = tk.Button(right_frame, pady=10, text='Local Derivative', command=deriv_calc(x_m,y_m)).grid(row=1, column=1)
 # not needed, clicking event used instead
 
+# set up the initial variable, code starts in option to use matplotlib tools
 click_opt_int = 0
 
+# connect figure event to a function that responds to clicks
+fig.canvas.mpl_connect("button_press_event", on_key_press)
 
-def onclick(event):
-    if click_opt_int == 1:
-        global ix, iy, coords, x_m, y_m
-        ix_plot, iy_plot = event.xdata, event.ydata
-        print (ix_plot,iy_plot)
-        x_m = float(ix_plot)
-        y_m = float(iy_plot)
-        deriv_calc(x_m, y_m)
-
-cid = fig.canvas.mpl_connect("button_press_event", onclick)
-
-
+# define a function that will update the variable defining click action
 def click_option_handler(click_option):
     global click_opt_int
     click_opt_int = click_option
