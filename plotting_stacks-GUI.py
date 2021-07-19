@@ -205,14 +205,14 @@ def format_eq(string):
     string = string.replace('theta', 'thetag')
     # where there are special functions, replace them with library directions
     string = string.replace('pi', 'np.pi')
-    string = string.replace('sqrt', 'np.sqrt')  # sqrt does not work, becaue of the r in it
+    string = string.replace('sqrt', 'np.sqrt')  # sqrt won't work, becaue of the r in it
     string = string.replace('sin', 'np.sin')
     string = string.replace('cos', 'np.cos')
     string = string.replace('tan', 'np.tan')
-    string = string.replace('invta', 'np.arctan')  # arctan does not work because of r and tan in it.
+    string = string.replace('arcta', 'np.arctan')  # arctan won't work because of tan in it.
     string = string.replace('^', '**')
     string = string.replace('ln', 'np.log')
-    string = string.replace('exp', 'np.exp')  # exp shouldn't work becasue of x?
+    string = string.replace('e^', 'np.exp')
     return string
 
 
@@ -376,8 +376,9 @@ def on_key_press(event):
 
 # define a function that will change r and theta components to equivalents in x and y
 def p_cart(string):
+    string= string.replace('R', 'r')
     string = string.replace('r', 'sqrt(x**2 + y**2)')
-    string = string.replace('theta', 'invta(y/x)')
+    string = string.replace('theta', 'arcta(y/x)')
     return string
 
 # define a function that takes input string that is python understood and turn into vector components:
