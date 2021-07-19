@@ -185,26 +185,56 @@ This has been implemented in code. The parameters for this are as follows:
 
 \section{2-forms from 1-forms, exterior derivative (on $\mathbb{R}^{m}$)}
 The code includes a script that calculates 2-forms from a given 1-form in a specified number of dimensions.
-It requires input of the 1-form components respectively to their elemental 1-form (in code: string\textunderscore x, string\textunderscore y, etc.), variable arrays (in code: $x$, $y$ etc.) as well as grids (in code: $xg$, $yg$, etc.) of these and a list of symbols for each variable used in the equations (coords).\\
-The code, so far, has to be changed manually to include the change of all given components from \textbf{string} type to \textbf{sympy.core.mul.Mul}. The number of used dimensions has to also be input as an integer ('$m$' in the code). The variable, expressions has to also be appended with the correct number of components.
-Python then cycles over the components and the given symbols for variables, differentiating each. To improve efficiency, the derivatives have not been completed when components are to be differentiated with respect to their corresponding elementary 1-form (these go to zero). The results are saved into an (m $\times$ m) array called $ext\textunderscore ds$'. The array is of data type 'object', as it must store strings of arbitrary length in each of its components. It stores all the found derivatives, with components changing along the rows, and variables changing along the columns.
-Each derivative expression is also changed into a string, This is done to append needed prefixes onto them and to later use them with the eval() function. It creates an issue, more on issues on the end of this subsection.\\
+It requires input of the 1-form components respectively to their elemental 1-form (in code: string\textunderscore x, string\textunderscore y, etc.), variable arrays (in code: $x$, $y$ etc.) as well as grids (in code: $xg$, $yg$, etc.) of these and a list of symbols for each variable used in the equations (coords).
+The code, so far, has to be changed manually to include the change of all given components from \textbf{string} type to \textbf{sympy.core.mul.Mul}. The number of used dimensions has to also be input as an integer ('$m$' in the code). The variable, 'expressions' has to also be appended with the correct number of components.
 
-\noindent This, completed, array is then taken through loops that extract the components of each elementary 2-form. This is done by appending (string) elements form the forward skewed diagonals of $ext\textunderscore ds$. Again, an issue was noticed here, more on those issues at the end.
-Cycling over diagonals was completed by numbering them using a variable $d$', from position $(0, 0)$ (when $d=0$). The loop had to be split to the upper right and lower left sections. Components $i$ and $j$ are found using the fact that $i + j = d$. The limits that restrict values of $d$ were established by considering the number of diagonals in an $m \times m$ matrix, excluding the edge diagonals, where there only exists 1 element (always equal to zero for this matrix).\\
-The resulting components of the 2-form, are saved in a vector named 'result'. The length of which is established by the dimensions of the given 1-form. It was found that the number of components of 2 forms on $\mathbb{R}^{m}$ follows triangular numbers. The components of this vector have to be strings for previously given reasons.
+\noindent Python cycles over the components and the given symbols for variables, differentiating each. To improve efficiency, the derivatives have not been completed when components are to be differentiated with respect to their corresponding elementary 1-form (these go to zero). The results are saved into an (m $\times$ m) array called ext\textunderscore ds'. The array is of data type 'object', as it must store strings of arbitrary length in each of its components. It stores all the found derivatives, with components changing along the rows, and variables changing along the columns.
+Each derivative expression is also changed into a string, This is done to append needed prefixes onto them and to later use them with the eval() function, such as brackets and negatives. Minus sings (strings) are then appended to the upper right hand-side of the matrix. This is done to correct for the elementary 2-forms being in the wrong order.
 
-These are then converted to numerical 2-forms using $xg$ and $yg$ (and others, when $m > 2$) via the eval() function. The resulting numerical 2-form is a vector of $m$ dimensional arrays, extracted by evaluating 'results' with grids corresponding to each variable. This is not very elegant, I will admit.
+\noindent This, completed, array is then taken through loops that extract the components of each elementary 2-form. These components are symmetrical elements, therefore extracting them includes taking elements with the same $i$ and $j$, switched in the coordinates. A 'pair' variable is introduced to keep track of how many times the loop extracted a pair of 2-form components and merged them. As only 2-forms are being calculated, there is always 2 components being extracted toward one elementary 2 form (including zeros as components) The number that this variable reaches is the number of components of a 2 form on $\mathbb{R}^{m}$, which was found to be given by triangular numbers. Resulting pairs are stored in an array of 1 column and a number of rows determined  by the triangular number of dimensionality. This array is called 'result', and stores objects (it must consist of strings of varying lengths for each element). Each time a new pair is being considered, the element from 'result' is cleared to exclude the initial 'NoneType' variable present. When appending the components, it is checked that if one or more of them evaluated to zero, they are not appended.
+The result is printed, as a vector, whose rows correspond to different 2-form elements. The order is as follows:
+For m=3:
+\begin{center}
+	\begin{tabular}{c}
+		$ dx \wedge dy$, 
+		$ dx \wedge dz$, 
+		$ dy \wedge dz$.
+	\end{tabular}
+\end{center}
+
+For m=4 these become:
 
 \begin{center}
-	\LARGE
-	IMPORTANT - ISSUES\\
+	\begin{tabular}{c}
+		$ dx \wedge dy$,
+		$ dx \wedge dz$,
+		$ dy \wedge dz$,
+		$ dx \wedge dw$,
+		$ dy \wedge dw$,
+		$ dz \wedge dw$,
+		
+	\end{tabular}
+\end{center}
+etc.
+
+These follow the component pairs as they appear in the lower-right of the matrix (ext\textunderscore ds), in order that follows each line, until the main diagonal.
+It can be clearly visualised on the example of the 2-form on $\mathbb{R}^{4}$ as follows:
+\begin{equation}
+		\begin{pmatrix}
+			0 & dy \wedge dx & dz \wedge dx & dw \wedge dx \\
+			dx \wedge dy & 0 & dz \wedge dy & dw \wedge dy \\
+			dx \wedge dz & dy \wedge dz & 0 & dw \wedge dz \\
+			dx \wedge dw & dy \wedge dw & dz \wedge dw & 0 \\
+		\end{pmatrix}
+\end{equation}
+
+Each component of the outcome ('result') is then formatted in such a way as to be understood by python's eval() function and the evaluation of each is saved into a variable called 'form\textunderscore 2'. This has to be composed of m dimensional arrays, one for each elemental 2-form component (given by the triangular numbers from the used dimensions 'm').
+
+\begin{center}
+	\Large
+	IMPORTANT - CONVENTION\\
 	\normalsize
-	\begin{itemize}
-	\item The lower-left bottom of \textbf{ext\textunderscore ds} is then appended with a minus sign and the other half, with a positive. This was done in hopes of correcting for the changes in elementary 2-forms, when merging expressions together. However, the conventional directions for these elementary 2 forms are not so easily implemented in code. Therefore, (so far) the code returns the result, not in standard directional form, meaning that not all signs in the expression are correct. This is still to be corrected.
-	\item The pattern of taking diagonals to obtain 2-form components was noticed in the case of $m=2$ and $m=3$. It was implemented without notice that it is no longer true for higher dimensions.
-	\end{itemize}
-\textbf{Further advancements are on their way and once these are implemented, this document will be altered accordingly. This is simply a note on current progress.}
+	There exists a convention on $\mathbb{R}^{3}$ which allows for simple matching of 2-forms to unit vectors used in vector calculus. By this convention, the elemental 2 forms used are not as stated above ($ dx \wedge dy$, $ dx \wedge dz$, $ dy \wedge dz$), but instead, are given by: $dx \wedge dy$, $ dz \wedge dx$, $ dy \wedge dz$. This allows for use of the standard Cartesian coordinates with the simple rule that the 2 forms correspond to unit vectors. This convention was not followed in this code, as it is irrational to use it in m>3, and it was established that it shadows an important aspect of differential forms. Wedge products are not defined in extra dimensions (in a way that a curl is defined in a direction the filed does not occupy, perpendicular to it). Wedge products have their orientation defined through the axial sense (clockwise and counter-clockwise). This means that their wedge product does not occupy extra dimensions. This can only be clearly retained, as used in higher dimensions, when the convention on $\mathbb{R}^{3}$ is abandoned. This is exactly what is done in the code. This code gives the 2 forms defined through clockwise (negative) and counter-clockwise (positive) orientations.
 \end{center}
 
 \end{document}
