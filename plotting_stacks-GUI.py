@@ -193,6 +193,28 @@ def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows='True', orienta
 
     plt.close()
 
+
+# define a function to replace input string to be 'python understood'
+def format_eq(string):
+    # replace all the x and y with xg and yg:
+    string = string.replace('x', 'xg')
+    string = string.replace('y', 'yg')
+    string = string.replace('z', 'zg')
+    string = string.replace('r', 'rg')
+    string = string.replace('theta', 'thetag')
+    # where there are special functions, replace them with library directions
+    string = string.replace('pi', 'np.pi')
+    string = string.replace('sqt', 'np.sqrt')  # sqrt does not work, becaue of the r in it
+    string = string.replace('sin', 'np.sin')
+    string = string.replace('cos', 'np.cos')
+    string = string.replace('tan', 'np.tan')
+    string = string.replace('invta', 'np.arctan')  # arctan does not work because of r and tan in it.
+    string = string.replace('^', '**')
+    string = string.replace('ln', 'np.log')
+    string = string.replace('exp', 'np.exp')
+    return string
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # set up basic layout of the window
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -293,15 +315,21 @@ r_den = 10
 theta_den = 20
 
 # define the axis
-r = np.linspace(0.001, r_max, r_den)
+r = np.linspace(0.05, r_max, r_den)
 theta = np.linspace(0, 360, theta_den) * np.pi/180
 
 # define a polar grid
 rg, thetag = np.meshgrid(r, theta)
 
 # define an initial polar field (same as initial cartesian field.)
-F_r = a*rg*np.sin(thetag)
-F_theta = -a*rg*np.cos(thetag)
+F_r_str_initial = 'a*r*sin(theta)'
+F_theta_str_initial = '-a*r*cos(theta)'
+
+F_r_str = format_eq(F_r_str_initial)
+F_theta_str = format_eq(F_theta_str_initial)
+
+F_r = eval(F_r_str)
+F_theta = eval(F_theta_str)
 
 # convert to cartesian
 u_p = F_r*np.cos(thetag) - F_theta*np.sin(thetag)  # x component
@@ -345,25 +373,11 @@ fig.canvas.mpl_connect("key_press_event", on_key_press)
 # define other needed functions, for input reponses
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# define a function to replace input string to be 'python understood'
-def format_eq(string):
-    # replace all the x and y with xg and yg:
-    string = string.replace('x', 'xg')
-    string = string.replace('y', 'yg')
-    string = string.replace('z', 'zg')
-    string = string.replace('r', 'rg')
-    string = string.replace('theta', 'thetag')
-    # where there are special functions, replace them with library directions
-    string = string.replace('pi', 'np.pi')
-    string = string.replace('sqrt', 'np.sqrt')
-    string = string.replace('sin', 'np.sin')
-    string = string.replace('cos', 'np.cos')
-    string = string.replace('tan', 'np.tan')
-    string = string.replace('^', '**')
-    string = string.replace('ln', 'np.log') 
-    string = string.replace('exp', 'np.exp')       
+# define a function that will change r and theta components to equivalents in x and y
+def p_cart(string):
+    string = string.replace('r', 'sqt(x**2 + y**2)')
+    string = string.replace('theta', 'invta(y/x)')
     return string
-
 
 # define a function that takes input string that is python understood and turn into vector components:
 def eq_to_comps(string_x, string_y, xg, yg):
@@ -488,36 +502,45 @@ def custom_btn_reponse():
     submit_arr_btn.grid(row=8, column=0, pady=10)
 
 
-def polar_submit():
+def polar_submit(tensorp):
     # take the input values into new variables
-    global F_r, F_theta, r_max, r_den, theta_den, a, r, theta, rg, thetag, u_p, v_p
+    global F_r, F_theta, r_max, r_den, theta_den, a, r, theta, rg, thetag, u_p, v_p, L, F_r_str_initial, F_theta_str_initial
     F_r = Fr_entry.get()
     F_theta = Ftheta_entry.get()
     r_max = float(r_max_entry.get())
     r_den = int(r_den_entry.get())
     theta_den = int(theta_den_entry.get())
     a = float(a_scale_entry.get())
+    L = float(L_entry1.get())
+    # rescale the axis:
+    ax_L = L + L/delta_factor
+    ax.set_xlim(-ax_L, ax_L)
+    ax.set_ylim(-ax_L, ax_L)
     # based on these, change the axis coordinates
-    r = np.linspace(0.001, r_max, r_den)
+    r = np.linspace(0.05, r_max, r_den)
     theta = np.linspace(0, 361, theta_den) * np.pi/180
     # and mesh the new ones
     rg, thetag = np.meshgrid(r, theta)
     # format radial and angular components to be python understood
-    F_r = format_eq(F_r)
-    F_theta = format_eq(F_theta)
-    # valueate them, bearing in mind the process to follow when user inputs 0
-    if F_r == '0':
+    # update intial strings to display
+    F_r_str_initial = F_r
+    F_theta_str_initial = F_theta
+    # format equations
+    F_r_str = format_eq(F_r)
+    F_theta_str = format_eq(F_theta)
+    # evalueate them, bearing in mind the process to follow when user inputs 0
+    if F_r_str == '0':
         F_r = np.zeros(np.shape(rg))
-        F_theta = eval(F_theta)
-    elif F_theta == '0':
-        F_r = eval(F_r)
+        F_theta = eval(F_theta_str)
+    elif F_theta_str == '0':
+        F_r = eval(F_r_str)
         F_theta = np.zeros(np.shape(thetag))
-    elif F_r and F_theta == '0':
+    elif F_r_str and F_theta_str == '0':
         F_r = np.zeros(np.shape(rg))
         F_theta = np.zeros(np.shape(thetag))
     else:
-        F_r = eval(F_r)
-        F_theta = eval(F_theta)
+        F_r = eval(F_r_str)
+        F_theta = eval(F_theta_str)
     # redefine the field with these (in cartesian)
     u_p = F_r*np.cos(thetag) - F_theta*np.sin(thetag)  # x component
     v_p = F_r*np.sin(thetag) + F_theta*np.cos(thetag)  # y component
@@ -529,37 +552,67 @@ def polar_submit():
     yg = rg*np.sin(thetag)
     # clear the plot that is already there:
     ax.clear()
-    # use these o create a stack plot (default)
-    stack_plot(xg, yg, ax, u_p, v_p, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)
-    # put it onto the screen
-    canvas.draw()
-    # change the radio button ticks back to stack only
-    tensor.set(0)
-    # display in x and y components that these are not used now
+    # use the tensor to determine what to plot:
+    # 0 is just stacks, 1 is for only arrows and 2 is for both
+    if tensorp == 0:
+        arrows = False  # set correct variable as asked by user
+        stack_plot(xg, yg, ax, u_p, v_p, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)  # plot
+        # display the figure so that it updates in GUI
+        canvas.draw()
+    elif tensorp == 1:
+        ax.quiver(xg, yg, u_p, v_p, pivot=orientation, scale=scale, scale_units='xy')
+        canvas.draw()
+    elif tensorp == 2:
+        arrows = True
+        stack_plot(xg, yg, ax, u_p, v_p, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)
+        # repeat the displaying of the figure so that it updates in GUI
+        canvas.draw()
+    # display in x and y components, in a somewhat messy form, straight from poalr to cart
     x_comp_entry.delete(0, 'end')
     y_comp_entry.delete(0, 'end')
-    x_comp_entry.insert(0, '0')
-    y_comp_entry.insert(0, '0')
+    x_comp_entry.insert(0, p_cart(F_r_str_initial) + p_cart(' * cos(theta)') + ' - ' + p_cart(F_theta_str_initial) + p_cart(' * sin(theta)'))
+    y_comp_entry.insert(0, p_cart(F_r_str_initial) + p_cart(' * sin(theta)') + ' + ' + p_cart(F_theta_str_initial) + p_cart(' * cos(theta)'))
     # then close the window
     polar_fld_window.destroy()
 
 
+#define a function that will check the vector type from the polar option
+def polar_vect_type_response(tensorp):
+    # clear the plot that is already there:
+    ax.clear()
+    # use the tensor to determine what to plot:
+    # 0 is just stacks, 1 is for only arrows and 2 is for both
+    if tensorp == 0:
+        arrows = False
+        stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)
+        canvas.draw()
+    elif tensorp == 1:
+        ax.quiver(xg, yg, u, v, pivot=orientation, scale=scale, scale_units='xy')
+        # repeat the displaying of the figure so that it updates in GUI
+        canvas.draw()
+    elif tensorp == 2:
+        arrows = True
+        stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)
+        # repeat the displaying of the figure so that it updates in GUI
+        canvas.draw()
+
 # define a function that responds to the polar button, to allow user to input
 # details about the polar field they fish to plot
 def Polar_btn_response():
-    global polar_fld_window, Fr_entry, Ftheta_entry, r_max_entry, r_den_entry, theta_den_entry, a_scale_entry
+    global polar_fld_window, Fr_entry, Ftheta_entry, r_max_entry, r_den_entry, theta_den_entry, a_scale_entry, L_entry1
+    global p_arr_btn, p_both_btn, p_stack_btn
     # open a window with input fields to enter polar components
     polar_fld_window = tk.Toplevel()
     polar_fld_window.title('polar field input')
     # define and label and first entry, for radial
     tk.Label(polar_fld_window, text='polar component in terms of \'r\':').grid(row=0, column=0)
     Fr_entry = tk.Entry(polar_fld_window, width=30, borderwidth=1)
-    Fr_entry.insert(0, 'a*r*sin(theta)')
+    Fr_entry.insert(0, str(F_r_str_initial))
     Fr_entry.grid(row=1, column=0)
     # define and label second entry, for height
     tk.Label(polar_fld_window, text='angular component in terms of \'theta\' :').grid(row=2, column=0)
     Ftheta_entry = tk.Entry(polar_fld_window, width=30, borderwidth=1)
-    Ftheta_entry.insert(0, '-a*r*cos(theta)')
+    Ftheta_entry.insert(0, str(F_theta_str_initial))
     Ftheta_entry.grid(row=3, column=0)
     # define an entry for radius limit r_max
     tk.Label(polar_fld_window, text='maximum radius:').grid(row=4, column=0)
@@ -576,14 +629,22 @@ def Polar_btn_response():
     theta_den_entry = tk.Entry(polar_fld_window, width=30, borderwidth=1)
     theta_den_entry.insert(0, theta_den)
     theta_den_entry.grid(row=9, column=0)
-        # define a linear scaling for the poalr field a_p
+    # define a linear scaling for the poalr field a_p
     tk.Label(polar_fld_window, text='linear scaling factor:').grid(row=10, column=0)
     a_scale_entry = tk.Entry(polar_fld_window, width=30, borderwidth=1)
     a_scale_entry.insert(0, a)
     a_scale_entry.grid(row=11, column=0)
-    # define a submit button to respond to these changes
-    submit_polar_btn = tk.Button(polar_fld_window, text='SUBMIT', padx=20, pady=20, command=polar_submit)
-    submit_polar_btn.grid(row=12, column=0)
+    # define linear axis size
+    tk.Label(polar_fld_window, text='graph size').grid(row=12, column=0)
+    L_entry1 = tk.Entry(polar_fld_window, width=30, borderwidth=1)
+    L_entry1.grid(row=13, column=0, padx = 2)
+    L_entry1.insert(0, L)
+    # define a number that will tarck which vector field is wanted
+    tensorp = tk.IntVar()
+    # define buttons to chose between different fields
+    p_arr_btn = tk.Radiobutton(polar_fld_window, text='arrow', variable=tensorp, value=1, command=lambda: polar_submit(tensorp.get())).grid(row=7, column=1)
+    p_both_btn = tk.Radiobutton(polar_fld_window, text='both', variable=tensorp, value=2, command=lambda: polar_submit(tensorp.get())).grid(row=7, column=2)
+    p_stack_btn = tk.Radiobutton(polar_fld_window, text='stack', variable=tensorp, value=0, command=lambda: polar_submit(tensorp.get())).grid(row=7, column=3)
 
 
 '''
