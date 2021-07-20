@@ -411,8 +411,6 @@ for i in range(len(xg[:, 0])):
             print('ZERO!')
 
 
-
-
 # can add a background colourmap to see between gridpoints by the following:
 '''
 cp = ax.contourf(xg, yg, form_2[0], cmap='bwr')

@@ -86,47 +86,56 @@ m = 3
 
 # take the input strings and turn them into sympy expressions to be able to
 # use sympy's partial differentiation
+# evaluate=false prevents the reordering of arguments
 sympy_expr_x = parse_expr(string_x, evaluate=False)
 sympy_expr_y = parse_expr(string_y, evaluate=False)
 sympy_expr_z = parse_expr(string_z, evaluate=False)
-# for m > 2, need more components, and need these in 'expressions' too!
+# Requires m expressions
 
 # define a sympy expression for string 0
 sympy_expr_zero = parse_expr('0*x', evaluate=False)
 
-# combine the 2 into a list:
+# Array of Sympy expressions
 expressions = np.array([sympy_expr_x, sympy_expr_y, sympy_expr_z])
 
-# set up an array to store derrivatives.
+# set up an array to store derivatives.
 ext_ds = np.empty((m, m), dtype='object')
 
-# use sympy partial derrivatives on these, as to get a 2-form on R2:
+# use sympy partial derrivatives on these, as to get a 2-form on R^m:
 # need to differentiate each component w.r.t the coordinates that it's
-# elementary 1 form does not contain.
+# elementary 1 form does not contain - hence diagonals are zero
 
-# set up an array of coordinates that need to be used (in standard order)
+# set up a list of coordinates that need to be used (in standard order)
 coords = ['x', 'y', 'z']
 
 # set up an array to store the results
 # in 2D only dx^dy, in 3D (in order): dx^dy, dz^dx, dy^dz
-result = np.empty((int((m-1)*m/2), 1), dtype='object')
-for i in range(int((m-1)*m/2)):
+
+N = int((m-1)*m/2)
+
+result = np.empty((N, 1), dtype='object')
+for i in range(N):
     result[i] = str(result[i])
 
-# loop over differentiating each, when differentiating w.r.t its coord, set to 0
+# Loop over the components of the 1-form and the coordinates
 for coord_index in range(len(coords)):
-    # loop over differentiating each component:
     for comp_index in range(len(expressions)):
-        # when equal set to 0, when not-differentiate:
+        
+        # Set diagonal elements to zero
         if comp_index == coord_index:
             ext_ds[comp_index, coord_index] = str(sympy_expr_zero)
+            
+        # Differentiate the expression wrt coordinate    
         elif comp_index != coord_index:
             ext_ds[comp_index, coord_index] = str(diff(expressions[comp_index], coords[coord_index]))
+        
         # change the signs for wedges in wrong order, this will include lower left side of the matrix ext_ds
+        # ext_ds is an array of strings
         if comp_index < coord_index:
             ext_ds[comp_index, coord_index] = ' - (' + str(ext_ds[comp_index, coord_index]) + ')'
         elif comp_index > coord_index:
             ext_ds[comp_index, coord_index] = ' + ' + str(ext_ds[comp_index, coord_index])
+            
 
 '''
 merge the results into a 2 form (for 2-form on R^2, the result is a single component (dx^xy))
