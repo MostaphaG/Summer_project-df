@@ -33,8 +33,8 @@ In python, these stack sheets have to be defined from the magnitude and directio
 
 \begin{figure}[H]
 	\centering
-	\graphicspath{ {c:/Users/macus/Desktop/Uni/summer internships/Moustafa - Differential Forms/images/} }
-	\includegraphics[scale=0.4]{Geometry of 1 stack sheet}
+	%\graphicspath{ {c:/Users/macus/Desktop/Uni/summer internships/Moustafa - Differential Forms/images/} }
+	\includegraphics[scale=0.4]{Documentation_images/Geometry of 1 stack sheet}
 	\caption{Sketch presenting the Geometrical arguments needed to define stack sheets, based on field magnitude and direction(indicated well by an arrow vector as shown)}
 	\label{fig:1 sheet}
 \end{figure}
@@ -55,8 +55,8 @@ These also function generally as operations that displace a point on the vector 
 To then displace the stack sheet by distance $d$ in the direction parallel to the arrow as shown in Figure~\ref{fig:parallel disp.},
 \begin{figure}[H]
 	\centering
-	\graphicspath{ {c:/Users/macus/Desktop/Uni/summer internships/Moustafa - Differential Forms/images/} }
-	\includegraphics[scale=0.38]{Geometry of 1 stack sheet, displacement 1}
+	%\graphicspath{ {c:/Users/macus/Desktop/Uni/summer internships/Moustafa - Differential Forms/images/} }
+	\includegraphics[scale=0.38]{Documentation_images/Geometry of 1 stack sheet, displacement 1}
 	\caption{Sketch presenting the geometrical arguments needed to displace stack sheets in the direction parallel to the vector field direction at that point, (again - represented by an arrow)}
 	\label{fig:parallel disp.}
 \end{figure}
@@ -74,8 +74,8 @@ To define the arrowhead on that stack vector, both translation operations, eqs. 
 
 \begin{figure}[H]
 	\centering
-	\graphicspath{ {c:/Users/macus/Desktop/Uni/summer internships/Moustafa - Differential Forms/images/} }
-	\includegraphics[scale=0.3]{Geometry of 1 stack sheet, displacement 2}
+	%\graphicspath{ {c:/Users/macus/Desktop/Uni/summer internships/Moustafa - Differential Forms/images/} }
+	\includegraphics[scale=0.3]{Documentation_images/Geometry of 1 stack sheet, displacement 2}
 	\caption{Sketch presenting the geometrical arguments needed to define the arrowhead on each stack vector)}
 	\label{fig:arrowhead gometry}
 \end{figure}
@@ -234,7 +234,7 @@ Each component of the outcome ('result') is then formatted in such a way as to b
 	\Large
 	IMPORTANT - CONVENTION\\
 	\normalsize
-	There exists a convention on $\mathbb{R}^{3}$ which allows for simple matching of 2-forms to unit vectors used in vector calculus. By this convention, the elemental 2 forms used are not as stated above ($ dx \wedge dy$, $ dx \wedge dz$, $ dy \wedge dz$), but instead, are given by: $dx \wedge dy$, $ dz \wedge dx$, $ dy \wedge dz$. This allows for use of the standard Cartesian coordinates with the simple rule that the 2 forms correspond to unit vectors. This convention was not followed in this code, as it is irrational to use it in m>3, and it was established that it shadows an important aspect of differential forms. Wedge products are not defined in extra dimensions (in a way that a curl is defined in a direction the filed does not occupy, perpendicular to it). Wedge products have their orientation defined through the axial sense (clockwise and counter-clockwise). This means that their wedge product does not occupy extra dimensions. This can only be clearly retained, as used in higher dimensions, when the convention on $\mathbb{R}^{3}$ is abandoned. This is exactly what is done in the code. This code gives the 2 forms defined through clockwise (negative) and counter-clockwise (positive) orientations.
+	There exists a convention on $\mathbb{R}^{3}$ which allows for simple matching of 2-forms to unit vectors used in vector calculus. By this convention, the elemental 2 forms used are not as stated above ($ dx \wedge dy$, $ dx \wedge dz$, $ dy \wedge dz$), but instead, are given by: $dx \wedge dy$, $ dz \wedge dx$, $ dy \wedge dz$. This allows for use of the standard Cartesian coordinates with the simple rule that the 2 forms correspond to unit vectors. This convention was not followed in this code, as it is irrational to use it in $m>3$, and it was established that it shadows an important aspect of differential forms. Wedge products are not defined in extra dimensions (in a way that a curl is defined in a direction the filed does not occupy, perpendicular to it). Wedge products have their orientation defined through the axial sense (clockwise and counter-clockwise). This means that their wedge product does not occupy extra dimensions. This can only be clearly retained, as used in higher dimensions, when the convention on $\mathbb{R}^{3}$ is abandoned. This is exactly what is done in the code. This code gives the 2 forms defined through clockwise (negative) and counter-clockwise (positive) orientations.
 \end{center}
 
 \end{document}
