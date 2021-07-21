@@ -44,7 +44,7 @@ def G(s, n, c):
 
 # define a function that will complete all stack plotting:
 def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows='True', orientation='mid', scale=1, w_head=1/8, h_head=1/4):
-    # get axis lengths:
+    # get the lengths of x and y from their grids
     x_len = len(xg[:, 0])
     y_len = len(yg[0, :])
     
@@ -201,15 +201,15 @@ def format_eq(string):
     string = string.replace('x', 'xg')
     string = string.replace('y', 'yg')
     string = string.replace('z', 'zg')
-    string = string.replace('R', 'rg')
+    string = string.replace('R', 'rg')  # otherwise: sqrt won't work, becaue of the r in it &arctan won't work because of tan in it and the r in it.
     string = string.replace('theta', 'thetag')
     # where there are special functions, replace them with library directions
     string = string.replace('pi', 'np.pi')
-    string = string.replace('sqrt', 'np.sqrt')  # sqrt won't work, becaue of the r in it
+    string = string.replace('sqrt', 'np.sqrt')
     string = string.replace('sin', 'np.sin')
     string = string.replace('cos', 'np.cos')
     string = string.replace('tan', 'np.tan')
-    string = string.replace('arcta', 'np.arctan')  # arctan won't work because of tan in it.
+    string = string.replace('arcta', 'np.arctan')
     string = string.replace('^', '**')
     string = string.replace('ln', 'np.log')
     string = string.replace('e^', 'np.exp')
@@ -227,14 +227,14 @@ root = tk.Tk()
 root.title('Vector field analyser - differential forms')
 
 # set a window size for it all to initially appear in
-root.geometry("1400x920")
+root.geometry("1400x980")
 
 # set up frames for each of:
 # bottom side (field, scalings etc) and the right side (with detailed options)
 # and top left for plot
 
 # right frame:
-right_frame = tk.LabelFrame(root, text='Options Frame', padx=120, pady=228)
+right_frame = tk.LabelFrame(root, text='Options Frame', padx=20, pady=264)
 right_frame.grid(row=0, column=1)
 
 # bot frame:
@@ -266,9 +266,9 @@ xg, yg = np.meshgrid(x, y)
 
 # define an example vector field
 a = 0.2
-u = a*np.sin(xg)  # x component
+u = a*yg*np.sin(xg)  # x component
 v = -a*xg*np.cos(yg)  # y component
-# for no dependance, use : np.zeros(np.shape(xg))  ----- or yg
+# for no dependance in any initial component, use : np.zeros(np.shape(xg)) or yg
 
 
 # set up quiver factors
@@ -282,7 +282,7 @@ delta_factor = 10
 # fraction of sheet length to graph length
 fract = 0.05
 
-# define the maximum number of stack to plot, dep. on magnitude
+# define the maximum number of stack to plot, dep. on magnitude (initialy)
 s_max = 2
 
 # set screen dpi
@@ -291,8 +291,8 @@ my_dpi = 100
 # define denominator of fractional height and width of arrowhead based on stack size
 w_head = 1/8
 h_head = 1/4
-    
-# create a figure
+
+# create a figure, use dpi to fit it more precisely to size of the frame
 fig = plt.figure(figsize=(855/my_dpi, 573/my_dpi), dpi=my_dpi)
 
 # set up axis
@@ -309,8 +309,9 @@ ax.set_xlim(-ax_L, ax_L)
 ax.set_ylim(-ax_L, ax_L)
 
 
-# define the initial polar plot also. Despite it not being plotted.
-# needed for when Polar plot option is used.
+'''define the initial polar plot also. Despite it not being plotted to start
+with needed for when Polar plot option is used'''
+
 r_max = 2
 r_den = 10
 theta_den = 20
@@ -323,23 +324,27 @@ theta = np.linspace(0, 360, theta_den) * np.pi/180
 rg, thetag = np.meshgrid(r, theta)
 
 # define an initial polar field (same as initial cartesian field.)
-F_r_str_initial = 'a*r*sin(theta)'
-F_theta_str_initial = '-a*r*cos(theta)'
+F_r_str_initial = 'a*r*sin(theta)*sin(r*cos(theta))'
+F_theta_str_initial = '-a*r*cos(theta)*cos(r*sin(theta))'
 
+# from the unformated string called 'initial', set up a python understood string
 F_r_str = format_eq(F_r_str_initial)
 F_theta_str = format_eq(F_theta_str_initial)
 
+# using these, evaluate the initial radial and angular components of the field.
 F_r = eval(F_r_str)
 F_theta = eval(F_theta_str)
 
-# convert to cartesian
+# convert the field back to cartesian
 u_p = F_r*np.cos(thetag) - F_theta*np.sin(thetag)  # x component
 v_p = F_r*np.sin(thetag) + F_theta*np.cos(thetag)  # y component
 
-# plot the field with desired parameters as specidfied above
+''' end of polar setting up'''
+
+# plot the cartessian field with desired parameters as specidfied above
 plottedfield = stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)
 
-# reduce white space on the plot figure
+# reduce white space from the figure in the plot frame
 fig.tight_layout()
 
 # set up the space for the plot to be put into AKA the plot frame
@@ -353,22 +358,25 @@ toolbar.update()  # allow the plot to update based on the toolbar
 canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
 
-# tack the mouse presses for the toolbar to respond to
+# track the mouse presses for the toolbar to respond to
 def on_key_press(event):
+    # respond with only toolbar actions when only tools are to be used
     if click_opt_int == 0:
         print("you pressed {}".format(event.key))
         key_press_handler(event, canvas, toolbar)
+    # when the derivative option is selected, cerry out the derivative when clicked
     elif click_opt_int == 1:
         global x_pix, y_pix, x_m, y_m
-        # Cartesian Coordinates of click
+        # get cartesian Coordinates of click
         ix_plot, iy_plot = event.xdata, event.ydata
-        # Pixels Coords of click
+        # from those, get pixel Coordinates of click
         x_pix, y_pix = event.x , event.y
         x_m = float(ix_plot)
         y_m = float(iy_plot)
         mpl.rcParams['toolbar'] = 'None'  # this does not do what it should yet
         deriv_calc(x_m, y_m)
     else:
+        # just is case
         pass
 
 
@@ -377,6 +385,8 @@ def on_key_press(event):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # define a function that will change r and theta components to equivalents in x and y
+# this will be needed to display the filed in cartesian after submitting a polar field
+# so that the PLOT button does not break.
 def p_cart(string):
     string= string.replace('R', 'r')
     string = string.replace('r', 'sqrt(x**2 + y**2)')
@@ -386,11 +396,11 @@ def p_cart(string):
 # define a function that takes input string that is python understood and turn into vector components:
 def eq_to_comps(string_x, string_y, xg, yg):
     global equation_x, equation_y
-    # use this fucntion to replace given string to python understood equations:
+    # use the format_eq fucntion to make given string readable by python
     equation_x = format_eq(string_x)
     equation_y = format_eq(string_y)
     # use these to define the field:
-    # also: check if equation equals zero, to then replace it with an array and not just 0:
+    # also: checking if equation equals zero, to then replace it with an array and not just 0:
     if equation_x == '0':
         u = np.zeros(np.shape(xg))
         v = eval(equation_y)
@@ -433,6 +443,8 @@ def vect_type_response(tensor):
 
 # define the PLOT button response function
 def PLOT_response():
+    # first, take from entry boxes, wanted parameters and make them global:
+    # these must be changed globally for other functions to work with the new field.
     global L, pt_den, s_max, a, x, y, xg, yg, u, v, tensor, ax, string_x, string_y
     # clear the current axis
     ax.clear()
@@ -525,11 +537,10 @@ def polar_submit(tensorp):
     theta = np.linspace(0, 361, theta_den) * np.pi/180
     # and mesh the new ones
     rg, thetag = np.meshgrid(r, theta)
-    # format radial and angular components to be python understood
     # update intial strings to display
     F_r_str_initial = F_r
     F_theta_str_initial = F_theta
-    # format equations
+    # format radial and angular components to be python understood
     F_r_str = format_eq(F_r)
     F_theta_str = format_eq(F_theta)
     # evalueate them, bearing in mind the process to follow when user inputs 0
@@ -551,12 +562,12 @@ def polar_submit(tensorp):
     # scale these linearly
     u_p *= a
     v_p *= a
-    # convert the cooridnates rg and thetag back to cartesian:
+    # convert the cooridnates rg and thetag back to cartesian, needed for the plotting functions
     xg = rg*np.cos(thetag)
     yg = rg*np.sin(thetag)
     # clear the plot that is already there:
     ax.clear()
-    # use the tensor to determine what to plot:
+    # use the selected tensor to determine what to plot:
     # 0 is just stacks, 1 is for only arrows and 2 is for both
     if tensorp == 0:
         arrows = False  # set correct variable as asked by user
@@ -576,6 +587,7 @@ def polar_submit(tensorp):
     y_comp_entry.delete(0, 'end')
     x_comp_entry.insert(0, p_cart(F_r_str_initial) + p_cart(' * cos(theta)') + ' - ' + p_cart(F_theta_str_initial) + p_cart(' * sin(theta)'))
     y_comp_entry.insert(0, p_cart(F_r_str_initial) + p_cart(' * sin(theta)') + ' + ' + p_cart(F_theta_str_initial) + p_cart(' * cos(theta)'))
+    ''' NOTE - the cartesian field will not be quite the same because range issues in arctan '''
     # then close the window
     polar_fld_window.destroy()
 
@@ -583,6 +595,7 @@ def polar_submit(tensorp):
 # define a function that responds to the polar button, to allow user to input
 # details about the polar field they fish to plot
 def Polar_btn_response():
+    # need these global to pass them onto the function that responds to submission
     global polar_fld_window, Fr_entry, Ftheta_entry, r_max_entry, r_den_entry, theta_den_entry, a_scale_entry, L_entry1
     global p_arr_btn, p_both_btn, p_stack_btn
     # open a window with input fields to enter polar components
@@ -626,6 +639,8 @@ def Polar_btn_response():
     # define a number that will tarck which vector field is wanted
     tensorp = tk.IntVar()
     # define buttons to chose between different fields
+    # when one is selected, go to the submission function.
+    # treat chosing the field as submitting all given variables.
     p_arr_btn = tk.Radiobutton(polar_fld_window, text='arrow', variable=tensorp, value=1, command=lambda: polar_submit(tensorp.get())).grid(row=7, column=1)
     p_both_btn = tk.Radiobutton(polar_fld_window, text='both', variable=tensorp, value=2, command=lambda: polar_submit(tensorp.get())).grid(row=7, column=2)
     p_stack_btn = tk.Radiobutton(polar_fld_window, text='stack', variable=tensorp, value=0, command=lambda: polar_submit(tensorp.get())).grid(row=7, column=3)
@@ -639,11 +654,11 @@ def Polar_btn_response():
 PLOT_btn = tk.Button(small_frame, text='PLOT', padx=60, pady=30, command=PLOT_response)
 PLOT_btn.grid(row=0, column=0, columnspan=2, rowspan=2)
 
-# define a small button in small frame that will open new window to adjust arrowheads
+# define a button in small frame that will open new window to adjust arrowheads
 custom_btn = tk.Button(small_frame, text='customise', padx=1, pady=1, command=custom_btn_reponse)
 custom_btn.grid(row=0, column=3)
 
-# button to open a window to input a polar field
+# define a button to open a window to input a polar field
 polar_btn = tk.Button(bot_frame, text='Polar', padx=50, pady=20, command=Polar_btn_response)
 polar_btn.grid(row=0, column=0)
 
@@ -684,6 +699,9 @@ y_comp_entry = tk.Entry(bot_frame, width=20, borderwidth=2)
 y_comp_entry.grid(row=2, column=1)
 y_comp_entry.insert(0, '-a*x*cos(y)')
 
+# define strings from initial components 
+# these are needed by the derivative function, therefore for the derivative
+# to work on the initial field, need to initially define them
 string_x = str(x_comp_entry.get())
 string_y = str(y_comp_entry.get())
 
@@ -709,86 +727,86 @@ stack_btn = tk.Radiobutton(right_frame, text='stack', variable=tensor, value=0, 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# define wanted checkboxes
+# Derivative Plot
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Mouse Click Plotting for the Derivative Field
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Derivative Plot - works well for linear fields!
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+# define initial pixes coordinates for the function to use
+# when mouse is clicked, these are changed to the pressed position
 x_m = float(0)
 y_m = float(0)
 
-def deriv_calc(x_m, y_m):  
+
+# define a function that will calculate the local, geometrical derivative
+def deriv_calc(x_m, y_m):
     global i_m, j_m, deriv_inset_ax, dxg, dyg
     
-    # Range and point density of the derivative plot   
-    d_range = 0.25
-    dpd = dpd_select.get()
-    d_length = 0.3
-    d_scale = 0.3
+    # Range and point density of the derivative plot
+    d_range = 0.25  # both are to be changed by sliders later
+    d_length = 0.3  # both are to be changed by sliders later
+    dpd = dpd_select.get()  # get the point density from the dropdown menu
+    d_scale = scale
     
-    # Select index
+    # Select index for the middle of the new derivative axis
     i_m = int(round((dpd/2)-0.1))
     j_m = int(round((dpd/2)-0.1))
     
-    # New Grids
+    # define new axis in the derivative plot
     dx = np.linspace(-d_range+x_m, d_range+x_m, dpd)
     dy = np.linspace(-d_range+y_m, d_range+y_m, dpd)
-
+    # mesh these into grids
     dxg , dyg = np.meshgrid(dx, dy)
-
-    u1 , v1 = eq_to_comps(string_x, string_y, dxg, dyg)
+    
+    # define the vector field in these new axis
+    u1, v1 = eq_to_comps(string_x, string_y, dxg, dyg)
     
     # Calculate derivative field components
+    # This is done geometrically by subracting thevector at the centre of the
+    # grid, from vectors at other grid positions in the derivative axis.
     du1 = u1 - u1[i_m, j_m]
-    dv1 = v1 - v1[i_m, j_m]   
+    dv1 = v1 - v1[i_m, j_m]
     
-    # Create axes at clicked position    
-    deriv_inset_ax = ax.inset_axes([(x_pix-178)/500 - (d_length/2),(y_pix-59)/500 - (d_length/2), d_length, d_length])
+    # Create axes at clicked position from supplied position and given axis sizes
+    deriv_inset_ax = ax.inset_axes([(x_pix-178)/500 - (d_length/2), (y_pix-59)/500 - (d_length/2), d_length, d_length])
     
-    # Max sheets in the derivative plot = 5 and fract=0.1 to increase the width of the sheets
-    
+    # depending on the chosen RadioButton, plot that derivative vector field
+    # set max sheets in the derivative plot=5 and fract=0.1
     if tensor.get() == 0:        
         # Stack
         arrows = False
         stack_plot_deriv(dxg, dyg, du1, dv1, 5, d_range, dpd, 0.1, arrows, orientation, d_scale)
-        
     elif tensor.get() == 1:
         # Arrows        
         deriv_inset_ax.quiver(dxg, dyg, du1, dv1, pivot='mid', scale = d_scale, scale_units='xy')
-        
     elif tensor.get() == 2:
         # Arrows + Stack
         arrows = True
         stack_plot_deriv(dxg, dyg, du1, dv1, 5, d_range, dpd, 0.1, arrows, orientation, d_scale)
-        
-    print('tensor=' + str(tensor.get())) 
     
-    # Hide the x and y axis values
+    # Don't display the x and y axis values
     deriv_inset_ax.set_xticks([])
     deriv_inset_ax.set_yticks([])
     
-    # Redraw the figure anvas, showing the inset axis
+    # Redraw the figure canvas, showing the inset axis
     fig.canvas.draw()
     deriv_inset_ax.clear()
     deriv_inset_ax.remove()
-    
+
+
 # =============================================================================
 # Define new function for plotting stacks in the derivative plot
 # =============================================================================
 
+
 def stack_plot_deriv(xg, yg, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head=1/8, h_head=1/4):
-    
+    # get the lengths of x and y from their grids
     x_len = len(xg[:, 0])
     y_len = len(yg[0, :])
+    # set the visuals for the derivative axis
     deriv_inset_ax.set_aspect('equal')
     deriv_inset_ax.set_xlim(-L+x_m-L/5, L+x_m+L/5)
     deriv_inset_ax.set_ylim(-L+y_m-L/5, L+y_m+L/5)
+    
+    # AS BEFORE:
     R_int = np.zeros(shape=((x_len), (y_len)))
     
     if arrows is True:
@@ -828,11 +846,10 @@ def stack_plot_deriv(xg, yg, u, v, s_max, L, pt_den, fract, arrows, orientation,
     
     for i in range(x_len):
         for j in range(y_len):
-            
             for t in range(1, s_max+1):
                 if (t-1)/s_max <= R[i, j] <= t/s_max:
                     R_int[i, j] = t
-                    
+            
             n = R_int[i, j]
             
             # Prevent stack plotting in centre point of the derivative plot
@@ -880,18 +897,18 @@ def stack_plot_deriv(xg, yg, u, v, s_max, L, pt_den, fract, arrows, orientation,
                 deriv_inset_ax.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color='green'))
 
 
-# set up the initial variable, code starts in option to use matplotlib tools
+# set up the initial variable (code starts in option to use matplotlib tools)
 click_opt_int = 0
 
-# connect figure event to a function that responds to clicks
+# connect figure event to a function that responds to clicks, defined above, 
 fig.canvas.mpl_connect("button_press_event", on_key_press)
 
-# define a function that will update the variable defining click action
+# define a function that will update the variable that defines click action
 def click_option_handler(click_option):
     global click_opt_int
     click_opt_int = click_option
     print(click_opt_int)
-    
+    # and for the the initial plot:
     if click_opt_int == 0:
         fig.canvas.draw()
 
