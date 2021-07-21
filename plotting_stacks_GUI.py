@@ -44,7 +44,7 @@ def G(s, n, c):
 
 # define a function that will complete all stack plotting:
 def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows='True', orientation='mid', scale=1, w_head=1/8, h_head=1/4):
-    # get axis lengths:
+    # get the lengths of x and y from their grids
     x_len = len(xg[:, 0])
     y_len = len(yg[0, :])
     
@@ -700,8 +700,10 @@ y_comp_entry.grid(row=2, column=1)
 y_comp_entry.insert(0, '-a*x*cos(y)')
 
 # define strings from initial components 
-#string_x = str(x_comp_entry.get())
-#string_y = str(y_comp_entry.get())
+# these are needed by the derivative function, therefore for the derivative
+# to work on the initial field, need to initially define them
+string_x = str(x_comp_entry.get())
+string_y = str(y_comp_entry.get())
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # define wanted Radio buttons
@@ -725,86 +727,86 @@ stack_btn = tk.Radiobutton(right_frame, text='stack', variable=tensor, value=0, 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# define wanted checkboxes
+# Derivative Plot
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Mouse Click Plotting for the Derivative Field
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Derivative Plot - works well for linear fields!
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+# define initial pixes coordinates for the function to use
+# when mouse is clicked, these are changed to the pressed position
 x_m = float(0)
 y_m = float(0)
 
-def deriv_calc(x_m, y_m):  
+
+# define a function that will calculate the local, geometrical derivative
+def deriv_calc(x_m, y_m):
     global i_m, j_m, deriv_inset_ax, dxg, dyg
     
-    # Range and point density of the derivative plot   
-    d_range = 0.25
-    dpd = dpd_select.get()
-    d_length = 0.3
-    d_scale = 0.3
+    # Range and point density of the derivative plot
+    d_range = 0.25  # both are to be changed by sliders later
+    d_length = 0.3  # both are to be changed by sliders later
+    dpd = dpd_select.get()  # get the point density from the dropdown menu
+    d_scale = scale
     
-    # Select index
+    # Select index for the middle of the new derivative axis
     i_m = int(round((dpd/2)-0.1))
     j_m = int(round((dpd/2)-0.1))
     
-    # New Grids
+    # define new axis in the derivative plot
     dx = np.linspace(-d_range+x_m, d_range+x_m, dpd)
     dy = np.linspace(-d_range+y_m, d_range+y_m, dpd)
-
+    # mesh these into grids
     dxg , dyg = np.meshgrid(dx, dy)
-
-    u1 , v1 = eq_to_comps(string_x, string_y, dxg, dyg)
+    
+    # define the vector field in these new axis
+    u1, v1 = eq_to_comps(string_x, string_y, dxg, dyg)
     
     # Calculate derivative field components
+    # This is done geometrically by subracting thevector at the centre of the
+    # grid, from vectors at other grid positions in the derivative axis.
     du1 = u1 - u1[i_m, j_m]
-    dv1 = v1 - v1[i_m, j_m]   
+    dv1 = v1 - v1[i_m, j_m]
     
-    # Create axes at clicked position    
-    deriv_inset_ax = ax.inset_axes([(x_pix-178)/500 - (d_length/2),(y_pix-59)/500 - (d_length/2), d_length, d_length])
+    # Create axes at clicked position from supplied position and given axis sizes
+    deriv_inset_ax = ax.inset_axes([(x_pix-178)/500 - (d_length/2), (y_pix-59)/500 - (d_length/2), d_length, d_length])
     
-    # Max sheets in the derivative plot = 5 and fract=0.1 to increase the width of the sheets
-    
+    # depending on the chosen RadioButton, plot that derivative vector field
+    # set max sheets in the derivative plot=5 and fract=0.1
     if tensor.get() == 0:        
         # Stack
         arrows = False
         stack_plot_deriv(dxg, dyg, du1, dv1, 5, d_range, dpd, 0.1, arrows, orientation, d_scale)
-        
     elif tensor.get() == 1:
         # Arrows        
         deriv_inset_ax.quiver(dxg, dyg, du1, dv1, pivot='mid', scale = d_scale, scale_units='xy')
-        
     elif tensor.get() == 2:
         # Arrows + Stack
         arrows = True
         stack_plot_deriv(dxg, dyg, du1, dv1, 5, d_range, dpd, 0.1, arrows, orientation, d_scale)
-        
-    print('tensor=' + str(tensor.get())) 
     
-    # Hide the x and y axis values
+    # Don't display the x and y axis values
     deriv_inset_ax.set_xticks([])
     deriv_inset_ax.set_yticks([])
     
-    # Redraw the figure anvas, showing the inset axis
+    # Redraw the figure canvas, showing the inset axis
     fig.canvas.draw()
     deriv_inset_ax.clear()
     deriv_inset_ax.remove()
-    
+
+
 # =============================================================================
 # Define new function for plotting stacks in the derivative plot
 # =============================================================================
 
+
 def stack_plot_deriv(xg, yg, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head=1/8, h_head=1/4):
-    
+    # get the lengths of x and y from their grids
     x_len = len(xg[:, 0])
     y_len = len(yg[0, :])
+    # set the visuals for the derivative axis
     deriv_inset_ax.set_aspect('equal')
     deriv_inset_ax.set_xlim(-L+x_m-L/5, L+x_m+L/5)
     deriv_inset_ax.set_ylim(-L+y_m-L/5, L+y_m+L/5)
+    
+    # AS BEFORE:
     R_int = np.zeros(shape=((x_len), (y_len)))
     
     if arrows is True:
@@ -844,11 +846,10 @@ def stack_plot_deriv(xg, yg, u, v, s_max, L, pt_den, fract, arrows, orientation,
     
     for i in range(x_len):
         for j in range(y_len):
-            
             for t in range(1, s_max+1):
                 if (t-1)/s_max <= R[i, j] <= t/s_max:
                     R_int[i, j] = t
-                    
+            
             n = R_int[i, j]
             
             # Prevent stack plotting in centre point of the derivative plot
@@ -896,18 +897,18 @@ def stack_plot_deriv(xg, yg, u, v, s_max, L, pt_den, fract, arrows, orientation,
                 deriv_inset_ax.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color='green'))
 
 
-# set up the initial variable, code starts in option to use matplotlib tools
+# set up the initial variable (code starts in option to use matplotlib tools)
 click_opt_int = 0
 
-# connect figure event to a function that responds to clicks
+# connect figure event to a function that responds to clicks, defined above, 
 fig.canvas.mpl_connect("button_press_event", on_key_press)
 
-# define a function that will update the variable defining click action
+# define a function that will update the variable that defines click action
 def click_option_handler(click_option):
     global click_opt_int
     click_opt_int = click_option
     print(click_opt_int)
-    
+    # and for the the initial plot:
     if click_opt_int == 0:
         fig.canvas.draw()
 
