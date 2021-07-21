@@ -1,15 +1,12 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2020.2.27)  21 JUL 2021 13:55
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 20.6.29) (preloaded format=pdflatex 2021.7.9)  21 JUL 2021 14:54
 entering extended mode
- restricted \write18 enabled.
- file:line:error style messages enabled.
- %&-line parsing enabled.
-**Documentation.tex
-(./Documentation.tex
-LaTeX2e <2020-02-02> patch level 4
-L3 programming layer <2020-02-25>
-(/usr/local/texlive/2019/texmf-dist/tex/latex/base/report.cls
+**./Documentation.tex
+(Documentation.tex
+LaTeX2e <2020-02-02> patch level 5
+L3 programming layer <2020-06-18>
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/base\report.cls
 Document Class: report 2019/12/20 v1.4l Standard LaTeX document class
-(/usr/local/texlive/2019/texmf-dist/tex/latex/base/size10.clo
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/base\size10.clo
 File: size10.clo 2019/12/20 v1.4l Standard LaTeX file (size option)
 )
 \c@part=\count167
@@ -25,38 +22,39 @@ File: size10.clo 2019/12/20 v1.4l Standard LaTeX file (size option)
 \belowcaptionskip=\skip48
 \bibindent=\dimen134
 )
-(/usr/local/texlive/2019/texmf-dist/tex/latex/graphics/graphicx.sty
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphicx.sty
 Package: graphicx 2019/11/30 v1.2a Enhanced LaTeX Graphics (DPC,SPQR)
 
-(/usr/local/texlive/2019/texmf-dist/tex/latex/graphics/keyval.sty
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/graphics\keyval.sty
 Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
-\KV@toks@=\toks14
+\KV@toks@=\toks15
 )
-(/usr/local/texlive/2019/texmf-dist/tex/latex/graphics/graphics.sty
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphics.sty
 Package: graphics 2019/11/30 v1.4a Standard LaTeX Graphics (DPC,SPQR)
 
-(/usr/local/texlive/2019/texmf-dist/tex/latex/graphics/trig.sty
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/graphics\trig.sty
 Package: trig 2016/01/03 v1.10 sin cos tan (DPC)
 )
-(/usr/local/texlive/2019/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\graphics.c
+fg
 File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
 )
 Package graphics Info: Driver file: pdftex.def on input line 105.
 
-(/usr/local/texlive/2019/texmf-dist/tex/latex/graphics-def/pdftex.def
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/graphics-def\pdftex.def
 File: pdftex.def 2018/01/08 v1.0l Graphics/color driver for pdftex
 ))
 \Gin@req@height=\dimen135
 \Gin@req@width=\dimen136
 )
-(/usr/local/texlive/2019/texmf-dist/tex/latex/geometry/geometry.sty
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.sty
 Package: geometry 2020/01/02 v5.9 Page Geometry
 
-(/usr/local/texlive/2019/texmf-dist/tex/generic/iftex/ifvtex.sty
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/generic/iftex\ifvtex.sty
 Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
 
-(/usr/local/texlive/2019/texmf-dist/tex/generic/iftex/iftex.sty
-Package: iftex 2019/11/07 v1.0c TeX engine tests
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/generic/iftex\iftex.sty
+Package: iftex 2020/03/06 v1.0d TeX engine tests
 ))
 \Gm@cnth=\count176
 \Gm@cntv=\count177
@@ -69,26 +67,27 @@ Package: iftex 2019/11/07 v1.0c TeX engine tests
 \Gm@layoutheight=\dimen142
 \Gm@layouthoffset=\dimen143
 \Gm@layoutvoffset=\dimen144
-\Gm@dimlist=\toks15
-)
-(/usr/local/texlive/2019/texmf-dist/tex/latex/amsmath/amsmath.sty
+\Gm@dimlist=\toks16
+
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.cfg))
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
 Package: amsmath 2020/01/20 v2.17e AMS math features
 \@mathmargin=\skip49
 
 For additional information on amsmath, use the `?' option.
-(/usr/local/texlive/2019/texmf-dist/tex/latex/amsmath/amstext.sty
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amstext.sty
 Package: amstext 2000/06/29 v2.01 AMS text
 
-(/usr/local/texlive/2019/texmf-dist/tex/latex/amsmath/amsgen.sty
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsgen.sty
 File: amsgen.sty 1999/11/30 v2.0 generic functions
-\@emptytoks=\toks16
+\@emptytoks=\toks17
 \ex@=\dimen145
 ))
-(/usr/local/texlive/2019/texmf-dist/tex/latex/amsmath/amsbsy.sty
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsbsy.sty
 Package: amsbsy 1999/11/29 v1.2d Bold Symbols
 \pmbraise@=\dimen146
 )
-(/usr/local/texlive/2019/texmf-dist/tex/latex/amsmath/amsopn.sty
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty
 Package: amsopn 2016/03/08 v2.02 operator names
 )
 \inf@bad=\count179
@@ -111,75 +110,81 @@ LaTeX Font Info:    Redeclaring font encoding OMS on input line 734.
 \dotsspace@=\muskip16
 \c@parentequation=\count186
 \dspbrk@lvl=\count187
-\tag@help=\toks17
+\tag@help=\toks18
 \row@=\count188
 \column@=\count189
 \maxfields@=\count190
-\andhelp@=\toks18
+\andhelp@=\toks19
 \eqnshift@=\dimen148
 \alignsep@=\dimen149
 \tagshift@=\dimen150
 \tagwidth@=\dimen151
 \totwidth@=\dimen152
 \lineht@=\dimen153
-\@envbody=\toks19
+\@envbody=\toks20
 \multlinegap=\skip50
 \multlinetaggap=\skip51
-\mathdisplay@stack=\toks20
+\mathdisplay@stack=\toks21
 LaTeX Info: Redefining \[ on input line 2859.
 LaTeX Info: Redefining \] on input line 2860.
 )
-(/usr/local/texlive/2019/texmf-dist/tex/latex/amsfonts/amssymb.sty
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amssymb.sty
 Package: amssymb 2013/01/14 v3.01 AMS font symbols
 
-(/usr/local/texlive/2019/texmf-dist/tex/latex/amsfonts/amsfonts.sty
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amsfonts.sty
 Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
 \symAMSa=\mathgroup4
 \symAMSb=\mathgroup5
 LaTeX Font Info:    Redeclaring math symbol \hbar on input line 98.
 LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
 (Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
-))
-(/usr/local/texlive/2019/texmf-dist/tex/latex/float/float.sty
+)) (C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/float\float.sty
 Package: float 2001/11/08 v1.3d Float enhancements (AL)
 \c@float@type=\count191
-\float@exts=\toks21
+\float@exts=\toks22
 \float@box=\box47
-\@float@everytoks=\toks22
+\@float@everytoks=\toks23
 \@floatcapt=\box48
 )
-(/usr/local/texlive/2019/texmf-dist/tex/latex/base/inputenc.sty
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/base\inputenc.sty
 Package: inputenc 2018/08/11 v1.3c Input encoding file
-\inpenc@prehook=\toks23
-\inpenc@posthook=\toks24
+\inpenc@prehook=\toks24
+\inpenc@posthook=\toks25
 )
-(/usr/local/texlive/2019/texmf-dist/tex/generic/babel/babel.sty
-Package: babel 2020/02/14 3.40 The Babel package
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/generic/babel\babel.sty
+Package: babel 2020/06/10 3.45 The Babel package
 
-(/usr/local/texlive/2019/texmf-dist/tex/generic/babel/switch.def
-File: switch.def 2020/02/14 3.40 Babel switching mechanism
-)
-(/usr/local/texlive/2019/texmf-dist/tex/generic/babel-english/english.ldf
-Language: english 2017/06/06 v3.3r English support from the babel system
-
-(/usr/local/texlive/2019/texmf-dist/tex/generic/babel/babel.def
-File: babel.def 2020/02/14 3.40 Babel common definitions
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/generic/babel\babel.def
+File: babel.def 2020/06/10 3.45 Babel common definitions
 \babel@savecnt=\count192
 \U@D=\dimen154
+\l@babelnohyphens=\language79
 
-(/usr/local/texlive/2019/texmf-dist/tex/generic/babel/txtbabel.def)
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/generic/babel\txtbabel.def)
 \bbl@readstream=\read2
-\bbl@dirlevel=\count193
 )
+\bbl@dirlevel=\count193
+
+*************************************
+* Local config file bblopts.cfg used
+*
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/arabi\bblopts.cfg
+File: bblopts.cfg 2005/09/08 v0.1 add Arabic and Farsi to "declared" options of
+ babel
+)
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/babel-english\english.l
+df
+Language: english 2017/06/06 v3.3r English support from the babel system
 Package babel Info: \l@canadian = using hyphenrules for english
 (babel)             (\language0) on input line 102.
 Package babel Info: \l@australian = using hyphenrules for ukenglish
-(babel)             (\language21) on input line 105.
+(babel)             (\language73) on input line 105.
 Package babel Info: \l@newzealand = using hyphenrules for ukenglish
-(babel)             (\language21) on input line 108.
+(babel)             (\language73) on input line 108.
 ))
-(/usr/local/texlive/2019/texmf-dist/tex/latex/l3backend/l3backend-pdfmode.def
-File: l3backend-pdfmode.def 2020-02-23 L3 backend support: PDF mode
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdf
+mode.def
+File: l3backend-pdfmode.def 2020-06-29 L3 backend support: PDF mode
 \l__kernel_color_stack_int=\count194
 \l__pdf_internal_box=\box49
 )
@@ -187,7 +192,7 @@ File: l3backend-pdfmode.def 2020-02-23 L3 backend support: PDF mode
 LaTeX Warning: Unused global option(s):
     [11].
 
-(./Documentation.aux)
+(Documentation.aux)
 \openout1 = `Documentation.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 15.
@@ -205,41 +210,47 @@ LaTeX Font Info:    ... okay on input line 15.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 15.
 LaTeX Font Info:    ... okay on input line 15.
 
-(/usr/local/texlive/2019/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mk
+ii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count195
 \scratchdimen=\dimen155
 \scratchbox=\box50
 \nofMPsegments=\count196
 \nofMParguments=\count197
-\everyMPshowfont=\toks25
+\everyMPshowfont=\toks26
 \MPscratchCnt=\count198
 \MPscratchDim=\dimen156
 \MPnumerator=\count199
 \makeMPintoPDFobject=\count266
-\everyMPtoPDFconversion=\toks26
-) (/usr/local/texlive/2019/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
+\everyMPtoPDFconversion=\toks27
+)
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-b
+ase.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
 
-(/usr/local/texlive/2019/texmf-dist/tex/generic/infwarerr/infwarerr.sty
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/generic/infwarerr\infwarerr.s
+ty
 Package: infwarerr 2019/12/03 v1.5 Providing info/warning/error messages (HO)
-)
-(/usr/local/texlive/2019/texmf-dist/tex/latex/grfext/grfext.sty
+) (C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/grfext\grfext.sty
 Package: grfext 2019/12/03 v1.3 Manage graphics extensions (HO)
 
-(/usr/local/texlive/2019/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/generic/kvdefinekeys\kvdefine
+keys.sty
 Package: kvdefinekeys 2019-12-19 v1.6 Define keys (HO)
-)) (/usr/local/texlive/2019/texmf-dist/tex/latex/kvoptions/kvoptions.sty
+))
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/kvoptions\kvoptions.sty
 Package: kvoptions 2019/11/29 v3.13 Key value format for package options (HO)
-
-(/usr/local/texlive/2019/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty
-Package: ltxcmds 2019/12/15 v1.24 LaTeX kernel commands for general use (HO)
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/generic/ltxcmds\ltxcmds.sty
+Package: ltxcmds 2020-05-10 v1.25 LaTeX kernel commands for general use (HO)
 )
-(/usr/local/texlive/2019/texmf-dist/tex/generic/kvsetkeys/kvsetkeys.sty
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/generic/kvsetkeys\kvsetkeys.s
+ty
 Package: kvsetkeys 2019/12/15 v1.18 Key value parser (HO)
 ))
-(/usr/local/texlive/2019/texmf-dist/tex/latex/pdftexcmds/pdftexcmds.sty
-Package: pdftexcmds 2019/11/24 v0.31 Utility functions of pdfTeX for LuaTeX (HO
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/generic/pdftexcmds\pdftexcmds
+.sty
+Package: pdftexcmds 2020-06-27 v0.33 Utility functions of pdfTeX for LuaTeX (HO
 )
 Package pdftexcmds Info: \pdf@primitive is available.
 Package pdftexcmds Info: \pdf@ifprimitive is available.
@@ -251,11 +262,7 @@ Package grfext Info: Graphics extension search list:
 (grfext)             [.pdf,.png,.jpg,.mps,.jpeg,.jbig2,.jb2,.PDF,.PNG,.JPG,.JPE
 G,.JBIG2,.JB2,.eps]
 (grfext)             \AppendGraphicsExtensions on input line 504.
-
-(/usr/local/texlive/2019/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
-File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
-e
-))
+)
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
 *geometry* verbose mode - [ preamble ] result:
@@ -292,20 +299,20 @@ e
 
 [1
 
-{/usr/local/texlive/2019/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
+{C:/Users/macus/AppData/Local/MiKTeX/pdftex/config/pdftex.map}]
 LaTeX Font Info:    Trying to load font information for U+msa on input line 32.
 
 
-(/usr/local/texlive/2019/texmf-dist/tex/latex/amsfonts/umsa.fd
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
 LaTeX Font Info:    Trying to load font information for U+msb on input line 32.
 
 
-(/usr/local/texlive/2019/texmf-dist/tex/latex/amsfonts/umsb.fd
+(C:\Users\macus\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-<Documentation_images/Geometry of 1 stack sheet.png, id=8, 699.61375pt x 477.78
+<Documentation_images/Geometry of 1 stack sheet.png, id=7, 699.61375pt x 477.78
 5pt>
 File: Documentation_images/Geometry of 1 stack sheet.png Graphic file (type png
 )
@@ -318,8 +325,8 @@ Underfull \hbox (badness 10000) in paragraph at lines 51--54
 
  []
 
-<Documentation_images/Geometry of 1 stack sheet, displacement 1.png, id=10, 499
-.8675pt x 351.3125pt>
+<Documentation_images/Geometry of 1 stack sheet, displacement 1.png, id=9, 499.
+8675pt x 351.3125pt>
 File: Documentation_images/Geometry of 1 stack sheet, displacement 1.png Graphi
 c file (type png)
 <use Documentation_images/Geometry of 1 stack sheet, displacement 1.png>
@@ -327,7 +334,7 @@ Package pdftex.def Info: Documentation_images/Geometry of 1 stack sheet, displa
 cement 1.png  used on input line 59.
 (pdftex.def)             Requested size: 189.95161pt x 133.50012pt.
 [1 <./Documentation_images/Geometry of 1 stack sheet.png>]
-<Documentation_images/Geometry of 1 stack sheet, displacement 2.png, id=21, 596
+<Documentation_images/Geometry of 1 stack sheet, displacement 2.png, id=20, 596
 .2275pt x 460.72125pt>
 File: Documentation_images/Geometry of 1 stack sheet, displacement 2.png Graphi
 c file (type png)
@@ -351,38 +358,39 @@ Underfull \hbox (badness 10000) in paragraph at lines 113--114
 
  []
 
-[3] [4] [5] [6] [7] (./Documentation.aux) ) 
+[3] [4] [5] [6] [7] (Documentation.aux) ) 
 Here is how much of TeX's memory you used:
- 3966 strings out of 480997
- 56107 string characters out of 5912194
- 315834 words of memory out of 5000000
- 19407 multiletter control sequences out of 15000+600000
- 540845 words of font info for 57 fonts, out of 8000000 for 9000
+ 4072 strings out of 480790
+ 58960 string characters out of 2897302
+ 321677 words of memory out of 3000000
+ 20013 multiletter control sequences out of 15000+200000
+ 541191 words of font info for 58 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 34i,16n,31p,1247b,222s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/local/texlive/2019/texmf-dist/
-fonts/enc/dvips/cm-super/cm-super-ts1.enc}</usr/local/texlive/2019/texmf-dist/f
-onts/type1/public/amsfonts/cm/cmbx10.pfb></usr/local/texlive/2019/texmf-dist/fo
-nts/type1/public/amsfonts/cm/cmbx12.pfb></usr/local/texlive/2019/texmf-dist/fon
-ts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2019/texmf-dist/font
-s/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2019/texmf-dist/fonts
-/type1/public/amsfonts/cm/cmmi6.pfb></usr/local/texlive/2019/texmf-dist/fonts/t
-ype1/public/amsfonts/cm/cmmi7.pfb></usr/local/texlive/2019/texmf-dist/fonts/typ
-e1/public/amsfonts/cm/cmmi9.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1
-/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/p
-ublic/amsfonts/cm/cmr12.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/pub
-lic/amsfonts/cm/cmr6.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public
-/amsfonts/cm/cmr7.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/am
-sfonts/cm/cmr9.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfo
-nts/cm/cmsy10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfon
-ts/cm/cmsy7.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts
-/cm/cmsy9.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/s
-ymbols/msbm10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/cm-sup
-er/sfrm1000.pfb>
-Output written on Documentation.pdf (8 pages, 368327 bytes).
+ 34i,16n,31p,1249b,222s stack positions out of 5000i,500n,10000p,200000b,50000s
+ <C:\Users\macus\AppData\Local\MiKTeX\
+fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1000.pk><C:/Users/macus/AppData/Local/Pr
+ograms/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Users/macus/AppData
+/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/macu
+s/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/U
+sers/macus/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.
+pfb><C:/Users/macus/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/c
+m/cmmi6.pfb><C:/Users/macus/AppData/Local/Programs/MiKTeX/fonts/type1/public/am
+sfonts/cm/cmmi7.pfb><C:/Users/macus/AppData/Local/Programs/MiKTeX/fonts/type1/p
+ublic/amsfonts/cm/cmmi9.pfb><C:/Users/macus/AppData/Local/Programs/MiKTeX/fonts
+/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/macus/AppData/Local/Programs/MiKT
+eX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/macus/AppData/Local/Progr
+ams/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/macus/AppData/Loca
+l/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/macus/AppDa
+ta/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr9.pfb><C:/Users/macu
+s/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/U
+sers/macus/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy7.p
+fb><C:/Users/macus/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm
+/cmsy9.pfb><C:/Users/macus/AppData/Local/Programs/MiKTeX/fonts/type1/public/ams
+fonts/cm/cmti10.pfb><C:/Users/macus/AppData/Local/Programs/MiKTeX/fonts/type1/p
+ublic/amsfonts/symbols/msbm10.pfb>
+Output written on Documentation.pdf (8 pages, 389448 bytes).
 PDF statistics:
- 107 PDF objects out of 1000 (max. 8388607)
- 73 compressed objects within 1 object stream
+ 109 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  16 words of extra memory for PDF output out of 10000 (max. 10000000)
 
