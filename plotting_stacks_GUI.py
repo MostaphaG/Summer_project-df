@@ -201,15 +201,15 @@ def format_eq(string):
     string = string.replace('x', 'xg')
     string = string.replace('y', 'yg')
     string = string.replace('z', 'zg')
-    string = string.replace('R', 'rg')
+    string = string.replace('R', 'rg')  # otherwise: sqrt won't work, becaue of the r in it &arctan won't work because of tan in it and the r in it.
     string = string.replace('theta', 'thetag')
     # where there are special functions, replace them with library directions
     string = string.replace('pi', 'np.pi')
-    string = string.replace('sqrt', 'np.sqrt')  # sqrt won't work, becaue of the r in it
+    string = string.replace('sqrt', 'np.sqrt')
     string = string.replace('sin', 'np.sin')
     string = string.replace('cos', 'np.cos')
     string = string.replace('tan', 'np.tan')
-    string = string.replace('arcta', 'np.arctan')  # arctan won't work because of tan in it.
+    string = string.replace('arcta', 'np.arctan')
     string = string.replace('^', '**')
     string = string.replace('ln', 'np.log')
     string = string.replace('e^', 'np.exp')
