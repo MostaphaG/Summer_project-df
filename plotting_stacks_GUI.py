@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import tkinter as tk
+from tkinter import ttk
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg, NavigationToolbar2Tk)
 from matplotlib.backend_bases import key_press_handler
@@ -235,19 +236,19 @@ root.geometry("1400x980")
 
 # right frame:
 right_frame = tk.LabelFrame(root, text='Options Frame', padx=20, pady=264)
-right_frame.grid(row=0, column=1)
+right_frame.grid(row=1, column=1)
 
 # bot frame:
 bot_frame = tk.LabelFrame(root, text='Field Input Frame', padx=192, pady=87)
-bot_frame.grid(row=1, column=0)
+bot_frame.grid(row=2, column=0)
 
 # plot frame:
 plot_frame = tk.LabelFrame(root, text='Vector Field Frame', padx=10, pady=10)
-plot_frame.grid(row=0, column=0)
+plot_frame.grid(row=1, column=0)
 
 # plot characteristics frame and plot button
 small_frame = tk.LabelFrame(root, text='Plot Customisation Frame', padx=29, pady=41)
-small_frame.grid(row=1, column=1)
+small_frame.grid(row=2, column=1)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # set up initial parameters and plot the initial graph, put it in plot frame
@@ -269,6 +270,40 @@ a = 0.2
 u = a*yg*np.sin(xg)  # x component
 v = -a*xg*np.cos(yg)  # y component
 # for no dependance in any initial component, use : np.zeros(np.shape(xg)) or yg
+
+
+
+'''
+SET UP A LIST OF DEFAULT VECTOR FIELDS TO DISPLAY IN DROPDOWN MENU
+'''
+# list of names of fields to display
+field_name_list = ['default y*sin(x)i - x*cos(y)j',
+              'Simple pendulum yi  - sin(x)j',
+              'Harmonic oscillator yi -xj',
+              'linear field example_1 (14*x - 4*y)i + (-1*x + 4*y)j',
+              'linear field example_2 xi',
+              'constant field 6i + 3j',
+              'falling cat field (Planar 3 link robot)']
+
+
+# list of x components, in order of field_name_list
+field_x_list = ['y*sin(x)',
+                'y',
+                'y',
+                '14*x - 4*y',
+                'x',
+                '6',
+                '(3*cos(y) + 4)/(15 + 6*cos(x) + 6*cos(y))']
+
+
+# list of y components, in order of field_name_list
+field_y_list = ['- x*cos(y)',
+                '-sin(x)',
+                '-x',
+                '(-1*x + 4*y)',
+                '0',
+                '3',
+                '-(3*cos(x) + 4)/(15 + 6*cos(x) + 6*cos(y))']
 
 
 # set up quiver factors
@@ -646,6 +681,24 @@ def Polar_btn_response():
     p_stack_btn = tk.Radiobutton(polar_fld_window, text='stack', variable=tensorp, value=0, command=lambda: polar_submit(tensorp.get())).grid(row=7, column=3)
 
 
+
+# define a function that will respons to field selection in the drop down menu
+def field_selection_response(event):
+    # clear the x and y component boxes
+    x_comp_entry.delete(0, 'end')
+    y_comp_entry.delete(0, 'end')
+    # get the index at which this entry is
+    selected_index = field_name_list.index(str(field_select_drop.get()))
+    # using that index, get the x and y components from their lists
+    # and insert these into x and y comp. entry boxes
+    x_comp_selected = field_x_list[selected_index]
+    y_comp_selected = field_y_list[selected_index]
+    x_comp_entry.insert(0, x_comp_selected)
+    y_comp_entry.insert(0, y_comp_selected)
+    # now call the plot function to finalise all these onto the plot
+    PLOT_response()
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # define wanted standard buttons
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -717,6 +770,18 @@ tensor = tk.IntVar()
 arrow_btn = tk.Radiobutton(right_frame, text='arrow', variable=tensor, value=1, command=lambda: vect_type_response(tensor.get())).grid(row=10, column=0)
 arrow_stack_btn = tk.Radiobutton(right_frame, text='both', variable=tensor, value=2, command=lambda: vect_type_response(tensor.get())).grid(row=10, column=1)
 stack_btn = tk.Radiobutton(right_frame, text='stack', variable=tensor, value=0, command=lambda: vect_type_response(tensor.get())).grid(row=10, column=2)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Define wanted dropdown menus
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+field_select = tk.StringVar()
+field_select.set(field_name_list[0])
+
+field_select_drop = ttk.Combobox(root, value = field_name_list, width=40)
+field_select_drop.current(0)
+field_select_drop.grid(row=0, column=1)
+field_select_drop.bind("<<ComboboxSelected>>", field_selection_response)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # define wanted sliders
