@@ -436,18 +436,17 @@ def eq_to_comps(string_x, string_y, xg, yg):
     equation_y = format_eq(string_y)
     # use these to define the field:
     # also: checking if equation equals zero, to then replace it with an array and not just 0:
+    u = eval(equation_x)
+    v = eval(equation_y)
     if equation_x.find('x') & equation_x.find('y') == -1:
         u = float(equation_x)*np.ones(np.shape(xg))
         v = eval(equation_y)
-    elif equation_y.find('x') & equation_y.find('y') == -1:
+    if equation_y.find('x') & equation_y.find('y') == -1:
         u = eval(equation_x)
         v = float(equation_y)*np.ones(np.shape(yg))
-    elif equation_x.find('x') & equation_x.find('y') & equation_y.find('x') & equation_y.find('y') == -1:
+    if equation_x.find('x') & equation_x.find('y') & equation_y.find('x') & equation_y.find('y') == -1:
         u = float(equation_x)*np.ones(np.shape(xg))
         v = float(equation_y)*np.ones(np.shape(yg))
-    else:
-        u = eval(equation_x)
-        v = eval(equation_y)
     # return these
     return u, v
 
