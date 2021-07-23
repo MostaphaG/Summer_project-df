@@ -746,12 +746,12 @@ a_entry.insert(0, a)
 x_comp_label = tk.Label(bot_frame, text='x component').grid(row=1, column=0)
 x_comp_entry = tk.Entry(bot_frame, width=20, borderwidth=2)
 x_comp_entry.grid(row=2, column=0)
-x_comp_entry.insert(0, 'a*sin(x)')
+x_comp_entry.insert(0, 'y*sin(x)')
 
 y_comp_label = tk.Label(bot_frame, text='y component').grid(row=1, column=1)
 y_comp_entry = tk.Entry(bot_frame, width=20, borderwidth=2)
 y_comp_entry.grid(row=2, column=1)
-y_comp_entry.insert(0, '-a*x*cos(y)')
+y_comp_entry.insert(0, '-x*cos(y)')
 
 # define strings from initial components 
 # these are needed by the derivative function, therefore for the derivative
