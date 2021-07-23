@@ -210,7 +210,7 @@ def format_eq(string):
     string = string.replace('sin', 'np.sin')
     string = string.replace('cos', 'np.cos')
     string = string.replace('tan', 'np.tan')
-    string = string.replace('arcta', 'np.arctan')
+    string = string.replace('arcta', 'np.arctan2')
     string = string.replace('^', '**')
     string = string.replace('ln', 'np.log')
     string = string.replace('e^', 'np.exp')
@@ -351,16 +351,20 @@ ax.set_ylim(-ax_L, ax_L)
 '''define the initial polar plot also. Despite it not being plotted to start
 with needed for when Polar plot option is used'''
 
-r_max = 2
+r_max = 5
 r_den = 10
 theta_den = 20
 
 # define the axis
-r = np.linspace(0.05, r_max, r_den)
+r = np.linspace(0.2, r_max, r_den)
 theta = np.linspace(0, 360, theta_den) * np.pi/180
 
 # define a polar grid
 rg, thetag = np.meshgrid(r, theta)
+
+# define an initial linear scaling of the poalr field to be able to scale in
+# poalr gird without converting to cartesian grid first
+a_polar = 1
 
 # define an initial polar field (same as initial cartesian field.)
 F_r_str_initial = 'r*sin(theta)*sin(r*cos(theta))'
@@ -429,7 +433,7 @@ def on_key_press(event):
 def p_cart(string):
     string= string.replace('R', 'r')
     string = string.replace('r', 'sqrt(x**2 + y**2)')
-    string = string.replace('theta', 'arcta(y/x)')
+    string = string.replace('theta', 'arcta(y, x)')
     return string
 
 # define a function that takes input string that is python understood and turn into vector components:
@@ -554,13 +558,14 @@ def custom_btn_reponse():
 
 def polar_submit(tensorp):
     # take the input values into new variables
-    global F_r, F_theta, r_max, r_den, theta_den, r, theta, rg, thetag, u_p, v_p, L, F_r_str_initial, F_theta_str_initial
+    global F_r, F_theta, r_max, r_den, theta_den, r, theta, rg, thetag, u_p, v_p, a_polar, L, F_r_str_initial, F_theta_str_initial
     F_r = Fr_entry.get()
     F_theta = Ftheta_entry.get()
     r_max = float(r_max_entry.get())
     r_den = int(r_den_entry.get())
     theta_den = int(theta_den_entry.get())
     L = float(L_entry1.get())
+    a_polar = float(a_entry.get())
     # rescale the axis:
     ax_L = L + L/delta_factor
     ax.set_xlim(-ax_L, ax_L)
@@ -592,6 +597,9 @@ def polar_submit(tensorp):
     # redefine the field with these (in cartesian)
     u_p = F_r*np.cos(thetag) - F_theta*np.sin(thetag)  # x component
     v_p = F_r*np.sin(thetag) + F_theta*np.cos(thetag)  # y component
+    # scale the field with given a:
+    u_p *= a_polar
+    v_p *= a_polar
     # convert the cooridnates rg and thetag back to cartesian, needed for the plotting functions
     xg = rg*np.cos(thetag)
     yg = rg*np.sin(thetag)
@@ -626,13 +634,13 @@ def polar_submit(tensorp):
 # details about the polar field they fish to plot
 def Polar_btn_response():
     # need these global to pass them onto the function that responds to submission
-    global polar_fld_window, Fr_entry, Ftheta_entry, r_max_entry, r_den_entry, theta_den_entry, L_entry1
+    global polar_fld_window, Fr_entry, Ftheta_entry, r_max_entry, r_den_entry, theta_den_entry, L_entry1, a_entry
     global p_arr_btn, p_both_btn, p_stack_btn
     # open a window with input fields to enter polar components
     polar_fld_window = tk.Toplevel()
     polar_fld_window.title('polar field input')
     # define and label and first entry, for radial
-    tk.Label(polar_fld_window, text='polar component in terms of \'R\':').grid(row=0, column=0)
+    tk.Label(polar_fld_window, text='radial component in terms of \'R\':').grid(row=0, column=0)
     Fr_entry = tk.Entry(polar_fld_window, width=30, borderwidth=1)
     Fr_entry.insert(0, str(F_r_str_initial))
     Fr_entry.grid(row=1, column=0)
@@ -661,6 +669,13 @@ def Polar_btn_response():
     L_entry1 = tk.Entry(polar_fld_window, width=30, borderwidth=1)
     L_entry1.grid(row=11, column=0, padx = 2)
     L_entry1.insert(0, L)
+    # because the arrow scaling only works in 'optimisation' button response
+    # for which, the PLOT must be used first, chaning the plot to a
+    # cartesian grid, need to also define a linear scaling in this window !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    tk.Label(polar_fld_window, text='linear scaling (used in plotting arrows)').grid(row=12, column=0)
+    a_entry = tk.Entry(polar_fld_window, width=30, borderwidth=1)
+    a_entry.grid(row=13, column=0, padx = 2)
+    a_entry.insert(0, a_polar)
     # define a number that will tarck which vector field is wanted
     tensorp = tk.IntVar()
     # define buttons to chose between different fields
@@ -669,7 +684,8 @@ def Polar_btn_response():
     p_arr_btn = tk.Radiobutton(polar_fld_window, text='arrow', variable=tensorp, value=1, command=lambda: polar_submit(tensorp.get())).grid(row=7, column=1)
     p_both_btn = tk.Radiobutton(polar_fld_window, text='both', variable=tensorp, value=2, command=lambda: polar_submit(tensorp.get())).grid(row=7, column=2)
     p_stack_btn = tk.Radiobutton(polar_fld_window, text='stack', variable=tensorp, value=0, command=lambda: polar_submit(tensorp.get())).grid(row=7, column=3)
-
+    # make sure that no Radiobutton is selected to begin with
+    tensorp.set(None)  # as this one is showed as selected when opening the window
 
 
 # define a function that will respons to field selection in the drop down menu
