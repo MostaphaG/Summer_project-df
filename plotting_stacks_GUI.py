@@ -228,18 +228,23 @@ root = tk.Tk()
 root.title('Vector field analyser - differential forms')
 
 # set a window size for it all to initially appear in
-root.geometry("1400x980")
+# do so by extracting the size of user's screen
+# the method was found on blog.pythonlibrary
+width = root.winfo_screenwidth()
+height = root.winfo_screenheight()
+
+root.geometry(str(width) + 'x' + str(height))
 
 # set up frames for each of:
 # bottom side (field, scalings etc) and the right side (with detailed options)
 # and top left for plot
 
 # right frame:
-right_frame = tk.LabelFrame(root, text='Options Frame', padx=20, pady=264)
+right_frame = tk.LabelFrame(root, text='Options Frame', padx=5, pady=264)
 right_frame.grid(row=1, column=1)
 
 # bot frame:
-bot_frame = tk.LabelFrame(root, text='Field Input Frame', padx=192, pady=87)
+bot_frame = tk.LabelFrame(root, text='Field Input Frame', padx=192, pady=40)
 bot_frame.grid(row=2, column=0)
 
 # plot frame:
@@ -247,7 +252,7 @@ plot_frame = tk.LabelFrame(root, text='Vector Field Frame', padx=10, pady=10)
 plot_frame.grid(row=1, column=0)
 
 # plot characteristics frame and plot button
-small_frame = tk.LabelFrame(root, text='Plot Customisation Frame', padx=29, pady=41)
+small_frame = tk.LabelFrame(root, text='Plot Customisation Frame', padx=35, pady=30)
 small_frame.grid(row=2, column=1)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -266,9 +271,8 @@ y = np.linspace(-L, L, pt_den)
 xg, yg = np.meshgrid(x, y)
 
 # define an example vector field
-a = 0.2
-u = a*yg*np.sin(xg)  # x component
-v = -a*xg*np.cos(yg)  # y component
+u = yg*np.sin(xg)  # x component
+v = -xg*np.cos(yg)  # y component
 # for no dependance in any initial component, use : np.zeros(np.shape(xg)) or yg
 
 
@@ -359,8 +363,8 @@ theta = np.linspace(0, 360, theta_den) * np.pi/180
 rg, thetag = np.meshgrid(r, theta)
 
 # define an initial polar field (same as initial cartesian field.)
-F_r_str_initial = 'a*r*sin(theta)*sin(r*cos(theta))'
-F_theta_str_initial = '-a*r*cos(theta)*cos(r*sin(theta))'
+F_r_str_initial = 'r*sin(theta)*sin(r*cos(theta))'
+F_theta_str_initial = '-r*cos(theta)*cos(r*sin(theta))'
 
 # from the unformated string called 'initial', set up a python understood string
 F_r_str = format_eq(F_r_str_initial)
@@ -476,14 +480,13 @@ def vect_type_response(tensor):
 def PLOT_response():
     # first, take from entry boxes, wanted parameters and make them global:
     # these must be changed globally for other functions to work with the new field.
-    global L, pt_den, s_max, a, x, y, xg, yg, u, v, tensor, ax, string_x, string_y
+    global L, pt_den, s_max, x, y, xg, yg, u, v, tensor, ax, string_x, string_y
     # clear the current axis
     ax.clear()
     # take the new axis parameters and field definitions out of the boxes
     L = float(L_entry.get())
     pt_den = int(pt_den_entry.get())
     s_max = int(s_max_entry.get())
-    a = float(a_entry.get())
     string_x = str(x_comp_entry.get())
     string_y = str(y_comp_entry.get())
     # from L redefine the axis
@@ -497,11 +500,6 @@ def PLOT_response():
     # take all these values, and the input from field component bnoxes to set up the field:
     u, v = eq_to_comps(string_x, string_y, xg, yg)
     # plot the new field
-    
-    # Scale the field components with a
-    u = a*u
-    v = a*v
-    
     stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)
     # put it onto the screen
     canvas.draw()
@@ -556,13 +554,12 @@ def custom_btn_reponse():
 
 def polar_submit(tensorp):
     # take the input values into new variables
-    global F_r, F_theta, r_max, r_den, theta_den, a, r, theta, rg, thetag, u_p, v_p, L, F_r_str_initial, F_theta_str_initial
+    global F_r, F_theta, r_max, r_den, theta_den, r, theta, rg, thetag, u_p, v_p, L, F_r_str_initial, F_theta_str_initial
     F_r = Fr_entry.get()
     F_theta = Ftheta_entry.get()
     r_max = float(r_max_entry.get())
     r_den = int(r_den_entry.get())
     theta_den = int(theta_den_entry.get())
-    a = float(a_scale_entry.get())
     L = float(L_entry1.get())
     # rescale the axis:
     ax_L = L + L/delta_factor
@@ -595,9 +592,6 @@ def polar_submit(tensorp):
     # redefine the field with these (in cartesian)
     u_p = F_r*np.cos(thetag) - F_theta*np.sin(thetag)  # x component
     v_p = F_r*np.sin(thetag) + F_theta*np.cos(thetag)  # y component
-    # scale these linearly
-    u_p *= a
-    v_p *= a
     # convert the cooridnates rg and thetag back to cartesian, needed for the plotting functions
     xg = rg*np.cos(thetag)
     yg = rg*np.sin(thetag)
@@ -632,7 +626,7 @@ def polar_submit(tensorp):
 # details about the polar field they fish to plot
 def Polar_btn_response():
     # need these global to pass them onto the function that responds to submission
-    global polar_fld_window, Fr_entry, Ftheta_entry, r_max_entry, r_den_entry, theta_den_entry, a_scale_entry, L_entry1
+    global polar_fld_window, Fr_entry, Ftheta_entry, r_max_entry, r_den_entry, theta_den_entry, L_entry1
     global p_arr_btn, p_both_btn, p_stack_btn
     # open a window with input fields to enter polar components
     polar_fld_window = tk.Toplevel()
@@ -662,15 +656,10 @@ def Polar_btn_response():
     theta_den_entry = tk.Entry(polar_fld_window, width=30, borderwidth=1)
     theta_den_entry.insert(0, theta_den)
     theta_den_entry.grid(row=9, column=0)
-    # define a linear scaling for the poalr field a_p
-    tk.Label(polar_fld_window, text='linear scaling factor:').grid(row=10, column=0)
-    a_scale_entry = tk.Entry(polar_fld_window, width=30, borderwidth=1)
-    a_scale_entry.insert(0, a)
-    a_scale_entry.grid(row=11, column=0)
     # define linear axis size
-    tk.Label(polar_fld_window, text='graph size').grid(row=12, column=0)
+    tk.Label(polar_fld_window, text='graph size').grid(row=10, column=0)
     L_entry1 = tk.Entry(polar_fld_window, width=30, borderwidth=1)
-    L_entry1.grid(row=13, column=0, padx = 2)
+    L_entry1.grid(row=11, column=0, padx = 2)
     L_entry1.insert(0, L)
     # define a number that will tarck which vector field is wanted
     tensorp = tk.IntVar()
@@ -736,11 +725,6 @@ s_max_label = tk.Label(small_frame, text='max sheets').grid(row=2, column=2)
 s_max_entry = tk.Entry(small_frame, width=11, borderwidth=1)
 s_max_entry.grid(row=3, column=2, padx = 2)
 s_max_entry.insert(0, s_max)
-
-a_label = tk.Label(small_frame, text='field scaling  \'a\'').grid(row=2, column=3)
-a_entry = tk.Entry(small_frame, width=11, borderwidth=1)
-a_entry.grid(row=3, column=3, padx = 2)
-a_entry.insert(0, a)
 
 # define entry boxes for the field equations in x and y
 x_comp_label = tk.Label(bot_frame, text='x component').grid(row=1, column=0)
