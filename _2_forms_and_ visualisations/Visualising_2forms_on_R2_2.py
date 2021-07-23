@@ -296,7 +296,7 @@ Set up all needed parameters, plots etc and complete the 2 form figure for the g
 
 # define scale of the graph
 L = 5
-pt_den = 26   # number of points on each axis
+pt_den = 20   # number of points on each axis
 a = 0.05  # linear scaling factor
 
 # define x and y values
@@ -359,7 +359,7 @@ delta_factor = 10
 fract = 0.05
 
 # define the maximum number of stack to plot, dep. on magnitude
-s_max = 10
+s_max = 5
     
 # create a figure
 fig = plt.figure(figsize=(8, 8))
@@ -387,6 +387,19 @@ colour_str = ['red', 'blue', 'grey']
 form_2_components_plot(xg, yg, u, zero_field, s_max, L, pt_den, fract, colour_str)
 form_2_components_plot(xg, yg, zero_field, v, s_max, L, pt_den, fract, colour_str)
 # these fields are the original components
+
+# Create new figure for 2-form contour/surface plots
+fig1 = plt.figure()
+fig1.suptitle('2-form Surface')
+ax1 = fig1.gca(projection='3d')
+ax1.set_xlabel('x')
+ax1.set_ylabel('y')
+ax1.set_zlabel('z')
+
+# Using the 2-form expression, plot z = F(x,y) as a contour/surface, comment as required
+zg = eval(format_eq(ext_ds[1,0]+ext_ds[0,1]))
+# C_plot = ax1.contour(xg,yg,zg,50)
+S_plot = ax1.plot_surface(xg,yg,zg,cmap=cm.coolwarm)
 
 # return time to run
 stop = timeit.default_timer()
