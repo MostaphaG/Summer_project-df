@@ -64,8 +64,8 @@ def eq_to_comps(string_x, string_y, xg, yg, u, v):
 
 
 # define scale of the graph
-L = 8
-pt_den = 31   # number of points on each axis
+L = 5
+pt_den = 20   # number of points on each axis
 a = 0.05  # linear scaling factor
 
 # define x and y values
