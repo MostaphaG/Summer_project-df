@@ -448,9 +448,6 @@ def eq_to_comps(string_x, string_y, xg, yg):
     else:
         u = eval(equation_x)
         v = eval(equation_y)
-    # scale with given a:
-    u *= a
-    v *= a
     # return these
     return u, v
 
@@ -501,6 +498,11 @@ def PLOT_response():
     # take all these values, and the input from field component bnoxes to set up the field:
     u, v = eq_to_comps(string_x, string_y, xg, yg)
     # plot the new field
+    
+    # Scale the field components with a
+    u = a*u
+    v = a*v
+    
     stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)
     # put it onto the screen
     canvas.draw()
