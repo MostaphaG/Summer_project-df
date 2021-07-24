@@ -448,12 +448,7 @@ def eq_to_comps(string_x, string_y, xg, yg):
     v = eval(equation_y)
     if equation_x.find('x') & equation_x.find('y') == -1:
         u = float(equation_x)*np.ones(np.shape(xg))
-        v = eval(equation_y)
     if equation_y.find('x') & equation_y.find('y') == -1:
-        u = eval(equation_x)
-        v = float(equation_y)*np.ones(np.shape(yg))
-    if equation_x.find('x') & equation_x.find('y') & equation_y.find('x') & equation_y.find('y') == -1:
-        u = float(equation_x)*np.ones(np.shape(xg))
         v = float(equation_y)*np.ones(np.shape(yg))
     # return these
     return u, v
@@ -571,8 +566,8 @@ def polar_submit(tensorp):
     ax.set_xlim(-ax_L, ax_L)
     ax.set_ylim(-ax_L, ax_L)
     # based on these, change the axis coordinates
-    r = np.linspace(0.05, r_max, r_den)
-    theta = np.linspace(0, 361, theta_den) * np.pi/180
+    r = np.linspace(0.2, r_max, r_den)
+    theta = np.linspace(0, 360, theta_den) * np.pi/180
     # and mesh the new ones
     rg, thetag = np.meshgrid(r, theta)
     # update intial strings to display

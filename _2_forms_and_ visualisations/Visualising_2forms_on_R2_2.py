@@ -5,11 +5,11 @@
 import timeit
 import numpy as np
 import matplotlib.pyplot as plt
-from sympy import symbols, diff
+from sympy import diff
 from sympy.parsing.sympy_parser import parse_expr
 from matplotlib.lines import Line2D
 from matplotlib import cm
-from matplotlib import patches as patch
+from mpl_toolkits.mplot3d import axes3d, Axes3D
 
 # %%
 
