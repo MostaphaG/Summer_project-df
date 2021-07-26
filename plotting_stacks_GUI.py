@@ -895,7 +895,7 @@ def stack_plot_deriv(xg, yg, u, v, s_max, L, pt_den, fract, arrows, orientation,
     # set the visuals for the derivative axis
     deriv_inset_ax.set_aspect('equal')
     
-    
+    # Account for change to grid centre for divergence plot
     if click_opt_int == 3:       
         deriv_inset_ax.set_xlim(-L-L/5, L+L/5)
         deriv_inset_ax.set_ylim(-L-L/5, L+L/5)
@@ -949,7 +949,7 @@ def stack_plot_deriv(xg, yg, u, v, s_max, L, pt_den, fract, arrows, orientation,
             
             n = R_int[i, j]
             
-            # Prevent stack plotting in centre point of the derivative plot
+            # Prevent stack plotting in centre point of the derivative and div plot
             if click_opt_int != 1 and i == i_m and j == j_m:
                 continue
             
@@ -1075,7 +1075,7 @@ click_option_Div_btn.grid(row=1, column=0)
 
 dpd_select = tk.IntVar()
 dpd_select.set(5)
-dpd_list = [3,5,7]
+dpd_list = [5,7,9]
 
 tk.Label(right_frame,text='Select Inset Plot Point Density:').grid(row=2, column=0)
 dpd_drop = tk.OptionMenu(right_frame, dpd_select, *dpd_list)
