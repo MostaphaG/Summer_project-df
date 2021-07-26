@@ -172,23 +172,29 @@ def G(s, n, c):
 def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L, pt_den, fract, colour_str):
     global s_L
     
-    # get axis lengths:
-    x_len = len(grid_x[:, 0, h_index])  # no need to change with axis_view
-    y_len = len(grid_y[0, :, h_index])  # if grids are all same size
-    
     # depending on axis_view and h_index, get the planar u and v from the given
-    # 3D ones
+    # 3D ones and the grids sorted
     if axis_view == 'z':
+        grid_x = grid_x[:, :, h_index]
+        grid_y = grid_y[:, :, h_index]
         u = u[:, :, h_index]
         v = v[:, :, h_index]
     elif axis_view == 'y':
+        grid_x = grid_x[h_index, :, :]
+        grid_y = grid_y[h_index, :, :]
         u = u[:, h_index, :]
         v = v[:, h_index, :]
     elif axis_view == 'x':
+        grid_x = grid_x[:, h_index, :]
+        grid_y = grid_y[:, h_index, :]
         u = u[h_index, :, :]
         v = v[h_index, :, :]
     else:
         print('Error can\'t find this axis')
+    
+    # get axis lengths:
+    x_len = len(grid_x[:, 0])  # no need to change with axis_view
+    y_len = len(grid_y[0, :])  # if grids are all same size
     
     # Scaling of axes and setting equal proportions circles look like circles
     ax.set_aspect('equal')
@@ -341,9 +347,9 @@ z = np.linspace(-L, L, pt_den)
 xg, yg, zg = np.meshgrid(x, y, z)
 
 # define the wanted 1 form on R3 in terms of each component:
-string_x = 'x*sin(y)'  # x component
-string_y = 'y*cos(x)'  # y component
-string_z = '4*x*z'  # z component
+string_x = 'x*sin(y*z)'  # x component
+string_y = 'y*cos(x)*sin(z)'  # y component
+string_z = '4*x*z*y**2'  # z component
 
 # to start with, set as viewing aling z axis onto x-y plane
 axis_view = 'z'
