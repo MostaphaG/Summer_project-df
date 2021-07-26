@@ -240,19 +240,19 @@ root.geometry(str(width) + 'x' + str(height))
 # and top left for plot
 
 # right frame:
-right_frame = tk.LabelFrame(root, text='Options Frame', padx=5, pady=264)
+right_frame = tk.LabelFrame(root, text='Options Frame', padx=5, pady=5)
 right_frame.grid(row=1, column=1)
 
 # bot frame:
-bot_frame = tk.LabelFrame(root, text='Field Input Frame', padx=192, pady=40)
+bot_frame = tk.LabelFrame(root, text='Field Input Frame', padx=100, pady=5)
 bot_frame.grid(row=2, column=0)
 
 # plot frame:
-plot_frame = tk.LabelFrame(root, text='Vector Field Frame', padx=10, pady=10)
+plot_frame = tk.LabelFrame(root, text='Vector Field Frame', padx=5, pady=5)
 plot_frame.grid(row=1, column=0)
 
 # plot characteristics frame and plot button
-small_frame = tk.LabelFrame(root, text='Plot Customisation Frame', padx=35, pady=30)
+small_frame = tk.LabelFrame(root, text='Plot Customisation Frame', padx=35, pady=5)
 small_frame.grid(row=2, column=1)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1021,7 +1021,7 @@ dpd_drop.grid(row=1, column=1)
 
 zoom_label = tk.Label(right_frame, text='Zoom')
 zoom_label.grid(row=2, column=0)
-zoom_slider = tk.Scale(right_frame, from_=1, to=100)
+zoom_slider = tk.Scale(right_frame, from_=1, to=10, orient=tk.HORIZONTAL)
 zoom_slider.grid(row=2, column=1)
 
 # return time to run
