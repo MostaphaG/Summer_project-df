@@ -216,9 +216,9 @@ def form_2_components_plot(xg, yg, u, v, s_max, L, pt_den, fract, colour_str):
             # define it for all magnitudes. Separately for odd and even corr. number of sheets:
             # Label each element with the number of stacks required: linear scaling
             
-            if form_2_sgn[i,j] == +1:
+            if form_2_sgn[i, j] == +1:
                 color_index = 0
-            elif form_2_sgn[i,j] == -1:
+            elif form_2_sgn[i, j] == -1:
                 color_index = 1
             else:
                 color_index = 2  # just in case
@@ -291,7 +291,6 @@ Set up all needed parameters, plots etc and complete the 2 form figure for the g
 # define scale of the graph
 L = 5
 pt_den = 20   # number of points on each axis
-a = 0.05  # linear scaling factor
 
 # define x and y values
 x = np.linspace(-L, L, pt_den)
@@ -338,10 +337,6 @@ form_2_sgn = np.sign(form_2[0])
 # evaluate the u and v given previously, with formating for them to be
 # python understood
 u, v = eq_to_comps(str(expressions[0]), str(expressions[1]), xg, yg)
-
-# scale linearly
-u *= a
-v *= a
 
 # set up a zero vector filed to plot x and y components as 2 separate fields:
 zero_field = np.zeros(np.shape(xg))
