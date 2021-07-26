@@ -313,7 +313,7 @@ field_y_list = ['- x*cos(y)',
 # set up quiver factors
 arrows = False  # set up if arrows should be plotted on stacks or not.
 orientation = 'mid'  # how the arrow rotates about its assigned grid point - options: tail, mid and tip as string
-scale = 1  # the scale reduction factor, if None (as None-type, not str), automatically computed by average, if 1 = mag
+scale = 10  # the scale reduction factor, if None (as None-type, not str), automatically computed by average, if 1 = mag
 
 # set up the delta_factor of additional axis space L/delta_factor gives extra space on axis
 delta_factor = 10
@@ -802,7 +802,7 @@ def deriv_calc(x_m, y_m):
     global i_m, j_m, deriv_inset_ax, dxg, dyg
     
     # Range and point density of the derivative plot
-    d_range = 0.25  # both are to be changed by sliders later
+    d_range = 1.65/(zoom_slider.get())  # both are to be changed by sliders later
     d_length = 0.3  # both are to be changed by sliders later
     dpd = dpd_select.get()  # get the point density from the dropdown menu
     d_scale = scale
@@ -998,6 +998,15 @@ dpd_drop_label = tk.Label(right_frame,text='Select Derivative Plot Point Density
 dpd_drop_label.grid(row=1, column=0)
 dpd_drop = tk.OptionMenu(right_frame, dpd_select, *dpd_list)
 dpd_drop.grid(row=1, column=1)
+
+# =============================================================================
+# Zooming window zoom slider
+# =============================================================================
+
+zoom_label = tk.Label(right_frame, text='Zoom')
+zoom_label.grid(row=2, column=0)
+zoom_slider = tk.Scale(right_frame, from_=1, to=100)
+zoom_slider.grid(row=2, column=1)
 
 # return time to run
 stop = timeit.default_timer()
