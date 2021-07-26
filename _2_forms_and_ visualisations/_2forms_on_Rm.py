@@ -60,9 +60,6 @@ z = np.linspace(-L, L, pt_den)
 # create a grid on x-y plane
 xg, yg, zg = np.meshgrid(x, y, z)
 
-# define a scaling factor
-a = 0.05
-
 # define an example vector field, now - from string, even initially
 string_x = 'x*y*z'  # x component
 string_y = '4*z*x**2'  # y component
