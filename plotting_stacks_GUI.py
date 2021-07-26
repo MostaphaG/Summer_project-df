@@ -10,6 +10,9 @@ from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg, NavigationToolbar2Tk)
 from matplotlib.backend_bases import key_press_handler
 import matplotlib as mpl
+from sympy import diff
+from sympy.parsing.sympy_parser import parse_expr
+
 
 # %% VFA GUI
 
@@ -809,53 +812,66 @@ def deriv_calc(x_m, y_m):
     i_m = int(round((dpd/2)-0.1))
     j_m = int(round((dpd/2)-0.1))
     
-    # define new axis in the derivative plot
-    dx = np.linspace(-d_range+x_m, d_range+x_m, dpd)
-    dy = np.linspace(-d_range+y_m, d_range+y_m, dpd)
-    # mesh these into grids
-    dxg , dyg = np.meshgrid(dx, dy)
-    
-    # define the vector field in these new axis
-    u1, v1 = eq_to_comps(string_x, string_y, dxg, dyg)
-    
-    # Calculate derivative field components
-    # This is done geometrically by subracting thevector at the centre of the
-    # grid, from vectors at other grid positions in the derivative axis.
-    du1 = u1 - u1[i_m, j_m]
-    dv1 = v1 - v1[i_m, j_m]
-    
+    # Divergence Plot
+    if click_opt_int == 3:
+        dx = np.linspace(-d_range, d_range, dpd)
+        dy = np.linspace(-d_range, d_range, dpd)
+        J = jacobian(2,string_x,string_y)
+        # Evaluate the Jacobian elements at (x_m,y_m) click location 
+        du_dx =  eval(format_eq_div(format_eq(J[0,0])))
+        #du_dy =  eval(format_eq_div(format_eq(J[0,1])))
+        #dv_dx =  eval(format_eq_div(format_eq(J[1,0])))
+        dv_dy =  eval(format_eq_div(format_eq(J[1,1])))
+        dxg , dyg = np.meshgrid(dx, dy)
+        u_div = (du_dx + dv_dy)*dxg
+        v_div = (du_dx + dv_dy)*dyg
+        
+    # Zoom/Derivative Plot
+    else:
+        # define new axis in the derivative plot
+        dx = np.linspace(-d_range+x_m, d_range+x_m, dpd)
+        dy = np.linspace(-d_range+y_m, d_range+y_m, dpd)
+        dxg , dyg = np.meshgrid(dx, dy)
+        # define the vector field in these new axis
+        u1, v1 = eq_to_comps(string_x, string_y, dxg, dyg)
+        # Calculate derivative field components
+        # This is done geometrically by subracting thevector at the centre of the
+        # grid, from vectors at other grid positions in the derivative axis.
+        du1 = u1 - u1[i_m, j_m]
+        dv1 = v1 - v1[i_m, j_m]
+  
     # Create axes at clicked position from supplied position and given axis sizes
     deriv_inset_ax = ax.inset_axes([(x_pix-178)/500 - (d_length/2), (y_pix-59)/500 - (d_length/2), d_length, d_length])
     
-    # depending on the chosen RadioButton, plot that derivative vector field
-    # set max sheets in the derivative plot=5 and fract=0.1
+    # Check radiobutton selection
     if click_opt_int == 1:
+        u_s = u1
+        v_s = v1
+        scale_s = d_scale
         
-        if tensor.get() == 0:        
-            # Stack
-            arrows = False
-            stack_plot_deriv(dxg, dyg, u1, v1, 5, d_range, dpd, 0.1, arrows, orientation, d_scale)
-        elif tensor.get() == 1:
-            # Arrows        
-            deriv_inset_ax.quiver(dxg, dyg, u1, v1, pivot='mid', scale = d_scale, scale_units='xy')
-        elif tensor.get() == 2:
-            # Arrows + Stack
-            arrows = True
-            stack_plot_deriv(dxg, dyg, u1, v1, 5, d_range, dpd, 0.1, arrows, orientation, d_scale)
-            
-    if click_opt_int == 2:
+    elif click_opt_int == 2:
+        u_s = du1
+        v_s = dv1
+        scale_s = scale
         
-        if tensor.get() == 0:        
-            # Stack
-            arrows = False
-            stack_plot_deriv(dxg, dyg, du1, dv1, 5, d_range, dpd, 0.1, arrows, orientation, scale)
-        elif tensor.get() == 1:
-            # Arrows        
-            deriv_inset_ax.quiver(dxg, dyg, du1, dv1, pivot='mid', scale = scale, scale_units='xy')
-        elif tensor.get() == 2:
-            # Arrows + Stack
-            arrows = True
-            stack_plot_deriv(dxg, dyg, du1, dv1, 5, d_range, dpd, 0.1, arrows, orientation, scale)
+    elif click_opt_int == 3:
+        u_s = u_div
+        v_s = v_div
+        scale_s = scale
+        
+    # Stack or arrows plot
+    if tensor.get() == 0:        
+        # Stack
+        arrows = False
+        stack_plot_deriv(dxg, dyg, u_s, v_s, 5, d_range, dpd, 0.1, arrows, orientation, scale_s)
+    elif tensor.get() == 1:
+        # Arrows        
+        deriv_inset_ax.quiver(dxg, dyg, u_s, v_s, pivot='mid', scale = scale_s, scale_units='xy')
+    elif tensor.get() == 2:
+        # Arrows + Stack
+        arrows = True
+        stack_plot_deriv(dxg, dyg, u_s, v_s, 5, d_range, dpd, 0.1, arrows, orientation, scale_s)
+
         
     # Don't display the x and y axis values
     deriv_inset_ax.set_xticks([])
@@ -878,8 +894,14 @@ def stack_plot_deriv(xg, yg, u, v, s_max, L, pt_den, fract, arrows, orientation,
     y_len = len(yg[0, :])
     # set the visuals for the derivative axis
     deriv_inset_ax.set_aspect('equal')
-    deriv_inset_ax.set_xlim(-L+x_m-L/5, L+x_m+L/5)
-    deriv_inset_ax.set_ylim(-L+y_m-L/5, L+y_m+L/5)
+    
+    
+    if click_opt_int == 3:       
+        deriv_inset_ax.set_xlim(-L-L/5, L+L/5)
+        deriv_inset_ax.set_ylim(-L-L/5, L+L/5)
+    else:
+        deriv_inset_ax.set_xlim(-L+x_m-L/5, L+x_m+L/5)
+        deriv_inset_ax.set_ylim(-L+y_m-L/5, L+y_m+L/5)
     
     # AS BEFORE:
     R_int = np.zeros(shape=((x_len), (y_len)))
@@ -928,7 +950,7 @@ def stack_plot_deriv(xg, yg, u, v, s_max, L, pt_den, fract, arrows, orientation,
             n = R_int[i, j]
             
             # Prevent stack plotting in centre point of the derivative plot
-            if i == i_m and j == j_m:
+            if click_opt_int != 1 and i == i_m and j == j_m:
                 continue
             
             if parity(n) is True:
@@ -986,6 +1008,48 @@ def click_option_handler(click_option):
     # and for the the initial plot:
     if click_opt_int == 0:
         fig.canvas.draw()
+        
+def jacobian(m,u_str,v_str):
+    
+    # take the input strings and turn them into sympy expressions to be able to
+    # use sympy's partial differentiation
+    sympy_expr_x = parse_expr(u_str, evaluate=False)
+    sympy_expr_y = parse_expr(v_str, evaluate=False)
+    
+    # define a sympy expression for string 0
+    #sympy_expr_zero = parse_expr('0*x', evaluate=False)
+    
+    # combine the 2 intoa list:
+    expressions = np.array([sympy_expr_x, sympy_expr_y])
+    
+    # set up an array to store derrivatives.
+    J = np.empty((m, m), dtype='object')
+    
+    
+    # set up an array of coordinates that need to be used (in standard order)
+    coords = ['x', 'y']
+    
+    # set up an array to store the results
+    # result = np.empty((int((m-1)*m/2), 1), dtype='object')
+    # for i in range(int((m-1)*m/2)):
+    #     result[i] = str(result[i])
+    
+    # loop over differentiating each, when differentiating w.r.t its coord, set to 0
+    for coord_index in range(len(coords)):
+        # loop over differentiating each component:
+        for comp_index in range(len(expressions)):
+            J[comp_index, coord_index] = str(diff(expressions[comp_index], coords[coord_index]))
+            
+    return J
+
+# =============================================================================
+# Additional formatting function used in divergence plots
+# =============================================================================
+
+def format_eq_div(string):
+    string = string.replace('xg', 'x_m')
+    string = string.replace('yg', 'y_m')
+    return string
 
 
 # =============================================================================
@@ -995,12 +1059,15 @@ click_option = tk.IntVar()
 click_option.set(0)
 
 click_option_Tools_btn = tk.Radiobutton(right_frame, text='Tools', variable=click_option, value=0, command=lambda: click_option_handler(click_option.get()))
-click_option_Zoom_btn = tk.Radiobutton(right_frame, text='Zoom', variable=click_option, value=1, command=lambda: click_option_handler(click_option.get()))
+click_option_Zoom_btn = tk.Radiobutton(right_frame, text='Zoom Plot', variable=click_option, value=1, command=lambda: click_option_handler(click_option.get()))
 click_option_Deriv_btn = tk.Radiobutton(right_frame, text='Derivative Plot', variable=click_option, value=2, command=lambda: click_option_handler(click_option.get()))
+click_option_Div_btn = tk.Radiobutton(right_frame, text='Divergence Plot', variable=click_option, value=3, command=lambda: click_option_handler(click_option.get()))
+
 
 click_option_Tools_btn.grid(row=0, column=0)
 click_option_Zoom_btn.grid(row=0, column=1)
 click_option_Deriv_btn.grid(row=0, column=2)
+click_option_Div_btn.grid(row=1, column=0)
 
 # =============================================================================
 # Drop down to select the derivative plot point density (dpd)
@@ -1010,17 +1077,17 @@ dpd_select = tk.IntVar()
 dpd_select.set(5)
 dpd_list = [3,5,7]
 
-tk.Label(right_frame,text='Select Inset Plot Point Density:').grid(row=1, column=0)
+tk.Label(right_frame,text='Select Inset Plot Point Density:').grid(row=2, column=0)
 dpd_drop = tk.OptionMenu(right_frame, dpd_select, *dpd_list)
-dpd_drop.grid(row=1, column=1)
+dpd_drop.grid(row=2, column=1)
 
 # =============================================================================
 # Zooming window zoom slider
 # =============================================================================
 
-tk.Label(right_frame, text='Zoom').grid(row=2, column=0)
+tk.Label(right_frame, text='Zoom').grid(row=3, column=0)
 zoom_slider = tk.Scale(right_frame, from_=1, to=10, orient=tk.HORIZONTAL)
-zoom_slider.grid(row=2, column=1)
+zoom_slider.grid(row=3, column=1)
 
 # return time to run
 stop = timeit.default_timer()
