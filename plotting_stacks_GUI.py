@@ -1010,7 +1010,7 @@ dpd_select = tk.IntVar()
 dpd_select.set(5)
 dpd_list = [3,5,7]
 
-dpd_drop_label = tk.Label(right_frame,text='Select Derivative Plot Point Density:')
+dpd_drop_label = tk.Label(right_frame,text='Select Inset Plot Point Density:')
 dpd_drop_label.grid(row=1, column=0)
 dpd_drop = tk.OptionMenu(right_frame, dpd_select, *dpd_list)
 dpd_drop.grid(row=1, column=1)
