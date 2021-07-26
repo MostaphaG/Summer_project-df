@@ -408,7 +408,7 @@ def on_key_press(event):
         print("you pressed {}".format(event.key))
         key_press_handler(event, canvas, toolbar)
     # when the derivative option is selected, cerry out the derivative when clicked
-    elif click_opt_int == 1:
+    else:
         global x_pix, y_pix, x_m, y_m
         # get cartesian Coordinates of click
         ix_plot, iy_plot = event.xdata, event.ydata
@@ -418,9 +418,7 @@ def on_key_press(event):
         y_m = float(iy_plot)
         mpl.rcParams['toolbar'] = 'None'  # this does not do what it should yet
         deriv_calc(x_m, y_m)
-    else:
-        # just is case
-        pass
+
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -805,7 +803,7 @@ def deriv_calc(x_m, y_m):
     d_range = 1.65/(zoom_slider.get())  # both are to be changed by sliders later
     d_length = 0.3  # both are to be changed by sliders later
     dpd = dpd_select.get()  # get the point density from the dropdown menu
-    d_scale = scale
+    d_scale = scale*(zoom_slider.get())
     
     # Select index for the middle of the new derivative axis
     i_m = int(round((dpd/2)-0.1))
@@ -831,18 +829,34 @@ def deriv_calc(x_m, y_m):
     
     # depending on the chosen RadioButton, plot that derivative vector field
     # set max sheets in the derivative plot=5 and fract=0.1
-    if tensor.get() == 0:        
-        # Stack
-        arrows = False
-        stack_plot_deriv(dxg, dyg, du1, dv1, 5, d_range, dpd, 0.1, arrows, orientation, d_scale)
-    elif tensor.get() == 1:
-        # Arrows        
-        deriv_inset_ax.quiver(dxg, dyg, du1, dv1, pivot='mid', scale = d_scale, scale_units='xy')
-    elif tensor.get() == 2:
-        # Arrows + Stack
-        arrows = True
-        stack_plot_deriv(dxg, dyg, du1, dv1, 5, d_range, dpd, 0.1, arrows, orientation, d_scale)
-    
+    if click_opt_int == 1:
+        
+        if tensor.get() == 0:        
+            # Stack
+            arrows = False
+            stack_plot_deriv(dxg, dyg, u1, v1, 5, d_range, dpd, 0.1, arrows, orientation, d_scale)
+        elif tensor.get() == 1:
+            # Arrows        
+            deriv_inset_ax.quiver(dxg, dyg, u1, v1, pivot='mid', scale = d_scale, scale_units='xy')
+        elif tensor.get() == 2:
+            # Arrows + Stack
+            arrows = True
+            stack_plot_deriv(dxg, dyg, u1, v1, 5, d_range, dpd, 0.1, arrows, orientation, d_scale)
+            
+    if click_opt_int == 2:
+        
+        if tensor.get() == 0:        
+            # Stack
+            arrows = False
+            stack_plot_deriv(dxg, dyg, du1, dv1, 5, d_range, dpd, 0.1, arrows, orientation, scale)
+        elif tensor.get() == 1:
+            # Arrows        
+            deriv_inset_ax.quiver(dxg, dyg, du1, dv1, pivot='mid', scale = scale, scale_units='xy')
+        elif tensor.get() == 2:
+            # Arrows + Stack
+            arrows = True
+            stack_plot_deriv(dxg, dyg, du1, dv1, 5, d_range, dpd, 0.1, arrows, orientation, scale)
+        
     # Don't display the x and y axis values
     deriv_inset_ax.set_xticks([])
     deriv_inset_ax.set_yticks([])
@@ -981,10 +995,12 @@ click_option = tk.IntVar()
 click_option.set(0)
 
 click_option_Tools_btn = tk.Radiobutton(right_frame, text='Tools', variable=click_option, value=0, command=lambda: click_option_handler(click_option.get()))
-click_option_Deriv_btn = tk.Radiobutton(right_frame, text='Derivative Plot', variable=click_option, value=1, command=lambda: click_option_handler(click_option.get()))
+click_option_Zoom_btn = tk.Radiobutton(right_frame, text='Zoom', variable=click_option, value=1, command=lambda: click_option_handler(click_option.get()))
+click_option_Deriv_btn = tk.Radiobutton(right_frame, text='Derivative Plot', variable=click_option, value=2, command=lambda: click_option_handler(click_option.get()))
 
 click_option_Tools_btn.grid(row=0, column=0)
-click_option_Deriv_btn.grid(row=0, column=1)
+click_option_Zoom_btn.grid(row=0, column=1)
+click_option_Deriv_btn.grid(row=0, column=2)
 
 # =============================================================================
 # Drop down to select the derivative plot point density (dpd)
