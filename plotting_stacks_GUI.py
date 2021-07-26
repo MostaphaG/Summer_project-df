@@ -720,28 +720,28 @@ polar_btn.grid(row=0, column=0)
 ''' define entry boxes to update: L, pt_den, s_max and a  and a PLOT button '''
 # define entry boxes for each (in order): L, pt_den, s_max and a ; and info txt
 # Also input into them the initial values
-L_label = tk.Label(small_frame, text='Size').grid(row=2, column=0)
+tk.Label(small_frame, text='Size').grid(row=2, column=0)
 L_entry = tk.Entry(small_frame, width=11, borderwidth=1)
 L_entry.grid(row=3, column=0, padx = 2)
 L_entry.insert(0, L)
 
-pt_den_label = tk.Label(small_frame, text='grid').grid(row=2, column=1)
+tk.Label(small_frame, text='grid').grid(row=2, column=1)
 pt_den_entry = tk.Entry(small_frame, width=11, borderwidth=1)
 pt_den_entry.grid(row=3, column=1, padx = 2)
 pt_den_entry.insert(0, pt_den)
 
-s_max_label = tk.Label(small_frame, text='max sheets').grid(row=2, column=2)
+tk.Label(small_frame, text='max sheets').grid(row=2, column=2)
 s_max_entry = tk.Entry(small_frame, width=11, borderwidth=1)
 s_max_entry.grid(row=3, column=2, padx = 2)
 s_max_entry.insert(0, s_max)
 
 # define entry boxes for the field equations in x and y
-x_comp_label = tk.Label(bot_frame, text='x component').grid(row=1, column=0)
+tk.Label(bot_frame, text='x component').grid(row=1, column=0)
 x_comp_entry = tk.Entry(bot_frame, width=20, borderwidth=2)
 x_comp_entry.grid(row=2, column=0)
 x_comp_entry.insert(0, 'y*sin(x)')
 
-y_comp_label = tk.Label(bot_frame, text='y component').grid(row=1, column=1)
+tk.Label(bot_frame, text='y component').grid(row=1, column=1)
 y_comp_entry = tk.Entry(bot_frame, width=20, borderwidth=2)
 y_comp_entry.grid(row=2, column=1)
 y_comp_entry.insert(0, '-x*cos(y)')
@@ -1010,8 +1010,7 @@ dpd_select = tk.IntVar()
 dpd_select.set(5)
 dpd_list = [3,5,7]
 
-dpd_drop_label = tk.Label(right_frame,text='Select Inset Plot Point Density:')
-dpd_drop_label.grid(row=1, column=0)
+tk.Label(right_frame,text='Select Inset Plot Point Density:').grid(row=1, column=0)
 dpd_drop = tk.OptionMenu(right_frame, dpd_select, *dpd_list)
 dpd_drop.grid(row=1, column=1)
 
@@ -1019,8 +1018,7 @@ dpd_drop.grid(row=1, column=1)
 # Zooming window zoom slider
 # =============================================================================
 
-zoom_label = tk.Label(right_frame, text='Zoom')
-zoom_label.grid(row=2, column=0)
+tk.Label(right_frame, text='Zoom').grid(row=2, column=0)
 zoom_slider = tk.Scale(right_frame, from_=1, to=10, orient=tk.HORIZONTAL)
 zoom_slider.grid(row=2, column=1)
 
