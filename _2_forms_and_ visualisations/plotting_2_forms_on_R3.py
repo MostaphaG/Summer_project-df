@@ -356,9 +356,9 @@ z = np.linspace(-L, L, pt_den)
 xg, yg, zg = np.meshgrid(x, y, z)
 
 # define the wanted 1 form on R3 in terms of each component:
-string_x = 'y*sin(x)'  # x component
-string_y = '-x*cos(y)'  # y component
-string_z = '3'  # z component
+string_x = 'x*sin(y)'  # x component
+string_y = 'y*cos(x)'  # y component
+string_z = '0'  # z component
 
 # to start with, set as viewing aling z axis onto x-y plane
 axis_view = 'z'
