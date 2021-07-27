@@ -806,7 +806,7 @@ def deriv_calc(x_m, y_m):
     # Range and point density of the derivative plot
     d_range = 1.65/(zoom_slider.get())  
     # d_length = d_length_select.get() 
-    d_length = 0.3
+    d_length = d_length_select.get()
     dpd = dpd_select.get()  
     d_scale = scale*(zoom_slider.get())
     
@@ -1078,7 +1078,7 @@ click_option_Tools_btn.grid(row=0, column=0)
 click_option_Zoom_btn.grid(row=0, column=1)
 click_option_Deriv_btn.grid(row=0, column=2)
 click_option_Div_btn.grid(row=1, column=0)
-click_option_Curl_btn.grid(row=1,column=1)
+click_option_Curl_btn.grid(row=1, column=1)
 
 # =============================================================================
 # Zooming window zoom slider
@@ -1094,7 +1094,7 @@ zoom_slider.grid(row=2, column=1)
 
 dpd_select = tk.IntVar()
 dpd_select.set(5)
-dpd_list = [5,7,9]
+dpd_list = [5, 7, 9]
 
 tk.Label(right_frame,text='Select Inset Plot Point Density:').grid(row=3, column=0)
 dpd_drop = tk.OptionMenu(right_frame, dpd_select, *dpd_list)
@@ -1104,13 +1104,13 @@ dpd_drop.grid(row=3, column=1)
 # Drop down to select inset axis size (d_length)
 # =============================================================================
 
-# d_length_select = tk.IntVar()
-# d_length_select.set(0.3)
-# d_length_list = [0.2,0.3,0.4]
+d_length_select = tk.DoubleVar()
+d_length_select.set(0.3)
+d_length_list = [0.25, 0.3, 0.35, 0.4]
 
-# tk.Label(right_frame,text='Select Inset Plot Size (inches):').grid(row=4, column=0)
-# d_length_drop = tk.OptionMenu(right_frame, d_length_select, *d_length_list)
-# d_length_drop.grid(row=4, column=1)
+tk.Label(right_frame, text='Select Inset Plot Size (inches):').grid(row=4, column=0)
+d_length_drop = tk.OptionMenu(right_frame, d_length_select, *d_length_list)
+d_length_drop.grid(row=4, column=1)
 
 # return time to run
 stop = timeit.default_timer()
