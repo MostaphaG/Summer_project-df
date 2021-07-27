@@ -120,11 +120,11 @@ def find_2_form(expressions, coords, pt_den, m=3):
             temp = ext_ds[i, j]
             temp1 = ext_ds[j, i]
             # check these against zero entries:
-            if (temp == '0') or (temp == '-(0)') or (temp == '0*x'):
+            if (temp == ' + 0') or (temp == ' - (0)') or (temp == '0*x'):
                 pass
             else:
                 result[pair, 0] += temp
-            if (temp1 == '0') or (temp1 == '-(0)') or (temp1 == '0*x'):
+            if (temp1 == ' + 0') or (temp1 == ' - (0)') or (temp1 == '0*x'):
                 pass
             else:
                 result[pair, 0] += temp1
@@ -132,8 +132,16 @@ def find_2_form(expressions, coords, pt_den, m=3):
             pair += 1
     # format string in each result row
     for d in range(pair):
-        # format the result to be 'python understood' to be able to use the eval()
-        result[d, 0] = format_eq(result[d, 0])
+        if result[d, 0].find('x') & result[d, 0].find('y') & result[d, 0].find('z') == -1:
+            if result[d, 0] == '':
+                result[d, 0] = '0*x'
+                result[d, 0] = format_eq(result[d, 0])
+            else:
+                result[d, 0] = '(' + result[d, 0] + ')*x'
+                result[d, 0] = format_eq(result[d, 0])
+        else:
+            # format the result to be 'python understood' to be able to use the eval()
+            result[d, 0] = format_eq(result[d, 0])
     
     # set up a vector to store the 2 form numerically, from xg and yg
     form_2 = np.empty((len(result[:, 0]), pt_den, pt_den, pt_den))    # Note - need pt_den m times.
@@ -348,9 +356,9 @@ z = np.linspace(-L, L, pt_den)
 xg, yg, zg = np.meshgrid(x, y, z)
 
 # define the wanted 1 form on R3 in terms of each component:
-string_x = 'x*sin(y)'  # x component
-string_y = 'y*cos(z)'  # y component
-string_z = 'z*sin(x)'  # z component
+string_x = 'y*sin(x)'  # x component
+string_y = '-x*cos(y)'  # y component
+string_z = '3'  # z component
 
 # to start with, set as viewing aling z axis onto x-y plane
 axis_view = 'z'
