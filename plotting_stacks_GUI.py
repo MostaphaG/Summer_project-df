@@ -834,7 +834,7 @@ def deriv_calc(x_m, y_m):
         # define new axis in the derivative plot
         dx = np.linspace(-d_range+x_m, d_range+x_m, dpd)
         dy = np.linspace(-d_range+y_m, d_range+y_m, dpd)
-        dxg , dyg = np.meshgrid(dx, dy)
+        dxg, dyg = np.meshgrid(dx, dy)
         # define the vector field in these new axis
         u1, v1 = eq_to_comps(string_x, string_y, dxg, dyg)
         # Calculate derivative field components
@@ -874,7 +874,7 @@ def deriv_calc(x_m, y_m):
         stack_plot_deriv(dxg, dyg, u_s, v_s, 5, d_range, dpd, 0.1, arrows, orientation, scale_s)
     elif tensor.get() == 1:
         # Arrows        
-        deriv_inset_ax.quiver(dxg, dyg, u_s, v_s, pivot='mid', scale = scale_s, scale_units='xy')
+        deriv_inset_ax.quiver(dxg, dyg, u_s, v_s, pivot='mid', scale=scale_s, scale_units='xy')
     elif tensor.get() == 2:
         # Arrows + Stack
         arrows = True
@@ -924,7 +924,7 @@ def stack_plot_deriv(xg, yg, u, v, s_max, L, pt_den, fract, arrows, orientation,
 
     sheet_L = L*fract
     s_L = fract*L
-    max_size = np.max(mag) 
+    max_size = np.max(mag)
     R = mag/max_size
 
     I_sin = np.sin(theta)
@@ -972,7 +972,7 @@ def stack_plot_deriv(xg, yg, u, v, s_max, L, pt_den, fract, arrows, orientation,
                     Ax2 = A_x[i, j] - G(s, n, 0)*s_L*I_cos[i, j]
                     Ay2 = A_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
                     Bx2 = B_x[i, j] - G(s, n, 0)*s_L*I_cos[i, j]
-                    By2 = B_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]                   
+                    By2 = B_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
                     deriv_inset_ax.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=1, color='green'))
                     deriv_inset_ax.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=1, color='green'))
                     s += 1
@@ -981,7 +981,7 @@ def stack_plot_deriv(xg, yg, u, v, s_max, L, pt_den, fract, arrows, orientation,
                 deriv_inset_ax.add_line(Line2D((A_x[i, j], B_x[i, j]), (A_y[i, j], B_y[i, j]), linewidth=1, color='green'))
                 s = 1 
                 
-                while s <= 0.5*(n-1):  
+                while s <= 0.5*(n-1):
                     Ax1 = A_x[i, j] + G(s, n, 1)*s_L*I_cos[i, j]
                     Ay1 = A_y[i, j] + G(s, n, 1)*s_L*I_sin[i, j]
                     Bx1 = B_x[i, j] + G(s, n, 1)*s_L*I_cos[i, j]
@@ -990,13 +990,13 @@ def stack_plot_deriv(xg, yg, u, v, s_max, L, pt_den, fract, arrows, orientation,
                     Ay2 = A_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
                     Bx2 = B_x[i, j] - G(s, n, 1)*s_L*I_cos[i, j]
                     By2 = B_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
-                    deriv_inset_ax.add_line(Line2D((Ax1,Bx1),(Ay1,By1), linewidth=1, color='green'))
-                    deriv_inset_ax.add_line(Line2D((Ax2,Bx2),(Ay2,By2), linewidth=1, color='green'))
+                    deriv_inset_ax.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=1, color='green'))
+                    deriv_inset_ax.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=1, color='green'))
                     s += 1
                     
             if n > 1:
-                deriv_inset_ax.add_line(Line2D((p_sh1x[i, j],p_sh3x[i, j]),(p_sh1y[i, j],p_sh3y[i, j]), linewidth=1, color='green'))
-                deriv_inset_ax.add_line(Line2D((p_sh2x[i, j],p_sh3x[i, j]),((p_sh2y[i, j],p_sh3y[i, j])), linewidth=1, color='green'))
+                deriv_inset_ax.add_line(Line2D((p_sh1x[i, j], p_sh3x[i, j]), (p_sh1y[i, j], p_sh3y[i, j]), linewidth=1, color='green'))
+                deriv_inset_ax.add_line(Line2D((p_sh2x[i, j], p_sh3x[i, j]), ((p_sh2y[i, j], p_sh3y[i, j])), linewidth=1, color='green'))
             else:
                 deriv_inset_ax.add_line(Line2D((P_sh1x[i, j], P_sh3x[i, j]), (P_sh1y[i, j], P_sh3y[i, j]), linewidth=1, color='green'))
                 deriv_inset_ax.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color='green'))
@@ -1004,6 +1004,7 @@ def stack_plot_deriv(xg, yg, u, v, s_max, L, pt_den, fract, arrows, orientation,
 
 # set up the initial variable (code starts in option to use matplotlib tools)
 click_opt_int = 0
+
 
 # define a function that will update the variable that defines click action
 def click_option_handler(click_option):
@@ -1014,26 +1015,26 @@ def click_option_handler(click_option):
     if click_opt_int == 0:
         fig.canvas.draw()
 
+
 # =============================================================================
 # Calculate the Jacobian matrix of the defined vector field
 # =============================================================================
 
+
 def jacobian(m, u_str, v_str):
-    
     # take the input strings and turn them into sympy expressions to be able to
     # use sympy's partial differentiation
     sympy_expr_x = parse_expr(u_str, evaluate=False)
     sympy_expr_y = parse_expr(v_str, evaluate=False)
     
     # define a sympy expression for string 0
-    #sympy_expr_zero = parse_expr('0*x', evaluate=False)
+    # sympy_expr_zero = parse_expr('0*x', evaluate=False)
     
     # combine the 2 intoa list:
     expressions = np.array([sympy_expr_x, sympy_expr_y])
     
     # set up an array to store derrivatives.
     J = np.empty((m, m), dtype='object')
-    
     
     # set up an array of coordinates that need to be used (in standard order)
     coords = ['x', 'y']
@@ -1055,10 +1056,12 @@ def jacobian(m, u_str, v_str):
 # Additional formatting function used in divergence plots
 # =============================================================================
 
+
 def format_eq_div(string):
     string = string.replace('xg', 'x_m')
     string = string.replace('yg', 'y_m')
     return string
+
 
 # =============================================================================
 # Radiobutton to select what happens when clicking the plot
@@ -1077,7 +1080,7 @@ click_option_Tools_btn.grid(row=0, column=0)
 click_option_Zoom_btn.grid(row=0, column=1)
 click_option_Deriv_btn.grid(row=0, column=2)
 click_option_Div_btn.grid(row=1, column=0)
-click_option_Curl_btn.grid(row=1,column=1)
+click_option_Curl_btn.grid(row=1, column=1)
 
 # =============================================================================
 # Zooming window zoom slider
@@ -1095,7 +1098,7 @@ dpd_select = tk.IntVar()
 dpd_select.set(5)
 dpd_list = [5, 7, 9]
 
-tk.Label(right_frame,text='Select Inset Plot Point Density:').grid(row=3, column=0)
+tk.Label(right_frame, text='Select Inset Plot Point Density:').grid(row=3, column=0)
 dpd_drop = tk.OptionMenu(right_frame, dpd_select, *dpd_list)
 dpd_drop.grid(row=3, column=1)
 
@@ -1107,7 +1110,7 @@ d_length_select = tk.DoubleVar()
 d_length_select.set(0.3)
 d_length_list = [0.2, 0.25, 0.3, 0.35, 0.4]
 
-tk.Label(right_frame,text='Select Inset Plot Size (inches):').grid(row=4, column=0)
+tk.Label(right_frame, text='Select Inset Plot Size (inches):').grid(row=4, column=0)
 d_length_drop = tk.OptionMenu(right_frame, d_length_select, *d_length_list)
 d_length_drop.grid(row=4, column=1)
 
