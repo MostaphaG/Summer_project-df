@@ -813,18 +813,20 @@ def deriv_calc(x_m, y_m):
     j_m = int(round((dpd/2)-0.1))
     
     # Divergence Plot
-    if click_opt_int == 3:
+    if click_opt_int > 2:
         dx = np.linspace(-d_range, d_range, dpd)
         dy = np.linspace(-d_range, d_range, dpd)
         J = jacobian(2,string_x,string_y)
         # Evaluate the Jacobian elements at (x_m,y_m) click location 
         du_dx =  eval(format_eq_div(format_eq(J[0,0])))
-        #du_dy =  eval(format_eq_div(format_eq(J[0,1])))
-        #dv_dx =  eval(format_eq_div(format_eq(J[1,0])))
+        du_dy =  eval(format_eq_div(format_eq(J[0,1])))
+        dv_dx =  eval(format_eq_div(format_eq(J[1,0])))
         dv_dy =  eval(format_eq_div(format_eq(J[1,1])))
         dxg , dyg = np.meshgrid(dx, dy)
         u_div = (du_dx + dv_dy)*dxg
         v_div = (du_dx + dv_dy)*dyg
+        u_curl = -(du_dy - dv_dx)*dyg
+        v_curl = (du_dy - dv_dx)*dxg
         
     # Zoom/Derivative Plot
     else:
@@ -857,6 +859,11 @@ def deriv_calc(x_m, y_m):
     elif click_opt_int == 3:
         u_s = u_div
         v_s = v_div
+        scale_s = scale
+        
+    elif click_opt_int == 4:
+        u_s = u_curl
+        v_s = v_curl
         scale_s = scale
         
     # Stack or arrows plot
@@ -896,7 +903,7 @@ def stack_plot_deriv(xg, yg, u, v, s_max, L, pt_den, fract, arrows, orientation,
     deriv_inset_ax.set_aspect('equal')
     
     # Account for change to grid centre for divergence plot
-    if click_opt_int == 3:       
+    if click_opt_int > 2:       
         deriv_inset_ax.set_xlim(-L-L/5, L+L/5)
         deriv_inset_ax.set_ylim(-L-L/5, L+L/5)
     else:
@@ -950,7 +957,7 @@ def stack_plot_deriv(xg, yg, u, v, s_max, L, pt_den, fract, arrows, orientation,
             n = R_int[i, j]
             
             # Prevent stack plotting in centre point of the derivative and div plot
-            if click_opt_int != 1 and i == i_m and j == j_m:
+            if click_opt_int > 1 and i == i_m and j == j_m:
                 continue
             
             if parity(n) is True:
@@ -1010,7 +1017,9 @@ def click_option_handler(click_option):
     if click_opt_int == 0:
         fig.canvas.draw()
 
-
+# =============================================================================
+# Calculate the Jacobian matrix of the defined vector field
+# =============================================================================
 
 def jacobian(m, u_str, v_str):
     
@@ -1062,15 +1071,16 @@ click_option = tk.IntVar()
 click_option.set(0)
 
 click_option_Tools_btn = tk.Radiobutton(right_frame, text='Tools', variable=click_option, value=0, command=lambda: click_option_handler(click_option.get()))
-click_option_Zoom_btn = tk.Radiobutton(right_frame, text='Zoom Plot', variable=click_option, value=1, command=lambda: click_option_handler(click_option.get()))
-click_option_Deriv_btn = tk.Radiobutton(right_frame, text='Derivative Plot', variable=click_option, value=2, command=lambda: click_option_handler(click_option.get()))
-click_option_Div_btn = tk.Radiobutton(right_frame, text='Divergence Plot', variable=click_option, value=3, command=lambda: click_option_handler(click_option.get()))
-
+click_option_Zoom_btn = tk.Radiobutton(right_frame, text='Zoom', variable=click_option, value=1, command=lambda: click_option_handler(click_option.get()))
+click_option_Deriv_btn = tk.Radiobutton(right_frame, text='Deriv.', variable=click_option, value=2, command=lambda: click_option_handler(click_option.get()))
+click_option_Div_btn = tk.Radiobutton(right_frame, text='Div.', variable=click_option, value=3, command=lambda: click_option_handler(click_option.get()))
+click_option_Curl_btn = tk.Radiobutton(right_frame, text='Curl', variable=click_option, value=4, command=lambda: click_option_handler(click_option.get()))
 
 click_option_Tools_btn.grid(row=0, column=0)
 click_option_Zoom_btn.grid(row=0, column=1)
 click_option_Deriv_btn.grid(row=0, column=2)
 click_option_Div_btn.grid(row=1, column=0)
+click_option_Curl_btn.grid(row=1,column=1)
 
 # =============================================================================
 # Drop down to select the derivative plot point density (dpd)
@@ -1089,7 +1099,7 @@ dpd_drop.grid(row=2, column=1)
 # =============================================================================
 
 tk.Label(right_frame, text='Zoom').grid(row=3, column=0)
-zoom_slider = tk.Scale(right_frame, from_=1, to=10, orient=tk.HORIZONTAL)
+zoom_slider = tk.Scale(right_frame, from_=1, to=50, orient=tk.HORIZONTAL)
 zoom_slider.grid(row=3, column=1)
 
 # return time to run
