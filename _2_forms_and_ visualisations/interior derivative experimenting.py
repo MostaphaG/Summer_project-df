@@ -371,7 +371,6 @@ def stack_plot(xg, yg, u, v, s_max, L, pt_den, fract, arrows='True', orientation
     plt.close()
 
 
-
 # define a function to plot the simplified 2 forms, with coloured squares
 def plot_form(form_2):
     # celar the currently present plot

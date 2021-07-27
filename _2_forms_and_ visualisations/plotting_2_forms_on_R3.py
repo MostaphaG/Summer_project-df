@@ -355,10 +355,8 @@ string_z = 'z*sin(x)'  # z component
 # to start with, set as viewing aling z axis onto x-y plane
 axis_view = 'z'
 
-# set the initial index along viewing axis
-# Note, I keep it called as z_index, even when viewing axis is changed to
-# x or y, it denotes height in the extra dimension
-z_index = 11
+# set the initial index of height of the viewed plane along viewing axis
+h_index = 11
 
 # set the dimensionality
 m = 3
@@ -428,8 +426,8 @@ colour_str = ['red', 'blue', 'grey']
 
 # plot the starting field with desired parameters as specidfied above
 # arrow params not needed as arrows arent plotted
-form_2_components_plot_3(xg, yg, z_index, axis_view, F_x, zero_field, s_max, L, pt_den, fract, colour_str)
-form_2_components_plot_3(xg, yg, z_index, axis_view, zero_field, F_y, s_max, L, pt_den, fract, colour_str)
+form_2_components_plot_3(xg, yg, h_index, axis_view, F_x, zero_field, s_max, L, pt_den, fract, colour_str)
+form_2_components_plot_3(xg, yg, h_index, axis_view, zero_field, F_y, s_max, L, pt_den, fract, colour_str)
 
 # reduce white space from the figure in the plot frame
 fig.tight_layout()
@@ -452,41 +450,39 @@ def on_key_press(event):
 
 
 # define a function to update z Index and redraw the plot based on the slider
-def slide():
-    global z_index
+def slide(var):
+    global h_index
     # extract current value from slider
-    z_index = slider_z.get()
+    h_index = slider_z.get()
     # remove the currently displayed plot
     ax.clear()
-    # replot the graph with that new z_index:
+    # replot the graph with that new h_index:
     if axis_view == 'z':
-        form_2_components_plot_3(xg, yg, z_index, axis_view, F_x, zero_field, s_max, L, pt_den, fract, colour_str)
-        form_2_components_plot_3(xg, yg, z_index, axis_view, zero_field, F_y, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot_3(xg, yg, h_index, axis_view, F_x, zero_field, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot_3(xg, yg, h_index, axis_view, zero_field, F_y, s_max, L, pt_den, fract, colour_str)
         ax.set_xlabel('$x$')
         ax.set_ylabel('$y$')
     elif axis_view == 'y':
-        form_2_components_plot_3(xg, zg, z_index, axis_view, F_x, zero_field, s_max, L, pt_den, fract, colour_str)
-        form_2_components_plot_3(xg, zg, z_index, axis_view, zero_field, F_z, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot_3(xg, zg, h_index, axis_view, F_x, zero_field, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot_3(xg, zg, h_index, axis_view, zero_field, F_z, s_max, L, pt_den, fract, colour_str)
         ax.set_xlabel('$x$')
         ax.set_ylabel('$z$')
     elif axis_view == 'x':
-        form_2_components_plot_3(yg, zg, z_index, axis_view, F_y, zero_field, s_max, L, pt_den, fract, colour_str)
-        form_2_components_plot_3(yg, zg, z_index, axis_view, zero_field, F_z, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot_3(yg, zg, h_index, axis_view, F_y, zero_field, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot_3(yg, zg, h_index, axis_view, zero_field, F_z, s_max, L, pt_den, fract, colour_str)
         ax.set_xlabel('$y$')
         ax.set_ylabel('$z$')
     # draw that onto the screen
     canvas.draw()
 
 
-# define a slider to update z_index
+# define a slider to update h_index
 slider_z = tk.Scale(root, from_ = 0, to=pt_den-1, orient=tk.HORIZONTAL)
+slider_z.bind("<ButtonRelease-1>", slide)  # bind the button to an event of releasing the mouse
+# updating in real time is too slow, but a button is clumsy
+# now the slider will update to a value that the mouse was released at
 slider_z.set(11)
 slider_z.grid(row = 1, column = 0)
-
-# because the slider updates are rather slow
-# define a button to submit the current slider value and commit it to code
-slider_submit_btn = tk.Button(root, text='update viewing axis', padx=5, pady=5, command=slide)
-slider_submit_btn.grid(row = 2, column = 0)
 
 
 # define a function that will repond to changing axis view with radiobuttons
@@ -498,18 +494,18 @@ def view_response(view_var):
     ax.clear()
     # draw the new plots, depending on the chosen viewing direction
     if axis_view == 'z':
-        form_2_components_plot_3(xg, yg, z_index, axis_view, F_x, zero_field, s_max, L, pt_den, fract, colour_str)
-        form_2_components_plot_3(xg, yg, z_index, axis_view, zero_field, F_y, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot_3(xg, yg, h_index, axis_view, F_x, zero_field, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot_3(xg, yg, h_index, axis_view, zero_field, F_y, s_max, L, pt_den, fract, colour_str)
         ax.set_xlabel('$x$')
         ax.set_ylabel('$y$')
     elif axis_view == 'y':
-        form_2_components_plot_3(xg, zg, z_index, axis_view, F_x, zero_field, s_max, L, pt_den, fract, colour_str)
-        form_2_components_plot_3(xg, zg, z_index, axis_view, zero_field, F_z, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot_3(xg, zg, h_index, axis_view, F_x, zero_field, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot_3(xg, zg, h_index, axis_view, zero_field, F_z, s_max, L, pt_den, fract, colour_str)
         ax.set_xlabel('$x$')
         ax.set_ylabel('$z$')
     elif axis_view == 'x':
-        form_2_components_plot_3(yg, zg, z_index, axis_view, F_y, zero_field, s_max, L, pt_den, fract, colour_str)
-        form_2_components_plot_3(yg, zg, z_index, axis_view, zero_field, F_z, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot_3(yg, zg, h_index, axis_view, F_y, zero_field, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot_3(yg, zg, h_index, axis_view, zero_field, F_z, s_max, L, pt_den, fract, colour_str)
         ax.set_xlabel('$y$')
         ax.set_ylabel('$z$')
     # draw that onto the screen
