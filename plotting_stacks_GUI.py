@@ -805,8 +805,7 @@ def deriv_calc(x_m, y_m):
     
     # Range and point density of the derivative plot
     d_range = 1.65/(zoom_slider.get())  
-    # d_length = d_length_select.get() 
-    d_length = 0.3
+    d_length = float(d_length_select.get())
     dpd = dpd_select.get()  
     d_scale = scale*(zoom_slider.get())
     
@@ -1104,13 +1103,14 @@ dpd_drop.grid(row=3, column=1)
 # Drop down to select inset axis size (d_length)
 # =============================================================================
 
-# d_length_select = tk.IntVar()
-# d_length_select.set(0.3)
-# d_length_list = [0.2,0.3,0.4]
+d_length_select = tk.StringVar()
+d_length_select.set('0.3')
+d_length = 0.3
+d_length_list = ['0.2','0.3','0.4']
 
-# tk.Label(right_frame,text='Select Inset Plot Size (inches):').grid(row=4, column=0)
-# d_length_drop = tk.OptionMenu(right_frame, d_length_select, *d_length_list)
-# d_length_drop.grid(row=4, column=1)
+tk.Label(right_frame,text='Select Inset Plot Size (inches):').grid(row=4, column=0)
+d_length_drop = tk.OptionMenu(right_frame, d_length_select, *d_length_list)
+d_length_drop.grid(row=4, column=1)
 
 # return time to run
 stop = timeit.default_timer()
