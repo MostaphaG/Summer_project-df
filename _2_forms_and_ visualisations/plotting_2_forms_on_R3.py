@@ -337,7 +337,7 @@ Set up all needed parameters, plots etc
 
 # define parameters of the axis
 L = 5
-pt_den = 21   # number of points on each axis
+pt_den = 17  # number of points on each axis
 
 # define x, y and z values
 x = np.linspace(-L, L, pt_den)
@@ -476,13 +476,19 @@ def slide(var):
     canvas.draw()
 
 
+# Label a slider
+tk.Label(root, text='index of plane along the viewing axis').grid(row=1, column=0)
 # define a slider to update h_index
-slider_z = tk.Scale(root, from_ = 0, to=pt_den-1, orient=tk.HORIZONTAL)
-slider_z.bind("<ButtonRelease-1>", slide)  # bind the button to an event of releasing the mouse
+slider_z = tk.Scale(root, from_ = 0, to=len(z)-1, orient=tk.HORIZONTAL)
+
+# bind the button to an event of releasing the mouse
+slider_z.bind("<ButtonRelease-1>", slide)
 # updating in real time is too slow, but a button is clumsy
 # now the slider will update to a value that the mouse was released at
-slider_z.set(11)
-slider_z.grid(row = 1, column = 0)
+
+# set the initial value and put the slider on the screen
+slider_z.set(z[0])
+slider_z.grid(row = 2, column = 0)
 
 
 # define a function that will repond to changing axis view with radiobuttons
