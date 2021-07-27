@@ -284,13 +284,13 @@ v = -xg*np.cos(yg)  # y component
 SET UP A LIST OF DEFAULT VECTOR FIELDS TO DISPLAY IN DROPDOWN MENU
 '''
 # list of names of fields to display
-field_name_list = ['default y*sin(x)i - x*cos(y)j',
-              'Simple pendulum yi  - sin(x)j',
-              'Harmonic oscillator yi -xj',
-              'linear field example_1 (14*x - 4*y)i + (-1*x + 4*y)j',
-              'linear field example_2 xi',
-              'constant field 6i + 3j',
-              'falling cat field (Planar 3 link robot)']
+field_name_list = ['Default: y*sin(x)i - x*cos(y)j',
+              'Simple pendulum: yi  - sin(x)j',
+              'Harmonic oscillator: yi -xj',
+              'Linear field example 1: (14*x - 4*y)i + (-1*x + 4*y)j',
+              'Linear field example 2: xi',
+              'Constant field: 6i + 3j',
+              'Falling cat field (Planar 3 link robot)']
 
 
 # list of x components, in order of field_name_list
@@ -421,8 +421,9 @@ def on_key_press(event):
         y_m = float(iy_plot)
         mpl.rcParams['toolbar'] = 'None'  # this does not do what it should yet
         deriv_calc(x_m, y_m)
-
-
+        
+# connect figure event to a function that responds to clicks, defined above
+fig.canvas.mpl_connect("button_press_event", on_key_press)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # define other needed functions, for input reponses
@@ -803,9 +804,10 @@ def deriv_calc(x_m, y_m):
     global i_m, j_m, deriv_inset_ax, dxg, dyg
     
     # Range and point density of the derivative plot
-    d_range = 1.65/(zoom_slider.get())  # both are to be changed by sliders later
-    d_length = 0.3  # both are to be changed by sliders later
-    dpd = dpd_select.get()  # get the point density from the dropdown menu
+    d_range = 1.65/(zoom_slider.get())  
+    # d_length = d_length_select.get() 
+    d_length = 0.3
+    dpd = dpd_select.get()  
     d_scale = scale*(zoom_slider.get())
     
     # Select index for the middle of the new derivative axis
@@ -1004,10 +1006,6 @@ def stack_plot_deriv(xg, yg, u, v, s_max, L, pt_den, fract, arrows, orientation,
 # set up the initial variable (code starts in option to use matplotlib tools)
 click_opt_int = 0
 
-# connect figure event to a function that responds to clicks, defined above
-fig.canvas.mpl_connect("button_press_event", on_key_press)
-
-
 # define a function that will update the variable that defines click action
 def click_option_handler(click_option):
     global click_opt_int
@@ -1063,10 +1061,10 @@ def format_eq_div(string):
     string = string.replace('yg', 'y_m')
     return string
 
-
 # =============================================================================
 # Radiobutton to select what happens when clicking the plot
 # =============================================================================
+
 click_option = tk.IntVar()
 click_option.set(0)
 
@@ -1083,6 +1081,14 @@ click_option_Div_btn.grid(row=1, column=0)
 click_option_Curl_btn.grid(row=1,column=1)
 
 # =============================================================================
+# Zooming window zoom slider
+# =============================================================================
+
+tk.Label(right_frame, text='Zoom').grid(row=2, column=0)
+zoom_slider = tk.Scale(right_frame, from_=1, to=50, orient=tk.HORIZONTAL)
+zoom_slider.grid(row=2, column=1)
+
+# =============================================================================
 # Drop down to select the derivative plot point density (dpd)
 # =============================================================================
 
@@ -1090,17 +1096,21 @@ dpd_select = tk.IntVar()
 dpd_select.set(5)
 dpd_list = [5,7,9]
 
-tk.Label(right_frame,text='Select Inset Plot Point Density:').grid(row=2, column=0)
+tk.Label(right_frame,text='Select Inset Plot Point Density:').grid(row=3, column=0)
 dpd_drop = tk.OptionMenu(right_frame, dpd_select, *dpd_list)
-dpd_drop.grid(row=2, column=1)
+dpd_drop.grid(row=3, column=1)
 
 # =============================================================================
-# Zooming window zoom slider
+# Drop down to select inset axis size (d_length)
 # =============================================================================
 
-tk.Label(right_frame, text='Zoom').grid(row=3, column=0)
-zoom_slider = tk.Scale(right_frame, from_=1, to=50, orient=tk.HORIZONTAL)
-zoom_slider.grid(row=3, column=1)
+# d_length_select = tk.IntVar()
+# d_length_select.set(0.3)
+# d_length_list = [0.2,0.3,0.4]
+
+# tk.Label(right_frame,text='Select Inset Plot Size (inches):').grid(row=4, column=0)
+# d_length_drop = tk.OptionMenu(right_frame, d_length_select, *d_length_list)
+# d_length_drop.grid(row=4, column=1)
 
 # return time to run
 stop = timeit.default_timer()
