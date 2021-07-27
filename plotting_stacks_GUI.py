@@ -997,8 +997,9 @@ def stack_plot_deriv(xg, yg, u, v, s_max, L, pt_den, fract, arrows, orientation,
 # set up the initial variable (code starts in option to use matplotlib tools)
 click_opt_int = 0
 
-# connect figure event to a function that responds to clicks, defined above, 
+# connect figure event to a function that responds to clicks, defined above
 fig.canvas.mpl_connect("button_press_event", on_key_press)
+
 
 # define a function that will update the variable that defines click action
 def click_option_handler(click_option):
@@ -1008,8 +1009,10 @@ def click_option_handler(click_option):
     # and for the the initial plot:
     if click_opt_int == 0:
         fig.canvas.draw()
-        
-def jacobian(m,u_str,v_str):
+
+
+
+def jacobian(m, u_str, v_str):
     
     # take the input strings and turn them into sympy expressions to be able to
     # use sympy's partial differentiation

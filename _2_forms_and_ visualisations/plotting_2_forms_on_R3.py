@@ -49,12 +49,13 @@ def format_eq(string):
 
 
 # define a function that takes input string that is python understood and turn into vector components:
-def eq_to_comps(string_x, string_y, string_z, xg, yg, zg):
-    global equation_x, equation_y, equation_z
+def eq_to_comps(equation_x, equation_y, equation_z, xg, yg, zg):
     # use this fucntion to replace given string to python understood equations:
-    equation_x = format_eq(string_x)
-    equation_y = format_eq(string_y)
-    equation_z = format_eq(string_z)
+    #equation_x = format_eq(string_x)
+    #equation_y = format_eq(string_y)
+    #equation_z = format_eq(string_z)
+    # want to use it on result here, therefore don't need to format
+    # result has already been formated
     # use these to define the field:
     # also: checking if equation equals zero, to then replace it with an array and not just 0:
     F_x = eval(equation_x)
@@ -347,9 +348,9 @@ z = np.linspace(-L, L, pt_den)
 xg, yg, zg = np.meshgrid(x, y, z)
 
 # define the wanted 1 form on R3 in terms of each component:
-string_x = 'x*sin(y*z)'  # x component
-string_y = 'y*cos(x)*sin(z)'  # y component
-string_z = '4*x*z*y**2'  # z component
+string_x = 'x*sin(y)'  # x component
+string_y = 'y*cos(z)'  # y component
+string_z = 'z*sin(x)'  # z component
 
 # to start with, set as viewing aling z axis onto x-y plane
 axis_view = 'z'
@@ -372,10 +373,6 @@ sympy_expr_z = parse_expr(string_z, evaluate=False)
 # combine the 2 into a list:
 expressions = np.array([sympy_expr_x, sympy_expr_y, sympy_expr_z])
 
-# evaluate the u and v given previously, with formating for them to be
-# python understood
-F_x, F_y, F_z = eq_to_comps(str(expressions[0]), str(expressions[1]), str(expressions[2]), xg, yg, zg)
-
 # use sympy partial derrivatives on these, as to get a 2-form on R2:
 # need to differentiate each component w.r.t the coordinates that it's
 # elementary 1 form does not contain.
@@ -385,6 +382,16 @@ coords = ['x', 'y', 'z']
 
 # from these, use the find_2_form function to get the 2 form
 form_2 = find_2_form(expressions, coords, pt_den, m)
+
+# because on R3, the x, y and z components are made up of
+# dx^dy, dx^dz and dy^dz, get the field components from those
+# these are given in the result, calculated in find_2_form.
+# Note, it is not assigned above, the function just makes that global
+F_x, F_y, F_z = eq_to_comps(str(result[2][0]), str(result[1][0]), str(result[0][0]), xg, yg, zg)
+
+# Note that that order on RHS is not standard because result gives
+# elemental 2 forms in order: dx^dy, dx^dz and dy^dz.
+# so the z component is first, then y and then x.
 
 # set up a zero vector filed to plot x and y components as 2 separate fields:
 zero_field = np.zeros(np.shape(xg))
