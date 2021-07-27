@@ -216,6 +216,162 @@ def form_2_components_plot(xg, yg, u, v, s_max, L, pt_den, fract, colour_str):
                     s += 1
 
 
+# define a function that will complete all stack plotting:
+# needed after using interior derivative on the 2 form
+# as that returns a 1 form - vector field.
+def stack_plot(xg, yg, u, v, s_max, L, pt_den, fract, arrows='True', orientation='mid', scale=1, w_head=1/8, h_head=1/4):
+    # get the lengths of x and y from their grids
+    x_len = len(xg[:, 0])
+    y_len = len(yg[0, :])
+    
+    # Scaling of axes and setting equal proportions circles look like circles
+    ax.set_aspect('equal')
+    ax_L = L + L/delta_factor
+    ax.set_xlim(-ax_L, ax_L)
+    ax.set_ylim(-ax_L, ax_L)
+    
+    # define an empty array of magnitudes, to then fill with integer rel. mags
+    R_int = np.zeros(shape=((x_len), (y_len)))
+    
+    # #########################################################################
+    # plot the initial quiver plot to work from
+    # #########################################################################
+    
+    # plot the quiver plot on grid points if chosen in original function
+    if arrows is True:
+        ax.quiver(xg, yg, u, v, pivot=orientation, scale=scale, scale_units='xy')
+    else:
+        pass
+    
+    # #########################################################################
+    # get variables needed for the initial, simplified stack plot
+    # #########################################################################
+    # find the arrow length corresponding to each point and store in mag array
+    mag = np.sqrt(u**2 + v**2)
+    # find direction of each arrow
+    theta = np.arctan2(v, u)   # theta defined from positive x axis ccw
+    
+    # #########################################################################
+    # use the the direction of arrows to define stack properties
+    # #########################################################################
+    
+    # define length of sheet as a fraction of total graph scale
+    sheet_L = L*fract
+    # set up the max, total height of stack (along arrow)
+    s_L = fract*L
+    
+    # #########################################################################
+    # define the stacks based on geometrical arguments
+    # to be perp. to arrow. shifted parallel to it, their density porp to mag
+    # of the arrow and with an arrowhead on top.
+    # #########################################################################
+    # find the maximum magnitude for scaling
+    max_size = np.max(mag)   # careful with singularities, else ---> nan
+    
+    # find the relative magnitude of vectors to maximum, as an array
+    R = mag/max_size
+    
+    # define tigonometirc shifts
+    I_sin = np.sin(theta)
+    I_cos = np.cos(theta)
+    
+    # define the points that set out a line of the stack sheet (middle line)
+    A_x = xg + (sheet_L/2)*I_sin
+    A_y = yg - (sheet_L/2)*I_cos
+    B_x = xg - (sheet_L/2)*I_sin
+    B_y = yg + (sheet_L/2)*I_cos
+    
+    # define points of stack arrowheads as arrays for all stacks
+    p_sh1x = xg + (s_L/2)*I_cos + (sheet_L*w_head)*I_sin
+    p_sh1y = yg + (s_L/2)*I_sin - (sheet_L*w_head)*I_cos
+    p_sh2x = xg + (s_L/2)*I_cos - (sheet_L*w_head)*I_sin
+    p_sh2y = yg + (s_L/2)*I_sin + (sheet_L*w_head)*I_cos
+    p_sh3x = xg + (s_L*0.5 + s_L*h_head)*I_cos
+    p_sh3y = yg + (s_L*0.5 + s_L*h_head)*I_sin
+    
+    # define these for when there is only 1 line in the stack plot:
+    P_sh1x = xg + (sheet_L*w_head)*I_sin
+    P_sh1y = yg - (sheet_L*w_head)*I_cos
+    P_sh2x = xg - (sheet_L*w_head)*I_sin
+    P_sh2y = yg + (sheet_L*w_head)*I_cos
+    P_sh3x = xg + (s_L*h_head)*I_cos
+    P_sh3y = yg + (s_L*h_head)*I_sin
+    
+    # loop over each arrow coordinate in x and y
+    for i in range(x_len):
+        for j in range(y_len):
+            # define it for all magnitudes. Separately for odd and even corr. number of sheets:
+            # Label each element with the number of stacks required: linear scaling
+            for t in range(1, s_max+1):
+                if (t-1)/s_max <= R[i, j] <= t/s_max:
+                    R_int[i, j] = t
+            # set a varible for current considered magnitude as it is reused
+            # avoids extracting from R many times.
+            n = R_int[i, j]
+            
+            # deal with even number of sheets from magnitudes:
+            if parity(n) is True:
+                # define a parameter to loop over in the recursion equation
+                s = 0
+                
+                # Define the points for sheets required for the given magnitude
+                # from these define all the needed lines and plot them
+                while s <= 0.5*(n-2):  # maximum set by equations (documentation)
+                    # define all the points for the 2 currently looped +- sheets in while loop
+                    Ax1 = A_x[i, j] + G(s, n, 0)*s_L*I_cos[i, j]
+                    Ay1 = A_y[i, j] + G(s, n, 0)*s_L*I_sin[i, j]
+                    Bx1 = B_x[i, j] + G(s, n, 0)*s_L*I_cos[i, j]
+                    By1 = B_y[i, j] + G(s, n, 0)*s_L*I_sin[i, j]
+                    Ax2 = A_x[i, j] - G(s, n, 0)*s_L*I_cos[i, j]
+                    Ay2 = A_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
+                    Bx2 = B_x[i, j] - G(s, n, 0)*s_L*I_cos[i, j]
+                    By2 = B_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
+                    
+                    # from these, define the 2 lines, for this run
+                    ax.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=1, color='green'))
+                    ax.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=1, color='green'))
+                    
+                    # update parameter to reapet and draw all needed arrows
+                    s += 1
+            # deal with the odd number of stacks:
+            elif parity(n) is False:
+                # Add the centre line for odd numbers of stacks
+                ax.add_line(Line2D((A_x[i, j], B_x[i, j]), (A_y[i, j], B_y[i, j]), linewidth=1, color='green'))
+                
+                # then loop over the remaining lines as per the recursion formula:
+                s = 1  # change the looping parametr to exclude already completed 0 (corr. to middle sheet here)
+                
+                # define all remaining sheets for the magnitude:
+                while s <= 0.5*(n-1):  # maximum set by equations (documentation)
+                    # define all the points for the current +- displacement in while loop
+                    Ax1 = A_x[i, j] + G(s, n, 1)*s_L*I_cos[i, j]
+                    Ay1 = A_y[i, j] + G(s, n, 1)*s_L*I_sin[i, j]
+                    Bx1 = B_x[i, j] + G(s, n, 1)*s_L*I_cos[i, j]
+                    By1 = B_y[i, j] + G(s, n, 1)*s_L*I_sin[i, j]
+                    Ax2 = A_x[i, j] - G(s, n, 1)*s_L*I_cos[i, j]
+                    Ay2 = A_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
+                    Bx2 = B_x[i, j] - G(s, n, 1)*s_L*I_cos[i, j]
+                    By2 = B_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
+                    
+                    # from these, define the 2 displaced lines
+                    ax.add_line(Line2D((Ax1,Bx1),(Ay1,By1), linewidth=1, color='green'))
+                    ax.add_line(Line2D((Ax2,Bx2),(Ay2,By2), linewidth=1, color='green'))
+                    
+                    # change the parameter to loop over all changes in displacement for current magnitude
+                    s += 1
+            # plot lines of arrowheads from central sheet for n = 1 or on top sheet for n>1 
+            if n > 1:   # for all lines ubt the single sheet one
+                ax.add_line(Line2D((p_sh1x[i, j],p_sh3x[i, j]),(p_sh1y[i, j],p_sh3y[i, j]), linewidth=1, color='green'))
+                ax.add_line(Line2D((p_sh2x[i, j],p_sh3x[i, j]),((p_sh2y[i, j],p_sh3y[i, j])), linewidth=1, color='green'))
+            # then define it for the stacks with only 1 sheet:
+            else:
+                ax.add_line(Line2D((P_sh1x[i, j], P_sh3x[i, j]), (P_sh1y[i, j], P_sh3y[i, j]), linewidth=1, color='green'))
+                ax.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color='green'))
+                
+    plt.close()
+
+
+
 # define a function to plot the simplified 2 forms, with coloured squares
 def plot_form(form_2):
     # celar the currently present plot
@@ -259,6 +415,7 @@ def plot_form(form_2):
 
 # define a function that will find the 2 form from given expressions
 # in a given number of dimensions and in terms of given coordinate symbols
+# here it is only needed on R2 in terms of 'x' and 'y'.
 def find_2_form(expressions, coords, m=2):
     global ext_ds, result
     # define a sympy expression for string 0
@@ -385,7 +542,7 @@ def on_key_press(event):
 tk.Label(root, text='2 form on R2').grid(row=1, column=0)
 form_2_entry = tk.Entry(root, width=20, borderwidth=2)
 form_2_entry.grid(row=2, column=0)
-form_2_entry.insert(0, 'x*y**2')
+form_2_entry.insert(0, 'sin(x*y)')
 
 '''
 
@@ -396,7 +553,7 @@ Define needed parameters and expressions
 
 # define scale of the graph
 L = 5
-pt_den = 30   # number of points on each axis
+pt_den = 21   # number of points on each axis
 
 # with L, correct the axis and redraw
 delta_factor = 10
@@ -415,7 +572,7 @@ xg, yg = np.meshgrid(x, y)
 m = 2
 
 # define the 2 form components to each elementary 2 form on R^m
-string_1 = 'x*y**2'  # dx^dy component
+string_1 = 'sin(x*y)'  # dx^dy component
 
 # define the initial 2 form, in terms of a string, equation and numerically
 form_2_str = string_1
@@ -456,7 +613,7 @@ define needed functions for responses
 
 # define a function that will respond to submitting the 2 form:
 def Submit_form():
-    global form_2_str, form_2_eq, form_2_sgn
+    global form_2_str, form_2_eq, form_2, form_2_sgn
     form_2_str = str(form_2_entry.get())
     # format it to be python understood
     form_2_eq = format_eq(form_2_str)
@@ -481,11 +638,12 @@ def Int_deriv_R2():
     u_str = '-' + form_2_str
     v_str = form_2_str
     # use the stacks plotter to present this
-    form_2_components_plot(xg, yg, u, v, s_max, L, pt_den, fract, colour_str)
+    stack_plot(xg, yg, u, v, s_max, L, pt_den, fract, False)
     canvas.draw()
 
 
 def Ext_deriv_R2():
+    global form_2_sgn
     # celar current axis
     ax.clear()
     # from found u and v in the interior derivative, set up sympy components
