@@ -46,6 +46,7 @@ def format_eq(string):
     string = string.replace('tan', 'np.tan')
     string = string.replace('^', '**')
     string = string.replace('ln', 'np.log')
+    string = string.replace('log', 'np.log')
     return string
 
 
