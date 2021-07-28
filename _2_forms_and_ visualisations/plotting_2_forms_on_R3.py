@@ -31,6 +31,7 @@ root.geometry('1000x800')
 plot_frame = tk.LabelFrame(root, text='plot Frame', padx=5, pady=5)
 plot_frame.grid(row=0, column=0)
 
+
 # define a function to replace input string to be 'python understood'
 def format_eq(string):
     # replace all the x and y with xg and yg:
@@ -44,18 +45,16 @@ def format_eq(string):
     string = string.replace('cos', 'np.cos')
     string = string.replace('tan', 'np.tan')
     string = string.replace('^', '**')
-    string = string.replace('ln', 'np.log')        
+    string = string.replace('ln', 'np.log')
     return string
 
 
 # define a function that takes input string that is python understood and turn into vector components:
 def eq_to_comps(equation_x, equation_y, equation_z, xg, yg, zg):
     # use this fucntion to replace given string to python understood equations:
-    #equation_x = format_eq(string_x)
-    #equation_y = format_eq(string_y)
-    #equation_z = format_eq(string_z)
-    # want to use it on result here, therefore don't need to format
-    # result has already been formated
+    equation_x = format_eq(string_x)
+    equation_y = format_eq(string_y)
+    equation_z = format_eq(string_z)
     # use these to define the field:
     # also: checking if equation equals zero, to then replace it with an array and not just 0:
     F_x = eval(equation_x)
@@ -131,6 +130,9 @@ def find_2_form(expressions, coords, pt_den, m=3):
             # update the result row counter
             pair += 1
     # format string in each result row
+    # making sure to format it correctly even if it contains constants or '0'
+    # this is done if result is to be directly used later for any reason
+    # instead of form_2 numerically.
     for d in range(pair):
         if result[d, 0].find('x') & result[d, 0].find('y') & result[d, 0].find('z') == -1:
             if result[d, 0] == '':
@@ -390,10 +392,11 @@ coords = ['x', 'y', 'z']
 form_2 = find_2_form(expressions, coords, pt_den, m)
 
 # because on R3, the x, y and z components are made up of
-# dx^dy, dx^dz and dy^dz, get the field components from those
-# these are given in the result, calculated in find_2_form.
-# Note, it is not assigned above, the function just makes that global
-F_x, F_y, F_z = eq_to_comps(str(result[2][0]), str(result[1][0]), str(result[0][0]), xg, yg, zg)
+# dy^dz, dx^dz and dx^dy
+# need to superpose stacks from the x y and z fields (depending on viewing)
+# the filed will point in the extra dimension, or by polar sense
+# will be defined in plane based on orientation of stacks. Indicated by colour
+F_x, F_y, F_z = eq_to_comps(str(expressions[0]), str(expressions[1]), str(expressions[2]), xg, yg, zg)
 
 # Note that that order on RHS is not standard because result gives
 # elemental 2 forms in order: dx^dy, dx^dz and dy^dz.
@@ -496,12 +499,12 @@ slider_z.bind("<ButtonRelease-1>", slide)
 
 # set the initial value and put the slider on the screen
 slider_z.set(z[0])
-slider_z.grid(row = 2, column = 0)
+slider_z.grid(row=2, column=0)
 
 
 # define a function that will repond to changing axis view with radiobuttons
 def view_response(view_var):
-    #get and make global the axis view variable
+    # get and make global the axis view variable
     global axis_view
     axis_view = view_tk.get()
     # clear the current plot
