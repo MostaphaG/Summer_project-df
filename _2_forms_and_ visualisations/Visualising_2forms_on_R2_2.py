@@ -117,9 +117,20 @@ def find_2_form(expressions, coords, m=2):
             # update the result row counter
             pair += 1
     # format string in each result row
+    # making sure to format it correctly even if it contains constants or '0'
+    # this is done if result is to be directly used later for any reason
+    # instead of form_2 numerically.
     for d in range(pair):
-        # format the result to be 'python understood' to be able to use the eval()
-        result[d, 0] = format_eq(result[d, 0])
+        if result[d, 0].find('x') & result[d, 0].find('y') & result[d, 0].find('z') == -1:
+            if result[d, 0] == '':
+                result[d, 0] = '0*x'  # no need for unit field, as it is * by 0
+                result[d, 0] = format_eq(result[d, 0])
+            else:
+                result[d, 0] = '(' + result[d, 0] + ')* field_unit'
+                result[d, 0] = format_eq(result[d, 0])
+        else:
+            # format the result to be 'python understood' to be able to use the eval()
+            result[d, 0] = format_eq(result[d, 0])
     
     # set up a vector to store the 2 form numerically, from xg and yg
     form_2 = np.empty((len(result[:, 0]), pt_den, pt_den))    # Note - need pt_den m times.

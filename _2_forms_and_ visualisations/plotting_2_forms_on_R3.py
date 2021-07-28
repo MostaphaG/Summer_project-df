@@ -137,10 +137,10 @@ def find_2_form(expressions, coords, pt_den, m=3):
     for d in range(pair):
         if result[d, 0].find('x') & result[d, 0].find('y') & result[d, 0].find('z') == -1:
             if result[d, 0] == '':
-                result[d, 0] = '0*x'
+                result[d, 0] = '0*x'  # no need for unit field, as it is * by 0
                 result[d, 0] = format_eq(result[d, 0])
             else:
-                result[d, 0] = '(' + result[d, 0] + ')*x'
+                result[d, 0] = '(' + result[d, 0] + ')* field_unit'
                 result[d, 0] = format_eq(result[d, 0])
         else:
             # format the result to be 'python understood' to be able to use the eval()
@@ -361,7 +361,7 @@ xg, yg, zg = np.meshgrid(x, y, z)
 # define the wanted 1 form on R3 in terms of each component:
 string_x = 'x*sin(y)'  # x component
 string_y = 'y*cos(x)'  # y component
-string_z = '0'  # z component
+string_z = '3'  # z component
 
 # to start with, set as viewing aling z axis onto x-y plane
 axis_view = 'z'
@@ -405,6 +405,9 @@ F_x, F_y, F_z = eq_to_comps(str(expressions[0]), str(expressions[1]), str(expres
 
 # set up a zero vector filed to plot x and y components as 2 separate fields:
 zero_field = np.zeros(np.shape(xg))
+
+# define an array of ones of the correct size in case result in needed with correct magnitude
+field_unit = np.ones(np.shape(zg))
 
 # set up the delta_factor of additional axis space L/delta_factor gives extra space on axis
 delta_factor = 10

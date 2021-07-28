@@ -28,7 +28,7 @@ Define initially needed functions
 
 # function make variables python understood
 def format_eq(string):
-    # replace all the x and y with xg and yg:
+    # replace all the x and y etc. with xg and yg ... :
     string = string.replace('x', 'xg')
     string = string.replace('y', 'yg')
     string = string.replace('z', 'zg')
@@ -43,8 +43,32 @@ def format_eq(string):
     string = string.replace('arcta', 'np.arctan2')
     string = string.replace('^', '**')
     string = string.replace('ln', 'np.log')
+    string = string.replace('log', 'np.log')
     string = string.replace('e^', 'np.exp')
     return string
+
+
+# define a function to change format back to something we can display
+def unformat(string):
+        # replace all the xg and yg etc. with x and y:
+    string = string.replace('xg', 'x')
+    string = string.replace('yg', 'y')
+    string = string.replace('zg', 'z')
+    string = string.replace('rg', 'R')  # otherwise: sqrt won't work, becaue of the r in it &arctan won't work because of tan in it and the r in it.
+    string = string.replace('thetag', 'theta')
+    # where there are special functions, replace them with library directions
+    string = string.replace('np.pi', 'pi')
+    string = string.replace('np.sqrt', 'sqrt')
+    string = string.replace('np.sin', 'sin')
+    string = string.replace('np.cos', 'cos')
+    string = string.replace('np.tan', 'tan')
+    string = string.replace('np.arctan2', 'arcta')
+    string = string.replace('**', '^')
+    string = string.replace('np.log', 'ln')
+    string = string.replace('np.exp', 'e^')
+    string = string.replace('* field_unit', '')
+    return string
+
 
 
 # define a function that takes input string that is python understood and turn into vector components:
@@ -473,9 +497,20 @@ def find_2_form(expressions, coords, m=2):
             # update the result row counter
             pair += 1
     # format string in each result row
+    # making sure to format it correctly even if it contains constants or '0'
+    # this is done if result is to be directly used later for any reason
+    # instead of form_2 numerically.
     for d in range(pair):
-        # format the result to be 'python understood' to be able to use the eval()
-        result[d, 0] = format_eq(result[d, 0])
+        if result[d, 0].find('x') & result[d, 0].find('y') & result[d, 0].find('z') == -1:
+            if result[d, 0] == '':
+                result[d, 0] = '0*x'  # no need for unit field, as it is * by 0
+                result[d, 0] = format_eq(result[d, 0])
+            else:
+                result[d, 0] = '(' + result[d, 0] + ')* field_unit'
+                result[d, 0] = format_eq(result[d, 0])
+        else:
+            # format the result to be 'python understood' to be able to use the eval()
+            result[d, 0] = format_eq(result[d, 0])
     
     # set up a vector to store the 2 form numerically, from xg and yg
     form_2 = np.empty((len(result[:, 0]), pt_den, pt_den))    # Note - need pt_den m times.
@@ -603,6 +638,14 @@ s_max = 5
 # set up a zero vector filed to plot x and y components as 2 separate fields:
 zero_field = np.zeros(np.shape(xg))
 
+# define an array of ones of the correct size in case result in needed with correct magnitude
+field_unit = np.ones(np.shape(xg))
+
+# define the initial label that will configure after evaluating ext deriv
+# to show its actual result, and how it is different from the original 2 form
+new_form_text = tk.Label(right_frame, text='')
+new_form_text.grid(row=3, column=0)
+
 '''
 
 define needed functions for responses
@@ -616,8 +659,10 @@ def Submit_form():
     form_2_str = str(form_2_entry.get())
     # format it to be python understood
     form_2_eq = format_eq(form_2_str)
-    # get the numerical evaluation of it
+    # evalue it numerically, bearing in mind constant fields and zeros:
     form_2 = eval(form_2_eq)
+    if np.size(form_2) == 1:
+        form_2 *= field_unit
     # get the signs of thsi new 2 form
     form_2_sgn = np.sign(form_2)
     # plot the new form using the previously define funtion
@@ -634,7 +679,7 @@ def Int_deriv_R2():
     u = -form_2
     v = form_2
     # to be usable in ext_deriv, define strings of these variables
-    u_str = '-' + form_2_str
+    u_str = '-(' + form_2_str + ')'
     v_str = form_2_str
     # use the stacks plotter to present this
     stack_plot(xg, yg, u, v, s_max, L, pt_den, fract, False)
@@ -661,9 +706,13 @@ def Ext_deriv_R2():
     u, v = eq_to_comps(str(expressions[0]), str(expressions[1]), xg, yg)
     # plot the fields with desired parameters as specidfied above
     # arrow params not needed as arrows arent plotted
+    # NOTE -- these fields are not the original components that the 2 form came from
     form_2_components_plot(xg, yg, u, zero_field, s_max, L, pt_den, fract, colour_str)
     form_2_components_plot(xg, yg, zero_field, v, s_max, L, pt_den, fract, colour_str)
-    # these fields are the original components
+    # display the actual 2 form that this produces:
+    tk.Label(right_frame, text='2 form from the exterior derivative:').grid(row=2, column=0)
+    new_form_text.configure(text=unformat(str(result[0][0])))
+    # put it onto the GUI canvas
     canvas.draw()
 
 
