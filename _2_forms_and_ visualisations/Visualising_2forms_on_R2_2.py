@@ -290,7 +290,7 @@ Set up all needed parameters, plots etc and complete the 2 form figure for the g
 
 # define scale of the graph
 L = 5
-pt_den = 20   # number of points on each axis
+pt_den = 21   # number of points on each axis
 
 # define x and y values
 x = np.linspace(-L, L, pt_den)

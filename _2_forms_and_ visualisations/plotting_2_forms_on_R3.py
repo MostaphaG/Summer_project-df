@@ -347,7 +347,7 @@ Set up all needed parameters, plots etc
 
 # define parameters of the axis
 L = 5
-pt_den = 17  # number of points on each axis
+pt_den = 21  # number of points on each axis
 
 # define x, y and z values
 x = np.linspace(-L, L, pt_den)
