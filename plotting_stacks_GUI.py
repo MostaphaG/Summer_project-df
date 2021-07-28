@@ -45,10 +45,10 @@ def G(s, n, c):
     else:
         return (s/(n-1))
 
-
 # define a function that will complete all stack plotting:
-def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows='True', orientation='mid', scale=1, w_head=1/8, h_head=1/4):
+def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head=1/8, h_head=1/4):
     # get the lengths of x and y from their grids
+    
     x_len = len(xg[:, 0])
     y_len = len(yg[0, :])
     
@@ -61,16 +61,19 @@ def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows='True', orienta
     # define an empty array of magnitudes, to then fill with integer rel. mags
     R_int = np.zeros(shape=((x_len), (y_len)))
     
+
+    
     # #########################################################################
     # plot the initial quiver plot to work from
     # #########################################################################
-    
+
+        
     # plot the quiver plot on grid points if chosen in original function
     if arrows is True:
         ax.quiver(xg, yg, u, v, pivot=orientation, scale=scale, scale_units='xy')
     else:
         pass
-    
+  
     # #########################################################################
     # get variables needed for the initial, simplified stack plot
     # #########################################################################
@@ -97,7 +100,7 @@ def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows='True', orienta
     max_size = np.max(mag)   # careful with singularities, else ---> nan
     
     # find the relative magnitude of vectors to maximum, as an array
-    R = mag/max_size
+    R = mag/max_size    
     
     # define tigonometirc shifts
     I_sin = np.sin(theta)
@@ -277,8 +280,6 @@ xg, yg = np.meshgrid(x, y)
 u = yg*np.sin(xg)  # x component
 v = -xg*np.cos(yg)  # y component
 # for no dependance in any initial component, use : np.zeros(np.shape(xg)) or yg
-
-
 
 '''
 SET UP A LIST OF DEFAULT VECTOR FIELDS TO DISPLAY IN DROPDOWN MENU
@@ -809,8 +810,8 @@ y_m = float(0)
 def deriv_calc(x_m, y_m):
     global i_m, j_m, deriv_inset_ax
     
-    # Range and point density of the derivative plot
-    d_range = 1.65/(zoom_slider.get())  
+    # Range and point density of the derivative plot   
+    d_range = 0.33*L/(zoom_slider.get())  
     d_length = d_length_select.get()
     dpd = dpd_select.get()  
     d_scale = scale*(zoom_slider.get())
@@ -1016,7 +1017,6 @@ click_opt_int = 0
 def click_option_handler(click_option):
     global click_opt_int
     click_opt_int = click_option
-    print(click_opt_int)
     # and for the the initial plot:
     if click_opt_int == 0:
         fig.canvas.draw()
@@ -1043,7 +1043,6 @@ def jacobian(m, u_str, v_str):
     
     # combine the 2 intoa list:
     expressions = np.array([sympy_expr_x, sympy_expr_y])
-    print(expressions)
     
     # set up an array to store derrivatives.
     J = np.empty((m, m), dtype='object')
