@@ -51,7 +51,7 @@ def format_eq(string):
 
 
 # define a function that takes input string that is python understood and turn into vector components:
-def eq_to_comps(equation_x, equation_y, equation_z, xg, yg, zg):
+def eq_to_comps(string_x, string_y, string_z, xg, yg, zg):
     # use this fucntion to replace given string to python understood equations:
     equation_x = format_eq(string_x)
     equation_y = format_eq(string_y)
@@ -194,16 +194,16 @@ def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L,
     elif axis_view == 'y':
         grid_x = grid_x[h_index, :, :]
         grid_y = grid_y[h_index, :, :]
-        u = u[:, h_index, :]
-        v = v[:, h_index, :]
+        u = u[h_index, :, :]
+        v = v[h_index, :, :]
     elif axis_view == 'x':
         grid_x = grid_x[:, h_index, :]
         grid_y = grid_y[:, h_index, :]
-        u = u[h_index, :, :]
-        v = v[h_index, :, :]
+        u = u[:, h_index, :]
+        v = v[:, h_index, :]
     else:
         print('Error can\'t find this axis')
-    
+
     # get axis lengths:
     x_len = len(grid_x[:, 0])  # no need to change with axis_view
     y_len = len(grid_y[0, :])  # if grids are all same size
