@@ -290,7 +290,9 @@ field_name_list = ['Default: y*sin(x)i - x*cos(y)j',
               'Linear field example 1: (14*x - 4*y)i + (-1*x + 4*y)j',
               'Linear field example 2: xi',
               'Constant field: 6i + 3j',
-              'Falling cat field (Planar 3 link robot)']
+              'Falling cat field (Planar 3 link robot)',
+              'Gravitational/Electric Point Charge: -x/(x**2+y**2)i + -y/(x**2+y**2)j'
+              ]
 
 
 # list of x components, in order of field_name_list
@@ -300,7 +302,9 @@ field_x_list = ['y*sin(x)',
                 '14*x - 4*y',
                 'x',
                 '6',
-                '(3*cos(y) + 4)/(15 + 6*cos(x) + 6*cos(y))']
+                '(3*cos(y) + 4)/(15 + 6*cos(x) + 6*cos(y))',
+                '-x/(x**2+y**2)'
+                ]
 
 
 # list of y components, in order of field_name_list
@@ -310,7 +314,9 @@ field_y_list = ['- x*cos(y)',
                 '(-1*x + 4*y)',
                 '0',
                 '3',
-                '-(3*cos(x) + 4)/(15 + 6*cos(x) + 6*cos(y))']
+                '-(3*cos(x) + 4)/(15 + 6*cos(x) + 6*cos(y))',
+                '-y/(x**2+y**2)'
+                ]
 
 
 # set up quiver factors
@@ -801,7 +807,7 @@ y_m = float(0)
 
 # define a function that will calculate the local, geometrical derivative
 def deriv_calc(x_m, y_m):
-    global i_m, j_m, deriv_inset_ax, dxg, dyg
+    global i_m, j_m, deriv_inset_ax
     
     # Range and point density of the derivative plot
     d_range = 1.65/(zoom_slider.get())  
@@ -1024,6 +1030,11 @@ def click_option_handler(click_option):
 def jacobian(m, u_str, v_str):
     # take the input strings and turn them into sympy expressions to be able to
     # use sympy's partial differentiation
+    
+    u_str = u_str.replace('^','**')
+    v_str = v_str.replace('^','**')
+    
+    
     sympy_expr_x = parse_expr(u_str, evaluate=False)
     sympy_expr_y = parse_expr(v_str, evaluate=False)
     
@@ -1032,6 +1043,7 @@ def jacobian(m, u_str, v_str):
     
     # combine the 2 intoa list:
     expressions = np.array([sympy_expr_x, sympy_expr_y])
+    print(expressions)
     
     # set up an array to store derrivatives.
     J = np.empty((m, m), dtype='object')
