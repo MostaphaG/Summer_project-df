@@ -471,39 +471,52 @@ def slide(var):
     h_index = slider_z.get()
     # remove the currently displayed plot
     ax.clear()
-    # replot the graph with that new h_index:
+    # replot the graph with that new h_index
+    # and change the label under the slider to be the value of the chosen axis at that h_index
     if axis_view == 'z':
         form_2_components_plot_3(xg, yg, h_index, axis_view, F_x, zero_field, s_max, L, pt_den, fract, colour_str)
         form_2_components_plot_3(xg, yg, h_index, axis_view, zero_field, F_y, s_max, L, pt_den, fract, colour_str)
         ax.set_xlabel('$x$')
         ax.set_ylabel('$y$')
+        slider_val_text.configure(text=str(z[h_index]))
     elif axis_view == 'y':
         form_2_components_plot_3(xg, zg, h_index, axis_view, F_x, zero_field, s_max, L, pt_den, fract, colour_str)
         form_2_components_plot_3(xg, zg, h_index, axis_view, zero_field, F_z, s_max, L, pt_den, fract, colour_str)
         ax.set_xlabel('$x$')
         ax.set_ylabel('$z$')
+        slider_val_text.configure(text=str(y[h_index]))
     elif axis_view == 'x':
         form_2_components_plot_3(yg, zg, h_index, axis_view, F_y, zero_field, s_max, L, pt_den, fract, colour_str)
         form_2_components_plot_3(yg, zg, h_index, axis_view, zero_field, F_z, s_max, L, pt_den, fract, colour_str)
         ax.set_xlabel('$y$')
         ax.set_ylabel('$z$')
+        slider_val_text.configure(text=str(x[h_index]))
     # draw that onto the screen
     canvas.draw()
 
 
-# Label a slider
-tk.Label(root, text='index of plane along the viewing axis').grid(row=1, column=0)
-# define a slider to update h_index
-slider_z = tk.Scale(root, from_ = 0, to=len(z)-1, orient=tk.HORIZONTAL)
+# Label the slider values - indexes, which display above
+tk.Label(root, text='index of viewed plane along the viewing axis').grid(row=1, column=0)
+# define a slider to update h_index but display values, instead for easier reading
+slider_z = tk.Scale(root, from_=0, to=len(z)-1, orient=tk.HORIZONTAL)
+
+# set the initial value and put the slider on the screen
+slider_z.set(z[0])
+slider_z.grid(row=2, column=0, pady=0)
+
+
+# Label number that will display below, the height along viewing axis
+tk.Label(root, text='index of viewed plane along the viewing axis').grid(row=3, column=0)
+
+# because the slider shows indexes in real time
+# to show current value after selection, produce an initial label to later config
+slider_val_text = tk.Label(root, text=str(slider_z.get()))
+slider_val_text.grid(row=4, column=0)
 
 # bind the button to an event of releasing the mouse
 slider_z.bind("<ButtonRelease-1>", slide)
 # updating in real time is too slow, but a button is clumsy
 # now the slider will update to a value that the mouse was released at
-
-# set the initial value and put the slider on the screen
-slider_z.set(z[0])
-slider_z.grid(row=2, column=0)
 
 
 # define a function that will repond to changing axis view with radiobuttons
