@@ -339,6 +339,9 @@ expressions = np.array([sympy_expr_x, sympy_expr_y])
 # set up an array of coordinates that need to be used (in standard order)
 coords = ['x', 'y']
 
+# define a unit field so that code deals with constant fields
+field_unit = np.ones(np.shape(xg))  # need it here cuz its used in eq_to_comps and in find_2_form
+
 # from these, use the find_2_form function to get the 2 form
 form_2 = find_2_form(expressions, coords, m)
 
@@ -387,6 +390,10 @@ colour_str = ['red', 'blue', 'grey']
 form_2_components_plot(xg, yg, u, zero_field, s_max, L, pt_den, fract, colour_str)
 form_2_components_plot(xg, yg, zero_field, v, s_max, L, pt_den, fract, colour_str)
 # these fields are the original components
+
+# %%
+
+# Does not work for constant and linear fields, wrong shapes of arrays.
 
 # Create new figure for 2-form contour/surface plots
 fig1 = plt.figure()
