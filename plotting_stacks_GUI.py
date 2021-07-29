@@ -45,7 +45,7 @@ def G(s, n, c):
         return (s/(n-1))
 
 # define a function that will complete all stack plotting:
-def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head=1/8, h_head=1/4, axis_check=0):
+def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, orientation='mid', scale=1, w_head=1/8, h_head=1/4, axis_check=0):
     # get the lengths of x and y from their grids
     
     x_len = len(xg[:, 0])
@@ -65,6 +65,12 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows, orientation,
         else:
             axis.set_xlim(-L+x_m-L/5, L+x_m+L/5)
             axis.set_ylim(-L+y_m-L/5, L+y_m+L/5)
+    else:
+        # redefine axis limits here, as: before plotting a new figure, axis
+        # are cleared, it will rescale itself back to (0, 0), (1, 1) otherwise
+        ax_L = L + L/delta_factor
+        axis.set_xlim(-ax_L, ax_L)
+        axis.set_ylim(-ax_L, ax_L) 
     
     # define an empty array of magnitudes, to then fill with integer rel. mags
     R_int = np.zeros(shape=((x_len), (y_len)))
@@ -808,7 +814,7 @@ field_select_drop.bind("<<ComboboxSelected>>", field_selection_response)
 #     fig.canvas.draw()
 #     deriv_inset_ax.clear()
 #     deriv_inset_ax.remove()
-    
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Derivative Plot
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -821,12 +827,12 @@ y_m = float(0)
 
 # define a function that will calculate the local, geometrical derivative
 def deriv_calc(x_m, y_m):
-    global i_m, j_m#, deriv_inset_ax
+    global i_m, j_m  # deriv_inset_ax
     
-    # Range and point density of the derivative plot   
-    d_range = 0.33*L/(zoom_slider.get())  
+    # Range and point density of the derivative plot
+    d_range = 0.33*L/(zoom_slider.get())
     d_length = d_length_select.get()
-    dpd = dpd_select.get()  
+    dpd = dpd_select.get()
     d_scale = scale*(zoom_slider.get())
     
     # Select index for the middle of the new derivative axis
@@ -837,13 +843,13 @@ def deriv_calc(x_m, y_m):
     if click_opt_int > 2:
         dx = np.linspace(-d_range, d_range, dpd)
         dy = np.linspace(-d_range, d_range, dpd)
-        J = jacobian(2,string_x,string_y)
+        J = jacobian(2, string_x, string_y)
         # Evaluate the Jacobian elements at (x_m,y_m) click location 
-        du_dx =  eval(format_eq_div(format_eq(J[0,0])))
-        du_dy =  eval(format_eq_div(format_eq(J[0,1])))
-        dv_dx =  eval(format_eq_div(format_eq(J[1,0])))
-        dv_dy =  eval(format_eq_div(format_eq(J[1,1])))
-        dxg , dyg = np.meshgrid(dx, dy)
+        du_dx = eval(format_eq_div(format_eq(J[0, 0])))
+        du_dy = eval(format_eq_div(format_eq(J[0, 1])))
+        dv_dx = eval(format_eq_div(format_eq(J[1, 0])))
+        dv_dy = eval(format_eq_div(format_eq(J[1, 1])))
+        dxg, dyg = np.meshgrid(dx, dy)
         
         u_div = (du_dx + dv_dy)*dxg
         v_div = (du_dx + dv_dy)*dyg
@@ -904,7 +910,6 @@ def deriv_calc(x_m, y_m):
         #stack_plot_deriv(dxg, dyg, u_s, v_s, 5, d_range, dpd, 0.1, arrows, orientation, scale_s)
         stack_plot(dxg, dyg, deriv_inset_ax, u_s, v_s, 5, d_range, dpd, 0.1, arrows, orientation, scale_s, w_head, h_head, 1)
 
-        
     # Don't display the x and y axis values
     deriv_inset_ax.set_xticks([])
     deriv_inset_ax.set_yticks([])
