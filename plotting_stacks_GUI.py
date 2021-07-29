@@ -13,7 +13,6 @@ import matplotlib as mpl
 from sympy import diff
 from sympy.parsing.sympy_parser import parse_expr
 
-
 # %% VFA GUI
 
 # start the timer
@@ -794,9 +793,12 @@ stack_btn = tk.Radiobutton(right_frame, text='stack', variable=tensor, value=0, 
 field_select = tk.StringVar()
 field_select.set(field_name_list[0])
 
-field_select_drop = ttk.Combobox(root, value = field_name_list, width=40)
+field_select_drop_label = tk.Label(bot_frame, text='Select Pre-Defined Field:')
+field_select_drop_label.grid(row=3, column=0)
+
+field_select_drop = ttk.Combobox(bot_frame, value = field_name_list, width=40)
 field_select_drop.current(0)
-field_select_drop.grid(row=0, column=1)
+field_select_drop.grid(row=4, column=0)
 field_select_drop.bind("<<ComboboxSelected>>", field_selection_response)
 
 # Testing matplotlib objects in functions
@@ -1137,7 +1139,7 @@ d_length_select = tk.DoubleVar()
 d_length_select.set(0.3)
 d_length_list = [0.2, 0.25, 0.3, 0.35, 0.4]
 
-tk.Label(right_frame, text='Select Inset Plot Size (inches):').grid(row=4, column=0)
+tk.Label(right_frame, text='Select Inset Plot Size (units?):').grid(row=4, column=0)
 d_length_drop = tk.OptionMenu(right_frame, d_length_select, *d_length_list)
 d_length_drop.grid(row=4, column=1)
 
