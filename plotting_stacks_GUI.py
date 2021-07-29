@@ -308,7 +308,8 @@ field_name_list = ['Default: y*sin(x)i - x*cos(y)j',
               'Linear field example 2: xi',
               'Constant field: 6i + 3j',
               'Falling cat field (Planar 3 link robot)',
-              'Gravitational/Electric Point Charge: -x/(x**2+y**2)i + -y/(x**2+y**2)j'
+              'Gravitational/Electric Point Charge: -x/(x**2+y**2)i + -y/(x**2+y**2)j',
+              'Magnetic Field of Current Carrying Wire: -y/(x**2+y**2)i + x/(x**2+y**2)j'
               ]
 
 
@@ -320,7 +321,8 @@ field_x_list = ['y*sin(x)',
                 'x',
                 '6',
                 '(3*cos(y) + 4)/(15 + 6*cos(x) + 6*cos(y))',
-                '-x/(x**2+y**2)'
+                '-x/(x**2+y**2)*step(4*(x**2+y**2))',
+                '-y/(x**2+y**2)*step(4*(x**2+y**2))'
                 ]
 
 
@@ -332,7 +334,8 @@ field_y_list = ['- x*cos(y)',
                 '0',
                 '3',
                 '-(3*cos(x) + 4)/(15 + 6*cos(x) + 6*cos(y))',
-                '-y/(x**2+y**2)'
+                '-y/(x**2+y**2)*step(4*(x**2+y**2))',
+                'x/(x**2+y**2)*step(4*(x**2+y**2))'
                 ]
 
 
@@ -1056,7 +1059,9 @@ def jacobian(m, u_str, v_str):
     
     u_str = u_str.replace('^','**')
     v_str = v_str.replace('^','**')
-    
+    u_str = u_str.replace('step', '+0*')
+    v_str = v_str.replace('step', '+0*')
+
     
     sympy_expr_x = parse_expr(u_str, evaluate=False)
     sympy_expr_y = parse_expr(v_str, evaluate=False)
@@ -1147,6 +1152,23 @@ d_length_list = [0.2, 0.25, 0.3, 0.35, 0.4]
 tk.Label(right_frame, text='Select Inset Plot Size (units?):').grid(row=4, column=0)
 d_length_drop = tk.OptionMenu(right_frame, d_length_select, *d_length_list)
 d_length_drop.grid(row=4, column=1)
+
+# =============================================================================
+# Step function - for singularities
+# =============================================================================
+
+# takes a matrix a and sorts through elements setting to zero if condition is met and one otherwise  
+# used to remove singularity in Grav&Mag predefined field
+def step(a):
+    rows = len(a[:,0])
+    columns = len(a[0,:])
+    for i in range(rows):  
+        for j in range(columns):
+            if -1 < a[i,j] < 1:
+                a[i,j] = 0
+            else:
+                a[i,j] = 1
+    return a
 
 # return time to run
 stop = timeit.default_timer()
