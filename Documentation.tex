@@ -271,14 +271,14 @@ The divergence and curl plots are generated using an analytical method. The 'jac
 For these plots, the 'dxg' and 'dyg' meshgrids must be centred on zero, rather than on the click coords used for the deriv and zoom plots (the first if statement in 'deriv\textunderscore calc' accounts for this.) The equations for the components the divergence and curl fields are then calculated:
 
 \begin{equation}
-	u_{div} = \left( \frac{\partial u}{\partial x} + \frac{\partial v}{\partial y} \right) \quad
-	v_{div} = \left( \frac{\partial u}{\partial x} + \frac{\partial v}{\partial y} \right)	
+	u_{div} = \left( \frac{\partial u}{\partial x} + \frac{\partial v}{\partial y} \right)_{(x_m,y_m)} \Delta x \quad
+	v_{div} = \left( \frac{\partial u}{\partial x} + \frac{\partial v}{\partial y} \right)_{(x_m,y_m)} \Delta y	
 \end{equation}
 \begin{equation}
-	u_{curl} = - \left( \frac{\partial u}{\partial y} - \frac{\partial v}{\partial x} \right) \quad
-	v_{curl} = \left( \frac{\partial u}{\partial y} - \frac{\partial v}{\partial x} \right)
+	u_{curl} = \left( \frac{\partial u}{\partial y} - \frac{\partial v}{\partial x} \right)_{(x_m,y_m)} \Delta y \quad
+	v_{curl} = - \left( \frac{\partial u}{\partial y} - \frac{\partial v}{\partial x} \right)_{(x_m,y_m)} \Delta x
 \end{equation}
 
-As a result, positive curl is shown by a linear field with counter-clockwise flow and negative by a clockwise flow, as would be given by the right hand rule. Additionally, the divergence and curl plots use scaling that matches the field, which ensures that the magnitude of the vectors varies appropriately. 
+In this notation, $\Delta x$ and $\Delta y$ represent displacements within the inset axis. As a result, positive curl is shown by a linear field with counter-clockwise flow and negative by a clockwise flow, as would be given by the right hand rule. Additionally, the divergence and curl plots use scaling that matches the field, which ensures that the magnitude of the vectors varies appropriately. 
 
 \end{document}

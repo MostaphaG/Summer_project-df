@@ -46,21 +46,29 @@ def G(s, n, c):
         return (s/(n-1))
 
 # define a function that will complete all stack plotting:
-def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head=1/8, h_head=1/4):
+def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head=1/8, h_head=1/4, axis_check=0):
     # get the lengths of x and y from their grids
     
     x_len = len(xg[:, 0])
     y_len = len(yg[0, :])
     
     # Scaling of axes and setting equal proportions circles look like circles
-    ax.set_aspect('equal')
-    ax_L = L + L/delta_factor
-    ax.set_xlim(-ax_L, ax_L)
-    ax.set_ylim(-ax_L, ax_L)
+    # axis.set_aspect('equal')
+    # ax_L = L + L/delta_factor
+    # axis.set_xlim(-ax_L, ax_L)
+    # axis.set_ylim(-ax_L, ax_L)
+    
+    # Account for change to grid centre for divergence plot
+    if axis_check == 1:
+        if click_opt_int > 2:       
+            axis.set_xlim(-L-L/5, L+L/5)
+            axis.set_ylim(-L-L/5, L+L/5)
+        else:
+            axis.set_xlim(-L+x_m-L/5, L+x_m+L/5)
+            axis.set_ylim(-L+y_m-L/5, L+y_m+L/5)
     
     # define an empty array of magnitudes, to then fill with integer rel. mags
     R_int = np.zeros(shape=((x_len), (y_len)))
-    
 
     
     # #########################################################################
@@ -70,7 +78,7 @@ def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, s
         
     # plot the quiver plot on grid points if chosen in original function
     if arrows is True:
-        ax.quiver(xg, yg, u, v, pivot=orientation, scale=scale, scale_units='xy')
+        axis.quiver(xg, yg, u, v, pivot=orientation, scale=scale, scale_units='xy')
     else:
         pass
   
@@ -140,6 +148,9 @@ def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, s
             # avoids extracting from R many times.
             n = R_int[i, j]
             
+            if axis_check == 1 and click_opt_int > 1 and i == i_m and j == j_m:
+                continue
+            
             # deal with even number of sheets from magnitudes:
             if parity(n) is True:
                 # define a parameter to loop over in the recursion equation
@@ -159,15 +170,15 @@ def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, s
                     By2 = B_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
                     
                     # from these, define the 2 lines, for this run
-                    ax.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=1, color='green'))
-                    ax.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=1, color='green'))
+                    axis.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=1, color='green'))
+                    axis.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=1, color='green'))
                     
                     # update parameter to reapet and draw all needed arrows
                     s += 1
             # deal with the odd number of stacks:
             elif parity(n) is False:
                 # Add the centre line for odd numbers of stacks
-                ax.add_line(Line2D((A_x[i, j], B_x[i, j]), (A_y[i, j], B_y[i, j]), linewidth=1, color='green'))
+                axis.add_line(Line2D((A_x[i, j], B_x[i, j]), (A_y[i, j], B_y[i, j]), linewidth=1, color='green'))
                 
                 # then loop over the remaining lines as per the recursion formula:
                 s = 1  # change the looping parametr to exclude already completed 0 (corr. to middle sheet here)
@@ -185,19 +196,19 @@ def stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, s
                     By2 = B_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
                     
                     # from these, define the 2 displaced lines
-                    ax.add_line(Line2D((Ax1,Bx1),(Ay1,By1), linewidth=1, color='green'))
-                    ax.add_line(Line2D((Ax2,Bx2),(Ay2,By2), linewidth=1, color='green'))
+                    axis.add_line(Line2D((Ax1,Bx1),(Ay1,By1), linewidth=1, color='green'))
+                    axis.add_line(Line2D((Ax2,Bx2),(Ay2,By2), linewidth=1, color='green'))
                     
                     # change the parameter to loop over all changes in displacement for current magnitude
                     s += 1
             # plot lines of arrowheads from central sheet for n = 1 or on top sheet for n>1 
             if n > 1:   # for all lines ubt the single sheet one
-                ax.add_line(Line2D((p_sh1x[i, j],p_sh3x[i, j]),(p_sh1y[i, j],p_sh3y[i, j]), linewidth=1, color='green'))
-                ax.add_line(Line2D((p_sh2x[i, j],p_sh3x[i, j]),((p_sh2y[i, j],p_sh3y[i, j])), linewidth=1, color='green'))
+                axis.add_line(Line2D((p_sh1x[i, j],p_sh3x[i, j]),(p_sh1y[i, j],p_sh3y[i, j]), linewidth=1, color='green'))
+                axis.add_line(Line2D((p_sh2x[i, j],p_sh3x[i, j]),((p_sh2y[i, j],p_sh3y[i, j])), linewidth=1, color='green'))
             # then define it for the stacks with only 1 sheet:
             else:
-                ax.add_line(Line2D((P_sh1x[i, j], P_sh3x[i, j]), (P_sh1y[i, j], P_sh3y[i, j]), linewidth=1, color='green'))
-                ax.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color='green'))
+                axis.add_line(Line2D((P_sh1x[i, j], P_sh3x[i, j]), (P_sh1y[i, j], P_sh3y[i, j]), linewidth=1, color='green'))
+                axis.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color='green'))
                 
     plt.close()
 
@@ -345,17 +356,17 @@ h_head = 1/4
 fig = plt.figure(figsize=(855/my_dpi, 573/my_dpi), dpi=my_dpi)
 
 # set up axis
-ax = fig.gca()
+main_axis = fig.gca()
 
 # set up visuals - axis labels
-ax.set_xlabel('$x$')
-ax.set_ylabel('$y$')
+main_axis.set_xlabel('$x$')
+main_axis.set_ylabel('$y$')
 
 # Scaling of axes and setting equal proportions circles look like circles
-ax.set_aspect('equal')
+main_axis.set_aspect('equal')
 ax_L = L + L/delta_factor
-ax.set_xlim(-ax_L, ax_L)
-ax.set_ylim(-ax_L, ax_L)
+main_axis.set_xlim(-ax_L, ax_L)
+main_axis.set_ylim(-ax_L, ax_L)
 
 
 '''define the initial polar plot also. Despite it not being plotted to start
@@ -395,7 +406,7 @@ v_p = F_r*np.sin(thetag) + F_theta*np.cos(thetag)  # y component
 ''' end of polar setting up'''
 
 # plot the cartessian field with desired parameters as specidfied above
-plottedfield = stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)
+plottedfield = stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head, 0)
 
 # reduce white space from the figure in the plot frame
 fig.tight_layout()
@@ -466,20 +477,20 @@ def eq_to_comps(string_x, string_y, xg, yg):
 # define a function that will respond to radio buttons behind choosing vector types:
 def vect_type_response(tensor):
     # clear the plot that is already there:
-    ax.clear()
+    main_axis.clear()
     # use the tensor to determine what to plot:
     # 0 is just stacks, 1 is for only arrows and 2 is for both
     if tensor == 0:
         arrows = False
-        stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)
+        stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head, 0)
         canvas.draw()
     elif tensor == 1:
-        ax.quiver(xg, yg, u, v, pivot=orientation, scale=scale, scale_units='xy')
+        main_axis.quiver(xg, yg, u, v, pivot=orientation, scale=scale, scale_units='xy')
         # repeat the displaying of the figure so that it updates in GUI
         canvas.draw()
     elif tensor == 2:
         arrows = True
-        stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)
+        stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head, 0)
         # repeat the displaying of the figure so that it updates in GUI
         canvas.draw()
 
@@ -488,9 +499,9 @@ def vect_type_response(tensor):
 def PLOT_response():
     # first, take from entry boxes, wanted parameters and make them global:
     # these must be changed globally for other functions to work with the new field.
-    global L, pt_den, s_max, x, y, xg, yg, u, v, tensor, ax, string_x, string_y
+    global L, pt_den, s_max, x, y, xg, yg, u, v, tensor, main_axis, string_x, string_y
     # clear the current axis
-    ax.clear()
+    main_axis.clear()
     # take the new axis parameters and field definitions out of the boxes
     L = float(L_entry.get())
     pt_den = int(pt_den_entry.get())
@@ -499,8 +510,8 @@ def PLOT_response():
     string_y = str(y_comp_entry.get())
     # from L redefine the axis
     ax_L = L + L/delta_factor
-    ax.set_xlim(-ax_L, ax_L)
-    ax.set_ylim(-ax_L, ax_L)
+    main_axis.set_xlim(-ax_L, ax_L)
+    main_axis.set_ylim(-ax_L, ax_L)
     # from pt_den and L, change the axis coordinates and the grid:
     x = np.linspace(-L, L, pt_den)
     y = np.linspace(-L, L, pt_den)
@@ -508,7 +519,7 @@ def PLOT_response():
     # take all these values, and the input from field component bnoxes to set up the field:
     u, v = eq_to_comps(string_x, string_y, xg, yg)
     # plot the new field
-    stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)
+    stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head, 0)
     # put it onto the screen
     canvas.draw()
     # change the radio button ticks back to stack only
@@ -572,8 +583,8 @@ def polar_submit(tensorp):
     a_polar = float(a_entry.get())
     # rescale the axis:
     ax_L = L + L/delta_factor
-    ax.set_xlim(-ax_L, ax_L)
-    ax.set_ylim(-ax_L, ax_L)
+    main_axis.set_xlim(-ax_L, ax_L)
+    main_axis.set_ylim(-ax_L, ax_L)
     # based on these, change the axis coordinates
     r = np.linspace(0.2, r_max, r_den)
     theta = np.linspace(0, 360, theta_den) * np.pi/180
@@ -608,20 +619,20 @@ def polar_submit(tensorp):
     xg = rg*np.cos(thetag)
     yg = rg*np.sin(thetag)
     # clear the plot that is already there:
-    ax.clear()
+    main_axis.clear()
     # use the selected tensor to determine what to plot:
     # 0 is just stacks, 1 is for only arrows and 2 is for both
     if tensorp == 0:
         arrows = False  # set correct variable as asked by user
-        stack_plot(xg, yg, ax, u_p, v_p, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)  # plot
+        stack_plot(xg, yg, main_axis, u_p, v_p, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head, 0)  # plot
         # display the figure so that it updates in GUI
         canvas.draw()
     elif tensorp == 1:
-        ax.quiver(xg, yg, u_p, v_p, pivot=orientation, scale=scale, scale_units='xy')
+        main_axis.quiver(xg, yg, u_p, v_p, pivot=orientation, scale=scale, scale_units='xy')
         canvas.draw()
     elif tensorp == 2:
         arrows = True
-        stack_plot(xg, yg, ax, u_p, v_p, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head)
+        stack_plot(xg, yg, main_axis, u_p, v_p, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head, 0)
         # repeat the displaying of the figure so that it updates in GUI
         canvas.draw()
     # display in x and y components, in a somewhat messy form, straight from poalr to cart
@@ -788,14 +799,14 @@ field_select_drop.current(0)
 field_select_drop.grid(row=0, column=1)
 field_select_drop.bind("<<ComboboxSelected>>", field_selection_response)
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# define wanted sliders
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Testing matplotlib objects in functions
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# define wanted checkboxes
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+# def fun_test(axis):
+#     ax_test = axis.inset_axes([0.1,0.1,0.2,0.2])
+#     fig.canvas.draw()
+#     deriv_inset_ax.clear()
+#     deriv_inset_ax.remove()
+    
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Derivative Plot
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -808,7 +819,7 @@ y_m = float(0)
 
 # define a function that will calculate the local, geometrical derivative
 def deriv_calc(x_m, y_m):
-    global i_m, j_m, deriv_inset_ax
+    global i_m, j_m#, deriv_inset_ax
     
     # Range and point density of the derivative plot   
     d_range = 0.33*L/(zoom_slider.get())  
@@ -831,10 +842,12 @@ def deriv_calc(x_m, y_m):
         dv_dx =  eval(format_eq_div(format_eq(J[1,0])))
         dv_dy =  eval(format_eq_div(format_eq(J[1,1])))
         dxg , dyg = np.meshgrid(dx, dy)
+        
         u_div = (du_dx + dv_dy)*dxg
         v_div = (du_dx + dv_dy)*dyg
-        u_curl = -(du_dy - dv_dx)*dyg
-        v_curl = (du_dy - dv_dx)*dxg
+        
+        u_curl = (du_dy - dv_dx)*dyg
+        v_curl = -(du_dy - dv_dx)*dxg
         
     # Zoom/Derivative Plot
     else:
@@ -851,7 +864,7 @@ def deriv_calc(x_m, y_m):
         dv1 = v1 - v1[i_m, j_m]
   
     # Create axes at clicked position from supplied position and given axis sizes
-    deriv_inset_ax = ax.inset_axes([(x_pix-178)/500 - (d_length/2), (y_pix-59)/500 - (d_length/2), d_length, d_length])
+    deriv_inset_ax = main_axis.inset_axes([(x_pix-178)/500 - (d_length/2), (y_pix-59)/500 - (d_length/2), d_length, d_length])
     
     # Check radiobutton selection
     if click_opt_int == 1:
@@ -878,14 +891,16 @@ def deriv_calc(x_m, y_m):
     if tensor.get() == 0:        
         # Stack
         arrows = False
-        stack_plot_deriv(dxg, dyg, u_s, v_s, 5, d_range, dpd, 0.1, arrows, orientation, scale_s)
+        #stack_plot_deriv(dxg, dyg, u_s, v_s, 5, d_range, dpd, 0.1, arrows, orientation, scale_s)
+        stack_plot(dxg, dyg, deriv_inset_ax, u_s, v_s, 5, d_range, dpd, 0.1, arrows, orientation, scale_s, w_head, h_head, 1)
     elif tensor.get() == 1:
         # Arrows        
         deriv_inset_ax.quiver(dxg, dyg, u_s, v_s, pivot='mid', scale=scale_s, scale_units='xy')
     elif tensor.get() == 2:
         # Arrows + Stack
         arrows = True
-        stack_plot_deriv(dxg, dyg, u_s, v_s, 5, d_range, dpd, 0.1, arrows, orientation, scale_s)
+        #stack_plot_deriv(dxg, dyg, u_s, v_s, 5, d_range, dpd, 0.1, arrows, orientation, scale_s)
+        stack_plot(dxg, dyg, deriv_inset_ax, u_s, v_s, 5, d_range, dpd, 0.1, arrows, orientation, scale_s, w_head, h_head, 1)
 
         
     # Don't display the x and y axis values
@@ -903,110 +918,110 @@ def deriv_calc(x_m, y_m):
 # =============================================================================
 
 
-def stack_plot_deriv(xg, yg, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head=1/8, h_head=1/4):
-    # get the lengths of x and y from their grids
-    x_len = len(xg[:, 0])
-    y_len = len(yg[0, :])
-    # set the visuals for the derivative axis
-    deriv_inset_ax.set_aspect('equal')
+# def stack_plot_deriv(xg, yg, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head=1/8, h_head=1/4):
+#     # get the lengths of x and y from their grids
+#     x_len = len(xg[:, 0])
+#     y_len = len(yg[0, :])
+#     # set the visuals for the derivative axis
+#     deriv_inset_ax.set_aspect('equal')
     
-    # Account for change to grid centre for divergence plot
-    if click_opt_int > 2:       
-        deriv_inset_ax.set_xlim(-L-L/5, L+L/5)
-        deriv_inset_ax.set_ylim(-L-L/5, L+L/5)
-    else:
-        deriv_inset_ax.set_xlim(-L+x_m-L/5, L+x_m+L/5)
-        deriv_inset_ax.set_ylim(-L+y_m-L/5, L+y_m+L/5)
+#     # Account for change to grid centre for divergence plot
+#     if click_opt_int > 2:       
+#         deriv_inset_ax.set_xlim(-L-L/5, L+L/5)
+#         deriv_inset_ax.set_ylim(-L-L/5, L+L/5)
+#     else:
+#         deriv_inset_ax.set_xlim(-L+x_m-L/5, L+x_m+L/5)
+#         deriv_inset_ax.set_ylim(-L+y_m-L/5, L+y_m+L/5)
     
-    # AS BEFORE:
-    R_int = np.zeros(shape=((x_len), (y_len)))
+#     # AS BEFORE:
+#     R_int = np.zeros(shape=((x_len), (y_len)))
     
-    if arrows is True:
-        deriv_inset_ax.quiver(xg, yg, u, v, pivot=orientation, scale=scale, scale_units='xy')
-    else:
-        pass
+#     if arrows is True:
+#         deriv_inset_ax.quiver(xg, yg, u, v, pivot=orientation, scale=scale, scale_units='xy')
+#     else:
+#         pass
 
-    mag = np.sqrt(u**2 + v**2)
-    theta = np.arctan2(v, u)
+#     mag = np.sqrt(u**2 + v**2)
+#     theta = np.arctan2(v, u)
 
-    sheet_L = L*fract
-    s_L = fract*L
-    max_size = np.max(mag)
-    R = mag/max_size
+#     sheet_L = L*fract
+#     s_L = fract*L
+#     max_size = np.max(mag)
+#     R = mag/max_size
 
-    I_sin = np.sin(theta)
-    I_cos = np.cos(theta)
+#     I_sin = np.sin(theta)
+#     I_cos = np.cos(theta)
     
-    A_x = xg + (sheet_L/2)*I_sin
-    A_y = yg - (sheet_L/2)*I_cos
-    B_x = xg - (sheet_L/2)*I_sin
-    B_y = yg + (sheet_L/2)*I_cos
+#     A_x = xg + (sheet_L/2)*I_sin
+#     A_y = yg - (sheet_L/2)*I_cos
+#     B_x = xg - (sheet_L/2)*I_sin
+#     B_y = yg + (sheet_L/2)*I_cos
     
-    p_sh1x = xg + (s_L/2)*I_cos + (sheet_L*w_head)*I_sin
-    p_sh1y = yg + (s_L/2)*I_sin - (sheet_L*w_head)*I_cos
-    p_sh2x = xg + (s_L/2)*I_cos - (sheet_L*w_head)*I_sin
-    p_sh2y = yg + (s_L/2)*I_sin + (sheet_L*w_head)*I_cos
-    p_sh3x = xg + (s_L*0.5 + s_L*h_head)*I_cos
-    p_sh3y = yg + (s_L*0.5 + s_L*h_head)*I_sin
+#     p_sh1x = xg + (s_L/2)*I_cos + (sheet_L*w_head)*I_sin
+#     p_sh1y = yg + (s_L/2)*I_sin - (sheet_L*w_head)*I_cos
+#     p_sh2x = xg + (s_L/2)*I_cos - (sheet_L*w_head)*I_sin
+#     p_sh2y = yg + (s_L/2)*I_sin + (sheet_L*w_head)*I_cos
+#     p_sh3x = xg + (s_L*0.5 + s_L*h_head)*I_cos
+#     p_sh3y = yg + (s_L*0.5 + s_L*h_head)*I_sin
     
-    P_sh1x = xg + (sheet_L*w_head)*I_sin
-    P_sh1y = yg - (sheet_L*w_head)*I_cos
-    P_sh2x = xg - (sheet_L*w_head)*I_sin
-    P_sh2y = yg + (sheet_L*w_head)*I_cos
-    P_sh3x = xg + (s_L*h_head)*I_cos
-    P_sh3y = yg + (s_L*h_head)*I_sin
+#     P_sh1x = xg + (sheet_L*w_head)*I_sin
+#     P_sh1y = yg - (sheet_L*w_head)*I_cos
+#     P_sh2x = xg - (sheet_L*w_head)*I_sin
+#     P_sh2y = yg + (sheet_L*w_head)*I_cos
+#     P_sh3x = xg + (s_L*h_head)*I_cos
+#     P_sh3y = yg + (s_L*h_head)*I_sin
     
-    for i in range(x_len):
-        for j in range(y_len):
-            for t in range(1, s_max+1):
-                if (t-1)/s_max <= R[i, j] <= t/s_max:
-                    R_int[i, j] = t
+#     for i in range(x_len):
+#         for j in range(y_len):
+#             for t in range(1, s_max+1):
+#                 if (t-1)/s_max <= R[i, j] <= t/s_max:
+#                     R_int[i, j] = t
             
-            n = R_int[i, j]
+#             n = R_int[i, j]
             
-            # Prevent stack plotting in centre point of the derivative and div plot
-            if click_opt_int > 1 and i == i_m and j == j_m:
-                continue
+#             # Prevent stack plotting in centre point of the derivative and div plot
+#             if click_opt_int > 1 and i == i_m and j == j_m:
+#                 continue
             
-            if parity(n) is True:
-                s = 0
+#             if parity(n) is True:
+#                 s = 0
                 
-                while s <= 0.5*(n-2):
-                    Ax1 = A_x[i, j] + G(s, n, 0)*s_L*I_cos[i, j]
-                    Ay1 = A_y[i, j] + G(s, n, 0)*s_L*I_sin[i, j]
-                    Bx1 = B_x[i, j] + G(s, n, 0)*s_L*I_cos[i, j]
-                    By1 = B_y[i, j] + G(s, n, 0)*s_L*I_sin[i, j]
-                    Ax2 = A_x[i, j] - G(s, n, 0)*s_L*I_cos[i, j]
-                    Ay2 = A_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
-                    Bx2 = B_x[i, j] - G(s, n, 0)*s_L*I_cos[i, j]
-                    By2 = B_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
-                    deriv_inset_ax.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=1, color='green'))
-                    deriv_inset_ax.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=1, color='green'))
-                    s += 1
+#                 while s <= 0.5*(n-2):
+#                     Ax1 = A_x[i, j] + G(s, n, 0)*s_L*I_cos[i, j]
+#                     Ay1 = A_y[i, j] + G(s, n, 0)*s_L*I_sin[i, j]
+#                     Bx1 = B_x[i, j] + G(s, n, 0)*s_L*I_cos[i, j]
+#                     By1 = B_y[i, j] + G(s, n, 0)*s_L*I_sin[i, j]
+#                     Ax2 = A_x[i, j] - G(s, n, 0)*s_L*I_cos[i, j]
+#                     Ay2 = A_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
+#                     Bx2 = B_x[i, j] - G(s, n, 0)*s_L*I_cos[i, j]
+#                     By2 = B_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
+#                     deriv_inset_ax.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=1, color='green'))
+#                     deriv_inset_ax.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=1, color='green'))
+#                     s += 1
                     
-            elif parity(n) is False:
-                deriv_inset_ax.add_line(Line2D((A_x[i, j], B_x[i, j]), (A_y[i, j], B_y[i, j]), linewidth=1, color='green'))
-                s = 1 
+#             elif parity(n) is False:
+#                 deriv_inset_ax.add_line(Line2D((A_x[i, j], B_x[i, j]), (A_y[i, j], B_y[i, j]), linewidth=1, color='green'))
+#                 s = 1 
                 
-                while s <= 0.5*(n-1):
-                    Ax1 = A_x[i, j] + G(s, n, 1)*s_L*I_cos[i, j]
-                    Ay1 = A_y[i, j] + G(s, n, 1)*s_L*I_sin[i, j]
-                    Bx1 = B_x[i, j] + G(s, n, 1)*s_L*I_cos[i, j]
-                    By1 = B_y[i, j] + G(s, n, 1)*s_L*I_sin[i, j]
-                    Ax2 = A_x[i, j] - G(s, n, 1)*s_L*I_cos[i, j]
-                    Ay2 = A_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
-                    Bx2 = B_x[i, j] - G(s, n, 1)*s_L*I_cos[i, j]
-                    By2 = B_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
-                    deriv_inset_ax.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=1, color='green'))
-                    deriv_inset_ax.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=1, color='green'))
-                    s += 1
+#                 while s <= 0.5*(n-1):
+#                     Ax1 = A_x[i, j] + G(s, n, 1)*s_L*I_cos[i, j]
+#                     Ay1 = A_y[i, j] + G(s, n, 1)*s_L*I_sin[i, j]
+#                     Bx1 = B_x[i, j] + G(s, n, 1)*s_L*I_cos[i, j]
+#                     By1 = B_y[i, j] + G(s, n, 1)*s_L*I_sin[i, j]
+#                     Ax2 = A_x[i, j] - G(s, n, 1)*s_L*I_cos[i, j]
+#                     Ay2 = A_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
+#                     Bx2 = B_x[i, j] - G(s, n, 1)*s_L*I_cos[i, j]
+#                     By2 = B_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
+#                     deriv_inset_ax.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=1, color='green'))
+#                     deriv_inset_ax.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=1, color='green'))
+#                     s += 1
                     
-            if n > 1:
-                deriv_inset_ax.add_line(Line2D((p_sh1x[i, j], p_sh3x[i, j]), (p_sh1y[i, j], p_sh3y[i, j]), linewidth=1, color='green'))
-                deriv_inset_ax.add_line(Line2D((p_sh2x[i, j], p_sh3x[i, j]), ((p_sh2y[i, j], p_sh3y[i, j])), linewidth=1, color='green'))
-            else:
-                deriv_inset_ax.add_line(Line2D((P_sh1x[i, j], P_sh3x[i, j]), (P_sh1y[i, j], P_sh3y[i, j]), linewidth=1, color='green'))
-                deriv_inset_ax.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color='green'))
+#             if n > 1:
+#                 deriv_inset_ax.add_line(Line2D((p_sh1x[i, j], p_sh3x[i, j]), (p_sh1y[i, j], p_sh3y[i, j]), linewidth=1, color='green'))
+#                 deriv_inset_ax.add_line(Line2D((p_sh2x[i, j], p_sh3x[i, j]), ((p_sh2y[i, j], p_sh3y[i, j])), linewidth=1, color='green'))
+#             else:
+#                 deriv_inset_ax.add_line(Line2D((P_sh1x[i, j], P_sh3x[i, j]), (P_sh1y[i, j], P_sh3y[i, j]), linewidth=1, color='green'))
+#                 deriv_inset_ax.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color='green'))
 
 
 # set up the initial variable (code starts in option to use matplotlib tools)
@@ -1017,6 +1032,7 @@ click_opt_int = 0
 def click_option_handler(click_option):
     global click_opt_int
     click_opt_int = click_option
+    #fun_test(ax)
     # and for the the initial plot:
     if click_opt_int == 0:
         fig.canvas.draw()
