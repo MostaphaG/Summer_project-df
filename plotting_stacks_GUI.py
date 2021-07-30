@@ -555,7 +555,7 @@ def custom_btn_reponse():
 # define a function to repond to plotting apolar grid
 # takes the same field, but plots it on a polar grid
 def Polar_grid_plot_response(tensor):
-    global xg, yg, u ,v, s_max
+    global xg, yg, u, v, s_max
     # set the number of sheets to use from input box
     s_max = int(s_max_entry.get())
     # the polar grid comes from global already defined
