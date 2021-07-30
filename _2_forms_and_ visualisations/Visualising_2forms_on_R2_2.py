@@ -22,6 +22,7 @@ define needed fucntions
 
 '''
 
+
 # define a function to replace input string to be 'python understood'
 def format_eq(string):
     # replace all the x and y with xg and yg:
@@ -35,7 +36,7 @@ def format_eq(string):
     string = string.replace('cos', 'np.cos')
     string = string.replace('tan', 'np.tan')
     string = string.replace('^', '**')
-    string = string.replace('ln', 'np.log')        
+    string = string.replace('ln', 'np.log')
     return string
 
 
@@ -46,13 +47,13 @@ def eq_to_comps(string_x, string_y, xg, yg):
     equation_x = format_eq(string_x)
     equation_y = format_eq(string_y)
     # use these to define the field:
-    # also: checking if equation equals zero, to then replace it with an array and not just 0:
+    # also: checking if its constant, to then replace it with an array of correct shape:
     u = eval(equation_x)
     v = eval(equation_y)
     if equation_x.find('x') & equation_x.find('y') == -1:
-        u = float(equation_x)*np.ones(np.shape(xg))
+        u = eval(equation_x)*np.ones(np.shape(xg))
     if equation_y.find('x') & equation_y.find('y') == -1:
-        v = float(equation_y)*np.ones(np.shape(yg))
+        v = eval(equation_y)*np.ones(np.shape(yg))
     # return these
     return u, v
 
@@ -86,7 +87,7 @@ def find_2_form(expressions, coords, m=2):
             if comp_index < coord_index:
                 ext_ds[comp_index, coord_index] = ' - (' + str(ext_ds[comp_index, coord_index]) + ')'
             elif comp_index > coord_index:
-                ext_ds[comp_index, coord_index] = ' + ' + str(ext_ds[comp_index, coord_index])
+                ext_ds[comp_index, coord_index] = ' +' + str(ext_ds[comp_index, coord_index])
     
     '''
     merge the results into a 2 form (for 2-form on R^2, the result is a single component (dx^xy))
@@ -105,15 +106,20 @@ def find_2_form(expressions, coords, m=2):
             # extract opposing elements
             temp = ext_ds[i, j]
             temp1 = ext_ds[j, i]
+            # clear the used ext_ds
+            ext_ds[i, j] = ''
+            ext_ds[j, i] = ''
             # check these against zero entries:
-            if (temp == '0') or (temp == '-(0)') or (temp == '0*x'):
-                pass
+            if (temp == '0') or (temp == ' - (0)') or (temp == '0*x'):
+                ext_ds[i, j] = '0'
             else:
                 result[pair, 0] += temp
-            if (temp1 == '0') or (temp1 == '-(0)') or (temp1 == '0*x'):
-                pass
+                ext_ds[i, j] = temp
+            if (temp1 == '0') or (temp1 == ' - (0)') or (temp1 == '0*x'):
+                ext_ds[j, i] = '0'
             else:
                 result[pair, 0] += temp1
+                ext_ds[j, i] = temp1
             # update the result row counter
             pair += 1
     # format string in each result row
@@ -311,8 +317,8 @@ y = np.linspace(-L, L, pt_den)
 xg, yg = np.meshgrid(x, y)
 
 # define an example vector field, now - from string, even initially
-string_x = 'x*sin(y)'  # x component
-string_y = 'y*cos(x)'  # y component
+string_x = 'y*sin(x)'  # x component
+string_y = 'x*cos(y)'  # y component
 
 # to define a 2 from, need to perform the exterior derrivative on
 # the given 1 form (vector field).
@@ -350,7 +356,7 @@ form_2_sgn = np.sign(form_2[0])
 
 # evaluate the u and v given previously, with formating for them to be
 # python understood
-u, v = eq_to_comps(str(expressions[0]), str(expressions[1]), xg, yg)
+u, v = eq_to_comps(str(ext_ds[0, 1]), str(ext_ds[1, 0]), xg, yg)
 
 # set up a zero vector filed to plot x and y components as 2 separate fields:
 zero_field = np.zeros(np.shape(xg))
