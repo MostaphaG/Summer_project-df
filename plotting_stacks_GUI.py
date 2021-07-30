@@ -983,6 +983,7 @@ def click_option_handler(click_option):
         canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
     # when 'tool' is not selected, disable the pan and zoom:
     if click_opt_int > 0:
+        toolbar.home()
         toolbar.children['!button4'].pack_forget()
         toolbar.children['!button5'].pack_forget()
 
