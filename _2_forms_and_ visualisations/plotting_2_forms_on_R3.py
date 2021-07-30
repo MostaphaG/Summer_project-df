@@ -62,11 +62,11 @@ def eq_to_comps(string_x, string_y, string_z, xg, yg, zg):
     F_y = eval(equation_y)
     F_z = eval(equation_z)
     if equation_x.find('x') & equation_x.find('y') & equation_x.find('z') == -1:
-        F_x = float(equation_x)*np.ones(np.shape(xg))
+        F_x = eval(equation_x)*np.ones(np.shape(xg))
     if equation_y.find('x') & equation_y.find('y') & equation_y.find('z') == -1:
-        F_y = float(equation_y)*np.ones(np.shape(yg))
+        F_y = eval(equation_y)*np.ones(np.shape(yg))
     if equation_z.find('x') & equation_z.find('y') & equation_z.find('z') == -1:
-        F_z = float(equation_z)*np.ones(np.shape(zg))
+        F_z = eval(equation_z)*np.ones(np.shape(zg))
     # return these
     return F_x, F_y, F_z
 
@@ -100,7 +100,7 @@ def find_2_form(expressions, coords, pt_den, m=3):
             if comp_index < coord_index:
                 ext_ds[comp_index, coord_index] = ' - (' + str(ext_ds[comp_index, coord_index]) + ')'
             elif comp_index > coord_index:
-                ext_ds[comp_index, coord_index] = ' + ' + str(ext_ds[comp_index, coord_index])
+                ext_ds[comp_index, coord_index] = ' +' + str(ext_ds[comp_index, coord_index])
     
     '''
     merge the results into a 2 form (for 2-form on R^2, the result is a single component (dx^xy))
@@ -119,15 +119,20 @@ def find_2_form(expressions, coords, pt_den, m=3):
             # extract opposing elements
             temp = ext_ds[i, j]
             temp1 = ext_ds[j, i]
+            # clear the used ext_ds
+            ext_ds[i, j] = ''
+            ext_ds[j, i] = ''
             # check these against zero entries:
-            if (temp == ' + 0') or (temp == ' - (0)') or (temp == '0*x'):
-                pass
+            if (temp == '0') or (temp == ' - (0)') or (temp == '0*x'):
+                ext_ds[i, j] = '0'
             else:
                 result[pair, 0] += temp
-            if (temp1 == ' + 0') or (temp1 == ' - (0)') or (temp1 == '0*x'):
-                pass
+                ext_ds[i, j] = temp
+            if (temp1 == '0') or (temp1 == ' - (0)') or (temp1 == '0*x'):
+                ext_ds[j, i] = '0'
             else:
                 result[pair, 0] += temp1
+                ext_ds[j, i] = temp1
             # update the result row counter
             pair += 1
     # format string in each result row
@@ -359,9 +364,9 @@ z = np.linspace(-L, L, pt_den)
 xg, yg, zg = np.meshgrid(x, y, z)
 
 # define the wanted 1 form on R3 in terms of each component:
-string_x = 'x*sin(y*z)'  # x component
+string_x = 'x*sin(y)'  # x component
 string_y = 'y*cos(x)'  # y component
-string_z = '3'  # z component
+string_z = 'x*y'  # z component
 
 # to start with, set as viewing aling z axis onto x-y plane
 axis_view = 'z'
@@ -397,7 +402,10 @@ form_2 = find_2_form(expressions, coords, pt_den, m)
 # need to superpose stacks from the x y and z fields (depending on viewing)
 # the filed will point in the extra dimension, or by polar sense
 # will be defined in plane based on orientation of stacks. Indicated by colour
-F_x, F_y, F_z = eq_to_comps(str(expressions[0]), str(expressions[1]), str(expressions[2]), xg, yg, zg)
+F_x, F_y, F_z = eq_to_comps(str(ext_ds[0, 1]) + ' + ' + str(ext_ds[0, 2]),
+                            str(ext_ds[1, 0]) + ' + ' + str(ext_ds[1, 2]),
+                            str(ext_ds[2, 0]) + ' + ' + str(ext_ds[2, 1]),
+                            xg, yg, zg)
 
 # Note that that order on RHS is not standard because result gives
 # elemental 2 forms in order: dx^dy, dx^dz and dy^dz.

@@ -317,8 +317,8 @@ y = np.linspace(-L, L, pt_den)
 xg, yg = np.meshgrid(x, y)
 
 # define an example vector field, now - from string, even initially
-string_x = 'y*sin(x)'  # x component
-string_y = 'x*cos(y)'  # y component
+string_x = 'x*sin(y)'  # x component
+string_y = 'y*cos(x)'  # y component
 
 # to define a 2 from, need to perform the exterior derrivative on
 # the given 1 form (vector field).
@@ -369,7 +369,7 @@ fract = 0.05
 
 # define the maximum number of stack to plot, dep. on magnitude
 s_max = 5
-    
+
 # create a figure
 fig = plt.figure(figsize=(8, 8))
 
