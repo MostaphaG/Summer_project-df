@@ -82,9 +82,9 @@ def eq_to_comps(string_x, string_y, xg, yg):
     u = eval(equation_x)
     v = eval(equation_y)
     if equation_x.find('x') & equation_x.find('y') == -1:
-        u = float(equation_x)*np.ones(np.shape(xg))
+        u = eval(equation_x)*np.ones(np.shape(xg))
     if equation_y.find('x') & equation_y.find('y') == -1:
-        v = float(equation_y)*np.ones(np.shape(yg))
+        v = eval(equation_y)*np.ones(np.shape(yg))
     # return these
     return u, v
 
@@ -485,15 +485,20 @@ def find_2_form(expressions, coords, m=2):
             # extract opposing elements
             temp = ext_ds[i, j]
             temp1 = ext_ds[j, i]
+            # clear the used ext_ds
+            ext_ds[i, j] = ''
+            ext_ds[j, i] = ''
             # check these against zero entries:
             if (temp == '0') or (temp == '-(0)') or (temp == '0*x'):
-                pass
+                ext_ds[i, j] = '0'
             else:
                 result[pair, 0] += temp
+                ext_ds[i, j] = temp
             if (temp1 == '0') or (temp1 == '-(0)') or (temp1 == '0*x'):
-                pass
+                ext_ds[j, i] = '0'
             else:
                 result[pair, 0] += temp1
+                ext_ds[j, i] = temp1
             # update the result row counter
             pair += 1
     # format string in each result row
@@ -703,7 +708,7 @@ def Ext_deriv_R2():
     form_2_sgn = np.sign(form_2[0])
     # evaluate the u and v given previously, with formating for them to be
     # python understood
-    u, v = eq_to_comps(str(expressions[0]), str(expressions[1]), xg, yg)
+    u, v = eq_to_comps(str(ext_ds[0, 1]), str(ext_ds[1, 0]), xg, yg)
     # plot the fields with desired parameters as specidfied above
     # arrow params not needed as arrows arent plotted
     # NOTE -- these fields are not the original components that the 2 form came from

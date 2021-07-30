@@ -448,9 +448,9 @@ def eq_to_comps(string_x, string_y, xg, yg):
     u = eval(equation_x)
     v = eval(equation_y)
     if equation_x.find('x') & equation_x.find('y') == -1:
-        u = float(equation_x)*np.ones(np.shape(xg))
+        u = eval(equation_x)*np.ones(np.shape(xg))
     if equation_y.find('x') & equation_y.find('y') == -1:
-        v = float(equation_y)*np.ones(np.shape(yg))
+        v = eval(equation_y)*np.ones(np.shape(yg))
     # return these
     return u, v
 
