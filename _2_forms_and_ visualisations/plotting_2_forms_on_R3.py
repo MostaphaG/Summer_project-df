@@ -359,7 +359,7 @@ z = np.linspace(-L, L, pt_den)
 xg, yg, zg = np.meshgrid(x, y, z)
 
 # define the wanted 1 form on R3 in terms of each component:
-string_x = 'x*sin(y)'  # x component
+string_x = 'x*sin(y*z)'  # x component
 string_y = 'y*cos(x)'  # y component
 string_z = '3'  # z component
 
@@ -465,10 +465,7 @@ def on_key_press(event):
 
 
 # define a function to update z Index and redraw the plot based on the slider
-def slide(var):
-    global h_index
-    # extract current value from slider
-    h_index = slider_z.get()
+def slide():
     # remove the currently displayed plot
     ax.clear()
     # replot the graph with that new h_index
@@ -478,45 +475,61 @@ def slide(var):
         form_2_components_plot_3(xg, yg, h_index, axis_view, zero_field, F_y, s_max, L, pt_den, fract, colour_str)
         ax.set_xlabel('$x$')
         ax.set_ylabel('$y$')
-        slider_val_text.configure(text=str(z[h_index]))
+        # update the label based on that
+        axis_height_txt.configure(text=str(z[h_index]))
     elif axis_view == 'y':
         form_2_components_plot_3(xg, zg, h_index, axis_view, F_x, zero_field, s_max, L, pt_den, fract, colour_str)
         form_2_components_plot_3(xg, zg, h_index, axis_view, zero_field, F_z, s_max, L, pt_den, fract, colour_str)
         ax.set_xlabel('$x$')
         ax.set_ylabel('$z$')
-        slider_val_text.configure(text=str(y[h_index]))
+        # update the label based on that
+        axis_height_txt.configure(text=str(y[h_index]))
     elif axis_view == 'x':
         form_2_components_plot_3(yg, zg, h_index, axis_view, F_y, zero_field, s_max, L, pt_den, fract, colour_str)
         form_2_components_plot_3(yg, zg, h_index, axis_view, zero_field, F_z, s_max, L, pt_den, fract, colour_str)
         ax.set_xlabel('$y$')
         ax.set_ylabel('$z$')
-        slider_val_text.configure(text=str(x[h_index]))
+        # update the label based on that
+        axis_height_txt.configure(text=str(x[h_index]))
     # draw that onto the screen
     canvas.draw()
 
 
-# Label the slider values - indexes, which display above
-tk.Label(root, text='index of viewed plane along the viewing axis').grid(row=1, column=0)
-# define a slider to update h_index but display values, instead for easier reading
-slider_z = tk.Scale(root, from_=0, to=len(z)-1, orient=tk.HORIZONTAL)
+# deifne a function that will update the label
+def label_update(var):
+    global h_index
+    # update current height
+    h_index += var
+    # update the label based on that
+    if axis_view == 'z':
+        # update the label based on that
+        axis_height_txt.configure(text=str(z[h_index]))
+    elif axis_view == 'y':
+        # update the label based on that
+        axis_height_txt.configure(text=str(y[h_index]))
+    elif axis_view == 'x':
+        # update the label based on that
+        axis_height_txt.configure(text=str(x[h_index]))
 
-# set the initial value and put the slider on the screen
-slider_z.set(z[0])
-slider_z.grid(row=2, column=0, pady=0)
+# define a label and arrows to change the axis value, and index
+# instead of the previously tried slider and entry boxes:
 
+# Label to show current axis value
+axis_height_txt = tk.Label(root, text=str(z[11]))
+axis_height_txt.grid(row=2, column=0)
 
-# Label number that will display below, the height along viewing axis
-tk.Label(root, text='index of viewed plane along the viewing axis').grid(row=3, column=0)
+# on the left, make a 'move down' button
+down_height = tk.Button(root, text=' \/ ', command= lambda: label_update(-1))
+down_height.grid(row=3, column=0)
 
-# because the slider shows indexes in real time
-# to show current value after selection, produce an initial label to later config
-slider_val_text = tk.Label(root, text=str(slider_z.get()))
-slider_val_text.grid(row=4, column=0)
+# on the right, make a 'move up' button
+down_height = tk.Button(root, text=' /\ ', command= lambda: label_update(1))
+down_height.grid(row=1, column=0)
 
-# bind the button to an event of releasing the mouse
-slider_z.bind("<ButtonRelease-1>", slide)
-# updating in real time is too slow, but a button is clumsy
-# now the slider will update to a value that the mouse was released at
+# define a button to submit the currently chosen value:
+Submit_h_btn = tk.Button(root, text='SUBMIT', padx=10, pady=50, command=slide)
+Submit_h_btn.grid(row=0, column=1)
+
 
 
 # define a function that will repond to changing axis view with radiobuttons
