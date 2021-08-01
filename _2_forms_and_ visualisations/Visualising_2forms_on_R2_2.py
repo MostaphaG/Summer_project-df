@@ -54,6 +54,12 @@ def eq_to_comps(string_x, string_y, xg, yg):
         u = eval(equation_x)*np.ones(np.shape(xg))
     if equation_y.find('x') & equation_y.find('y') == -1:
         v = eval(equation_y)*np.ones(np.shape(yg))
+    # check for when the derivative is zero, do not plot it as nothing
+    # if the other component is not zero.
+    if equation_x == '0' and equation_y != '0':
+        u = np.ones(np.shape(xg))
+    if equation_y == '0' and equation_x != '0':
+        v = np.ones(np.shape(yg))
     # return these
     return u, v
 
@@ -110,12 +116,12 @@ def find_2_form(expressions, coords, m=2):
             ext_ds[i, j] = ''
             ext_ds[j, i] = ''
             # check these against zero entries:
-            if (temp == '0') or (temp == ' - (0)') or (temp == '0*x'):
+            if (temp == '0') or (temp == ' - (0)') or (temp == '0*x') or (temp == ' +0'):
                 ext_ds[i, j] = '0'
             else:
                 result[pair, 0] += temp
                 ext_ds[i, j] = temp
-            if (temp1 == '0') or (temp1 == ' - (0)') or (temp1 == '0*x'):
+            if (temp1 == '0') or (temp1 == ' - (0)') or (temp1 == '0*x') or (temp1 == ' +0'):
                 ext_ds[j, i] = '0'
             else:
                 result[pair, 0] += temp1
@@ -317,8 +323,8 @@ y = np.linspace(-L, L, pt_den)
 xg, yg = np.meshgrid(x, y)
 
 # define an example vector field, now - from string, even initially
-string_x = 'x*sin(y)'  # x component
-string_y = 'y*cos(x)'  # y component
+string_x = 'sin(x + y)'  # x component
+string_y = 'sin(x + y)'  # y component
 
 # to define a 2 from, need to perform the exterior derrivative on
 # the given 1 form (vector field).
@@ -396,6 +402,9 @@ colour_str = ['red', 'blue', 'grey']
 form_2_components_plot(xg, yg, u, zero_field, s_max, L, pt_den, fract, colour_str)
 form_2_components_plot(xg, yg, zero_field, v, s_max, L, pt_den, fract, colour_str)
 # these fields are the original components
+
+# for testing, print ext_ds
+print(ext_ds)
 
 # %%
 
