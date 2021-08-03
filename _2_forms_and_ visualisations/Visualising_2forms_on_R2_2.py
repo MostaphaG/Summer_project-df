@@ -5,6 +5,7 @@
 import timeit
 import numpy as np
 import matplotlib.pyplot as plt
+from sympy import simplify
 from sympy import diff
 from sympy.parsing.sympy_parser import parse_expr
 from matplotlib.lines import Line2D
@@ -41,7 +42,7 @@ def format_eq(string):
 
 
 # define a function that takes input string that is python understood and turn into vector components:
-def eq_to_comps(string_x, string_y, xg, yg):
+def eq_to_comps_deriv(string_x, string_y, xg, yg):
     global equation_x, equation_y
     # use this fucntion to replace given string to python understood equations:
     equation_x = format_eq(string_x)
@@ -128,6 +129,9 @@ def find_2_form(expressions, coords, m=2):
                 ext_ds[j, i] = temp1
             # update the result row counter
             pair += 1
+    # before formatting give the simplified expression of result to user
+    print('result is : ')
+    print(str(simplify(str(result))) + '\n')
     # format string in each result row
     # making sure to format it correctly even if it contains constants or '0'
     # this is done if result is to be directly used later for any reason
@@ -180,7 +184,7 @@ def G(s, n, c):
 
 # define a function that will plot stack components, coloured
 # as per the orientation of the 2 form at that grid point
-def form_2_components_plot(xg, yg, u, v, s_max, L, pt_den, fract, colour_str):
+def form_2_components_plot(xg, yg, u, v, form_2_sgn, s_max, L, pt_den, fract, colour_str):
     global s_L
     # get axis lengths:
     x_len = len(xg[:, 0])
@@ -305,6 +309,21 @@ def form_2_components_plot(xg, yg, u, v, s_max, L, pt_den, fract, colour_str):
                     # change the parameter to loop over all changes in displacement for current magnitude
                     s += 1
 
+
+
+''' DOES NOT WORK FOR NOW, STILL FIGURING OUT HOW THIS CHECK CAN BE DONE '''
+# define a function that will deal with repeats in the ext_ds extractions
+# that will cancel out in the final 2 form, to exclude them from
+# stack expressions
+def two_form_stack_correct(ext_ds):
+    # extract needed ext_ds components into variables as strings
+    f_x, f_y = str(ext_ds[0, 1]), str(ext_ds[1, 0])
+    # want to check if anny whole functions, or components in both
+    # are equal, together with their signs, so they will cancel after
+    # inverting wedge orders in the final 2 form
+    return
+
+
 '''
 
 Set up all needed parameters, plots etc and complete the 2 form figure for the given filed
@@ -323,8 +342,8 @@ y = np.linspace(-L, L, pt_den)
 xg, yg = np.meshgrid(x, y)
 
 # define an example vector field, now - from string, even initially
-string_x = 'sin(x + y)'  # x component
-string_y = 'sin(x + y)'  # y component
+string_x = 'sin(x+y) - y'  # x component
+string_y = 'sin(x+y)'  # y component
 
 # to define a 2 from, need to perform the exterior derrivative on
 # the given 1 form (vector field).
@@ -362,7 +381,7 @@ form_2_sgn = np.sign(form_2[0])
 
 # evaluate the u and v given previously, with formating for them to be
 # python understood
-u, v = eq_to_comps(str(ext_ds[0, 1]), str(ext_ds[1, 0]), xg, yg)
+u, v = eq_to_comps_deriv(str(ext_ds[0, 1]), str(ext_ds[1, 0]), xg, yg)
 
 # set up a zero vector filed to plot x and y components as 2 separate fields:
 zero_field = np.zeros(np.shape(xg))
@@ -374,7 +393,7 @@ delta_factor = 10
 fract = 0.05
 
 # define the maximum number of stack to plot, dep. on magnitude
-s_max = 5
+s_max = 8
 
 # create a figure
 fig = plt.figure(figsize=(8, 8))
@@ -399,11 +418,12 @@ colour_str = ['red', 'blue', 'grey']
 
 # plot the fields with desired parameters as specidfied above
 # arrow params not needed as arrows arent plotted
-form_2_components_plot(xg, yg, u, zero_field, s_max, L, pt_den, fract, colour_str)
-form_2_components_plot(xg, yg, zero_field, v, s_max, L, pt_den, fract, colour_str)
+form_2_components_plot(xg, yg, u, zero_field, form_2_sgn, s_max, L, pt_den, fract, colour_str)
+form_2_components_plot(xg, yg, zero_field, v, form_2_sgn, s_max, L, pt_den, fract, colour_str)
 # these fields are the original components
 
-# for testing, print ext_ds
+# for testing, print ext_ds and result
+print('matrix of derrivatives was : ')
 print(ext_ds)
 
 # %%

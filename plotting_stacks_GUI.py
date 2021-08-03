@@ -45,7 +45,7 @@ def G(s, n, c):
         return (s/(n-1))
 
 # define a function that will complete all stack plotting:
-def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, orientation='mid', scale=1, w_head=1/8, h_head=1/4, axis_check=0):
+def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, orientation='mid', scale=1, w_head=1/8, h_head=1/4, axis_check=0, arrowheads=True, colour='green'):
     global s_L
     # get the lengths of x and y from their grids
     
@@ -176,15 +176,15 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, orient
                     By2 = B_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
                     
                     # from these, define the 2 lines, for this run
-                    axis.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=1, color='green'))
-                    axis.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=1, color='green'))
+                    axis.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=1, color=colour))
+                    axis.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=1, color=colour))
                     
                     # update parameter to reapet and draw all needed arrows
                     s += 1
             # deal with the odd number of stacks:
             elif parity(n) is False:
                 # Add the centre line for odd numbers of stacks
-                axis.add_line(Line2D((A_x[i, j], B_x[i, j]), (A_y[i, j], B_y[i, j]), linewidth=1, color='green'))
+                axis.add_line(Line2D((A_x[i, j], B_x[i, j]), (A_y[i, j], B_y[i, j]), linewidth=1, color=colour))
                 
                 # then loop over the remaining lines as per the recursion formula:
                 s = 1  # change the looping parametr to exclude already completed 0 (corr. to middle sheet here)
@@ -202,20 +202,22 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, orient
                     By2 = B_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
                     
                     # from these, define the 2 displaced lines
-                    axis.add_line(Line2D((Ax1,Bx1),(Ay1,By1), linewidth=1, color='green'))
-                    axis.add_line(Line2D((Ax2,Bx2),(Ay2,By2), linewidth=1, color='green'))
+                    axis.add_line(Line2D((Ax1,Bx1),(Ay1,By1), linewidth=1, color=colour))
+                    axis.add_line(Line2D((Ax2,Bx2),(Ay2,By2), linewidth=1, color=colour))
                     
                     # change the parameter to loop over all changes in displacement for current magnitude
                     s += 1
-            # plot lines of arrowheads from central sheet for n = 1 or on top sheet for n>1 
-            if n > 1:   # for all lines ubt the single sheet one
-                axis.add_line(Line2D((p_sh1x[i, j],p_sh3x[i, j]),(p_sh1y[i, j],p_sh3y[i, j]), linewidth=1, color='green'))
-                axis.add_line(Line2D((p_sh2x[i, j],p_sh3x[i, j]),((p_sh2y[i, j],p_sh3y[i, j])), linewidth=1, color='green'))
-            # then define it for the stacks with only 1 sheet:
+            if arrowheads == True:
+                # plot lines of arrowheads from central sheet for n = 1 or on top sheet for n>1 
+                if n > 1:   # for all lines ubt the single sheet one
+                    axis.add_line(Line2D((p_sh1x[i, j],p_sh3x[i, j]),(p_sh1y[i, j],p_sh3y[i, j]), linewidth=1, color='green'))
+                    axis.add_line(Line2D((p_sh2x[i, j],p_sh3x[i, j]),((p_sh2y[i, j],p_sh3y[i, j])), linewidth=1, color='green'))
+                # then define it for the stacks with only 1 sheet:
+                else:
+                    axis.add_line(Line2D((P_sh1x[i, j], P_sh3x[i, j]), (P_sh1y[i, j], P_sh3y[i, j]), linewidth=1, color='green'))
+                    axis.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color='green'))
             else:
-                axis.add_line(Line2D((P_sh1x[i, j], P_sh3x[i, j]), (P_sh1y[i, j], P_sh3y[i, j]), linewidth=1, color='green'))
-                axis.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color='green'))
-                
+                pass
     plt.close()
 
 
@@ -281,7 +283,7 @@ small_frame.grid(row=2, column=1)
 
 # define scale of the graph
 L = 5
-pt_den = 10   # number of points on each axis
+pt_den = 21   # number of points on each axis
 
 # define x and y values
 x = np.linspace(-L, L, pt_den)
@@ -349,7 +351,7 @@ delta_factor = 10
 fract = 0.05
 
 # define the maximum number of stack to plot, dep. on magnitude (initialy)
-s_max = 2
+s_max = 5
 
 # set screen dpi
 my_dpi = 100
@@ -395,6 +397,14 @@ rg, thetag = np.meshgrid(r, theta)
 a_polar = 1
 
 ''' end of polar setting up'''
+
+# set up initial strings for 2 forms window to display, for it to save properly after
+to_wedge_x_1_str = ''
+to_wedge_y_1_str = ''
+to_wedge_x_2_str = ''
+to_wedge_y_2_str = ''
+
+
 
 # plot the cartessian field with desired parameters as specidfied above
 plottedfield = stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head, 0)
@@ -603,7 +613,7 @@ def save_polar_grid():
 # define a button that will open a new window where the user can
 # customise the polar grid parameters
 def polar_grid_custom_reponse():
-    global arrowH_opt_window, r_min_entry, r_max_entry, r_den_entry, theta_den_entry, polar_grid_window
+    global r_min_entry, r_max_entry, r_den_entry, theta_den_entry, polar_grid_window
     # open a titled new window
     polar_grid_window = tk.Toplevel()
     polar_grid_window.title('optimisation settings for the polar grid')
@@ -649,6 +659,57 @@ def field_selection_response(event):
     PLOT_response()
 
 
+
+# define a function that will wedge two 1 forms and plot them
+def wedge_product():
+    global to_wedge_x_1_str, to_wedge_y_1_str, to_wedge_x_2_str, to_wedge_y_2_str
+    # first, get all entries out, save as string for these to display when
+    # window is opened again
+    to_wedge_x_1_str = str(to_wedge_x_1_entry.get())
+    to_wedge_y_1_str = str(to_wedge_y_1_entry.get())
+    to_wedge_x_2_str = str(to_wedge_x_2_entry.get())
+    to_wedge_y_2_str = str(to_wedge_y_2_entry.get())
+    u_1, v_1 = eq_to_comps(to_wedge_x_1_str, to_wedge_y_1_str, xg, yg)
+    u_2, v_2 = eq_to_comps(to_wedge_x_2_str, to_wedge_y_2_str, xg, yg)
+    # clear the axis:
+    main_axis.clear()
+    # plot these as stacks, with no arrowheads, on top of one another.
+    stack_plot(xg, yg, main_axis, u_1, v_1, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head, 0, arrowheads=False, colour='#F76952')
+    stack_plot(xg, yg, main_axis, u_2, v_2, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head, 0, arrowheads=False, colour='#5962FA')
+    # put these onto the canvas
+    canvas.draw()
+    # close the extra window
+    wedge_2_window.destroy()
+
+
+# define a function that will repond to wedge_2_btn
+def wedge_2_response():
+    global wedge_2_window, to_wedge_x_1_entry, to_wedge_y_1_entry, to_wedge_x_2_entry, to_wedge_y_2_entry
+    # open a titled new window
+    wedge_2_window = tk.Toplevel()
+    wedge_2_window.title('input two 1 forms to wedge')
+    # define all entry boxes
+    tk.Label(wedge_2_window, text='first 1 form x component :').grid(row=0, column=0)
+    to_wedge_x_1_entry = tk.Entry(wedge_2_window, width=30, borderwidth=1)
+    to_wedge_x_1_entry.insert(0, to_wedge_x_1_str)
+    to_wedge_x_1_entry.grid(row=1, column=0)
+    tk.Label(wedge_2_window, text='first 1 from y component:').grid(row=2, column=0)
+    to_wedge_y_1_entry = tk.Entry(wedge_2_window, width=30, borderwidth=1)
+    to_wedge_y_1_entry.insert(0, to_wedge_y_1_str)
+    to_wedge_y_1_entry.grid(row=3, column=0)
+    tk.Label(wedge_2_window, text='second 1 form x component :').grid(row=4, column=0)
+    to_wedge_x_2_entry = tk.Entry(wedge_2_window, width=30, borderwidth=1)
+    to_wedge_x_2_entry.insert(0, to_wedge_x_2_str)
+    to_wedge_x_2_entry.grid(row=5, column=0)
+    tk.Label(wedge_2_window, text='second 1 form y component :').grid(row=6, column=0)
+    to_wedge_y_2_entry = tk.Entry(wedge_2_window, width=30, borderwidth=1)
+    to_wedge_y_2_entry.insert(0, to_wedge_y_2_str)
+    to_wedge_y_2_entry.grid(row=7, column=0)
+    # define a button that will plot these
+    plot_wedge_btn = tk.Button(wedge_2_window, text='PLOT', padx=20, pady=10, command=wedge_product)
+    plot_wedge_btn.grid(row=8, column=0, pady=10)
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # define wanted Radio buttons
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -684,6 +745,12 @@ polar_grid_custom_btn.grid(row=1, column=3)
 # on a polar grid
 polar_grid_plot_btn = tk.Button(small_frame, text='polar grid plot', command= lambda: Polar_grid_plot_response(tensor.get()))
 polar_grid_plot_btn.grid(row=1, column=0, columnspan=2)
+
+# define a button for 2 1 forms to wedge
+# this will open a new window where the uder can input 2 2 forms that will be wedged
+# and the result will be plotted
+wedge_2_btn = tk.Button(right_frame, text='wedge', command= wedge_2_response)
+wedge_2_btn.grid()
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # define wanted entry boxes
@@ -1087,10 +1154,10 @@ dpd_drop.grid(row=3, column=1)
 # =============================================================================
 
 d_length_select = tk.DoubleVar()
-d_length_select.set(0.3)
 d_length_list = [0.2, 0.25, 0.3, 0.35, 0.4]
+d_length_select.set(d_length_list[2])
 
-tk.Label(right_frame, text='Select Inset Plot Size (units?):').grid(row=4, column=0)
+tk.Label(right_frame, text='Select Inset Plot Size :').grid(row=4, column=0)
 d_length_drop = tk.OptionMenu(right_frame, d_length_select, *d_length_list)
 d_length_drop.grid(row=4, column=1)
 

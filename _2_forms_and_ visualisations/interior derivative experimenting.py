@@ -668,7 +668,7 @@ def Submit_form():
     form_2 = eval(form_2_eq)
     if np.size(form_2) == 1:
         form_2 *= field_unit
-    # get the signs of thsi new 2 form
+    # get the signs of this new 2 form
     form_2_sgn = np.sign(form_2)
     # plot the new form using the previously define funtion
     plot_form(form_2)
