@@ -154,7 +154,8 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, orient
             # avoids extracting from R many times.
             n = R_int[i, j]
             
-            if axis_check == 1 and click_opt_int > 1 and i == i_m and j == j_m:
+            #if axis_check == 1 and click_opt_int > 1 and i == i_m and j == j_m:
+            if mag[i,j] == 0:
                 continue
             
             # deal with even number of sheets from magnitudes:
@@ -237,7 +238,6 @@ def format_eq(string):
     string = string.replace('ln', 'np.log')
     string = string.replace('e^', 'np.exp')
     return string
-
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # set up basic layout of the window
@@ -917,127 +917,14 @@ def deriv_calc(x_m, y_m):
     deriv_inset_ax.clear()
     deriv_inset_ax.remove()
 
-
-# =============================================================================
-# Define new function for plotting stacks in the derivative plot
-# =============================================================================
-
-
-# def stack_plot_deriv(xg, yg, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head=1/8, h_head=1/4):
-#     # get the lengths of x and y from their grids
-#     x_len = len(xg[:, 0])
-#     y_len = len(yg[0, :])
-#     # set the visuals for the derivative axis
-#     deriv_inset_ax.set_aspect('equal')
-    
-#     # Account for change to grid centre for divergence plot
-#     if click_opt_int > 2:       
-#         deriv_inset_ax.set_xlim(-L-L/5, L+L/5)
-#         deriv_inset_ax.set_ylim(-L-L/5, L+L/5)
-#     else:
-#         deriv_inset_ax.set_xlim(-L+x_m-L/5, L+x_m+L/5)
-#         deriv_inset_ax.set_ylim(-L+y_m-L/5, L+y_m+L/5)
-    
-#     # AS BEFORE:
-#     R_int = np.zeros(shape=((x_len), (y_len)))
-    
-#     if arrows is True:
-#         deriv_inset_ax.quiver(xg, yg, u, v, pivot=orientation, scale=scale, scale_units='xy')
-#     else:
-#         pass
-
-#     mag = np.sqrt(u**2 + v**2)
-#     theta = np.arctan2(v, u)
-
-#     sheet_L = L*fract
-#     s_L = fract*L
-#     max_size = np.max(mag)
-#     R = mag/max_size
-
-#     I_sin = np.sin(theta)
-#     I_cos = np.cos(theta)
-    
-#     A_x = xg + (sheet_L/2)*I_sin
-#     A_y = yg - (sheet_L/2)*I_cos
-#     B_x = xg - (sheet_L/2)*I_sin
-#     B_y = yg + (sheet_L/2)*I_cos
-    
-#     p_sh1x = xg + (s_L/2)*I_cos + (sheet_L*w_head)*I_sin
-#     p_sh1y = yg + (s_L/2)*I_sin - (sheet_L*w_head)*I_cos
-#     p_sh2x = xg + (s_L/2)*I_cos - (sheet_L*w_head)*I_sin
-#     p_sh2y = yg + (s_L/2)*I_sin + (sheet_L*w_head)*I_cos
-#     p_sh3x = xg + (s_L*0.5 + s_L*h_head)*I_cos
-#     p_sh3y = yg + (s_L*0.5 + s_L*h_head)*I_sin
-    
-#     P_sh1x = xg + (sheet_L*w_head)*I_sin
-#     P_sh1y = yg - (sheet_L*w_head)*I_cos
-#     P_sh2x = xg - (sheet_L*w_head)*I_sin
-#     P_sh2y = yg + (sheet_L*w_head)*I_cos
-#     P_sh3x = xg + (s_L*h_head)*I_cos
-#     P_sh3y = yg + (s_L*h_head)*I_sin
-    
-#     for i in range(x_len):
-#         for j in range(y_len):
-#             for t in range(1, s_max+1):
-#                 if (t-1)/s_max <= R[i, j] <= t/s_max:
-#                     R_int[i, j] = t
-            
-#             n = R_int[i, j]
-            
-#             # Prevent stack plotting in centre point of the derivative and div plot
-#             if click_opt_int > 1 and i == i_m and j == j_m:
-#                 continue
-            
-#             if parity(n) is True:
-#                 s = 0
-                
-#                 while s <= 0.5*(n-2):
-#                     Ax1 = A_x[i, j] + G(s, n, 0)*s_L*I_cos[i, j]
-#                     Ay1 = A_y[i, j] + G(s, n, 0)*s_L*I_sin[i, j]
-#                     Bx1 = B_x[i, j] + G(s, n, 0)*s_L*I_cos[i, j]
-#                     By1 = B_y[i, j] + G(s, n, 0)*s_L*I_sin[i, j]
-#                     Ax2 = A_x[i, j] - G(s, n, 0)*s_L*I_cos[i, j]
-#                     Ay2 = A_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
-#                     Bx2 = B_x[i, j] - G(s, n, 0)*s_L*I_cos[i, j]
-#                     By2 = B_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
-#                     deriv_inset_ax.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=1, color='green'))
-#                     deriv_inset_ax.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=1, color='green'))
-#                     s += 1
-                    
-#             elif parity(n) is False:
-#                 deriv_inset_ax.add_line(Line2D((A_x[i, j], B_x[i, j]), (A_y[i, j], B_y[i, j]), linewidth=1, color='green'))
-#                 s = 1 
-                
-#                 while s <= 0.5*(n-1):
-#                     Ax1 = A_x[i, j] + G(s, n, 1)*s_L*I_cos[i, j]
-#                     Ay1 = A_y[i, j] + G(s, n, 1)*s_L*I_sin[i, j]
-#                     Bx1 = B_x[i, j] + G(s, n, 1)*s_L*I_cos[i, j]
-#                     By1 = B_y[i, j] + G(s, n, 1)*s_L*I_sin[i, j]
-#                     Ax2 = A_x[i, j] - G(s, n, 1)*s_L*I_cos[i, j]
-#                     Ay2 = A_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
-#                     Bx2 = B_x[i, j] - G(s, n, 1)*s_L*I_cos[i, j]
-#                     By2 = B_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
-#                     deriv_inset_ax.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=1, color='green'))
-#                     deriv_inset_ax.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=1, color='green'))
-#                     s += 1
-                    
-#             if n > 1:
-#                 deriv_inset_ax.add_line(Line2D((p_sh1x[i, j], p_sh3x[i, j]), (p_sh1y[i, j], p_sh3y[i, j]), linewidth=1, color='green'))
-#                 deriv_inset_ax.add_line(Line2D((p_sh2x[i, j], p_sh3x[i, j]), ((p_sh2y[i, j], p_sh3y[i, j])), linewidth=1, color='green'))
-#             else:
-#                 deriv_inset_ax.add_line(Line2D((P_sh1x[i, j], P_sh3x[i, j]), (P_sh1y[i, j], P_sh3y[i, j]), linewidth=1, color='green'))
-#                 deriv_inset_ax.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color='green'))
-
-
-# set up the initial variable (code starts in option to use matplotlib tools)
+# Initialise the click button selection
 click_opt_int = 0
-
 
 # define a function that will update the variable that defines click action
 def click_option_handler(click_option):
     global click_opt_int, toolbar
     click_opt_int = click_option
-    #fun_test(ax)
+    
     # and for the the initial plot:
     if click_opt_int == 0:
         fig.canvas.draw()
@@ -1049,12 +936,12 @@ def click_option_handler(click_option):
         toolbar.update()  # allow the plot to update based on the toolbar
         canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
     # when 'tool' is not selected, disable the pan and zoom:
+        
     if click_opt_int > 0:
+        deriv_calc(x_m, y_m)
         toolbar.home()
         toolbar.children['!button4'].pack_forget()
         toolbar.children['!button5'].pack_forget()
-
-
 
 # =============================================================================
 # Calculate the Jacobian matrix of the defined vector field
@@ -1167,6 +1054,7 @@ d_length_drop.grid(row=4, column=1)
 
 # takes a matrix a and sorts through elements setting to zero if condition is met and one otherwise  
 # used to remove singularity in Grav&Mag predefined field
+
 def step(a):
     rows = len(a[:,0])
     columns = len(a[0,:])
