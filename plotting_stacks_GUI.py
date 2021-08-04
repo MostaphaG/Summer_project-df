@@ -45,8 +45,8 @@ def G(s, n, c):
         return (s/(n-1))
 
 # define a function that will complete all stack plotting:
-def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, orientation='mid', scale=1, w_head=1/8, h_head=1/4, axis_check=0, arrowheads=True, colour='green'):
-    global s_L
+def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks=True, orientation='mid', scale=1, w_head=1/8, h_head=1/4, axis_check=0, arrowheads=True, colour='green'):
+    global s_L, ScaleFactor
     # get the lengths of x and y from their grids
     
     x_len = len(xg[:, 0])
@@ -76,18 +76,6 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, orient
     # define an empty array of magnitudes, to then fill with integer rel. mags
     R_int = np.zeros(shape=((x_len), (y_len)))
 
-    
-    # #########################################################################
-    # plot the initial quiver plot to work from
-    # #########################################################################
-
-        
-    # plot the quiver plot on grid points if chosen in original function
-    if arrows is True:
-        axis.quiver(xg, yg, u, v, pivot=orientation, scale=scale, scale_units='xy')
-    else:
-        pass
-  
     # #########################################################################
     # get variables needed for the initial, simplified stack plot
     # #########################################################################
@@ -95,6 +83,7 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, orient
     mag = np.sqrt(u**2 + v**2)
     # find direction of each arrow
     angles = np.arctan2(v, u)   # theta defined from positive x axis ccw
+    
     
     # #########################################################################
     # use the the direction of arrows to define stack properties
@@ -110,115 +99,128 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, orient
     # to be perp. to arrow. shifted parallel to it, their density porp to mag
     # of the arrow and with an arrowhead on top.
     # #########################################################################
+    
     # find the maximum magnitude for scaling
     max_size = np.max(mag)   # careful with singularities, else ---> nan
     
+    # Define scaling factor
+    ScaleFactor = max_size/(0.9*(2*L/pt_den))
+
     # find the relative magnitude of vectors to maximum, as an array
     R = mag/max_size    
     
-    # define tigonometirc shifts
-    I_sin = np.sin(angles)
-    I_cos = np.cos(angles)
+    # plot the quiver plot on grid points if chosen in original function
+    if arrows is True:
+        axis.quiver(xg, yg, u, v, pivot=orientation, scale=ScaleFactor, scale_units='xy')
+    else:
+        pass
     
-    # define the points that set out a line of the stack sheet (middle line)
-    A_x = xg + (sheet_L/2)*I_sin
-    A_y = yg - (sheet_L/2)*I_cos
-    B_x = xg - (sheet_L/2)*I_sin
-    B_y = yg + (sheet_L/2)*I_cos
     
-    # define points of stack arrowheads as arrays for all stacks
-    p_sh1x = xg + (s_L/2)*I_cos + (sheet_L*w_head)*I_sin
-    p_sh1y = yg + (s_L/2)*I_sin - (sheet_L*w_head)*I_cos
-    p_sh2x = xg + (s_L/2)*I_cos - (sheet_L*w_head)*I_sin
-    p_sh2y = yg + (s_L/2)*I_sin + (sheet_L*w_head)*I_cos
-    p_sh3x = xg + (s_L*0.5 + s_L*h_head)*I_cos
-    p_sh3y = yg + (s_L*0.5 + s_L*h_head)*I_sin
-    
-    # define these for when there is only 1 line in the stack plot:
-    P_sh1x = xg + (sheet_L*w_head)*I_sin
-    P_sh1y = yg - (sheet_L*w_head)*I_cos
-    P_sh2x = xg - (sheet_L*w_head)*I_sin
-    P_sh2y = yg + (sheet_L*w_head)*I_cos
-    P_sh3x = xg + (s_L*h_head)*I_cos
-    P_sh3y = yg + (s_L*h_head)*I_sin
-    
-    # loop over each arrow coordinate in x and y
-    for i in range(x_len):
-        for j in range(y_len):
-            # define it for all magnitudes. Separately for odd and even corr. number of sheets:
-            # Label each element with the number of stacks required: linear scaling
-            for t in range(1, s_max+1):
-                if (t-1)/s_max <= R[i, j] <= t/s_max:
-                    R_int[i, j] = t
-            # set a varible for current considered magnitude as it is reused
-            # avoids extracting from R many times.
-            n = R_int[i, j]
+    if stacks is True:
             
-            #if axis_check == 1 and click_opt_int > 1 and i == i_m and j == j_m:
-            if mag[i,j] == 0:
-                continue
-            
-            # deal with even number of sheets from magnitudes:
-            if parity(n) is True:
-                # define a parameter to loop over in the recursion equation
-                s = 0
+        # define tigonometirc shifts
+        I_sin = np.sin(angles)
+        I_cos = np.cos(angles)
+        
+        # define the points that set out a line of the stack sheet (middle line)
+        A_x = xg + (sheet_L/2)*I_sin
+        A_y = yg - (sheet_L/2)*I_cos
+        B_x = xg - (sheet_L/2)*I_sin
+        B_y = yg + (sheet_L/2)*I_cos
+        
+        # define points of stack arrowheads as arrays for all stacks
+        p_sh1x = xg + (s_L/2)*I_cos + (sheet_L*w_head)*I_sin
+        p_sh1y = yg + (s_L/2)*I_sin - (sheet_L*w_head)*I_cos
+        p_sh2x = xg + (s_L/2)*I_cos - (sheet_L*w_head)*I_sin
+        p_sh2y = yg + (s_L/2)*I_sin + (sheet_L*w_head)*I_cos
+        p_sh3x = xg + (s_L*0.5 + s_L*h_head)*I_cos
+        p_sh3y = yg + (s_L*0.5 + s_L*h_head)*I_sin
+        
+        # define these for when there is only 1 line in the stack plot:
+        P_sh1x = xg + (sheet_L*w_head)*I_sin
+        P_sh1y = yg - (sheet_L*w_head)*I_cos
+        P_sh2x = xg - (sheet_L*w_head)*I_sin
+        P_sh2y = yg + (sheet_L*w_head)*I_cos
+        P_sh3x = xg + (s_L*h_head)*I_cos
+        P_sh3y = yg + (s_L*h_head)*I_sin
+        
+        # loop over each arrow coordinate in x and y
+        for i in range(x_len):
+            for j in range(y_len):
+                # define it for all magnitudes. Separately for odd and even corr. number of sheets:
+                # Label each element with the number of stacks required: linear scaling
+                for t in range(1, s_max+1):
+                    if (t-1)/s_max <= R[i, j] <= t/s_max:
+                        R_int[i, j] = t
+                # set a varible for current considered magnitude as it is reused
+                # avoids extracting from R many times.
+                n = R_int[i, j]
                 
-                # Define the points for sheets required for the given magnitude
-                # from these define all the needed lines and plot them
-                while s <= 0.5*(n-2):  # maximum set by equations (documentation)
-                    # define all the points for the 2 currently looped +- sheets in while loop
-                    Ax1 = A_x[i, j] + G(s, n, 0)*s_L*I_cos[i, j]
-                    Ay1 = A_y[i, j] + G(s, n, 0)*s_L*I_sin[i, j]
-                    Bx1 = B_x[i, j] + G(s, n, 0)*s_L*I_cos[i, j]
-                    By1 = B_y[i, j] + G(s, n, 0)*s_L*I_sin[i, j]
-                    Ax2 = A_x[i, j] - G(s, n, 0)*s_L*I_cos[i, j]
-                    Ay2 = A_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
-                    Bx2 = B_x[i, j] - G(s, n, 0)*s_L*I_cos[i, j]
-                    By2 = B_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
-                    
-                    # from these, define the 2 lines, for this run
-                    axis.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=1, color=colour))
-                    axis.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=1, color=colour))
-                    
-                    # update parameter to reapet and draw all needed arrows
-                    s += 1
-            # deal with the odd number of stacks:
-            elif parity(n) is False:
-                # Add the centre line for odd numbers of stacks
-                axis.add_line(Line2D((A_x[i, j], B_x[i, j]), (A_y[i, j], B_y[i, j]), linewidth=1, color=colour))
+                #if axis_check == 1 and click_opt_int > 1 and i == i_m and j == j_m:
+                if mag[i,j] == 0:
+                    continue
                 
-                # then loop over the remaining lines as per the recursion formula:
-                s = 1  # change the looping parametr to exclude already completed 0 (corr. to middle sheet here)
-                
-                # define all remaining sheets for the magnitude:
-                while s <= 0.5*(n-1):  # maximum set by equations (documentation)
-                    # define all the points for the current +- displacement in while loop
-                    Ax1 = A_x[i, j] + G(s, n, 1)*s_L*I_cos[i, j]
-                    Ay1 = A_y[i, j] + G(s, n, 1)*s_L*I_sin[i, j]
-                    Bx1 = B_x[i, j] + G(s, n, 1)*s_L*I_cos[i, j]
-                    By1 = B_y[i, j] + G(s, n, 1)*s_L*I_sin[i, j]
-                    Ax2 = A_x[i, j] - G(s, n, 1)*s_L*I_cos[i, j]
-                    Ay2 = A_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
-                    Bx2 = B_x[i, j] - G(s, n, 1)*s_L*I_cos[i, j]
-                    By2 = B_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
+                # deal with even number of sheets from magnitudes:
+                if parity(n) is True:
+                    # define a parameter to loop over in the recursion equation
+                    s = 0
                     
-                    # from these, define the 2 displaced lines
-                    axis.add_line(Line2D((Ax1,Bx1),(Ay1,By1), linewidth=1, color=colour))
-                    axis.add_line(Line2D((Ax2,Bx2),(Ay2,By2), linewidth=1, color=colour))
+                    # Define the points for sheets required for the given magnitude
+                    # from these define all the needed lines and plot them
+                    while s <= 0.5*(n-2):  # maximum set by equations (documentation)
+                        # define all the points for the 2 currently looped +- sheets in while loop
+                        Ax1 = A_x[i, j] + G(s, n, 0)*s_L*I_cos[i, j]
+                        Ay1 = A_y[i, j] + G(s, n, 0)*s_L*I_sin[i, j]
+                        Bx1 = B_x[i, j] + G(s, n, 0)*s_L*I_cos[i, j]
+                        By1 = B_y[i, j] + G(s, n, 0)*s_L*I_sin[i, j]
+                        Ax2 = A_x[i, j] - G(s, n, 0)*s_L*I_cos[i, j]
+                        Ay2 = A_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
+                        Bx2 = B_x[i, j] - G(s, n, 0)*s_L*I_cos[i, j]
+                        By2 = B_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
+                        
+                        # from these, define the 2 lines, for this run
+                        axis.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=1, color=colour))
+                        axis.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=1, color=colour))
+                        
+                        # update parameter to reapet and draw all needed arrows
+                        s += 1
+                # deal with the odd number of stacks:
+                elif parity(n) is False:
+                    # Add the centre line for odd numbers of stacks
+                    axis.add_line(Line2D((A_x[i, j], B_x[i, j]), (A_y[i, j], B_y[i, j]), linewidth=1, color=colour))
                     
-                    # change the parameter to loop over all changes in displacement for current magnitude
-                    s += 1
-            if arrowheads == True:
-                # plot lines of arrowheads from central sheet for n = 1 or on top sheet for n>1 
-                if n > 1:   # for all lines ubt the single sheet one
-                    axis.add_line(Line2D((p_sh1x[i, j],p_sh3x[i, j]),(p_sh1y[i, j],p_sh3y[i, j]), linewidth=1, color='green'))
-                    axis.add_line(Line2D((p_sh2x[i, j],p_sh3x[i, j]),((p_sh2y[i, j],p_sh3y[i, j])), linewidth=1, color='green'))
-                # then define it for the stacks with only 1 sheet:
+                    # then loop over the remaining lines as per the recursion formula:
+                    s = 1  # change the looping parametr to exclude already completed 0 (corr. to middle sheet here)
+                    
+                    # define all remaining sheets for the magnitude:
+                    while s <= 0.5*(n-1):  # maximum set by equations (documentation)
+                        # define all the points for the current +- displacement in while loop
+                        Ax1 = A_x[i, j] + G(s, n, 1)*s_L*I_cos[i, j]
+                        Ay1 = A_y[i, j] + G(s, n, 1)*s_L*I_sin[i, j]
+                        Bx1 = B_x[i, j] + G(s, n, 1)*s_L*I_cos[i, j]
+                        By1 = B_y[i, j] + G(s, n, 1)*s_L*I_sin[i, j]
+                        Ax2 = A_x[i, j] - G(s, n, 1)*s_L*I_cos[i, j]
+                        Ay2 = A_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
+                        Bx2 = B_x[i, j] - G(s, n, 1)*s_L*I_cos[i, j]
+                        By2 = B_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
+                        
+                        # from these, define the 2 displaced lines
+                        axis.add_line(Line2D((Ax1,Bx1),(Ay1,By1), linewidth=1, color=colour))
+                        axis.add_line(Line2D((Ax2,Bx2),(Ay2,By2), linewidth=1, color=colour))
+                        
+                        # change the parameter to loop over all changes in displacement for current magnitude
+                        s += 1
+                if arrowheads == True:
+                    # plot lines of arrowheads from central sheet for n = 1 or on top sheet for n>1 
+                    if n > 1:   # for all lines ubt the single sheet one
+                        axis.add_line(Line2D((p_sh1x[i, j],p_sh3x[i, j]),(p_sh1y[i, j],p_sh3y[i, j]), linewidth=1, color='green'))
+                        axis.add_line(Line2D((p_sh2x[i, j],p_sh3x[i, j]),((p_sh2y[i, j],p_sh3y[i, j])), linewidth=1, color='green'))
+                    # then define it for the stacks with only 1 sheet:
+                    else:
+                        axis.add_line(Line2D((P_sh1x[i, j], P_sh3x[i, j]), (P_sh1y[i, j], P_sh3y[i, j]), linewidth=1, color='green'))
+                        axis.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color='green'))
                 else:
-                    axis.add_line(Line2D((P_sh1x[i, j], P_sh3x[i, j]), (P_sh1y[i, j], P_sh3y[i, j]), linewidth=1, color='green'))
-                    axis.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color='green'))
-            else:
-                pass
+                    pass
     plt.close()
 
 
@@ -284,6 +286,9 @@ small_frame.grid(row=2, column=1)
 # define scale of the graph
 L = 5
 pt_den = 21   # number of points on each axis
+
+# Define scaling factor based on the point separation 2L/pt_den and the max vector magnitude
+# ScaleFactor = max_size/(0.9*(2*L/pt_den))
 
 # define x and y values
 x = np.linspace(-L, L, pt_den)
@@ -404,10 +409,10 @@ to_wedge_y_1_str = ''
 to_wedge_x_2_str = ''
 to_wedge_y_2_str = ''
 
-
+stacks = True
 
 # plot the cartessian field with desired parameters as specidfied above
-plottedfield = stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head, 0)
+plottedfield = stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0)
 
 # reduce white space from the figure in the plot frame
 fig.tight_layout()
@@ -466,31 +471,33 @@ def eq_to_comps(string_x, string_y, xg, yg):
 
 
 # define a function that will respond to radio buttons behind choosing vector types:
+# Note, tensor is a local variable. So to get value in other functions, use tensor.get() to extract current radiobutton value
+
 def vect_type_response(tensor):
     # clear the plot that is already there:
     main_axis.clear()
     # use the tensor to determine what to plot:
     # 0 is just stacks, 1 is for only arrows and 2 is for both
+     
     if tensor == 0:
         arrows = False
-        stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head, 0)
-        canvas.draw()
+        stacks = True
     elif tensor == 1:
-        main_axis.quiver(xg, yg, u, v, pivot=orientation, scale=scale, scale_units='xy')
-        # repeat the displaying of the figure so that it updates in GUI
-        canvas.draw()
+        arrows = True
+        stacks = False
     elif tensor == 2:
         arrows = True
-        stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head, 0)
-        # repeat the displaying of the figure so that it updates in GUI
-        canvas.draw()
+        stacks = True
+        
+    stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0)
+    canvas.draw()
 
 
 # define the PLOT button response function
 def PLOT_response():
     # first, take from entry boxes, wanted parameters and make them global:
     # these must be changed globally for other functions to work with the new field.
-    global L, pt_den, s_max, x, y, xg, yg, u, v, tensor, main_axis, string_x, string_y
+    global L, pt_den, s_max, x, y, xg, yg, u, v, tensor, main_axis, string_x, string_y, arrows, stacks
     # clear the current axis
     main_axis.clear()
     # take the new axis parameters and field definitions out of the boxes
@@ -509,12 +516,21 @@ def PLOT_response():
     xg, yg = np.meshgrid(x, y)
     # take all these values, and the input from field component bnoxes to set up the field:
     u, v = eq_to_comps(string_x, string_y, xg, yg)
-    # plot the new field
-    stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head, 0)
-    # put it onto the screen
+
+    
+    if tensor.get() == 0:
+        arrows = False  
+        stacks = True
+    elif tensor.get() == 1:
+        arrows = True  
+        stacks = False
+    elif tensor.get() == 2:
+        arrows = True
+        stacks = True
+
+    stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0)
+
     canvas.draw()
-    # change the radio button ticks back to stack only
-    tensor.set(0)
 
 
 # define a function to respond to submitting arrohead changes in the new window
@@ -579,18 +595,22 @@ def Polar_grid_plot_response(tensor):
     u, v = eq_to_comps(string_x, string_y, xg, yg)
     # clear the plot that is already there:
     main_axis.clear()
+    
     # use the selected tensor to determine what to plot:
     # 0 is just stacks, 1 is for only arrows and 2 is for both
+    
     if tensor == 0:
-        arrows = False  # set correct variable as asked by user
-        stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head, 0)
-        # display the figure so that it updates in GUI
+        arrows = False  
+        stacks = True
     elif tensor == 1:
-        main_axis.quiver(xg, yg, u, v, pivot=orientation, scale=scale, scale_units='xy')
+        arrows = True  
+        stacks = False
     elif tensor == 2:
         arrows = True
-        stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head, 0)
-        # repeat the displaying of the figure so that it updates in GUI
+        stacks = True
+    
+    stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0)
+    
     canvas.draw()
 
 
@@ -674,8 +694,10 @@ def wedge_product():
     # clear the axis:
     main_axis.clear()
     # plot these as stacks, with no arrowheads, on top of one another.
-    stack_plot(xg, yg, main_axis, u_1, v_1, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head, 0, arrowheads=False, colour='#F76952')
-    stack_plot(xg, yg, main_axis, u_2, v_2, s_max, L, pt_den, fract, arrows, orientation, scale, w_head, h_head, 0, arrowheads=False, colour='#5962FA')
+    arrows = False
+    stacks = True
+    stack_plot(xg, yg, main_axis, u_1, v_1, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0, arrowheads=False, colour='#F76952')
+    stack_plot(xg, yg, main_axis, u_2, v_2, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0, arrowheads=False, colour='#5962FA')
     # put these onto the canvas
     canvas.draw()
     # close the extra window
@@ -849,11 +871,13 @@ def deriv_calc(x_m, y_m):
         dv_dy = eval(format_eq_div(format_eq(J[1, 1])))
         dxg, dyg = np.meshgrid(dx, dy)
         
+        # Div --> Trace of the Jacobian Matrix
         u_div = (du_dx + dv_dy)*dxg
         v_div = (du_dx + dv_dy)*dyg
         
-        u_curl = (du_dy - dv_dx)*dyg
-        v_curl = -(du_dy - dv_dx)*dxg
+        #Curl --> Skew Symmetric Part of Jacobian Matrix 0.5*(A-A^T)
+        u_curl = -0.5*(du_dy - dv_dx)*dyg
+        v_curl = 0.5*(du_dy - dv_dx)*dxg
         
     # Zoom/Derivative Plot
     else:
@@ -892,21 +916,18 @@ def deriv_calc(x_m, y_m):
         u_s = u_curl
         v_s = v_curl
         scale_s = scale
-        
-    # Stack or arrows plot
-    if tensor.get() == 0:        
-        # Stack
+
+    if tensor.get() == 0:
         arrows = False
-        #stack_plot_deriv(dxg, dyg, u_s, v_s, 5, d_range, dpd, 0.1, arrows, orientation, scale_s)
-        stack_plot(dxg, dyg, deriv_inset_ax, u_s, v_s, 5, d_range, dpd, 0.1, arrows, orientation, scale_s, w_head, h_head, 1)
-    elif tensor.get() == 1:
-        # Arrows        
-        deriv_inset_ax.quiver(dxg, dyg, u_s, v_s, pivot='mid', scale=scale_s, scale_units='xy')
-    elif tensor.get() == 2:
-        # Arrows + Stack
+        stacks = True
+    if tensor.get() == 1:
         arrows = True
-        #stack_plot_deriv(dxg, dyg, u_s, v_s, 5, d_range, dpd, 0.1, arrows, orientation, scale_s)
-        stack_plot(dxg, dyg, deriv_inset_ax, u_s, v_s, 5, d_range, dpd, 0.1, arrows, orientation, scale_s, w_head, h_head, 1)
+        stacks = False
+    if tensor.get() == 2:
+        arrows = True
+        stacks = True
+    
+    stack_plot(dxg, dyg, deriv_inset_ax, u_s, v_s, 5, d_range, dpd, 0.1, arrows, stacks, orientation, scale_s, w_head, h_head, 1) 
 
     # Don't display the x and y axis values
     deriv_inset_ax.set_xticks([])
