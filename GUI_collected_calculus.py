@@ -9,11 +9,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import tkinter as tk
-from tkinter import ttk
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg, NavigationToolbar2Tk)
 from matplotlib.backend_bases import key_press_handler
-import matplotlib as mpl
 from sympy import diff
 from sympy.parsing.sympy_parser import parse_expr
 from sympy import simplify, integrate, Symbol
@@ -97,7 +95,7 @@ def unformat(string):
     string = string.replace('xg', 'x')
     string = string.replace('yg', 'y')
     string = string.replace('zg', 'z')
-    string = string.replace('rd', 'R')  # otherwise: sqrt won't work, becaue of the r in it &arctan won't work because of tan in it and the r in it.
+    string = string.replace('rd', 'R')
     string = string.replace('thetag', 'theta')
     # where there are special functions, replace them with library directions
     string = string.replace('np.pi', 'pi')
@@ -110,6 +108,7 @@ def unformat(string):
     string = string.replace('np.log()', 'ln')
     string = string.replace('np.exp', 'e^')
     return string
+
 
 # define a function that takes input string that is python understood and turn into vector components:
 def eq_to_comps(string_x, string_y, xg, yg):
@@ -262,7 +261,7 @@ xg, yg = np.meshgrid(x, y)
 # set the dimensionality
 m = 2
 
-''' 
+'''
 start the program with a 2 form being supplied and plotted by blocks only
 define intiial variables for these:
 '''
@@ -285,7 +284,7 @@ define initial variables for all pother operations that will be completed
 '''
 
 # ##### GENERAL ONES FOR STACKS #######
- 
+
 # define colours to use for 2 form plots with components
 # first string defines colour for positive (ccw), second for negative (cw)
 # last one is an in case, for when the magnitude is exactly zero.
@@ -474,21 +473,21 @@ def form_2_components_plot(xg, yg, u, v, form_2_sgn, s_max, L, pt_den, fract, co
                     By2 = B_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
                     
                     # from these, define the 2 displaced lines
-                 
-                    ax.add_line(Line2D((Ax1,Bx1),(Ay1,By1), linewidth=0.7, color=colour_str[color_index]))
-                    ax.add_line(Line2D((Ax2,Bx2),(Ay2,By2), linewidth=0.7, color=colour_str[color_index]))
+                    
+                    ax.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=0.7, color=colour_str[color_index]))
+                    ax.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=0.7, color=colour_str[color_index]))
                     
                     # change the parameter to loop over all changes in displacement for current magnitude
                     s += 1
-            if arrowheads == True:
-                    # plot lines of arrowheads from central sheet for n = 1 or on top sheet for n>1 
-                    if n > 1:   # for all lines ubt the single sheet one
-                        ax.add_line(Line2D((p_sh1x[i, j],p_sh3x[i, j]),(p_sh1y[i, j],p_sh3y[i, j]), linewidth=1, color=colour_str[color_index]))
-                        ax.add_line(Line2D((p_sh2x[i, j],p_sh3x[i, j]),((p_sh2y[i, j],p_sh3y[i, j])), linewidth=1, color=colour_str[color_index]))
-                    # then define it for the stacks with only 1 sheet:
-                    else:
-                        ax.add_line(Line2D((P_sh1x[i, j], P_sh3x[i, j]), (P_sh1y[i, j], P_sh3y[i, j]), linewidth=1, color=colour_str[color_index]))
-                        ax.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color=colour_str[color_index]))
+            if arrowheads is True:
+                # plot lines of arrowheads from central sheet for n = 1 or on top sheet for n>1 
+                if n > 1:   # for all lines ubt the single sheet one
+                    ax.add_line(Line2D((p_sh1x[i, j], p_sh3x[i, j]), (p_sh1y[i, j], p_sh3y[i, j]), linewidth=1, color=colour_str[color_index]))
+                    ax.add_line(Line2D((p_sh2x[i, j], p_sh3x[i, j]), ((p_sh2y[i, j], p_sh3y[i, j])), linewidth=1, color=colour_str[color_index]))
+                # then define it for the stacks with only 1 sheet:
+                else:
+                    ax.add_line(Line2D((P_sh1x[i, j], P_sh3x[i, j]), (P_sh1y[i, j], P_sh3y[i, j]), linewidth=1, color=colour_str[color_index]))
+                    ax.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color=colour_str[color_index]))
             else:
                 pass
 
@@ -508,23 +507,21 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, orient
     # axis.set_ylim(-ax_L, ax_L)
     ax_L = L + L/delta_factor
     axis.set_xlim(-ax_L, ax_L)
-    axis.set_ylim(-ax_L, ax_L) 
+    axis.set_ylim(-ax_L, ax_L)
     
     # define an empty array of magnitudes, to then fill with integer rel. mags
     R_int = np.zeros(shape=((x_len), (y_len)))
-
     
     # #########################################################################
     # plot the initial quiver plot to work from
     # #########################################################################
-
-        
+    
     # plot the quiver plot on grid points if chosen in original function
     if arrows is True:
         axis.quiver(xg, yg, u, v, pivot=orientation, scale=scale, scale_units='xy')
     else:
         pass
-  
+    
     # #########################################################################
     # get variables needed for the initial, simplified stack plot
     # #########################################################################
@@ -736,6 +733,7 @@ Define response functions to GUI interactions
 
 '''
 
+
 # gets 2 form from entry box and plots it as coloured blocks only
 def form_2_response():
     global form_2_str, form_2_eq, form_2_sgn, form_2, comp_x, comp_y, u, v
@@ -935,7 +933,6 @@ def Ext_deriv_response():
     form_1_y_entry.configure(bg='#FFFFFF')
 
 
-
 # define a function that will wedge two 1 forms and plot them
 def wedge_product():
     global to_wedge_x_1_str, to_wedge_y_1_str, to_wedge_x_2_str, to_wedge_y_2_str
@@ -1034,7 +1031,7 @@ form_2_btn = tk.Button(small_frame, text='2 form plot', padx=3, pady=5, command=
 form_2_btn.grid(row=0, column=0)
 
 # define radio buttons to chose stacks or blocks
-stack_block = tk.IntVar() # Tkinter variable for Radiobuttons
+stack_block = tk.IntVar()  # Tkinter variable for Radiobuttons
 stack_block.set(0)
 stack_block_int = stack_block.get()
 blocks_rb = tk.Radiobutton(right_frame, text='blocks', variable=stack_block, value=0, command=lambda: plot_type_response(stack_block.get()))
@@ -1070,14 +1067,12 @@ Hodge_btn = tk.Button(right_frame, text='Hodge', padx=67, pady=10, command=Hodge
 Hodge_btn.grid(row=4, column=0)
 
 
-
 '''
 
 NOTE: I am not putting in customisations here as this will later (hopefully)
 Join the main GUI which already has all that in it.
 
 '''
-
 
 
 '''
@@ -1105,5 +1100,9 @@ comp_x = str(simplify( '-(' + str(integrate(eq_1, y_symbol)) + ')'))
 comp_y = str(simplify(str(integrate(eq_2, x_symbol))))
 
 '''
+
+# return time to run
+stop = timeit.default_timer()
+print('Time: ', stop - start)
 
 tk.mainloop()
