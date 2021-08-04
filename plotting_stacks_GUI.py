@@ -46,7 +46,8 @@ def G(s, n, c):
 
 # define a function that will complete all stack plotting:
 def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks=True, orientation='mid', scale=1, w_head=1/8, h_head=1/4, axis_check=0, arrowheads=True, colour='green'):
-    global s_L, ScaleFactor
+    
+    global s_L
     # get the lengths of x and y from their grids
     
     x_len = len(xg[:, 0])
@@ -84,7 +85,6 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks
     # find direction of each arrow
     angles = np.arctan2(v, u)   # theta defined from positive x axis ccw
     
-    
     # #########################################################################
     # use the the direction of arrows to define stack properties
     # #########################################################################
@@ -109,12 +109,16 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks
     # find the relative magnitude of vectors to maximum, as an array
     R = mag/max_size    
     
+    if ascale.get() == 0:
+        ScaleFactor = scale
+    elif ascale.get() == 1:
+        ScaleFactor = max_size/(0.9*(2*L/pt_den))
+    
     # plot the quiver plot on grid points if chosen in original function
     if arrows is True:
-        axis.quiver(xg, yg, u, v, pivot=orientation, scale=ScaleFactor, scale_units='xy')
+        axis.quiver(xg, yg, u, v, pivot=orientation, scale=ScaleFactor, scale_units='xy') 
     else:
         pass
-    
     
     if stacks is True:
             
@@ -285,10 +289,11 @@ small_frame.grid(row=2, column=1)
 
 # define scale of the graph
 L = 5
-pt_den = 21   # number of points on each axis
+pt_den = 15   # number of points on each axis
 
-# Define scaling factor based on the point separation 2L/pt_den and the max vector magnitude
-# ScaleFactor = max_size/(0.9*(2*L/pt_den))
+# Initialise auto scaling variable
+ascale = tk.IntVar()
+ascale.set(1)
 
 # define x and y values
 x = np.linspace(-L, L, pt_den)
@@ -356,7 +361,7 @@ delta_factor = 10
 fract = 0.05
 
 # define the maximum number of stack to plot, dep. on magnitude (initialy)
-s_max = 5
+s_max = 4
 
 # set screen dpi
 my_dpi = 100
@@ -491,7 +496,6 @@ def vect_type_response(tensor):
         
     stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0)
     canvas.draw()
-
 
 # define the PLOT button response function
 def PLOT_response():
@@ -741,10 +745,13 @@ def wedge_2_response():
 tensor = tk.IntVar()
 tensor.set(0)
 
+tensor_label = tk.Label(right_frame, text='Toggle Arrows/Stacks:')
+tensor_label.grid(row = 10, column = 0)
+
 # define each button and put them on the screen, in the right_frame
-arrow_btn = tk.Radiobutton(right_frame, text='arrow', variable=tensor, value=1, command=lambda: vect_type_response(tensor.get())).grid(row=10, column=0)
-arrow_stack_btn = tk.Radiobutton(right_frame, text='both', variable=tensor, value=2, command=lambda: vect_type_response(tensor.get())).grid(row=10, column=1)
-stack_btn = tk.Radiobutton(right_frame, text='stack', variable=tensor, value=0, command=lambda: vect_type_response(tensor.get())).grid(row=10, column=2)
+arrow_btn = tk.Radiobutton(right_frame, text='arrow', variable=tensor, value=1, command=lambda: vect_type_response(tensor.get())).grid(row=10, column=1)
+arrow_stack_btn = tk.Radiobutton(right_frame, text='both', variable=tensor, value=2, command=lambda: vect_type_response(tensor.get())).grid(row=10, column=2)
+stack_btn = tk.Radiobutton(right_frame, text='stack', variable=tensor, value=0, command=lambda: vect_type_response(tensor.get())).grid(row=10, column=3)
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1022,6 +1029,9 @@ def format_eq_div(string):
 # Radiobutton to select what happens when clicking the plot
 # =============================================================================
 
+# click_option_label = tk.Label(right_frame, text='Select Toolbar and Zooming Windows:')
+# click_option_label.grid(row = -1, column = 0)
+
 click_option = tk.IntVar()
 click_option.set(0)
 
@@ -1068,6 +1078,20 @@ d_length_select.set(d_length_list[2])
 tk.Label(right_frame, text='Select Inset Plot Size :').grid(row=4, column=0)
 d_length_drop = tk.OptionMenu(right_frame, d_length_select, *d_length_list)
 d_length_drop.grid(row=4, column=1)
+
+# =============================================================================
+# Autoscale Toggle
+# =============================================================================
+
+ascale_label = tk.Label(right_frame, text='Toggle Autoscaling:')
+ascale_label.grid(row = 5, column = 0)
+
+ascale_toggle_off = tk.Radiobutton(right_frame, text = 'Off', variable = ascale, value = 0)
+ascale_toggle_on = tk.Radiobutton(right_frame, text = 'On', variable = ascale, value = 1)
+
+ascale_toggle_off.grid(row = 5, column = 1)
+ascale_toggle_on.grid(row = 5, column = 2)
+
 
 # =============================================================================
 # Step function - for singularities
