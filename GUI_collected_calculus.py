@@ -51,15 +51,15 @@ right_frame = tk.LabelFrame(root, text='Options Frame', padx=32, pady=5)
 right_frame.grid(row=1, column=1)
 
 # bot frame:
-bot_frame = tk.LabelFrame(root, text='Field Input Frame', padx=30, pady=25)
+bot_frame = tk.LabelFrame(root, text='Inputs Frame', padx=30, pady=25)
 bot_frame.grid(row=2, column=0)
 
 # plot frame:
-plot_frame = tk.LabelFrame(root, text='Vector Field Frame', padx=5, pady=5)
+plot_frame = tk.LabelFrame(root, text='Graph Frame', padx=5, pady=5)
 plot_frame.grid(row=1, column=0)
 
 # plot characteristics frame and plot button
-small_frame = tk.LabelFrame(root, text='Plot Customisation Frame', padx=35, pady=5)
+small_frame = tk.LabelFrame(root, text='Plot buttons Frame', padx=35, pady=5)
 small_frame.grid(row=2, column=1)
 
 
@@ -786,6 +786,12 @@ def form_2_response():
                              '''
         # display it
         tk.messagebox.showinfo('Uniqueness of this result', uniqueness_message)
+    # display a background green on the 2 form entry to show that
+    # this entry is being displayed now.
+    form_2_entry.configure(bg='#C0F6BB')
+    # undo it for 1 forms
+    form_1_x_entry.configure(bg='#FFFFFF')
+    form_1_y_entry.configure(bg='#FFFFFF')
 
 
 # plots the vetor field with stacks only
@@ -806,11 +812,17 @@ def form_1_stacks_response():
     stack_block.set(1)
     # and update its parameter also
     stack_block_int = 1
+    # display a background green on 1 form components and get rid of the 2 form
+    # colour, to show which one is being plotted
+    form_1_x_entry.configure(bg='#C0F6BB')
+    form_1_y_entry.configure(bg='#C0F6BB')
+    # get rid of the 2 form colour:
+    form_2_entry.configure(bg='#FFFFFF')
 
 
 # performs the interior derivative on supplied 2 form and plots it as stacks
 def Int_deriv_response():
-    global u, v, u_str, v_str, stack_block_int
+    global u, v, stack_block_int
     # clear the already present axis
     ax.clear()
     # get the input 2 form
@@ -828,6 +840,7 @@ def Int_deriv_response():
     u = -form_2
     v = form_2
     # to be usable in ext_deriv, define strings of these variables
+    # later to put them into their entry boxes.
     u_str = str(simplify('-' + form_2_str))
     v_str = form_2_str
     # use the stacks plotter to present this
@@ -842,16 +855,24 @@ def Int_deriv_response():
     form_1_y_entry.delete(0, 'end')
     form_1_x_entry.insert(0, u_str)
     form_1_y_entry.insert(0, v_str)
+    # display that the 1 form is now being plotted, therefore get rid of
+    # 2 form colour and show 1 form components in green:
+    form_1_x_entry.configure(bg='#C0F6BB')
+    form_1_y_entry.configure(bg='#C0F6BB')
+    form_2_entry.configure(bg='#FFFFFF')
 
 
 # perform ext deriv on the result of int_deriv and plots it as stacks
-def Ext_int_response():
+def Ext_deriv_response():
     global form_2, form_2_str, form_2_sgn
     # celar current axis
     ax.clear()
+    # get the inpus from fields of x and u components
+    x_comp_str = str(simplify(form_1_x_entry.get()))
+    y_comp_str = str(simplify(form_1_y_entry.get()))
     # from found u and v in the interior derivative, set up sympy components
-    sympy_expr_x = parse_expr(u_str, evaluate=False)
-    sympy_expr_y = parse_expr(v_str, evaluate=False)
+    sympy_expr_x = parse_expr(x_comp_str, evaluate=False)
+    sympy_expr_y = parse_expr(y_comp_str, evaluate=False)
     # combine the 2 into a list:
     expressions = np.array([sympy_expr_x, sympy_expr_y])
     # set up an array of coordinates that need to be used (in standard order)
@@ -862,7 +883,7 @@ def Ext_int_response():
     form_2_sgn = np.sign(form_2)
     # get the string of this new 2 form to use it in int deriv
     # also put it into the entry
-    form_2_str = str(simplify(str(result[0][0])))
+    form_2_str = str(simplify(str(unformat(result[0][0]))))
     # unformat it to display in the entry box, this way it does not
     # format twice if int deriv runs again
     form_2_str = unformat(form_2_str)
@@ -906,6 +927,13 @@ def Ext_int_response():
         # plot the new form using the previously define funtion
         plot_form(form_2)
         canvas.draw()
+    # display a background green on the 2 form entry to show that
+    # this entry is being displayed now.
+    form_2_entry.configure(bg='#C0F6BB')
+    # undo it for 1 forms
+    form_1_x_entry.configure(bg='#FFFFFF')
+    form_1_y_entry.configure(bg='#FFFFFF')
+
 
 
 # define a function that will wedge two 1 forms and plot them
@@ -928,6 +956,11 @@ def wedge_product():
     canvas.draw()
     # close the extra window
     wedge_2_window.destroy()
+    # neither the entered single 1 form or the single 2 form are being plotted
+    # now, therefore make both white:
+    form_1_x_entry.configure(bg='#FFFFFF')
+    form_1_y_entry.configure(bg='#FFFFFF')
+    form_2_entry.configure(bg='#FFFFFF')
 
 
 # define a reponse function, opens new window where two 1 forms to be wedged can be entered
@@ -964,74 +997,6 @@ def Hodge_response():
     tk.messagebox.showwarning('Hodge error', 'This has not yet been implemented, await further updates')
 
 
-# define a function that will repond to finding the ext deriv
-# of the given 1 form and plot it as stcks or blocks
-def Ext_deriv_response():
-    global form_2, form_2_str, form_2_sgn, expressions
-    # celar current axis
-    ax.clear()
-    # get the inpus from fields of x and u components
-    x_comp_str = str(simplify(form_1_x_entry.get()))
-    y_comp_str = str(simplify(form_1_y_entry.get()))
-    # from found u and v in the interior derivative, set up sympy components
-    sympy_expr_x = parse_expr(x_comp_str, evaluate=False)
-    sympy_expr_y = parse_expr(y_comp_str, evaluate=False)
-    # combine the 2 into a list:
-    expressions = np.array([sympy_expr_x, sympy_expr_y])
-    # set up an array of coordinates that need to be used (in standard order)
-    coords = ['x', 'y']
-    # from these, use the find_2_form function to get the 2 form
-    form_2 = find_2_form(expressions, coords, m)[0]
-    # get the signs of the 2 form
-    form_2_sgn = np.sign(form_2)
-    # get the string of this new 2 form to use it in int deriv
-    # also put it into the entry
-    form_2_str = str(simplify(unformat(str(result[0][0]))))
-    # unformat it to display in the entry box, this way it does not
-    # format twice if int deriv runs again
-    form_2_str = unformat(form_2_str)
-    form_2_entry.delete(0, 'end')
-    form_2_entry.insert(0, form_2_str)
-    # plot now depends on the chosen option - stacks or blocks
-    if stack_block_int == 1:
-        # first need to split up result into equal parts, as before
-        # AGAIN - NOT UNIQUE - therefore show the message here
-        # split this equation into two ARBITRARY parts
-        # supposing that the 2 form came from those via the exterior derivative
-        # for the example, split it into two EQUAL components
-        eq_1 = str(simplify('(' + form_2_str + ')/2'))
-        eq_2 = str(simplify('(' + form_2_str + ')/2'))
-        # turn these equatiosn to components to use in plotting the 2 form from stacks
-        u, v = eq_to_comps(eq_1, eq_2, xg, yg)
-        # clear the current plot
-        ax.clear()
-        # use plotting stacks to display these
-        form_2_components_plot(xg, yg, u, zero_field, form_2_sgn, s_max, L, pt_den, fract, colour_str)
-        form_2_components_plot(xg, yg, zero_field, v, form_2_sgn, s_max, L, pt_den, fract, colour_str)
-        # display the new plot
-        canvas.draw()
-        # define as string message to show in the message box
-        uniqueness_message = ''' This result is not unique
-                             Cancellations which are not accounted for
-                             may occur when the two derivatives (dx^dy and dy^dx) are merged
-                             To avoid this issue, the plot is found by splitting
-                             the resulting 2 form into components
-                             and integrating.
-                             HOWEVER
-                             Depeding on the way that the 2 form
-                             is split into dx^dy and dy^dx, the result will be different
-                             all of them are quivalent in giving the same 2 form
-                             in the end, but local details are not consistant.
-                             For a consistant expression, need to use the blocks method
-                             '''
-        # display it
-        tk.messagebox.showinfo('Uniqueness of this result', uniqueness_message)
-    elif stack_block_int == 0:
-        # plot the new form using the previously define funtion
-        plot_form(form_2)
-        canvas.draw()
-
-
 # define a function to respond to Radiobuttons for stacks vs blocks
 def plot_type_response(type_stack_block):
     global stack_block_int
@@ -1049,6 +1014,9 @@ tk.Label(bot_frame, text='2 form on R2').grid(row=0, column=1)
 form_2_entry = tk.Entry(bot_frame, width=20, borderwidth=2)
 form_2_entry.grid(row=0, column=0)
 form_2_entry.insert(0, form_2_str)
+# begin  displaying it on green colour to show that this is ebing displayed to
+# beign with
+form_2_entry.configure(bg='#C0F6BB')
 
 # define entries for a 1 form
 tk.Label(bot_frame, text='x component of 1 form').grid(row=1, column=1)
@@ -1085,9 +1053,11 @@ INT_btn = tk.Button(right_frame, text='Int Deriv', padx=63, pady=10, command=Int
 INT_btn.grid(row=1, column=0)
 
 # define a button to plot the exterior derivative from given u and v
-# This one will take the components from int deriv
-# This once does it with stacks
-EXT_int_btn = tk.Button(right_frame, text='Ext Deriv. of int. deriv', padx=20, pady=10, command=Ext_int_response)
+# Note, it will get the 2 form first, then return back down
+# to a one form to avoid concellations
+# therefore, it will also just be one possible representation
+# not the only possible one
+EXT_int_btn = tk.Button(right_frame, text='Ext Deriv', padx=62, pady=10, command=Ext_deriv_response)
 EXT_int_btn.grid(row=2, column=0)
 
 # define a wedge product button that will let the user input TWO 1 forms
@@ -1099,15 +1069,6 @@ wedge_btn.grid(row=3, column=0)
 Hodge_btn = tk.Button(right_frame, text='Hodge', padx=67, pady=10, command=Hodge_response)
 Hodge_btn.grid(row=4, column=0)
 
-# define a button that will find the ext deriv from given 1 form, not from
-# 1 form given by int deriv
-# Note, it will get the 2 form first, then return back down
-# to a one form to avoid concellations
-# therefore, it will also just be one possible representation
-# not the only possible one
-# THIS ONE PLOTS IT AS STACKS SUPERPOSED
-EXT_btn = tk.Button(right_frame, text='Ext Deriv of 1 form', padx=28, pady=10, command=Ext_deriv_response)
-EXT_btn.grid(row=5, column=0)
 
 
 '''
