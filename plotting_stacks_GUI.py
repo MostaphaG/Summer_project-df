@@ -700,8 +700,30 @@ def wedge_product():
     # plot these as stacks, with no arrowheads, on top of one another.
     arrows = False
     stacks = True
-    stack_plot(xg, yg, main_axis, u_1, v_1, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0, arrowheads=False, colour='#F76952')
-    stack_plot(xg, yg, main_axis, u_2, v_2, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0, arrowheads=False, colour='#5962FA')
+
+    # Given w_1 = fdx+gdy  and w_2=hdx+mdy. The graphical representation must be:
+    # fdx /\ mdy "and" -hdx/\gdy {equivalend to [(u_1,0)+(0,v2)] and [(-u_2,0)+(0,v1)]}, which is executed when the if condition below is satisfited. Basically two rectangular stacks with the scaling factor are accounted to via giving similar colors to the vertical stacks (red) and green to the horizantal ones. After the first rectagular stacks are added the second group will either sit on top of the first (in which case scaling contibution is zero) or sit in some gaps and hence increasing the denisty as result of its scaling function.
+    # If any of the coefficients (f,g,h and m)  is zero, the stacking reduces to one "function*dx/\dy", these are executed in the elif options.
+    # One situation to be added when (u_1*v_2-u2*v_1).all() = 0, the scaling function here is zero and hence no 2-form should be produced/ or produced in faded color.
+    
+    # Issues:
+    #         1- The max number of stacks possible will hinder good visualization when the stacks are dense. It's a general issue, but more clear here than other cases due to the nature of 2-forms.
+    #         2- Would be nice to uniformly distribute the stacks in each direction after finishing the double stacking.
+    
+    if u_1.any() != 0 and v_1.any() != 0 and u_2.any() != 0 and v_2.any() != 0:
+        stack_plot(xg, yg, main_axis, u_1, 0, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0, arrowheads=False, colour='red')
+        stack_plot(xg, yg, main_axis, 0, v_2, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0, arrowheads=False, colour='green')
+        stack_plot(xg, yg, main_axis, 0, v_1, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0, arrowheads=False, colour='green')
+        stack_plot(xg, yg, main_axis, -u_2, 0, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0, arrowheads=False, colour='red')
+    elif u_1.any() != 0 and v_2.any() != 0:
+        stack_plot(xg, yg, main_axis, u_1, 0, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0, arrowheads=False, colour='red')
+        stack_plot(xg, yg, main_axis, 0, v_2, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0, arrowheads=False, colour='green')
+    elif v_1.any() != 0 and u_2.any() != 0:
+        stack_plot(xg, yg, main_axis, 0, v_1, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0, arrowheads=False, colour='green')
+        stack_plot(xg, yg, main_axis, -u_2, 0, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0, arrowheads=False, colour='red')
+    else:
+        print("The wedge product is zero")
+        
     # put these onto the canvas
     canvas.draw()
     # close the extra window
