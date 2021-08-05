@@ -355,8 +355,8 @@ field_x_list = ['y*sin(x)',
                 'x',
                 '6',
                 '(3*cos(y) + 4)/(15 + 6*cos(x) + 6*cos(y))',
-                '-x/(x**2+y**2)*step((x**2+y**2))',
-                '-y/(x**2+y**2)*step((x**2+y**2))'
+                '-x/(x**2+y**2)*step(4*(x**2+y**2))',
+                '-y/(x**2+y**2)*step(4*(x**2+y**2))'
                 ]
 
 
@@ -1156,7 +1156,6 @@ ascale_label.grid(row=5, column=0)
 
 ascale_toggle = tk.Button(right_frame, image=toggle_image_off, bd=0, command=scale_toggle_response)
 ascale_toggle.grid(row=5, column=1, pady=5)
-
 
 # =============================================================================
 # Step function - for singularities
