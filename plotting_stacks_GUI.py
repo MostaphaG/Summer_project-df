@@ -88,10 +88,8 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks
     
     for i in range(x_len):
         for j in range(y_len):
-            if isnan(u[i,j]) == True:
-                u[i,j] = 0
-            if isnan(v[i,j]) == True:
-                v[i,j] = 0
+            if isnan(u[i,j]) == True or isnan(v[i,j]) == True:
+                u[i,j] = v[i,j] = 0
             
     # find the arrow length corresponding to each point and store in mag array
     
