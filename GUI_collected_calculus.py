@@ -171,7 +171,7 @@ def G(s, n, c):
 
 
 # define a function to plot the simplified 2 forms, with coloured squares
-def plot_form(form_2):
+def plot_form(form_2, fract_s):
     # celar the currently present plot
     ax.clear()
     # redefine the axis limits
@@ -184,7 +184,6 @@ def plot_form(form_2):
     # make Mag unitary:
     Mag = Mag/abs(np.max(Mag))
     # set a maximum side size as a fraction of the graph size
-    fract_s = 0.1
     max_s = fract_s*L
     # from the maximum size, set the Mag array to store shape sizes
     Mag = Mag*max_s
@@ -274,8 +273,11 @@ form_2 = eval(form_2_eq)
 # get the signs of the 2 form
 form_2_sgn = np.sign(form_2)
 
+# set a maximum side size for blocks as a fraction of the graph size
+fract_s = 0.1
+
 # put the initial plot onto the canvas
-plot_form(form_2)
+plot_form(form_2, fract_s)
 canvas.draw()
 
 '''
@@ -291,7 +293,7 @@ define initial variables for all pother operations that will be completed
 colour_str = ['red', 'blue', 'grey']
 
 # define fract of graph to set as size of stack
-fract = 0.05
+fract = 0.07
 
 # define max number of sheets to start with
 s_max = 5
@@ -750,7 +752,7 @@ def form_2_response():
     # depending on chosen setting, complete the calcualtions and plots
     if stack_block_int == 0:
         # plot the new form using the previously define funtion
-        plot_form(form_2)
+        plot_form(form_2, fract_s)
         canvas.draw()
     elif stack_block_int == 1:
         # split this equation into two ARBITRARY parts
@@ -767,6 +769,34 @@ def form_2_response():
         # and won't show in variable explorer.
         # turn these equatiosn to components to use in plotting the 2 form from stacks
         u, v = eq_to_comps(eq_1, eq_2, xg, yg)
+        '''
+        TESTING CODE FOR SCALING FIX:
+        
+        # get maximum values of each
+        max_u = np.max(u)
+        max_v = np.max(v)
+        # find their ratio
+        ratio_max = max_u/max_v
+        # set the number of stacks of the higher one to be s_max
+        # the lower one, set to integer divider of ratio
+        if ratio_max >= 1:
+            s_max_u = s_max
+            s_max_v = int(s_max_u/ratio_max)  # note - rounding
+        else:
+            s_max_v = s_max
+            s_max_u = s_max_v*int(s_max_u/ratio_max)
+        
+        #AND THEN almost as before:
+        # clear the current plot
+        ax.clear()
+        # use plotting stacks to display these
+        form_2_components_plot(xg, yg, u, zero_field, form_2_sgn, s_max_u, L, pt_den, fract, colour_str)
+        form_2_components_plot(xg, yg, zero_field, v, form_2_sgn, s_max_v, L, pt_den, fract, colour_str)
+        
+        canvas.draw()
+        #THIS DOES NOT WORK becasue:
+        #u and v are sthe same, by equal splitting.
+        '''
         # clear the current plot
         ax.clear()
         # use plotting stacks to display these
@@ -775,13 +805,20 @@ def form_2_response():
         # display the new plot
         canvas.draw()
         # define as string message to show in the message box
-        uniqueness_message = ''' This result is not unique!!!
-                                 Depeding on the way that the 2 form
-                                 is split into dx^dy and dy^dx, the result will be different
-                                 all of them are quivalent in giving the same 2 form
-                                 in the end, but local details are not consistant.
-                                 For a consistant expression, need to use the blocks method
-                             '''
+        
+        uniqueness_message = '''
+        THIS RESULT IN NOT UNIQUE!!! \n
+        Depeding on the way that the 2 form
+        is split into dx^dy and dy^dx, the result will be
+        different. \n
+        All of them are quivalent in giving the same 2 form
+        in the end, but local details are not consistant. \n
+        This result is one possible representation, out of all which
+        belong to a rotational group. The superposition of all of of its
+        elements gives the total representation - blocks, not local.
+        For a consistant expression, need to use the blocks method,
+        lossing local detail
+        '''
         # display it
         tk.messagebox.showinfo('Uniqueness of this result', uniqueness_message)
     # display a background green on the 2 form entry to show that
@@ -821,6 +858,10 @@ def form_1_stacks_response():
 # performs the interior derivative on supplied 2 form and plots it as stacks
 def Int_deriv_response():
     global u, v, stack_block_int
+    
+    # !!! For now it is only doing the interior derivative w.r.t the basis
+    # !!! it splits the 2 form equally between dx and dy to make a 1 form
+    
     # clear the already present axis
     ax.clear()
     # get the input 2 form
@@ -906,24 +947,31 @@ def Ext_deriv_response():
         # display the new plot
         canvas.draw()
         # define as string message to show in the message box
-        uniqueness_message = ''' This result is not unique
-                             Cancellations which are not accounted for
-                             may occur when the two derivatives (dx^dy and dy^dx) are merged
-                             To avoid this issue, the plot is found by splitting
-                             the resulting 2 form into components
-                             and integrating.
-                             HOWEVER
-                             Depeding on the way that the 2 form
-                             is split into dx^dy and dy^dx, the result will be different
-                             all of them are quivalent in giving the same 2 form
-                             in the end, but local details are not consistant.
-                             For a consistant expression, need to use the blocks method
-                             '''
+        uniqueness_message = '''
+        THIS RESULT IN NOT UNIQUE!!! \n
+        Cancellations which are not accounted for
+        may occur when the two derivatives (dx^dy and dy^dx) are
+        merged
+        To avoid this issue, the plot is found by splitting
+        the resulting 2 form into components \n
+        HOWEVER \n
+        Depeding on the way that the 2 form
+        is split into dx^dy and dy^dx, the result will be
+        different. \n
+        All of them are quivalent in giving the same 2 form
+        in the end, but local details are not consistant. \n
+        This result is one possible representation, out of all which
+        belong to a rotational group. The superposition of all of of its
+        elements gives the total representation - blocks, not local.
+        For a consistant expression, need to use the blocks method,
+        lossing local detail
+        '''
+        
         # display it
         tk.messagebox.showinfo('Uniqueness of this result', uniqueness_message)
     elif stack_block_int == 0:
         # plot the new form using the previously define funtion
-        plot_form(form_2)
+        plot_form(form_2, fract_s)
         canvas.draw()
     # display a background green on the 2 form entry to show that
     # this entry is being displayed now.
@@ -938,10 +986,10 @@ def wedge_product():
     global to_wedge_x_1_str, to_wedge_y_1_str, to_wedge_x_2_str, to_wedge_y_2_str, form_2_str, form_2_eq, form_2, form_2_sgn
     # first, get all entries out, save as string for these to display when
     # window is opened again
-    to_wedge_x_1_str = str(to_wedge_x_1_entry.get())
-    to_wedge_y_1_str = str(to_wedge_y_1_entry.get())
-    to_wedge_x_2_str = str(to_wedge_x_2_entry.get())
-    to_wedge_y_2_str = str(to_wedge_y_2_entry.get())
+    to_wedge_x_1_str = str(simplify(str(to_wedge_x_1_entry.get())))
+    to_wedge_y_1_str = str(simplify(str(to_wedge_y_1_entry.get())))
+    to_wedge_x_2_str = str(simplify(str(to_wedge_x_2_entry.get())))
+    to_wedge_y_2_str = str(simplify(str(to_wedge_y_2_entry.get())))
     u_1, v_1 = eq_to_comps(to_wedge_x_1_str, to_wedge_y_1_str, xg, yg)
     u_2, v_2 = eq_to_comps(to_wedge_x_2_str, to_wedge_y_2_str, xg, yg)
     # clear the axis:
@@ -973,19 +1021,17 @@ def wedge_product():
         # 1- The max number of stacks possible will hinder good visualization when
         # the stacks are dense. It's a general issue, but more clear here than other cases due to the nature of 2-forms.
         # 2- Would be nice to uniformly distribute the stacks in each direction after finishing the double stacking.
-        if u_1.any() != 0 and v_1.any() != 0 and u_2.any() != 0 and v_2.any() != 0:
+        if to_wedge_x_1_str != '0' and to_wedge_y_1_str != '0' and to_wedge_x_2_str != '0' and to_wedge_y_2_str != '0':
             stack_plot(xg, yg, ax, u_1, 0, s_max, L, pt_den, fract, arrowheads=False, colour='red')
             stack_plot(xg, yg, ax, 0, v_2, s_max, L, pt_den, fract, arrowheads=False, colour='green')
             stack_plot(xg, yg, ax, 0, v_1, s_max, L, pt_den, fract, arrowheads=False, colour='green')
             stack_plot(xg, yg, ax, -u_2, 0, s_max, L, pt_den, fract, arrowheads=False, colour='red')
-        elif u_1.any() != 0 and v_2.any() != 0:
+        elif to_wedge_x_1_str != '0' and to_wedge_y_2_str != '0':
             stack_plot(xg, yg, ax, u_1, 0, s_max, L, pt_den, fract, arrowheads=False, colour='red')
             stack_plot(xg, yg, ax, 0, v_2, s_max, L, pt_den, fract, arrowheads=False, colour='green')
-        elif v_1.any() != 0 and u_2.any() != 0:
+        elif to_wedge_y_1_str != '0' and to_wedge_x_2_str != '0':
             stack_plot(xg, yg, ax, 0, v_1, s_max, L, pt_den, fract, arrowheads=False, colour='green')
             stack_plot(xg, yg, ax, -u_2, 0, s_max, L, pt_den, fract, arrowheads=False, colour='red')
-        else:
-            print("The wedge product is zero")
     elif stack_block_int == 0:
         # to do it with blocks, first, get the numercial 2 from
         # from previously found string
@@ -998,7 +1044,18 @@ def wedge_product():
         # get the signs of thsi new 2 form
         form_2_sgn = np.sign(form_2)
         # plot the new form using the previously define funtion
-        plot_form(form_2)
+        plot_form(form_2, fract_s)
+    # first check against cancellation effects
+    if str(simplify( '(' + to_wedge_x_1_str + ')*(' +  to_wedge_y_2_str + ')' + ' - (' + to_wedge_y_1_str + ')*(' +  to_wedge_x_2_str + ')' )) == '0':
+        # delete whatever plot was created
+        ax.clear()
+        # update axis limits, becuase now they were cleared
+        ax.set_aspect('equal')
+        ax_L = L + L/delta_factor
+        ax.set_xlim(-ax_L, ax_L)
+        ax.set_ylim(-ax_L, ax_L)
+        # display a window info that the wedge product is zero
+        tk.messagebox.showinfo('Nothing to show', "The wedge product is zero")
     # put these onto the canvas
     canvas.draw()
     # close the extra window

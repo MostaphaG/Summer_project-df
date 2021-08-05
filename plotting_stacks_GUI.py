@@ -12,6 +12,8 @@ from matplotlib.backend_bases import key_press_handler
 import matplotlib as mpl
 from sympy import diff
 from sympy.parsing.sympy_parser import parse_expr
+import os
+from PIL import Image, ImageTk
 
 # %% VFA GUI
 
@@ -262,6 +264,16 @@ height = root.winfo_screenheight()
 
 root.geometry(str(width) + 'x' + str(height))
 
+# get a toggle on and off switch images and scale the images to wanted size
+toggle_image_on = Image.open('toggle_on_image.png')
+toggle_image_off = Image.open('toggle_off_image.png')
+
+toggle_image_on = toggle_image_on.resize((65, 25))
+toggle_image_off = toggle_image_off.resize((65, 25))
+
+toggle_image_on = ImageTk.PhotoImage(toggle_image_on)
+toggle_image_off = ImageTk.PhotoImage(toggle_image_off)
+
 # set up frames for each of:
 # bottom side (field, scalings etc) and the right side (with detailed options)
 # and top left for plot
@@ -288,11 +300,11 @@ small_frame.grid(row=2, column=1)
 
 # define scale of the graph
 L = 5
-pt_den = 15   # number of points on each axis
+pt_den = 21   # number of points on each axis
 
 # Initialise auto scaling variable
 ascale = tk.IntVar()
-ascale.set(1)
+ascale.set(0)
 
 # define x and y values
 x = np.linspace(-L, L, pt_den)
@@ -482,7 +494,6 @@ def vect_type_response(tensor):
     main_axis.clear()
     # use the tensor to determine what to plot:
     # 0 is just stacks, 1 is for only arrows and 2 is for both
-     
     if tensor == 0:
         arrows = False
         stacks = True
@@ -491,8 +502,7 @@ def vect_type_response(tensor):
         stacks = False
     elif tensor == 2:
         arrows = True
-        stacks = True
-        
+        stacks = True 
     stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0)
     canvas.draw()
 
@@ -761,6 +771,27 @@ def wedge_2_response():
     # define a button that will plot these
     plot_wedge_btn = tk.Button(wedge_2_window, text='PLOT', padx=20, pady=10, command=wedge_product)
     plot_wedge_btn.grid(row=8, column=0, pady=10)
+
+
+# define a response funcction to autoscale toggle button
+def scale_toggle_response():
+    global ascale
+    if ascale.get() == 0:
+        # the burron is off, and has been clicked therefore change the
+        # variable to an and the image to on
+        ascale.set(1)
+        ascale_toggle.configure(image=toggle_image_on)
+        # for it to update, reclick whatever radiobutton is selected
+        # or, if stacks only is chosen, change it to both, to show some change
+        vect_type_response(tensor.get())
+    else:
+        # the button is on and has been clicked
+        # set it to off and change image
+        ascale.set(0)
+        ascale_toggle.configure(image=toggle_image_off)
+        # for it to update, reclick whatever radiobutton is selected
+        # or, if stacks only is chosen, change it to both, to show some change
+        vect_type_response(tensor.get())
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1111,13 +1142,10 @@ d_length_drop.grid(row=4, column=1)
 # =============================================================================
 
 ascale_label = tk.Label(right_frame, text='Toggle Autoscaling:')
-ascale_label.grid(row = 5, column = 0)
+ascale_label.grid(row=5, column=0)
 
-ascale_toggle_off = tk.Radiobutton(right_frame, text = 'Off', variable = ascale, value = 0)
-ascale_toggle_on = tk.Radiobutton(right_frame, text = 'On', variable = ascale, value = 1)
-
-ascale_toggle_off.grid(row = 5, column = 1)
-ascale_toggle_on.grid(row = 5, column = 2)
+ascale_toggle = tk.Button(right_frame, image=toggle_image_off, bd=0, command=scale_toggle_response)
+ascale_toggle.grid(row=5, column=1, pady=5)
 
 
 # =============================================================================
