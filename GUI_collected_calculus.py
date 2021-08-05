@@ -935,7 +935,7 @@ def Ext_deriv_response():
 
 # define a function that will wedge two 1 forms and plot them
 def wedge_product():
-    global to_wedge_x_1_str, to_wedge_y_1_str, to_wedge_x_2_str, to_wedge_y_2_str
+    global to_wedge_x_1_str, to_wedge_y_1_str, to_wedge_x_2_str, to_wedge_y_2_str, form_2_str, form_2_eq, form_2, form_2_sgn
     # first, get all entries out, save as string for these to display when
     # window is opened again
     to_wedge_x_1_str = str(to_wedge_x_1_entry.get())
@@ -946,18 +946,69 @@ def wedge_product():
     u_2, v_2 = eq_to_comps(to_wedge_x_2_str, to_wedge_y_2_str, xg, yg)
     # clear the axis:
     ax.clear()
-    # plot these as stacks, with no arrowheads, on top of one another.
-    stack_plot(xg, yg, ax, u_1, v_1, s_max, L, pt_den, fract, axis_check=0, arrowheads=False, colour='#F76952')
-    stack_plot(xg, yg, ax, u_2, v_2, s_max, L, pt_den, fract, axis_check=0, arrowheads=False, colour='#5962FA')
+    # first, find the result of the 2 form
+    # this if, in terms of the above commented fields:
+    # 2 form = f*m - g*h
+    # get it mathematically, as a string
+    form_2_str = str(simplify( '(' + to_wedge_x_1_str + ')*(' +  to_wedge_y_2_str + ')' + ' - (' + to_wedge_y_1_str + ')*(' +  to_wedge_x_2_str + ')' ))
+    # put it into the entry box for 2 forms
+    form_2_entry.delete(0, 'end')
+    form_2_entry.insert(0, form_2_str)
+    
+    # complete the process depending on the selected radiobutton for stacks
+    # or blocks
+    if stack_block_int == 1:
+        # plot these as stacks, with no arrowheads, on top of one another.
+        
+        # Given w_1 = fdx+gdy  and w_2=hdx+mdy. The graphical representation must be:
+        # fdx /\ mdy "and" -hdx/\gdy {equivalend to [(u_1,0)+(0,v2)] and [(-u_2,0)+(0,v1)]},
+        # which is executed when the if condition below is satisfited. Basically two rectangular
+        # stacks with the scaling factor are accounted to via giving similar colors to the vertical
+        # stacks (red) and green to the horizantal ones. After the first rectagular stacks are added
+        # the second group will either sit on top of the first (in which case scaling contibution is zero)
+        # or sit in some gaps and hence increasing the denisty as result of its scaling function.
+        # If any of the coefficients (f,g,h and m)  is zero, the stacking reduces to one "function*dx/\dy", these are executed in the elif options.
+        # One situation to be added when (u_1*v_2-u2*v_1).all() = 0, the scaling function here is zero and hence no 2-form should be produced/ or produced in faded color.
+        # !!! ISSUES:
+        # 1- The max number of stacks possible will hinder good visualization when
+        # the stacks are dense. It's a general issue, but more clear here than other cases due to the nature of 2-forms.
+        # 2- Would be nice to uniformly distribute the stacks in each direction after finishing the double stacking.
+        if u_1.any() != 0 and v_1.any() != 0 and u_2.any() != 0 and v_2.any() != 0:
+            stack_plot(xg, yg, ax, u_1, 0, s_max, L, pt_den, fract, arrowheads=False, colour='red')
+            stack_plot(xg, yg, ax, 0, v_2, s_max, L, pt_den, fract, arrowheads=False, colour='green')
+            stack_plot(xg, yg, ax, 0, v_1, s_max, L, pt_den, fract, arrowheads=False, colour='green')
+            stack_plot(xg, yg, ax, -u_2, 0, s_max, L, pt_den, fract, arrowheads=False, colour='red')
+        elif u_1.any() != 0 and v_2.any() != 0:
+            stack_plot(xg, yg, ax, u_1, 0, s_max, L, pt_den, fract, arrowheads=False, colour='red')
+            stack_plot(xg, yg, ax, 0, v_2, s_max, L, pt_den, fract, arrowheads=False, colour='green')
+        elif v_1.any() != 0 and u_2.any() != 0:
+            stack_plot(xg, yg, ax, 0, v_1, s_max, L, pt_den, fract, arrowheads=False, colour='green')
+            stack_plot(xg, yg, ax, -u_2, 0, s_max, L, pt_den, fract, arrowheads=False, colour='red')
+        else:
+            print("The wedge product is zero")
+    elif stack_block_int == 0:
+        # to do it with blocks, first, get the numercial 2 from
+        # from previously found string
+        # format it to be python understood
+        form_2_eq = format_eq(form_2_str)
+        # check against constant and zero 2 forms being supplied
+        form_2_eq = form_2_constant_correction(form_2_eq)
+        # get the numerical evaluation of it
+        form_2 = eval(form_2_eq)
+        # get the signs of thsi new 2 form
+        form_2_sgn = np.sign(form_2)
+        # plot the new form using the previously define funtion
+        plot_form(form_2)
     # put these onto the canvas
     canvas.draw()
     # close the extra window
     wedge_2_window.destroy()
     # neither the entered single 1 form or the single 2 form are being plotted
-    # now, therefore make both white:
+    # but the resulting 2 form is input into the entry box
+    # therefore make 2 form green.
     form_1_x_entry.configure(bg='#FFFFFF')
     form_1_y_entry.configure(bg='#FFFFFF')
-    form_2_entry.configure(bg='#FFFFFF')
+    form_2_entry.configure(bg='#C0F6BB')
 
 
 # define a reponse function, opens new window where two 1 forms to be wedged can be entered
