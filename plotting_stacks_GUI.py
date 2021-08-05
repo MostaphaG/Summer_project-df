@@ -1006,12 +1006,11 @@ def deriv_calc(x_m, y_m):
 # Initialise the click button selection
 click_opt_int = 0
 
+
 # define a function that will update the variable that defines click action
 def click_option_handler(click_option):
     global click_opt_int, toolbar
     click_opt_int = click_option
-    
-    # and for the the initial plot:
     if click_opt_int == 0:
         fig.canvas.draw()
         # if the tools is selected again, add the zoom and pan buttons
@@ -1019,15 +1018,15 @@ def click_option_handler(click_option):
         toolbar.destroy()
         # put the default matplotlib toolbar, back on:
         toolbar = NavigationToolbar2Tk(canvas, plot_frame)
-        toolbar.update()  # allow the plot to update based on the toolbar
+        toolbar.update()
         canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
     # when 'tool' is not selected, disable the pan and zoom:
-        
-    if click_opt_int > 0:
+    elif click_opt_int > 0:
         deriv_calc(x_m, y_m)
         toolbar.home()
         toolbar.children['!button4'].pack_forget()
         toolbar.children['!button5'].pack_forget()
+
 
 # =============================================================================
 # Calculate the Jacobian matrix of the defined vector field
