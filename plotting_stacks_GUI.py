@@ -14,6 +14,7 @@ from sympy import diff
 from sympy.parsing.sympy_parser import parse_expr
 import os
 from PIL import Image, ImageTk
+from math import isnan
 
 # %% VFA GUI
 
@@ -82,7 +83,18 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks
     # #########################################################################
     # get variables needed for the initial, simplified stack plot
     # #########################################################################
+    
+    # Set singularities (nan) to zero using isnan function
+    
+    for i in range(x_len):
+        for j in range(y_len):
+            if isnan(u[i,j]) == True:
+                u[i,j] = 0
+            if isnan(v[i,j]) == True:
+                v[i,j] = 0
+            
     # find the arrow length corresponding to each point and store in mag array
+    
     mag = np.sqrt(u**2 + v**2)
     # find direction of each arrow
     angles = np.arctan2(v, u)   # theta defined from positive x axis ccw
@@ -226,6 +238,7 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks
                         axis.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color='green'))
                 else:
                     pass
+
     plt.close()
 
 
@@ -342,8 +355,8 @@ field_x_list = ['y*sin(x)',
                 'x',
                 '6',
                 '(3*cos(y) + 4)/(15 + 6*cos(x) + 6*cos(y))',
-                '-x/(x**2+y**2)*step(4*(x**2+y**2))',
-                '-y/(x**2+y**2)*step(4*(x**2+y**2))'
+                '-x/(x**2+y**2)*step((x**2+y**2))',
+                '-y/(x**2+y**2)*step((x**2+y**2))'
                 ]
 
 
@@ -690,8 +703,6 @@ def field_selection_response(event):
     y_comp_entry.insert(0, y_comp_selected)
     # now call the plot function to finalise all these onto the plot
     PLOT_response()
-
-
 
 # define a function that will wedge two 1 forms and plot them
 def wedge_product():
@@ -1153,6 +1164,10 @@ ascale_toggle.grid(row=5, column=1, pady=5)
 
 # takes a matrix a and sorts through elements setting to zero if condition is met and one otherwise  
 # used to remove singularity in Grav&Mag predefined field
+
+# Problem with this strategy is that 0*nan = nan so this was not eliminating the singularity
+# and causing error when automatically scaling. Still could be useful if used to define the zero region
+# in a plot with a central singularity. 
 
 def step(a):
     rows = len(a[:,0])
