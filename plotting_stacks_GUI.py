@@ -1048,8 +1048,8 @@ def jacobian(m, u_str, v_str):
     
     u_str = u_str.replace('^','**')
     v_str = v_str.replace('^','**')
-    u_str = u_str.replace('step', '+0*')
-    v_str = v_str.replace('step', '+0*')
+    #u_str = u_str.replace('step', '+0*')
+    #v_str = v_str.replace('step', '+0*')
 
     
     sympy_expr_x = parse_expr(u_str, evaluate=False)
@@ -1166,16 +1166,16 @@ ascale_toggle.grid(row=5, column=1, pady=5)
 # and causing error when automatically scaling. Still could be useful if used to define the zero region
 # in a plot with a central singularity. 
 
-def step(a):
-    rows = len(a[:,0])
-    columns = len(a[0,:])
-    for i in range(rows):  
-        for j in range(columns):
-            if -1 < a[i,j] < 1:
-                a[i,j] = 0
-            else:
-                a[i,j] = 1
-    return a
+#def step(a):
+#    rows = len(a[:,0])
+#    columns = len(a[0,:])
+#    for i in range(rows):  
+#        for j in range(columns):
+#            if -1 < a[i,j] < 1:
+#                a[i,j] = 0
+#            else:
+#                a[i,j] = 1
+#    return a
 
 # return time to run
 stop = timeit.default_timer()
