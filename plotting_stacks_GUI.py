@@ -459,7 +459,6 @@ canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 def on_key_press(event):
     # respond with only toolbar actions when only tools are to be used
     if click_opt_int == 0:
-        print("you pressed {}".format(event.key))
         key_press_handler(event, canvas, toolbar)
     # when the derivative option is selected, cerry out the derivative when clicked
     else:
@@ -472,12 +471,14 @@ def on_key_press(event):
         y_m = float(iy_plot)
         deriv_calc(x_m, y_m)
 
+
 # connect figure event to a function that responds to clicks, defined above
 cid = fig.canvas.mpl_connect("button_press_event", on_key_press)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # define other needed functions, for input reponses
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 # define a function that takes input string that is python understood and turn into vector components:
 def eq_to_comps(string_x, string_y, xg, yg):
@@ -499,7 +500,6 @@ def eq_to_comps(string_x, string_y, xg, yg):
 
 # define a function that will respond to radio buttons behind choosing vector types:
 # Note, tensor is a local variable. So to get value in other functions, use tensor.get() to extract current radiobutton value
-
 def vect_type_response(tensor):
     # clear the plot that is already there:
     main_axis.clear()
@@ -516,6 +516,7 @@ def vect_type_response(tensor):
         stacks = True 
     stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0)
     canvas.draw()
+
 
 # define the PLOT button response function
 def PLOT_response():
@@ -1031,8 +1032,15 @@ def click_option_handler(click_option):
         canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
     # when 'tool' is not selected, disable the pan and zoom:
     elif click_opt_int > 0:
-        deriv_calc(x_m, y_m)
         toolbar.home()
+        # close the selected mouse options
+        state = fig.canvas.toolbar.mode
+        if state == 'zoom rect':
+            toolbar.zoom()
+        if state == 'pan/zoom':
+            toolbar.pan()
+        # get rid of the 2 buttons we don't want
+        toolbar.children['!button4'].pack_forget()
         toolbar.children['!button4'].pack_forget()
         toolbar.children['!button5'].pack_forget()
 
