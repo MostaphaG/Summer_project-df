@@ -1022,9 +1022,9 @@ def wedge_product():
         # the stacks are dense. It's a general issue, but more clear here than other cases due to the nature of 2-forms.
         # 2- Would be nice to uniformly distribute the stacks in each direction after finishing the double stacking.
         if to_wedge_x_1_str != '0' and to_wedge_y_1_str != '0' and to_wedge_x_2_str != '0' and to_wedge_y_2_str != '0':
-            stack_plot(xg, yg, ax, u_1, 0, s_max, L, pt_den, fract, arrowheads=False, colour='red')
+            stack_plot(xg, yg, ax, u_1, 0, s_max, L, pt_den, fract, arrowheads=False, colour='green')
             stack_plot(xg, yg, ax, 0, v_2, s_max, L, pt_den, fract, arrowheads=False, colour='green')
-            stack_plot(xg, yg, ax, 0, v_1, s_max, L, pt_den, fract, arrowheads=False, colour='green')
+            stack_plot(xg, yg, ax, 0, v_1, s_max, L, pt_den, fract, arrowheads=False, colour='red')
             stack_plot(xg, yg, ax, -u_2, 0, s_max, L, pt_den, fract, arrowheads=False, colour='red')
         elif to_wedge_x_1_str != '0' and to_wedge_y_2_str != '0':
             stack_plot(xg, yg, ax, u_1, 0, s_max, L, pt_den, fract, arrowheads=False, colour='red')

@@ -49,8 +49,7 @@ def G(s, n, c):
 
 # define a function that will complete all stack plotting:
 def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks=True, orientation='mid', scale=1, w_head=1/8, h_head=1/4, axis_check=0, arrowheads=True, colour='green'):
-    
-    global s_L
+    global s_L, mag
     # get the lengths of x and y from their grids
     
     x_len = len(xg[:, 0])
@@ -84,18 +83,17 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks
     # get variables needed for the initial, simplified stack plot
     # #########################################################################
     
-    # Set singularities (nan) to zero using isnan function
-    
-    for i in range(x_len):
-        for j in range(y_len):
-            if isnan(u[i,j]) == True or isnan(v[i,j]) == True:
-                u[i,j] = v[i,j] = 0
-            
     # find the arrow length corresponding to each point and store in mag array
     
     mag = np.sqrt(u**2 + v**2)
     # find direction of each arrow
     angles = np.arctan2(v, u)   # theta defined from positive x axis ccw
+    
+    # prevent any magnitudes from being inf or nan
+    for i in range(x_len):
+        for j in range(y_len):
+            if isnan(mag[i, j]) is True or mag[i, j] == np.inf or mag[i, j] == -np.inf:
+                mag[i, j] = 0
     
     # #########################################################################
     # use the the direction of arrows to define stack properties
@@ -113,7 +111,7 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks
     # #########################################################################
     
     # find the maximum magnitude for scaling
-    max_size = np.max(mag)   # careful with singularities, else ---> nan
+    max_size = np.max(mag)
     
     # Define scaling factor
     ScaleFactor = max_size/(0.9*(2*L/pt_den))
@@ -1040,7 +1038,6 @@ def click_option_handler(click_option):
         if state == 'pan/zoom':
             toolbar.pan()
         # get rid of the 2 buttons we don't want
-        toolbar.children['!button4'].pack_forget()
         toolbar.children['!button4'].pack_forget()
         toolbar.children['!button5'].pack_forget()
 
