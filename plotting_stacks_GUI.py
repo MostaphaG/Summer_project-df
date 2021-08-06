@@ -969,7 +969,7 @@ def deriv_calc(x_m, y_m):
         dv1 = v1 - v1[i_m, j_m]
   
     # Create axes at clicked position from supplied position and given axis sizes
-    deriv_inset_ax = main_axis.inset_axes([(x_pix-178)/500 - (d_length/2), (y_pix-59)/500 - (d_length/2), d_length, d_length])
+    deriv_inset_ax = main_axis.inset_axes([(x_pix-178)/500 - (0.931*d_length/(2*L)), (y_pix-59)/500 - (0.931*d_length/(2*L)), 0.931*d_length/L, 0.931*d_length/L])
     
     # Check radiobutton selection
     if click_opt_int == 1:
@@ -1146,7 +1146,7 @@ dpd_drop.grid(row=3, column=1)
 # =============================================================================
 
 d_length_select = tk.DoubleVar()
-d_length_list = [0.2, 0.25, 0.3, 0.35, 0.4]
+d_length_list = [1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0]
 d_length_select.set(d_length_list[2])
 
 tk.Label(right_frame, text='Select Inset Plot Size :').grid(row=4, column=0)
