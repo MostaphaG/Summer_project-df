@@ -15,6 +15,7 @@ from sympy.parsing.sympy_parser import parse_expr
 import os
 from PIL import Image, ImageTk
 from math import isnan
+from matplotlib import patches as patch
 
 # %% VFA GUI
 
@@ -24,6 +25,88 @@ start = timeit.default_timer()
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # define needed functions for the initial plot
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+# define a function that will find region ON GRID
+# that are not defined as regions, as opposed to a lines or points
+# do so by finding  values of neightbouring values
+# if there is 3 or more that are also not defined, its a region
+def undef_region(mag):
+    # set up a same size array to store classifications
+    # 1 will mean a region, zero will mean a point or a line (of inf or nan)
+    bool_array = np.zeros(np.shape(u))
+    # get the lengths of supplied fields
+    x_len = len(mag[:, 0])
+    y_len = len(mag[0, :])
+    # loop over all indexes
+    for i in range(x_len):
+        for j in range(y_len):
+            # set up a conuting variable
+            counter = 0
+            # for the current index, 'look' up, down, left and right
+            # check how many of these are inf or nan.
+            # making sure, ends of grids are taken care of
+            # check up
+            try:
+                if abs(mag[i - 1, j]) == np.inf or isnan(mag[i - 1, j]) is True:
+                    counter += 1
+            except IndexError:
+                pass
+            # check down
+            try:
+                if abs(mag[i + 1, j]) == np.inf or isnan(mag[i + 1, j]) is True:
+                    counter += 1
+            except IndexError:
+                pass
+            # check left
+            try:
+                if abs(mag[i, j - 1]) == np.inf or isnan(mag[i, j - 1]) is True:
+                    counter += 1
+            except IndexError:
+                pass
+            # check right
+            try:
+                if abs(mag[i, j + 1]) == np.inf or isnan(mag[i, j + 1]) is True:
+                    counter += 1
+            except IndexError:
+                pass
+            # now check corners:
+            try:
+                if abs(mag[i - 1, j - 1]) == np.inf or isnan(mag[i - 1, j - 1]) is True:
+                    counter += 1
+            except IndexError:
+                pass
+            try:
+                if abs(mag[i + 1, j + 1]) == np.inf or isnan(mag[i + 1, j + 1]) is True:
+                    counter += 1
+            except IndexError:
+                pass
+            try:
+                if abs(mag[i + 1, j - 1]) == np.inf or isnan(mag[i + 1, j - 1]) is True:
+                    counter += 1
+            except IndexError:
+                pass
+            try:
+                if abs(mag[i - 1, j + 1]) == np.inf or isnan(mag[i - 1, j + 1]) is True:
+                    counter += 1
+            except IndexError:
+                pass
+            # CRUCIAL
+            # check its own point too!!
+            try:
+                if abs(mag[i, j]) == np.inf or isnan(mag[i, j]) is True:
+                    counter += 1
+            except IndexError:
+                pass
+            # now, depending on couner, define truth value in bool array
+            # True if counter >= 3, then its a region
+            if counter > 3:
+                bool_array[i, j] = 1
+            elif counter <= 3:
+                bool_array[i, j] = 0
+    return bool_array
+            
+
 
 # deifne a fucntion to check number parity
 def parity(x):
@@ -49,7 +132,7 @@ def G(s, n, c):
 
 # define a function that will complete all stack plotting:
 def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks=True, orientation='mid', scale=1, w_head=1/8, h_head=1/4, axis_check=0, arrowheads=True, colour='green'):
-    global s_L, mag
+    global s_L, mag, bool_array
     # get the lengths of x and y from their grids
     
     x_len = len(xg[:, 0])
@@ -76,6 +159,9 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks
         axis.set_xlim(-ax_L, ax_L)
         axis.set_ylim(-ax_L, ax_L) 
     
+    # find the distance between neightbouring points on the grid
+    dist_points = xg[0, 1] - xg[0, 0]
+    
     # define an empty array of magnitudes, to then fill with integer rel. mags
     R_int = np.zeros(shape=((x_len), (y_len)))
 
@@ -84,20 +170,33 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks
     # #########################################################################
     
     # find the arrow length corresponding to each point and store in mag array
-    
     mag = np.sqrt(u**2 + v**2)
     # find direction of each arrow
     angles = np.arctan2(v, u)   # theta defined from positive x axis ccw
     
-    # find the maximum magnitude for scaling
-    max_size = np.max(mag)
+    # find regions ON GRID that are nan or inf as a bool array
+    bool_array = undef_region(mag)
     
-    # prevent any magnitudes from being inf or nan
+    # deal with infs and nans in mag
     for i in range(x_len):
         for j in range(y_len):
-            if isnan(mag[i, j]) is True or mag[i, j] == np.inf or mag[i, j] == -np.inf:
+            # set to zero points that are not defined or inf
+            if isnan(mag[i, j]) is True or abs(mag[i, j]) == np.inf:
+                # depending on bool_array, shade points on grid that are in undefined
+                # region
+                if bool_array[i, j] == 1:
+                    print('undefined region')
+                    # colour this region as a shaded square
+                    rect = patch.Rectangle((xg[i, j] - dist_points/2, yg[i, j]  - dist_points/2), dist_points, dist_points, color='grey')
+                    axis.add_patch(rect)
+                if bool_array[i, j] == 0:
+                    print('undefined point')
+                    # colour this point as a big red dot
+                    circ = patch.Circle((xg[i, j], yg[i, j]), L*fract/2, color='red')
+                    axis.add_patch(circ)
                 mag[i, j] = 0
-    
+
+
     # #########################################################################
     # use the the direction of arrows to define stack properties
     # #########################################################################
@@ -113,6 +212,9 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks
     # of the arrow and with an arrowhead on top.
     # #########################################################################
     
+    # find the maximum magnitude for scaling
+    max_size = np.max(mag)   # careful with singularities, else ---> nan
+    
     # Define scaling factor
     ScaleFactor = max_size/(0.9*(2*L/pt_den))
 
@@ -126,6 +228,12 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks
     
     # plot the quiver plot on grid points if chosen in original function
     if arrows is True:
+        # prevent any magnitudes from being inf or nan
+        # only here, need to do it to u and v not just mag
+        for i in range(x_len):
+            for j in range(y_len):
+                if isnan(u[i,j]) == True or isnan(v[i,j]) == True or abs(u[i, j]) == np.inf or abs(v[i, j]) == np.inf:
+                    u[i,j] = v[i,j] = 0
         axis.quiver(xg, yg, u, v, pivot=orientation, scale=ScaleFactor, scale_units='xy') 
     else:
         pass

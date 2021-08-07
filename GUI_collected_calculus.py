@@ -889,12 +889,12 @@ def Int_deriv():
     form_2_sgn = np.sign(form_2)
     # using interior product, get the u and v (dx and dy) components
     # of the resulting 1 form
-    u = -form_2 * vector_ex
-    v = form_2 * vector_ey
+    u = -form_2 * vector_ey
+    v = form_2 * vector_ex
     # to be usable in ext_deriv, define strings of these variables
     # later to put them into their entry boxes.
-    u_str = str(simplify('-(' + form_2_str + ')*(' + vector_ex_str + ')' ))
-    v_str = str(simplify( '(' + form_2_str + ')*(' + vector_ey_str + ')' ))
+    u_str = str(simplify('-(' + form_2_str + ')*(' + vector_ey_str + ')' ))
+    v_str = str(simplify( '(' + form_2_str + ')*(' + vector_ex_str + ')' ))
     # use the stacks plotter to present this
     form_2_components_plot(xg, yg, u, v, form_2_sgn, s_max, L, pt_den, fract, colour_str, arrowheads=True)
     canvas.draw()
@@ -926,7 +926,7 @@ def Int_deriv_response():
     int_vect_ex_entry.insert(0, vector_ex_str)
     int_vect_ex_entry.grid(row=1, column=0)
     
-    tk.Label(int_vector_window, text='vector component e^x').grid(row=2, column=0)
+    tk.Label(int_vector_window, text='vector component e^y').grid(row=2, column=0)
     int_vect_ey_entry = tk.Entry(int_vector_window, width=30, borderwidth=1)
     int_vect_ey_entry.insert(0, vector_ey_str)
     int_vect_ey_entry.grid(row=3, column=0)
