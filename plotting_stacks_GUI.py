@@ -48,46 +48,46 @@ def undef_region(mag):
             # making sure, ends of grids are taken care of
             # check up
             try:
-                if abs(mag[i - 1, j]) == np.inf or isnan(mag[i - 1, j]) is True:
+                if abs(mag[i - 1, j]) == np.inf or isnan(mag[i - 1, j]) is True or abs(mag[i - 1, j]) > 1e10:
                     counter += 1
             except IndexError:
                 pass
             # check down
             try:
-                if abs(mag[i + 1, j]) == np.inf or isnan(mag[i + 1, j]) is True:
+                if abs(mag[i + 1, j]) == np.inf or isnan(mag[i + 1, j]) is True or abs(mag[i + 1, j]) > 1e10:
                     counter += 1
             except IndexError:
                 pass
             # check left
             try:
-                if abs(mag[i, j - 1]) == np.inf or isnan(mag[i, j - 1]) is True:
+                if abs(mag[i, j - 1]) == np.inf or isnan(mag[i, j - 1]) is True or abs(mag[i, j - 1]) > 1e10:
                     counter += 1
             except IndexError:
                 pass
             # check right
             try:
-                if abs(mag[i, j + 1]) == np.inf or isnan(mag[i, j + 1]) is True:
+                if abs(mag[i, j + 1]) == np.inf or isnan(mag[i, j + 1]) is True or abs(mag[i, j + 1]) > 1e10:
                     counter += 1
             except IndexError:
                 pass
             # now check corners:
             try:
-                if abs(mag[i - 1, j - 1]) == np.inf or isnan(mag[i - 1, j - 1]) is True:
+                if abs(mag[i - 1, j - 1]) == np.inf or isnan(mag[i - 1, j - 1]) is True or abs(mag[i -1, j - 1]) > 1e10:
                     counter += 1
             except IndexError:
                 pass
             try:
-                if abs(mag[i + 1, j + 1]) == np.inf or isnan(mag[i + 1, j + 1]) is True:
+                if abs(mag[i + 1, j + 1]) == np.inf or isnan(mag[i + 1, j + 1]) is True or abs(mag[i + 1, j + 1]) > 1e10:
                     counter += 1
             except IndexError:
                 pass
             try:
-                if abs(mag[i + 1, j - 1]) == np.inf or isnan(mag[i + 1, j - 1]) is True:
+                if abs(mag[i + 1, j - 1]) == np.inf or isnan(mag[i + 1, j - 1]) is True or abs(mag[i + 1, j - 1]) > 1e10:
                     counter += 1
             except IndexError:
                 pass
             try:
-                if abs(mag[i - 1, j + 1]) == np.inf or isnan(mag[i - 1, j + 1]) is True:
+                if abs(mag[i - 1, j + 1]) == np.inf or isnan(mag[i - 1, j + 1]) is True or abs(mag[i - 1, j + 1]) > 1e10:
                     counter += 1
             except IndexError:
                 pass
@@ -181,7 +181,7 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks
     for i in range(x_len):
         for j in range(y_len):
             # set to zero points that are not defined or inf
-            if isnan(mag[i, j]) is True or abs(mag[i, j]) == np.inf:
+            if isnan(mag[i, j]) is True or abs(mag[i, j]) == np.inf  or abs(mag[i, j]) > 1e10:
                 # depending on bool_array, shade points on grid that are in undefined
                 # region
                 if bool_array[i, j] == 1:
@@ -232,7 +232,7 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks
         # only here, need to do it to u and v not just mag
         for i in range(x_len):
             for j in range(y_len):
-                if isnan(u[i,j]) == True or isnan(v[i,j]) == True or abs(u[i, j]) == np.inf or abs(v[i, j]) == np.inf:
+                if isnan(u[i,j]) == True or isnan(v[i,j]) == True or abs(u[i, j]) == np.inf or abs(v[i, j]) == np.inf or abs(v[i, j]) > 1e10 or abs(u[i, j]) > 1e10:
                     u[i,j] = v[i,j] = 0
         axis.quiver(xg, yg, u, v, pivot=orientation, scale=ScaleFactor, scale_units='xy') 
     else:
