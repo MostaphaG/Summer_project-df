@@ -573,8 +573,7 @@ def on_key_press(event):
         x_pix, y_pix = event.x , event.y
         x_m = float(ix_plot)
         y_m = float(iy_plot)
-        deriv_calc(x_m, y_m)
-
+        deriv_calc(x_m,y_m)
 
 # connect figure event to a function that responds to clicks, defined above
 cid = fig.canvas.mpl_connect("button_press_event", on_key_press)
@@ -1028,94 +1027,102 @@ y_m = float(0)
 def deriv_calc(x_m, y_m):
     global i_m, j_m  # deriv_inset_ax
     
-    # Range and point density of the derivative plot
-    d_range = 0.33*L/(zoom_slider.get())
-    d_length = d_length_select.get()
-    dpd = dpd_select.get()
-    d_scale = scale*(zoom_slider.get())
+    # Try and except to account for the error caused when zoom window selected without first clicking
+    # (i.e. undefined x_pix and y_pix)
     
-    # Select index for the middle of the new derivative axis
-    i_m = int(round((dpd/2)-0.1))
-    j_m = int(round((dpd/2)-0.1))
+    try:
     
-    # Divergence Plot
-    if click_opt_int > 2:
-        dx = np.linspace(-d_range, d_range, dpd)
-        dy = np.linspace(-d_range, d_range, dpd)
-        J = jacobian(2, string_x, string_y)
-        # Evaluate the Jacobian elements at (x_m,y_m) click location 
-        du_dx = eval(format_eq_div(format_eq(J[0, 0])))
-        du_dy = eval(format_eq_div(format_eq(J[0, 1])))
-        dv_dx = eval(format_eq_div(format_eq(J[1, 0])))
-        dv_dy = eval(format_eq_div(format_eq(J[1, 1])))
-        dxg, dyg = np.meshgrid(dx, dy)
+        # Range and point density of the derivative plot
+        d_range = 0.33*L/(zoom_slider.get())
+        d_length = d_length_select.get()
+        dpd = dpd_select.get()
+        d_scale = scale*(zoom_slider.get())
         
-        # Div --> Trace of the Jacobian Matrix
-        u_div = (du_dx + dv_dy)*dxg
-        v_div = (du_dx + dv_dy)*dyg
+        # Select index for the middle of the new derivative axis
+        i_m = int(round((dpd/2)-0.1))
+        j_m = int(round((dpd/2)-0.1))
         
-        #Curl --> Skew Symmetric Part of Jacobian Matrix 0.5*(A-A^T)
-        u_curl = -0.5*(du_dy - dv_dx)*dyg
-        v_curl = 0.5*(du_dy - dv_dx)*dxg
+        # Divergence Plot
+        if click_opt_int > 2:
+            dx = np.linspace(-d_range, d_range, dpd)
+            dy = np.linspace(-d_range, d_range, dpd)
+            J = jacobian(2, string_x, string_y)
+            # Evaluate the Jacobian elements at (x_m,y_m) click location 
+            du_dx = eval(format_eq_div(format_eq(J[0, 0])))
+            du_dy = eval(format_eq_div(format_eq(J[0, 1])))
+            dv_dx = eval(format_eq_div(format_eq(J[1, 0])))
+            dv_dy = eval(format_eq_div(format_eq(J[1, 1])))
+            dxg, dyg = np.meshgrid(dx, dy)
+            
+            # Div --> Trace of the Jacobian Matrix
+            u_div = (du_dx + dv_dy)*dxg
+            v_div = (du_dx + dv_dy)*dyg
+            
+            #Curl --> Skew Symmetric Part of Jacobian Matrix 0.5*(A-A^T)
+            u_curl = -0.5*(du_dy - dv_dx)*dyg
+            v_curl = 0.5*(du_dy - dv_dx)*dxg
+            
+        # Zoom/Derivative Plot
+        else:
+            # define new axis in the derivative plot
+            dx = np.linspace(-d_range+x_m, d_range+x_m, dpd)
+            dy = np.linspace(-d_range+y_m, d_range+y_m, dpd)
+            dxg, dyg = np.meshgrid(dx, dy)
+            # define the vector field in these new axis
+            u1, v1 = eq_to_comps(string_x, string_y, dxg, dyg)
+            # Calculate derivative field components
+            # This is done geometrically by subracting thevector at the centre of the
+            # grid, from vectors at other grid positions in the derivative axis.
+            du1 = u1 - u1[i_m, j_m]
+            dv1 = v1 - v1[i_m, j_m]
+      
+        # Create axes at clicked position from supplied position and given axis sizes
+        deriv_inset_ax = main_axis.inset_axes([(x_pix-178)/500 - (0.931*d_length/(2*L)), (y_pix-59)/500 - (0.931*d_length/(2*L)), 0.931*d_length/L, 0.931*d_length/L])
         
-    # Zoom/Derivative Plot
-    else:
-        # define new axis in the derivative plot
-        dx = np.linspace(-d_range+x_m, d_range+x_m, dpd)
-        dy = np.linspace(-d_range+y_m, d_range+y_m, dpd)
-        dxg, dyg = np.meshgrid(dx, dy)
-        # define the vector field in these new axis
-        u1, v1 = eq_to_comps(string_x, string_y, dxg, dyg)
-        # Calculate derivative field components
-        # This is done geometrically by subracting thevector at the centre of the
-        # grid, from vectors at other grid positions in the derivative axis.
-        du1 = u1 - u1[i_m, j_m]
-        dv1 = v1 - v1[i_m, j_m]
-  
-    # Create axes at clicked position from supplied position and given axis sizes
-    deriv_inset_ax = main_axis.inset_axes([(x_pix-178)/500 - (0.931*d_length/(2*L)), (y_pix-59)/500 - (0.931*d_length/(2*L)), 0.931*d_length/L, 0.931*d_length/L])
+        # Check radiobutton selection
+        if click_opt_int == 1:
+            u_s = u1
+            v_s = v1
+            scale_s = d_scale
+            
+        elif click_opt_int == 2:
+            u_s = du1
+            v_s = dv1
+            scale_s = scale
+            
+        elif click_opt_int == 3:
+            u_s = u_div
+            v_s = v_div
+            scale_s = scale
+            
+        elif click_opt_int == 4:
+            u_s = u_curl
+            v_s = v_curl
+            scale_s = scale
     
-    # Check radiobutton selection
-    if click_opt_int == 1:
-        u_s = u1
-        v_s = v1
-        scale_s = d_scale
+        if tensor.get() == 0:
+            arrows = False
+            stacks = True
+        if tensor.get() == 1:
+            arrows = True
+            stacks = False
+        if tensor.get() == 2:
+            arrows = True
+            stacks = True
         
-    elif click_opt_int == 2:
-        u_s = du1
-        v_s = dv1
-        scale_s = scale
-        
-    elif click_opt_int == 3:
-        u_s = u_div
-        v_s = v_div
-        scale_s = scale
-        
-    elif click_opt_int == 4:
-        u_s = u_curl
-        v_s = v_curl
-        scale_s = scale
-
-    if tensor.get() == 0:
-        arrows = False
-        stacks = True
-    if tensor.get() == 1:
-        arrows = True
-        stacks = False
-    if tensor.get() == 2:
-        arrows = True
-        stacks = True
+        stack_plot(dxg, dyg, deriv_inset_ax, u_s, v_s, 5, d_range, dpd, 0.1, arrows, stacks, orientation, scale_s, w_head, h_head, 1) 
     
-    stack_plot(dxg, dyg, deriv_inset_ax, u_s, v_s, 5, d_range, dpd, 0.1, arrows, stacks, orientation, scale_s, w_head, h_head, 1) 
-
-    # Don't display the x and y axis values
-    deriv_inset_ax.set_xticks([])
-    deriv_inset_ax.set_yticks([])
-    
-    # Redraw the figure canvas, showing the inset axis
-    fig.canvas.draw()
-    deriv_inset_ax.clear()
-    deriv_inset_ax.remove()
+        # Don't display the x and y axis values
+        deriv_inset_ax.set_xticks([])
+        deriv_inset_ax.set_yticks([])
+        
+        # Redraw the figure canvas, showing the inset axis
+        fig.canvas.draw()
+        deriv_inset_ax.clear()
+        deriv_inset_ax.remove()
+        
+    # i.e. if click coordinates are undefined, do nothing
+    except: NameError
 
 # Initialise the click button selection
 click_opt_int = 0
@@ -1136,6 +1143,7 @@ def click_option_handler(click_option):
         canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
     # when 'tool' is not selected, disable the pan and zoom:
     elif click_opt_int > 0:
+        fig.canvas.draw()
         toolbar.home()
         # close the selected mouse options
         state = fig.canvas.toolbar.mode
@@ -1146,7 +1154,7 @@ def click_option_handler(click_option):
         # get rid of the 2 buttons we don't want
         toolbar.children['!button4'].pack_forget()
         toolbar.children['!button5'].pack_forget()
-
+        deriv_calc(x_m, y_m)
 
 # =============================================================================
 # Calculate the Jacobian matrix of the defined vector field
@@ -1195,13 +1203,14 @@ def jacobian(m, u_str, v_str):
 # Additional formatting function used in divergence plots
 # =============================================================================
 
-
 def format_eq_div(string):
     string = string.replace('xg', 'x_m')
     string = string.replace('yg', 'y_m')
     return string
 
-
+def update_deriv(self):
+    deriv_calc(x_m,y_m)
+    
 # =============================================================================
 # Radiobutton to select what happens when clicking the plot
 # =============================================================================
@@ -1230,6 +1239,7 @@ click_option_Curl_btn.grid(row=1, column=1)
 
 tk.Label(right_frame, text='Zoom').grid(row=2, column=0)
 zoom_slider = tk.Scale(right_frame, from_=1, to=50, orient=tk.HORIZONTAL)
+zoom_slider.bind("<ButtonRelease-1>", update_deriv)
 zoom_slider.grid(row=2, column=1)
 
 # =============================================================================
@@ -1241,7 +1251,7 @@ dpd_select.set(5)
 dpd_list = [5, 7, 9]
 
 tk.Label(right_frame, text='Select Inset Plot Point Density:').grid(row=3, column=0)
-dpd_drop = tk.OptionMenu(right_frame, dpd_select, *dpd_list)
+dpd_drop = tk.OptionMenu(right_frame, dpd_select, *dpd_list, command = update_deriv)
 dpd_drop.grid(row=3, column=1)
 
 # =============================================================================
@@ -1253,7 +1263,7 @@ d_length_list = [1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0]
 d_length_select.set(d_length_list[2])
 
 tk.Label(right_frame, text='Select Inset Plot Size :').grid(row=4, column=0)
-d_length_drop = tk.OptionMenu(right_frame, d_length_select, *d_length_list)
+d_length_drop = tk.OptionMenu(right_frame, d_length_select, *d_length_list, command = update_deriv)
 d_length_drop.grid(row=4, column=1)
 
 # =============================================================================
