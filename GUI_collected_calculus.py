@@ -1143,6 +1143,43 @@ def plot_type_response(type_stack_block):
     stack_block_int = int(type_stack_block)
 
 
+# response to saving customisations
+def customisation_save():
+    global fract_s, fract, pt_den
+    # get the inputs
+    fract_s = float(fract_s_entry.get())
+    fract = float(fract_entry.get())
+    pt_den = int(pt_den_entry.get())
+    # destroy the window
+    customise_window.destroy()
+
+# response button to customise features
+def customise_calc():
+    global customise_window, fract_s_entry, fract_entry, pt_den_entry
+    # show a new window
+    customise_window = tk.Toplevel()
+    customise_window.title('custmoise stack size, block size and number of points')
+    # define entry boxes
+    # block size as fraction of graph
+    tk.Label(customise_window, text='block size as fraction of graph size').grid(row=0, column=0)
+    fract_s_entry = tk.Entry(customise_window, width=20, borderwidth=1)
+    fract_s_entry.insert(0, fract_s)
+    fract_s_entry.grid(row=1, column=0)
+    # stack size as fraction of graph
+    tk.Label(customise_window, text='stack size as fraction of graph size').grid(row=2, column=0)
+    fract_entry = tk.Entry(customise_window, width=20, borderwidth=1)
+    fract_entry.insert(0, fract)
+    fract_entry.grid(row=3, column=0)
+    # number of points along each axis
+    tk.Label(customise_window, text='number of points along axis').grid(row=4, column=0)
+    pt_den_entry = tk.Entry(customise_window, width=20, borderwidth=1)
+    pt_den_entry.insert(0, pt_den)
+    pt_den_entry.grid(row=5, column=0)
+    # get a submittion button for these
+    Custom_submit_btn = tk.Button(customise_window, text='SAVE', padx=20, pady=10, command=customisation_save)
+    Custom_submit_btn.grid(row=6, column=0, pady=10)
+
+
 '''
 
 Define GUI interactions
@@ -1209,6 +1246,18 @@ wedge_btn.grid(row=3, column=0)
 Hodge_btn = tk.Button(right_frame, text='Hodge', padx=67, pady=10, command=Hodge_response)
 Hodge_btn.grid(row=4, column=0)
 
+
+
+# SOME customisations
+# extra one sthat are not yet in main GUI (plotting_stacks_GUI)
+# therefore will need to be added when the 2 are merged.
+
+# Include ocustomisation buttonsplay options to change
+# will show a window and di
+# stack size and block size, stack size is already avaliable in main GUI
+# but ont blocvk size
+customise_calc_btn = tk.Button(small_frame, text='optimise', command=customise_calc)
+customise_calc_btn.grid(row=3, column=1)
 
 '''
 
