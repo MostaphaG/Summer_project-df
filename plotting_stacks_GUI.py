@@ -48,53 +48,53 @@ def undef_region(mag):
             # making sure, ends of grids are taken care of
             # check up
             try:
-                if abs(mag[i - 1, j]) == np.inf or isnan(mag[i - 1, j]) is True or abs(mag[i - 1, j]) > 1e10:
+                if abs(mag[i - 1, j]) == np.inf or isnan(mag[i - 1, j]) is True or abs(mag[i - 1, j]) > 1e15:
                     counter += 1
             except IndexError:
                 pass
             # check down
             try:
-                if abs(mag[i + 1, j]) == np.inf or isnan(mag[i + 1, j]) is True or abs(mag[i + 1, j]) > 1e10:
+                if abs(mag[i + 1, j]) == np.inf or isnan(mag[i + 1, j]) is True or abs(mag[i + 1, j]) > 1e15:
                     counter += 1
             except IndexError:
                 pass
             # check left
             try:
-                if abs(mag[i, j - 1]) == np.inf or isnan(mag[i, j - 1]) is True or abs(mag[i, j - 1]) > 1e10:
+                if abs(mag[i, j - 1]) == np.inf or isnan(mag[i, j - 1]) is True or abs(mag[i, j - 1]) > 1e15:
                     counter += 1
             except IndexError:
                 pass
             # check right
             try:
-                if abs(mag[i, j + 1]) == np.inf or isnan(mag[i, j + 1]) is True or abs(mag[i, j + 1]) > 1e10:
+                if abs(mag[i, j + 1]) == np.inf or isnan(mag[i, j + 1]) is True or abs(mag[i, j + 1]) > 1e15:
                     counter += 1
             except IndexError:
                 pass
             # now check corners:
             try:
-                if abs(mag[i - 1, j - 1]) == np.inf or isnan(mag[i - 1, j - 1]) is True or abs(mag[i -1, j - 1]) > 1e10:
+                if abs(mag[i - 1, j - 1]) == np.inf or isnan(mag[i - 1, j - 1]) is True or abs(mag[i -1, j - 1]) > 1e15:
                     counter += 1
             except IndexError:
                 pass
             try:
-                if abs(mag[i + 1, j + 1]) == np.inf or isnan(mag[i + 1, j + 1]) is True or abs(mag[i + 1, j + 1]) > 1e10:
+                if abs(mag[i + 1, j + 1]) == np.inf or isnan(mag[i + 1, j + 1]) is True or abs(mag[i + 1, j + 1]) > 1e15:
                     counter += 1
             except IndexError:
                 pass
             try:
-                if abs(mag[i + 1, j - 1]) == np.inf or isnan(mag[i + 1, j - 1]) is True or abs(mag[i + 1, j - 1]) > 1e10:
+                if abs(mag[i + 1, j - 1]) == np.inf or isnan(mag[i + 1, j - 1]) is True or abs(mag[i + 1, j - 1]) > 1e15:
                     counter += 1
             except IndexError:
                 pass
             try:
-                if abs(mag[i - 1, j + 1]) == np.inf or isnan(mag[i - 1, j + 1]) is True or abs(mag[i - 1, j + 1]) > 1e10:
+                if abs(mag[i - 1, j + 1]) == np.inf or isnan(mag[i - 1, j + 1]) is True or abs(mag[i - 1, j + 1]) > 1e15:
                     counter += 1
             except IndexError:
                 pass
             # CRUCIAL
             # check its own point too!!
             try:
-                if abs(mag[i, j]) == np.inf or isnan(mag[i, j]) is True:
+                if abs(mag[i, j]) == np.inf or isnan(mag[i, j]) is True or abs(mag[i, j]) > 1e15:
                     counter += 1
             except IndexError:
                 pass
@@ -132,7 +132,7 @@ def G(s, n, c):
 
 # define a function that will complete all stack plotting:
 def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks=True, orientation='mid', scale=1, w_head=1/8, h_head=1/4, axis_check=0, arrowheads=True, colour='green'):
-    global s_L, mag, bool_array
+    global s_L, mag, bool_array, test_mag
     # get the lengths of x and y from their grids
     
     x_len = len(xg[:, 0])
@@ -171,6 +171,9 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks
     
     # find the arrow length corresponding to each point and store in mag array
     mag = np.sqrt(u**2 + v**2)
+    
+    test_mag = mag
+    
     # find direction of each arrow
     angles = np.arctan2(v, u)   # theta defined from positive x axis ccw
     
@@ -181,16 +184,16 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks
     for i in range(x_len):
         for j in range(y_len):
             # set to zero points that are not defined or inf
-            if isnan(mag[i, j]) is True or abs(mag[i, j]) == np.inf  or abs(mag[i, j]) > 1e10:
+            if isnan(mag[i, j]) is True or abs(mag[i, j]) == np.inf  or abs(mag[i, j]) > 1e15:
                 # depending on bool_array, shade points on grid that are in undefined
                 # region
                 if bool_array[i, j] == 1:
                     # colour this region as a shaded square
-                    rect = patch.Rectangle((xg[i, j] - dist_points/2, yg[i, j]  - dist_points/2), dist_points, dist_points, color='grey')
+                    rect = patch.Rectangle((xg[i, j] - dist_points/2, yg[i, j]  - dist_points/2), dist_points, dist_points, color='#B5B5B5')
                     axis.add_patch(rect)
                 if bool_array[i, j] == 0:
                     # colour this point as a big red dot
-                    circ = patch.Circle((xg[i, j], yg[i, j]), L*fract/2, color='red')
+                    circ = patch.Circle((xg[i, j], yg[i, j]), L*fract/3, color='red')
                     axis.add_patch(circ)
                 mag[i, j] = 0
 
@@ -356,11 +359,17 @@ def format_eq(string):
     string = string.replace('sin', 'np.sin')
     string = string.replace('cos', 'np.cos')
     string = string.replace('tan', 'np.tan')
-    string = string.replace('ARCTAN', 'np.arctan2')
+    string = string.replace('ARCTAN', 'np.arctan')
+    string = string.replace('ARCSIN', 'np.arcsin')
+    string = string.replace('ARCCOS', 'np.arccos')
+    string = string.replace('TANH', 'np.tanh')
+    string = string.replace('SINH', 'np.sinh')
+    string = string.replace('COSH', 'np.cosh')
     string = string.replace('^', '**')
     string = string.replace('ln', 'np.log')
     string = string.replace('e**', 'np.exp')
     return string
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # set up basic layout of the window
