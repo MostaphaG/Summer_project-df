@@ -185,12 +185,10 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks
                 # depending on bool_array, shade points on grid that are in undefined
                 # region
                 if bool_array[i, j] == 1:
-                    print('undefined region')
                     # colour this region as a shaded square
                     rect = patch.Rectangle((xg[i, j] - dist_points/2, yg[i, j]  - dist_points/2), dist_points, dist_points, color='grey')
                     axis.add_patch(rect)
                 if bool_array[i, j] == 0:
-                    print('undefined point')
                     # colour this point as a big red dot
                     circ = patch.Circle((xg[i, j], yg[i, j]), L*fract/2, color='red')
                     axis.add_patch(circ)
