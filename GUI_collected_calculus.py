@@ -332,6 +332,11 @@ to_wedge_y_1_str = ''
 to_wedge_x_2_str = ''
 to_wedge_y_2_str = ''
 
+# predefine vectors to store for the interior derivative
+vector_ex_str = ''
+vector_ey_str = ''
+
+
 '''
 
 Define other functions needed to be used in the responses to GUI interactions
@@ -856,12 +861,20 @@ def form_1_stacks_response():
 
 
 # performs the interior derivative on supplied 2 form and plots it as stacks
-def Int_deriv_response():
-    global u, v, stack_block_int
-    
-    # !!! For now it is only doing the interior derivative w.r.t the basis
-    # !!! it splits the 2 form equally between dx and dy to make a 1 form
-    
+def Int_deriv():
+    global u, v, stack_block_int, vector_ex_str, vector_ey_str, vector_ex_eq, vector_ey_eq, vector_ex, vector_ey
+    # take the supplied componments and save them globally
+    vector_ex_str = str(simplify(int_vect_ex_entry.get()))
+    vector_ey_str = str(simplify(int_vect_ey_entry.get()))
+    # turn these into equations
+    vector_ex_eq = format_eq(vector_ex_str)
+    vector_ey_eq = format_eq(vector_ey_str)
+    # check against zeros
+    vector_ex_eq = form_2_constant_correction(vector_ex_eq)
+    vector_ey_eq = form_2_constant_correction(vector_ey_eq)
+    # find numerical evaluation of it
+    vector_ex = eval(vector_ex_eq)
+    vector_ey = eval(vector_ey_eq)
     # clear the already present axis
     ax.clear()
     # get the input 2 form
@@ -876,12 +889,12 @@ def Int_deriv_response():
     form_2_sgn = np.sign(form_2)
     # using interior product, get the u and v (dx and dy) components
     # of the resulting 1 form
-    u = -form_2
-    v = form_2
+    u = -form_2 * vector_ex
+    v = form_2 * vector_ey
     # to be usable in ext_deriv, define strings of these variables
     # later to put them into their entry boxes.
-    u_str = str(simplify('-' + form_2_str))
-    v_str = form_2_str
+    u_str = str(simplify('-(' + form_2_str + ')*(' + vector_ex_str + ')' ))
+    v_str = str(simplify( '(' + form_2_str + ')*(' + vector_ey_str + ')' ))
     # use the stacks plotter to present this
     form_2_components_plot(xg, yg, u, v, form_2_sgn, s_max, L, pt_den, fract, colour_str, arrowheads=True)
     canvas.draw()
@@ -899,6 +912,28 @@ def Int_deriv_response():
     form_1_x_entry.configure(bg='#C0F6BB')
     form_1_y_entry.configure(bg='#C0F6BB')
     form_2_entry.configure(bg='#FFFFFF')
+
+
+# Interior derivative response
+def Int_deriv_response():
+    global int_vector_window, int_vect_ex_entry, int_vect_ey_entry
+    # open a titled new window
+    int_vector_window = tk.Toplevel()
+    int_vector_window.title('input a vector for the interior derivative')
+    # define entry boxes for e^x and e^y components of desired vector
+    tk.Label(int_vector_window, text='vector component e^x').grid(row=0, column=0)
+    int_vect_ex_entry = tk.Entry(int_vector_window, width=30, borderwidth=1)
+    int_vect_ex_entry.insert(0, vector_ex_str)
+    int_vect_ex_entry.grid(row=1, column=0)
+    
+    tk.Label(int_vector_window, text='vector component e^x').grid(row=2, column=0)
+    int_vect_ey_entry = tk.Entry(int_vector_window, width=30, borderwidth=1)
+    int_vect_ey_entry.insert(0, vector_ey_str)
+    int_vect_ey_entry.grid(row=3, column=0)
+    # define a button that will plot these
+    int_vector_load_btn = tk.Button(int_vector_window, text='PLOT', padx=20, pady=10, command=Int_deriv)
+    int_vector_load_btn.grid(row=4, column=0, pady=10)
+
 
 
 # perform ext deriv on the result of int_deriv and plots it as stacks

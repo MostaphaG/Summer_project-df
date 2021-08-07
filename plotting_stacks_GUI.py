@@ -89,6 +89,9 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks
     # find direction of each arrow
     angles = np.arctan2(v, u)   # theta defined from positive x axis ccw
     
+    # find the maximum magnitude for scaling
+    max_size = np.max(mag)
+    
     # prevent any magnitudes from being inf or nan
     for i in range(x_len):
         for j in range(y_len):
@@ -109,9 +112,6 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks
     # to be perp. to arrow. shifted parallel to it, their density porp to mag
     # of the arrow and with an arrowhead on top.
     # #########################################################################
-    
-    # find the maximum magnitude for scaling
-    max_size = np.max(mag)
     
     # Define scaling factor
     ScaleFactor = max_size/(0.9*(2*L/pt_den))
@@ -252,7 +252,7 @@ def format_eq(string):
     string = string.replace('tan', 'np.tan')
     string = string.replace('^', '**')
     string = string.replace('ln', 'np.log')
-    string = string.replace('e^', 'np.exp')
+    string = string.replace('e**', 'np.exp')
     return string
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
