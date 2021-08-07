@@ -356,6 +356,7 @@ def format_eq(string):
     string = string.replace('sin', 'np.sin')
     string = string.replace('cos', 'np.cos')
     string = string.replace('tan', 'np.tan')
+    string = string.replace('ARCTAN', 'np.arctan2')
     string = string.replace('^', '**')
     string = string.replace('ln', 'np.log')
     string = string.replace('e**', 'np.exp')
