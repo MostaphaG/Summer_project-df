@@ -1149,6 +1149,9 @@ def click_option_handler(click_option):
         # get rid of the modified toolbar:
         toolbar.destroy()
         # put the default matplotlib toolbar, back on:
+        
+        #NavigationToolbar2Tk.toolitems = [t for t in NavigationToolbar2Tk.toolitems]
+        
         toolbar = NavigationToolbar2Tk(canvas, plot_frame)
         toolbar.update()
         canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
@@ -1157,25 +1160,23 @@ def click_option_handler(click_option):
     elif click_opt_int > 0:
         fig.canvas.draw()
         
-        toolbar.home()
-        #toolbar.destroy()
+        toolbar.destroy()
         
-        # close the selected mouse options
-        state = fig.canvas.toolbar.mode
-        if state == 'zoom rect':
-            toolbar.zoom()
-        if state == 'pan/zoom':
-            toolbar.pan()
+        NavigationToolbar2Tk.toolitems = [t for t in NavigationToolbar2Tk.toolitems if t[0] not in ('Pan', 'Zoom')]
+        toolbar = NavigationToolbar2Tk(canvas, plot_frame)
+        toolbar.update()
+        canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
         
-        # get rid of the 2 buttons we don't want
+        # toolbar.home()
         
-        # toolbar.destroy()
-        # NavigationToolbar2Tk.toolitems = [t for t in NavigationToolbar2Tk.toolitems if t[0] not in ('Pan', 'Zoom',)]
-        # toolbar = NavigationToolbar2Tk(canvas, plot_frame)
-        # toolbar.update()
-        
-        toolbar.children['!button4'].pack_forget()
-        toolbar.children['!button5'].pack_forget()
+        # state = fig.canvas.toolbar.mode
+        # if state == 'zoom rect':
+        #     toolbar.zoom()
+        # if state == 'pan/zoom':
+        #     toolbar.pan()
+                
+        # toolbar.children['!button4'].pack_forget()
+        # toolbar.children['!button5'].pack_forget()
         
         deriv_calc(x_m, y_m)
 
