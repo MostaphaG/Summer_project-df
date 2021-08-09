@@ -248,7 +248,7 @@ Define all needed intial variables to start with
 
 # define scale of the graph
 L = 5
-pt_den = 21   # number of points on each axis
+pt_den = 31   # number of points on each axis
 
 # with L, correct the axis and redraw
 delta_factor = 10
@@ -299,7 +299,7 @@ define initial variables for all pother operations that will be completed
 colour_str = ['red', 'blue', 'grey']
 
 # define fract of graph to set as size of stack
-fract = 0.07
+fract = 0.06
 
 # define max number of sheets to start with
 s_max = 5
@@ -867,8 +867,10 @@ def form_1_stacks_response():
 
 
 # performs the interior derivative on supplied 2 form and plots it as stacks
-def Int_deriv():
-    global u, v, stack_block_int, vector_ex_str, vector_ey_str, vector_ex_eq, vector_ey_eq, vector_ex, vector_ey
+# for 2 form only, not including the 1 form.
+# if combined, use different fucntion.
+def Int_deriv_2_form():
+    global u, v, u_str, v_str, vector_ex_str, vector_ey_str, vector_ex_eq, vector_ey_eq, vector_ex, vector_ey
     # take the supplied componments and save them globally
     vector_ex_str = str(simplify(int_vect_ex_entry.get()))
     vector_ey_str = str(simplify(int_vect_ey_entry.get()))
@@ -881,8 +883,6 @@ def Int_deriv():
     # find numerical evaluation of it
     vector_ex = eval(vector_ex_eq)
     vector_ey = eval(vector_ey_eq)
-    # clear the already present axis
-    ax.clear()
     # get the input 2 form
     form_2_str = str(simplify(form_2_entry.get()))
     # format it to be python understood
@@ -903,6 +903,53 @@ def Int_deriv():
     v_str = str(simplify( '(' + form_2_str + ')*(' + vector_ex_str + ')' ))
     # use the stacks plotter to present this
     form_2_components_plot(xg, yg, u, v, form_2_sgn, s_max, L, pt_den, fract, colour_str, arrowheads=True)
+
+
+# define a function that will find the interior derivative of a given 1 form
+def Int_deriv_1_form():
+    global zero_form_str, zero_form, vector_ex_str, vector_ey_str, vector_ex_eq, vector_ey_eq, vector_ex, vector_ey
+    # take the supplied componments and save them globally
+    vector_ex_str = str(simplify(int_vect_ex_entry.get()))
+    vector_ey_str = str(simplify(int_vect_ey_entry.get()))
+    # turn these into equations
+    vector_ex_eq = format_eq(vector_ex_str)
+    vector_ey_eq = format_eq(vector_ey_str)
+    # check against zeros
+    vector_ex_eq = form_2_constant_correction(vector_ex_eq)
+    vector_ey_eq = form_2_constant_correction(vector_ey_eq)
+    # find numerical evaluation of it
+    vector_ex = eval(vector_ex_eq)
+    vector_ey = eval(vector_ey_eq)
+    # get the input 1 forms
+    x_comp_str = str(simplify(form_1_x_entry.get()))
+    y_comp_str = str(simplify(form_1_y_entry.get()))
+    # format them to be python understood
+    x_comp_eq = format_eq(x_comp_str)
+    y_comp_eq = format_eq(y_comp_str)
+    # check against constant and zeros being supplied
+    x_comp_eq = form_2_constant_correction(x_comp_eq)
+    y_comp_eq = form_2_constant_correction(y_comp_eq)
+    # get the numerical evaluations
+    x_comp = eval(x_comp_eq)
+    y_comp = eval(y_comp_eq)
+    # as per the ineterior product, get the scalar function from this
+    # first, numerically
+    zero_form = x_comp*vector_ex + y_comp*vector_ey
+    # then as a string to display in an extra window
+    zero_form_str = str(simplify('(' + x_comp_str + ')*(' + vector_ex_str + ')' + ' + (' + y_comp_str + ')*(' + vector_ey_str + ')'))
+    # plot the zero_form as contours with labeled levels
+    contour_levels = 10
+    ax.contour(xg, yg, zero_form, contour_levels)
+
+
+# define a function that will respond to plotting the 2 form only
+def Int_deriv_22_form():
+    global stack_block_int
+    # clear the axis
+    ax.clear()
+    # call the asked fucntion
+    Int_deriv_2_form()
+    # draw its result
     canvas.draw()
     # display the fact that this is a 1 form therefore always shows stacks
     stack_block.set(1)
@@ -920,8 +967,41 @@ def Int_deriv():
     form_2_entry.configure(bg='#FFFFFF')
 
 
-# Interior derivative response
-def Int_deriv_response():
+# define a function that will find the interior derivative of both the 2 form
+# and a 1 form, merged.
+def Int_deriv_21_form():
+    global stack_block_int
+    # clear the axis
+    ax.clear()
+    # first call the function to plot a 2 form and plot it
+    Int_deriv_2_form()
+    # then call the function that will do this for the 1 form
+    # plot these together
+    Int_deriv_1_form()
+    # draw its result
+    canvas.draw()
+    # make a label for the found 0 form
+    Label_zero_form.configure(text=zero_form_str)
+    # display the fact that this is a 1 form therefore always shows stacks
+    stack_block.set(1)
+    # and update its parameter also
+    stack_block_int = 1
+    # change the entry box 1 form to the calculated ones
+    form_1_x_entry.delete(0, 'end')
+    form_1_y_entry.delete(0, 'end')
+    form_1_x_entry.insert(0, u_str)
+    form_1_y_entry.insert(0, v_str)
+    # display that the 1 form is now being plotted, therefore get rid of
+    # 2 form colour and show 1 form components in green:
+    form_1_x_entry.configure(bg='#C0F6BB')
+    form_1_y_entry.configure(bg='#C0F6BB')
+    form_2_entry.configure(bg='#FFFFFF')
+    return
+
+
+# Interior derivative response for 2 form only
+# asks to give vectors w.r.t to which perform iota.
+def Int_deriv_2_form_response(type_form):
     global int_vector_window, int_vect_ex_entry, int_vect_ey_entry
     # open a titled new window
     int_vector_window = tk.Toplevel()
@@ -931,15 +1011,50 @@ def Int_deriv_response():
     int_vect_ex_entry = tk.Entry(int_vector_window, width=30, borderwidth=1)
     int_vect_ex_entry.insert(0, vector_ex_str)
     int_vect_ex_entry.grid(row=1, column=0)
-    
     tk.Label(int_vector_window, text='vector component e^y').grid(row=2, column=0)
     int_vect_ey_entry = tk.Entry(int_vector_window, width=30, borderwidth=1)
     int_vect_ey_entry.insert(0, vector_ey_str)
     int_vect_ey_entry.grid(row=3, column=0)
     # define a button that will plot these
-    int_vector_load_btn = tk.Button(int_vector_window, text='PLOT', padx=20, pady=10, command=Int_deriv)
-    int_vector_load_btn.grid(row=4, column=0, pady=10)
+    # for a 2 form only
+    if type_form == 2:
+        int_vector_load_btn = tk.Button(int_vector_window, text='PLOT', padx=20, pady=10, command=Int_deriv_22_form)
+        int_vector_load_btn.grid(row=4, column=0, pady=10)
+    # for 2 form with 1 form included:
+    elif type_form == 1:
+        int_vector_load_btn = tk.Button(int_vector_window, text='PLOT', padx=20, pady=10, command=Int_deriv_21_form)
+        int_vector_load_btn.grid(row=4, column=0, pady=10)
 
+
+# define a function that will respond to the made choice reg. int deriv.
+def int_deriv_choice(var):
+    if var == 0:
+        # only use 2 form, therefore call previous functions for this
+        Int_deriv_2_form_response(2)
+    elif var == 1:
+        # call the function, but make it deal with 2 form together with the
+        # 1 form
+        Int_deriv_2_form_response(1)
+    # close the previous window
+    int_option_window.destroy()
+
+
+# define response to int deriv button
+# shows window to select if should just use 2 form
+# or a comnination of 2 form and 1 form
+def Int_deriv_response():
+    global int_option_window
+    # show new window with label and two options.
+    int_option_window = tk.Toplevel()
+    int_option_window.title('input a vector for the interior derivative')
+    int_option_window.geometry('425x200')
+    # define Label
+    tk.Label(int_option_window, text='Perform w.r.t 2 form only or combine given 2 form and 1 form ?').grid(row=0, column=0, columnspan=2)
+    # define response buttons to the stated question
+    form_2_only_btn = tk.Button(int_option_window, text='2 form', padx=30, pady=30, command=lambda: int_deriv_choice(0))
+    from_2_and_1_btn = tk.Button(int_option_window, text='Both', padx=30, pady=30, command=lambda: int_deriv_choice(1))
+    form_2_only_btn.grid(row=1, column=0, pady=20)
+    from_2_and_1_btn.grid(row=1, column=1, pady=20)
 
 
 # perform ext deriv on the result of int_deriv and plots it as stacks
@@ -1211,6 +1326,12 @@ tk.Label(bot_frame, text='y component of 1 form').grid(row=2, column=1)
 form_1_y_entry = tk.Entry(bot_frame, width=20, borderwidth=2)
 form_1_y_entry.grid(row=2, column=0)
 form_1_y_entry.insert(0, string_y)
+
+# extra label for 0 form.
+# for now not an entry box because it doesn't get used anywhere
+# I make it red to remember to come back to it later and use it.
+Label_zero_form = tk.Label(bot_frame, text='', fg='red')
+Label_zero_form.grid(row=3, column=0)
 
 # define a button to submit the supplied 2 form and plot it as blocks
 form_2_btn = tk.Button(small_frame, text='2 form plot', padx=3, pady=5, command=form_2_response)
