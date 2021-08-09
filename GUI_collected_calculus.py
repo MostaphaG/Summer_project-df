@@ -74,18 +74,21 @@ def format_eq(string):
     string = string.replace('x', 'xg')
     string = string.replace('y', 'yg')
     string = string.replace('z', 'zg')
-    string = string.replace('R', 'rg')  # otherwise: sqrt won't work, becaue of the r in it &arctan won't work because of tan in it and the r in it.
-    string = string.replace('theta', 'thetag')
     # where there are special functions, replace them with library directions
     string = string.replace('pi', 'np.pi')
     string = string.replace('sqrt', 'np.sqrt')
     string = string.replace('sin', 'np.sin')
     string = string.replace('cos', 'np.cos')
     string = string.replace('tan', 'np.tan')
-    string = string.replace('arcta', 'np.arctan2')
+    string = string.replace('ARCTAN', 'np.arctan')
+    string = string.replace('ARCSIN', 'np.arcsin')
+    string = string.replace('ARCCOS', 'np.arccos')
+    string = string.replace('TANH', 'np.tanh')
+    string = string.replace('SINH', 'np.sinh')
+    string = string.replace('COSH', 'np.cosh')
     string = string.replace('^', '**')
     string = string.replace('ln', 'np.log')
-    string = string.replace('e^', 'np.exp')
+    string = string.replace('e**', 'np.exp')
     return string
 
 
@@ -95,18 +98,21 @@ def unformat(string):
     string = string.replace('xg', 'x')
     string = string.replace('yg', 'y')
     string = string.replace('zg', 'z')
-    string = string.replace('rd', 'R')
-    string = string.replace('thetag', 'theta')
     # where there are special functions, replace them with library directions
     string = string.replace('np.pi', 'pi')
     string = string.replace('np.sqrt', 'sqrt')
     string = string.replace('np.sin', 'sin')
     string = string.replace('np.cos', 'cos')
     string = string.replace('np.tan', 'tan')
-    string = string.replace('np.arctan2', 'arcta')
+    string = string.replace('np.arctan2', 'ARCTAN')
+    string = string.replace('ARCSIN', 'np.arcsin')
+    string = string.replace('np.arccos', 'ARCCOS')
+    string = string.replace('np.tanh', 'TANH')
+    string = string.replace('np.sinh', 'SINH')
+    string = string.replace('np.cosh', 'COSH')
     string = string.replace('**', '^')
     string = string.replace('np.log()', 'ln')
-    string = string.replace('np.exp', 'e^')
+    string = string.replace('np.exp', 'e**')
     return string
 
 
