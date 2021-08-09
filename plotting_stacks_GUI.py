@@ -91,18 +91,11 @@ def undef_region(mag):
                     counter += 1
             except IndexError:
                 pass
-            # CRUCIAL
-            # check its own point too!!
-            try:
-                if abs(mag[i, j]) == np.inf or isnan(mag[i, j]) is True or abs(mag[i, j]) > 1e15:
-                    counter += 1
-            except IndexError:
-                pass
             # now, depending on couner, define truth value in bool array
-            # True if counter >= 3, then its a region
-            if counter > 3:
+            # True if counter > 2, then its a region
+            if counter > 2:
                 bool_array[i, j] = 1
-            elif counter <= 3:
+            elif counter <= 2:
                 bool_array[i, j] = 0
     return bool_array
             
