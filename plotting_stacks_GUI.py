@@ -27,80 +27,6 @@ start = timeit.default_timer()
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-# define a function that will find region ON GRID
-# that are not defined as regions, as opposed to a lines or points
-# do so by finding  values of neightbouring values
-# if there is 3 or more that are also not defined, its a region
-def undef_region(mag):
-    # set up a same size array to store classifications
-    # 1 will mean a region, zero will mean a point or a line (of inf or nan)
-    bool_array = np.zeros(np.shape(u))
-    # get the lengths of supplied fields
-    x_len = len(mag[:, 0])
-    y_len = len(mag[0, :])
-    # loop over all indexes
-    for i in range(x_len):
-        for j in range(y_len):
-            # set up a conuting variable
-            counter = 0
-            # for the current index, 'look' up, down, left and right
-            # check how many of these are inf or nan.
-            # making sure, ends of grids are taken care of
-            # check up
-            try:
-                if abs(mag[i - 1, j]) == np.inf or isnan(mag[i - 1, j]) is True or abs(mag[i - 1, j]) > 1e15:
-                    counter += 1
-            except IndexError:
-                pass
-            # check down
-            try:
-                if abs(mag[i + 1, j]) == np.inf or isnan(mag[i + 1, j]) is True or abs(mag[i + 1, j]) > 1e15:
-                    counter += 1
-            except IndexError:
-                pass
-            # check left
-            try:
-                if abs(mag[i, j - 1]) == np.inf or isnan(mag[i, j - 1]) is True or abs(mag[i, j - 1]) > 1e15:
-                    counter += 1
-            except IndexError:
-                pass
-            # check right
-            try:
-                if abs(mag[i, j + 1]) == np.inf or isnan(mag[i, j + 1]) is True or abs(mag[i, j + 1]) > 1e15:
-                    counter += 1
-            except IndexError:
-                pass
-            # now check corners:
-            try:
-                if abs(mag[i - 1, j - 1]) == np.inf or isnan(mag[i - 1, j - 1]) is True or abs(mag[i -1, j - 1]) > 1e15:
-                    counter += 1
-            except IndexError:
-                pass
-            try:
-                if abs(mag[i + 1, j + 1]) == np.inf or isnan(mag[i + 1, j + 1]) is True or abs(mag[i + 1, j + 1]) > 1e15:
-                    counter += 1
-            except IndexError:
-                pass
-            try:
-                if abs(mag[i + 1, j - 1]) == np.inf or isnan(mag[i + 1, j - 1]) is True or abs(mag[i + 1, j - 1]) > 1e15:
-                    counter += 1
-            except IndexError:
-                pass
-            try:
-                if abs(mag[i - 1, j + 1]) == np.inf or isnan(mag[i - 1, j + 1]) is True or abs(mag[i - 1, j + 1]) > 1e15:
-                    counter += 1
-            except IndexError:
-                pass
-            # now, depending on couner, define truth value in bool array
-            # True if counter > 2, then its a region
-            if counter > 2:
-                bool_array[i, j] = 1
-            elif counter <= 2:
-                bool_array[i, j] = 0
-    return bool_array
-            
-
-
 # deifne a fucntion to check number parity
 def parity(x):
     '''
@@ -169,24 +95,22 @@ def stack_plot(xg, yg, axis, F_x, F_y, s_max, L, pt_den, fract, arrows=False, st
     angles = np.arctan2(F_y, F_x)   # theta defined from positive x axis ccw
     
     # find regions ON GRID that are nan or inf as a bool array
-    bool_array = undef_region(mag)
+    #bool_array = undef_region(mag)
     
     # deal with infs and nans in mag
     for i in range(x_len):
         for j in range(y_len):
             # set to zero points that are not defined or inf
-            if isnan(mag[i, j]) is True or abs(mag[i, j]) == np.inf  or abs(mag[i, j]) > 1e15:
-                # depending on bool_array, shade points on grid that are in undefined
-                # region
-                if bool_array[i, j] == 1:
-                    # colour this region as a shaded square
+            if isnan(mag[i, j]) is True:
+                #colour this region as a shaded square
                     rect = patch.Rectangle((xg[i, j] - dist_points/2, yg[i, j]  - dist_points/2), dist_points, dist_points, color='#B5B5B5')
                     axis.add_patch(rect)
-                if bool_array[i, j] == 0:
-                    # colour this point as a big red dot
+                    mag[i, j] = 0
+            if abs(mag[i, j]) == np.inf  or abs(mag[i, j]) > 1e15:
+                # colour this point as a big red dot
                     circ = patch.Circle((xg[i, j], yg[i, j]), L*fract/3, color='red')
                     axis.add_patch(circ)
-                mag[i, j] = 0
+                    mag[i, j] = 0
     
     # #########################################################################
     # use the the direction of arrows to define stack properties
@@ -443,15 +367,17 @@ v = -xg*np.cos(yg)  # y component
 SET UP A LIST OF DEFAULT VECTOR FIELDS TO DISPLAY IN DROPDOWN MENU
 '''
 # list of names of fields to display
-field_name_list = ['Default: y*sin(x)i - x*cos(y)j',
-              'Simple pendulum: yi  - sin(x)j',
-              'Harmonic oscillator: yi -xj',
-              'Linear field example 1: (14*x - 4*y)i + (-1*x + 4*y)j',
-              'Linear field example 2: xi',
-              'Constant field: 6i + 3j',
+field_name_list = ['Default: y*sin(x)dx - x*cos(y)dy',
+              'Simple pendulum: ydx  - sin(x)dy',
+              'Harmonic oscillator: ydx -xdy',
+              'Linear field example 1: (14*x - 4*y)dx + (-1*x + 4*y)dy',
+              'Linear field example 2: xdx',
+              'Constant field: 6dx + 3dy',
               'Falling cat field (Planar 3 link robot)',
-              'Gravitational/Electric Point Charge: -x/(x**2+y**2)i + -y/(x**2+y**2)j',
-              'Magnetic Field of Current Carrying Wire: -y/(x**2+y**2)i + x/(x**2+y**2)j'
+              'Gravitational/Electric Point Charge: -x/(x**2+y**2)dx + -y/(x**2+y**2)dy',
+              'Magnetic Field of Current Carrying Wire: -y/(x**2+y**2)dx + x/(x**2+y**2)dy',
+              'Black hole ext. y -> t, x->r: sqrt(1-2m/r)dt - 1/sqrt(1-2m/r) dr',
+              'Black hole int. y -> t, x->r: (1-2m/r)dt - 1/(1-2m/r) dr'
               ]
 
 
@@ -464,7 +390,9 @@ field_x_list = ['y*sin(x)',
                 '6',
                 '(3*cos(y) + 4)/(15 + 6*cos(x) + 6*cos(y))',
                 '-x/(x**2+y**2)',
-                '-y/(x**2+y**2)'
+                '-y/(x**2+y**2)',
+                '-1/(sqrt(1-(2/sqrt(x**2 + y**2))))',
+                '-1/(1-(2/sqrt(x**2 + y**2)))'
                 ]
 
 
@@ -477,7 +405,9 @@ field_y_list = ['- x*cos(y)',
                 '3',
                 '-(3*cos(x) + 4)/(15 + 6*cos(x) + 6*cos(y))',
                 '-y/(x**2+y**2)',
-                'x/(x**2+y**2)'
+                'x/(x**2+y**2)',
+                'sqrt(1-(2/(sqrt(x**2 + y**2))))',
+                '1-(2/(sqrt(x**2 + y**2)))'
                 ]
 
 
@@ -523,12 +453,11 @@ main_axis.set_ylim(-ax_L, ax_L)
 with needed for when Polar plot option is used'''
 
 r_min = 0.2
-r_max = 5
 r_den = 10
 theta_den = 20
 
 # define the axis
-r = np.linspace(r_min, r_max, r_den)
+r = np.linspace(r_min, L, r_den)
 theta = np.linspace(0, 360, theta_den) * np.pi/180
 
 # define a polar grid
@@ -627,7 +556,6 @@ def vect_type_response(tensor):
     stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0)
     canvas.draw()
 
-
 # define the PLOT button response function
 def PLOT_response():
     # first, take from entry boxes, wanted parameters and make them global:
@@ -651,8 +579,7 @@ def PLOT_response():
     xg, yg = np.meshgrid(x, y)
     # take all these values, and the input from field component bnoxes to set up the field:
     u, v = eq_to_comps(string_x, string_y, xg, yg)
-
-    
+    # plot depending on chosen type of vector
     if tensor.get() == 0:
         arrows = False  
         stacks = True
@@ -662,10 +589,11 @@ def PLOT_response():
     elif tensor.get() == 2:
         arrows = True
         stacks = True
-
+    # create a figure and display it
     stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0)
-
     canvas.draw()
+    # recolour pt_den to white, if it was red from polar plots
+    pt_den_entry.configure(bg='white')
 
 
 # define a function to respond to submitting arrohead changes in the new window
@@ -680,6 +608,8 @@ def custom_submission():
     vect_type_response(tensor.get())
     # then close the window
     arrowH_opt_window.destroy()
+    # recolour pt_den to white, if it was red from polar plots
+    pt_den_entry.configure(bg='white')
 
 
 # define a reponse function to open a new window when arrowh_btn is pressed:
@@ -716,11 +646,19 @@ def custom_btn_reponse():
 # define a function to repond to plotting apolar grid
 # takes the same field, but plots it on a polar grid
 def Polar_grid_plot_response(tensor):
-    global xg, yg, u, v, s_max
+    global xg, yg, u, v, s_max, pt_den_entry
     # set the number of sheets to use from input box
     s_max = int(s_max_entry.get())
     # the polar grid comes from global already defined
     # to change it, change it in the poalr field window
+    # apart from size, this should be based on L
+    # therefore use it to redefine it with that.
+    L = float(L_entry.get())
+    # using these redefine the new polar grids
+    r = np.linspace(r_min, L, r_den)
+    theta = np.linspace(0, 360, theta_den) * np.pi/180
+    # mesh into a grid
+    rg, thetag = np.meshgrid(r, theta)
     # convert grid to cartesian
     xg = rg*np.cos(thetag)
     yg = rg*np.sin(thetag)
@@ -730,10 +668,8 @@ def Polar_grid_plot_response(tensor):
     u, v = eq_to_comps(string_x, string_y, xg, yg)
     # clear the plot that is already there:
     main_axis.clear()
-    
     # use the selected tensor to determine what to plot:
     # 0 is just stacks, 1 is for only arrows and 2 is for both
-    
     if tensor == 0:
         arrows = False  
         stacks = True
@@ -743,21 +679,22 @@ def Polar_grid_plot_response(tensor):
     elif tensor == 2:
         arrows = True
         stacks = True
-    
+    # using those, create the plot and display it
     stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0)
-    
     canvas.draw()
+    # colour pt_den red to show that it is not approperiate to use it now
+    # need to def # of points along r and theta, in the additional window
+    pt_den_entry.configure(bg='red')
 
 
 # deifne a response to the SAVE button in the polar grid customisation window
 def save_polar_grid():
-    global r_min, r_max, r_den, theta_den, r, theta, rg, thetag
+    global r_min, r_den, theta_den, r, theta, rg, thetag
     r_min = float(r_min_entry.get())
-    r_max = float(r_max_entry.get())
     r_den = int(r_den_entry.get())
     theta_den = int(theta_den_entry.get())
     # using these redefine the new polar grids
-    r = np.linspace(r_min, r_max, r_den)
+    r = np.linspace(r_min, L, r_den)
     theta = np.linspace(0, 360, theta_den) * np.pi/180
     rg, thetag = np.meshgrid(r, theta)
     Polar_grid_plot_response(tensor.get())
@@ -768,7 +705,7 @@ def save_polar_grid():
 # define a button that will open a new window where the user can
 # customise the polar grid parameters
 def polar_grid_custom_reponse():
-    global r_min_entry, r_max_entry, r_den_entry, theta_den_entry, polar_grid_window
+    global r_min_entry, r_den_entry, theta_den_entry, polar_grid_window
     # open a titled new window
     polar_grid_window = tk.Toplevel()
     polar_grid_window.title('optimisation settings for the polar grid')
@@ -777,24 +714,19 @@ def polar_grid_custom_reponse():
     r_min_entry = tk.Entry(polar_grid_window, width=30, borderwidth=1)
     r_min_entry.insert(0, r_min)
     r_min_entry.grid(row=1, column=0)
-    # define an entry for radius limit r_max
-    tk.Label(polar_grid_window, text='maximum radius:').grid(row=2, column=0)
-    r_max_entry = tk.Entry(polar_grid_window, width=30, borderwidth=1)
-    r_max_entry.insert(0, r_max)
-    r_max_entry.grid(row=3, column=0)
     # define an entry for number of points along r
-    tk.Label(polar_grid_window, text='number of points along r:').grid(row=4, column=0)
+    tk.Label(polar_grid_window, text='number of points along r:').grid(row=2, column=0)
     r_den_entry = tk.Entry(polar_grid_window, width=30, borderwidth=1)
     r_den_entry.insert(0, r_den)
-    r_den_entry.grid(row=5, column=0)
+    r_den_entry.grid(row=3, column=0)
     # define an entry for number of points along theta
-    tk.Label(polar_grid_window, text='number of points along theta:').grid(row=6, column=0)
+    tk.Label(polar_grid_window, text='number of points along theta:').grid(row=4, column=0)
     theta_den_entry = tk.Entry(polar_grid_window, width=30, borderwidth=1)
     theta_den_entry.insert(0, theta_den)
-    theta_den_entry.grid(row=7, column=0)
+    theta_den_entry.grid(row=5, column=0)
     # define a button that will allow the user to save these inputs
     save_polar_grid_btn = tk.Button(polar_grid_window, text='SAVE', padx=20, pady=10, command=save_polar_grid)
-    save_polar_grid_btn.grid(row=8, column=0, pady=10)
+    save_polar_grid_btn.grid(row=6, column=0, pady=10)
 
 
 # define a function that will respons to field selection in the drop down menu
