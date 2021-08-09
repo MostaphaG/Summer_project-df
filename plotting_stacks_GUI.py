@@ -425,7 +425,7 @@ small_frame.grid(row=2, column=1)
 
 # define scale of the graph
 L = 5
-pt_den = 21   # number of points on each axis
+pt_den = 11   # number of points on each axis
 
 # Initialise auto scaling variable
 ascale = tk.IntVar()
@@ -564,10 +564,11 @@ canvas.draw()
 canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
 # put the default matplotlib toolbar, below the figure
+# NavigationToolbar2Tk.toolitems = [t for t in NavigationToolbar2Tk.toolitems if t[0] in ('Home','Back','Forward','Pan', 'Zoom','Save',)]
+
 toolbar = NavigationToolbar2Tk(canvas, plot_frame)
 toolbar.update()  # allow the plot to update based on the toolbar
 canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-
 
 # track the mouse presses for the toolbar to respond to
 def on_key_press(event):
@@ -1137,39 +1138,51 @@ def deriv_calc(x_m, y_m):
 # Initialise the click button selection
 click_opt_int = 0
 
-
 # define a function that will update the variable that defines click action
 def click_option_handler(click_option):
     global click_opt_int, toolbar
     click_opt_int = click_option
+    
     if click_opt_int == 0:
         fig.canvas.draw()
         # if the tools is selected again, add the zoom and pan buttons
         # get rid of the modified toolbar:
         toolbar.destroy()
         # put the default matplotlib toolbar, back on:
+        
+        #NavigationToolbar2Tk.toolitems = [t for t in NavigationToolbar2Tk.toolitems]
+        
         toolbar = NavigationToolbar2Tk(canvas, plot_frame)
         toolbar.update()
         canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+        
     # when 'tool' is not selected, disable the pan and zoom:
     elif click_opt_int > 0:
         fig.canvas.draw()
-        toolbar.home()
-        # close the selected mouse options
-        state = fig.canvas.toolbar.mode
-        if state == 'zoom rect':
-            toolbar.zoom()
-        if state == 'pan/zoom':
-            toolbar.pan()
-        # get rid of the 2 buttons we don't want
-        toolbar.children['!button4'].pack_forget()
-        toolbar.children['!button5'].pack_forget()
+        
+        toolbar.destroy()
+        
+        NavigationToolbar2Tk.toolitems = [t for t in NavigationToolbar2Tk.toolitems if t[0] not in ('Pan', 'Zoom')]
+        toolbar = NavigationToolbar2Tk(canvas, plot_frame)
+        toolbar.update()
+        canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+        
+        # toolbar.home()
+        
+        # state = fig.canvas.toolbar.mode
+        # if state == 'zoom rect':
+        #     toolbar.zoom()
+        # if state == 'pan/zoom':
+        #     toolbar.pan()
+                
+        # toolbar.children['!button4'].pack_forget()
+        # toolbar.children['!button5'].pack_forget()
+        
         deriv_calc(x_m, y_m)
 
 # =============================================================================
 # Calculate the Jacobian matrix of the defined vector field
 # =============================================================================
-
 
 def jacobian(m, u_str, v_str):
     # take the input strings and turn them into sympy expressions to be able to
@@ -1177,9 +1190,6 @@ def jacobian(m, u_str, v_str):
     
     u_str = u_str.replace('^','**')
     v_str = v_str.replace('^','**')
-    #u_str = u_str.replace('step', '+0*')
-    #v_str = v_str.replace('step', '+0*')
-
     
     sympy_expr_x = parse_expr(u_str, evaluate=False)
     sympy_expr_y = parse_expr(v_str, evaluate=False)
