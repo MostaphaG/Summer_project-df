@@ -124,8 +124,8 @@ def G(s, n, c):
         return (s/(n-1))
 
 # define a function that will complete all stack plotting:
-def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks=True, orientation='mid', scale=1, w_head=1/8, h_head=1/4, axis_check=0, arrowheads=True, colour='green'):
-    global s_L, mag, bool_array, test_mag
+def stack_plot(xg, yg, axis, F_x, F_y, s_max, L, pt_den, fract, arrows=False, stacks=True, orientation='mid', scale=1, w_head=1/8, h_head=1/4, axis_check=0, arrowheads=True, colour='green'):
+    global s_L, mag, bool_array
     # get the lengths of x and y from their grids
     
     x_len = len(xg[:, 0])
@@ -163,12 +163,10 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks
     # #########################################################################
     
     # find the arrow length corresponding to each point and store in mag array
-    mag = np.sqrt(u**2 + v**2)
-    
-    test_mag = mag
+    mag = np.sqrt(F_x**2 + F_y**2)
     
     # find direction of each arrow
-    angles = np.arctan2(v, u)   # theta defined from positive x axis ccw
+    angles = np.arctan2(F_y, F_x)   # theta defined from positive x axis ccw
     
     # find regions ON GRID that are nan or inf as a bool array
     bool_array = undef_region(mag)
@@ -189,8 +187,7 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks
                     circ = patch.Circle((xg[i, j], yg[i, j]), L*fract/3, color='red')
                     axis.add_patch(circ)
                 mag[i, j] = 0
-
-
+    
     # #########################################################################
     # use the the direction of arrows to define stack properties
     # #########################################################################
@@ -220,15 +217,21 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, stacks
     elif ascale.get() == 1:
         ScaleFactor = max_size/(0.9*(2*L/pt_den))
     
+    # for arrows to work, with nan and infs
+    # make a local variable of F_x and F_y
+    # so that thye don't alter globally
+    F_x_local = F_x * 1
+    F_y_local = F_y * 1
+    
     # plot the quiver plot on grid points if chosen in original function
     if arrows is True:
         # prevent any magnitudes from being inf or nan
         # only here, need to do it to u and v not just mag
         for i in range(x_len):
             for j in range(y_len):
-                if isnan(u[i,j]) == True or isnan(v[i,j]) == True or abs(u[i, j]) == np.inf or abs(v[i, j]) == np.inf or abs(v[i, j]) > 1e10 or abs(u[i, j]) > 1e10:
-                    u[i,j] = v[i,j] = 0
-        axis.quiver(xg, yg, u, v, pivot=orientation, scale=ScaleFactor, scale_units='xy') 
+                if isnan(F_x_local[i,j]) == True or isnan(F_y_local[i,j]) == True or abs(F_x_local[i, j]) == np.inf or abs(F_y_local[i, j]) == np.inf or abs(F_y_local[i, j]) > 1e10 or abs(F_x_local[i, j]) > 1e10:
+                    F_x_local[i,j] = F_y_local[i,j] = 0
+        axis.quiver(xg, yg, F_x_local, F_y_local, pivot=orientation, scale=ScaleFactor, scale_units='xy') 
     else:
         pass
     
@@ -418,7 +421,7 @@ small_frame.grid(row=2, column=1)
 
 # define scale of the graph
 L = 5
-pt_den = 11   # number of points on each axis
+pt_den = 21   # number of points on each axis
 
 # Initialise auto scaling variable
 ascale = tk.IntVar()
