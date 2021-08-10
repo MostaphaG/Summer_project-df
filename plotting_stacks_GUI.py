@@ -270,10 +270,15 @@ def stack_plot(xg, yg, axis, F_x, F_y, s_max, L, pt_den, fract, arrows=False, st
 
 
 # define a function to replace input string to be 'python understood'
-def format_eq(string):
+def format_eq(string, LI=0):
     # replace all the x and y with xg and yg:
-    string = string.replace('x', 'xg')
-    string = string.replace('y', 'yg')
+    if LI == 1 :
+        string = string.replace('x', 'intervals[0,:]')
+        string = string.replace('y', 'intervals[1,:]')
+    else:
+        string = string.replace('x', 'xg')
+        string = string.replace('y', 'yg')
+    
     string = string.replace('z', 'zg')
     # where there are special functions, replace them with library directions
     string = string.replace('pi', 'np.pi')
@@ -494,21 +499,73 @@ toolbar = NavigationToolbar2Tk(canvas, plot_frame)
 toolbar.update()  # allow the plot to update based on the toolbar
 canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
+LI_tot = 0
+
 # track the mouse presses for the toolbar to respond to
 def on_key_press(event):
+    global x_pix, y_pix, x_m, y_m
+    # get cartesian Coordinates of click
+    # from those, get pixel Coordinates of click
+    x_pix, y_pix = event.x , event.y
+    x_m = float(event.xdata)
+    y_m = float(event.ydata)
     # respond with only toolbar actions when only tools are to be used
     if click_opt_int == 0:
         key_press_handler(event, canvas, toolbar)
     # when the derivative option is selected, cerry out the derivative when clicked
-    else:
-        global x_pix, y_pix, x_m, y_m
-        # get cartesian Coordinates of click
-        ix_plot, iy_plot = event.xdata, event.ydata
-        # from those, get pixel Coordinates of click
-        x_pix, y_pix = event.x , event.y
-        x_m = float(ix_plot)
-        y_m = float(iy_plot)
+    elif 0 < click_opt_int < 5:
         deriv_calc(x_m,y_m)
+    elif click_opt_int == 5:
+        # Store the coordinates of the click in list
+        LI_coord.append([x_m,y_m])
+        line_int(1000, string_x, string_y)
+        
+def line_int(N, u_str, v_str):
+    
+    c_count = len(LI_coord)
+    
+    if c_count > 1:
+        
+        a = LI_coord[c_count - 2]
+        b = LI_coord[c_count - 1]
+        
+        # Plot line between points a and b
+        main_axis.add_line(Line2D((a[0],b[0]),(a[1],b[1]), linewidth=2, color='red'))
+        
+        #linegrad = (b[1]-a[1])/(b[0]-a[0])
+        linelength = np.sqrt((b[0]-a[0])**2 + (b[1]-a[1])**2)
+        
+        dx = (b[0]-a[0])/N
+        dy = (b[1]-a[1])/N
+        
+        # Create array to store interval point coordinates
+        intervals = np.zeros(shape=(2,N))
+        uv_store = np.zeros(shape=(2,N))
+        
+        # Loop through to assign coordinates to interval points and plot them
+        for i in range(N):
+            intervals[0,i] = a[0] + i*dx
+            intervals[1,i] = a[1] + i*dy
+            #ax.plot(intervals[0,i], intervals[1,i], 'bo', markersize=100/N)
+            
+        interval_len = linelength/N
+        
+        # Evaluate the vector components at the interval points    
+        uv_store[0,:] = eval(format_eq(u_str,1))
+        uv_store[1,:] = eval(format_eq(v_str,1))
+        
+        # Evaluate line integral as sum of vector components multiplied by the small x and y displacements 
+        res = dx*np.sum(uv_store[0,:]) + dy*np.sum(uv_store[1,:])
+        
+        canvas.draw()
+        
+        print(res)
+        
+        return res
+    
+    else:
+        pass
+
 
 # connect figure event to a function that responds to clicks, defined above
 cid = fig.canvas.mpl_connect("button_press_event", on_key_press)
@@ -516,7 +573,6 @@ cid = fig.canvas.mpl_connect("button_press_event", on_key_press)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # define other needed functions, for input reponses
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 
 # define a function that takes input string that is python understood and turn into vector components:
 def eq_to_comps(string_x, string_y, xg, yg):
@@ -1079,7 +1135,7 @@ def click_option_handler(click_option):
         toolbar.update()
         canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
     # when 'tool' is not selected, disable the pan and zoom:
-    elif click_opt_int > 0:
+    elif 0 < click_opt_int < 5:
         fig.canvas.draw()
         toolbar.home()
         # close the selected mouse options
@@ -1092,6 +1148,11 @@ def click_option_handler(click_option):
         toolbar.children['!button4'].pack_forget()
         toolbar.children['!button5'].pack_forget()
         deriv_calc(x_m, y_m)
+    elif click_opt_int == 5:
+        # Initialise variable for storing click coordinates and total line integral
+        global LI_coord
+        LI_coord = []
+        LI_tot = 5
 
 
 # =============================================================================
@@ -1160,12 +1221,14 @@ click_option_Zoom_btn = tk.Radiobutton(right_frame, text='Zoom', variable=click_
 click_option_Deriv_btn = tk.Radiobutton(right_frame, text='Deriv.', variable=click_option, value=2, command=lambda: click_option_handler(click_option.get()))
 click_option_Div_btn = tk.Radiobutton(right_frame, text='Div.', variable=click_option, value=3, command=lambda: click_option_handler(click_option.get()))
 click_option_Curl_btn = tk.Radiobutton(right_frame, text='Curl', variable=click_option, value=4, command=lambda: click_option_handler(click_option.get()))
+click_option_LI_btn = tk.Radiobutton(right_frame, text='Line Int.', variable=click_option, value=5, command=lambda: click_option_handler(click_option.get()))
 
 click_option_Tools_btn.grid(row=0, column=0)
 click_option_Zoom_btn.grid(row=0, column=1)
 click_option_Deriv_btn.grid(row=0, column=2)
 click_option_Div_btn.grid(row=1, column=0)
 click_option_Curl_btn.grid(row=1, column=1)
+click_option_LI_btn.grid(row=1, column=2)
 
 # =============================================================================
 # Zooming window zoom slider
