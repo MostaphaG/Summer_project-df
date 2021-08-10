@@ -363,11 +363,6 @@ z = np.linspace(-L, L, pt_den)
 # create the grids
 xg, yg, zg = np.meshgrid(x, y, z)
 
-# define the wanted 1 form on R3 in terms of each component:
-string_x = 'x*sin(y)'  # x component
-string_y = 'y*cos(x)'  # y component
-string_z = 'x*y'  # z component
-
 # to start with, set as viewing aling z axis onto x-y plane
 axis_view = 'z'
 
@@ -376,40 +371,6 @@ h_index = 11
 
 # set the dimensionality
 m = 3
-
-# take the input strings and turn them into sympy expressions to be able to
-# use sympy's partial differentiation
-sympy_expr_x = parse_expr(string_x, evaluate=False)
-sympy_expr_y = parse_expr(string_y, evaluate=False)
-sympy_expr_z = parse_expr(string_z, evaluate=False)
-# for m > 2, need more components, and need these in 'expressions' too!
-
-# combine the 2 into a list:
-expressions = np.array([sympy_expr_x, sympy_expr_y, sympy_expr_z])
-
-# use sympy partial derrivatives on these, as to get a 2-form on R2:
-# need to differentiate each component w.r.t the coordinates that it's
-# elementary 1 form does not contain.
-
-# set up an array of coordinates that need to be used (in standard order)
-coords = ['x', 'y', 'z']
-
-# from these, use the find_2_form function to get the 2 form
-form_2 = find_2_form(expressions, coords, pt_den, m)
-
-# because on R3, the x, y and z components are made up of
-# dy^dz, dx^dz and dx^dy
-# need to superpose stacks from the x y and z fields (depending on viewing)
-# the filed will point in the extra dimension, or by polar sense
-# will be defined in plane based on orientation of stacks. Indicated by colour
-F_x, F_y, F_z = eq_to_comps(str(ext_ds[0, 1]) + ' + ' + str(ext_ds[0, 2]),
-                            str(ext_ds[1, 0]) + ' + ' + str(ext_ds[1, 2]),
-                            str(ext_ds[2, 0]) + ' + ' + str(ext_ds[2, 1]),
-                            xg, yg, zg)
-
-# Note that that order on RHS is not standard because result gives
-# elemental 2 forms in order: dx^dy, dx^dz and dy^dz.
-# so the z component is first, then y and then x.
 
 # set up a zero vector filed to plot x and y components as 2 separate fields:
 zero_field = np.zeros(np.shape(xg))
@@ -446,6 +407,62 @@ ax.set_ylim(-ax_L, ax_L)
 # first string defines colour for positive (ccw), second for negative (cw)
 # last one is an in case, for when the magnitude is exactly zero.
 colour_str = ['red', 'blue', 'grey']
+
+# define the wanted 1 form on R3 in terms of each component:
+string_x = 'x*sin(y)'  # x component
+string_y = 'y*cos(x)'  # y component
+string_z = 'x*y'  # z component
+
+# INITIAL CALCULATIONS
+
+# take the input strings and turn them into sympy expressions to be able to
+# use sympy's partial differentiation
+sympy_expr_x = parse_expr(string_x, evaluate=False)
+sympy_expr_y = parse_expr(string_y, evaluate=False)
+sympy_expr_z = parse_expr(string_z, evaluate=False)
+# for m > 2, need more components, and need these in 'expressions' too!
+
+# combine the 2 into a list:
+expressions = np.array([sympy_expr_x, sympy_expr_y, sympy_expr_z])
+
+# use sympy partial derrivatives on these, as to get a 2-form on R2:
+# need to differentiate each component w.r.t the coordinates that it's
+# elementary 1 form does not contain.
+
+# set up an array of coordinates that need to be used (in standard order)
+coords = ['x', 'y', 'z']
+
+# from these, use the find_2_form function to get the 2 form
+form_2 = find_2_form(expressions, coords, pt_den, m)
+
+# because on R3, the x, y and z components are made up of
+# dy^dz, dx^dz and dx^dy
+# need to superpose stacks from the x y and z fields (depending on viewing)
+# the filed will point in the extra dimension, or by polar sense
+# will be defined in plane based on orientation of stacks. Indicated by colour
+
+# note that depending on the viewing axis, any result stacks
+# cannot exist in that direction, as that will close the area off in the viewed
+# plane
+# the plane are done as before, by splitting and so aren't unique
+# blocks are!
+# therefore F_x. F_y and F_z need to be defined depending on viewed plane
+# find all separately, to make switching axis and sliding faster
+
+# define components in the x-y plane:
+
+
+
+
+
+
+
+F_x, F_y, F_z = eq_to_comps(str(ext_ds[0, 1]) + ' + ' + str(ext_ds[0, 2]),
+                            str(ext_ds[1, 0]) + ' + ' + str(ext_ds[1, 2]),
+                            str(ext_ds[2, 0]) + ' + ' + str(ext_ds[2, 1]),
+                            xg, yg, zg)
+
+
 
 # plot the starting field with desired parameters as specidfied above
 # arrow params not needed as arrows arent plotted

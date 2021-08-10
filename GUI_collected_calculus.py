@@ -342,6 +342,10 @@ to_wedge_y_2_str = ''
 vector_ex_str = ''
 vector_ey_str = ''
 
+# predefine strings for splitting in x and in y for 2 form stacks
+x_split_str = '1/2'
+y_split_str = '1/2'
+
 
 '''
 
@@ -352,7 +356,7 @@ Define other functions needed to be used in the responses to GUI interactions
 
 # define a function that will plot stack components, coloured
 # as per the orientation of the 2 form at that grid point
-def form_2_components_plot(xg, yg, u, v, form_2_sgn, s_max, L, pt_den, fract, colour_str, arrowheads=False, w_head=1/8, h_head=1/4):
+def form_2_components_plot(xg, yg, u, v, form_2_sgn, s_max, L, fract, colour_str, arrowheads=False, w_head=1/8, h_head=1/4):
     global s_L
     # get axis lengths:
     x_len = len(xg[:, 0])
@@ -506,7 +510,7 @@ def form_2_components_plot(xg, yg, u, v, form_2_sgn, s_max, L, pt_den, fract, co
 
 
 # define a function that will complete all stack plotting:
-def stack_plot(xg, yg, axis, u, v, s_max, L, pt_den, fract, arrows=False, orientation='mid', scale=1, w_head=1/8, h_head=1/4, axis_check=0, arrowheads=True, colour='green'):
+def stack_plot(xg, yg, axis, u, v, s_max, L, fract, arrows=False, orientation='mid', scale=1, w_head=1/8, h_head=1/4, axis_check=0, arrowheads=True, colour='green'):
     global s_L
     # get the lengths of x and y from their grids
     
@@ -769,8 +773,9 @@ def form_2_response():
         # split this equation into two ARBITRARY parts
         # supposing that the 2 form came from those via the exterior derivative
         # for the example, split it into two EQUAL components
-        eq_1 = str(simplify('(' + form_2_str + ')/2'))
-        eq_2 = str(simplify('(' + form_2_str + ')/2'))
+        # use the inut splittings:
+        eq_1 = str(simplify('(' + form_2_str + ')' + '*(' + x_split_str + ')'))
+        eq_2 = str(simplify('(' + form_2_str + ')' + '*(' + y_split_str + ')'))
         # the above is needs the input as a string, and symbol, that needs to be changed
         # to a string to be able to add minus to it from dy^dx ---> dx^dy
         # and that needs to be simplified
@@ -780,43 +785,14 @@ def form_2_response():
         # and won't show in variable explorer.
         # turn these equatiosn to components to use in plotting the 2 form from stacks
         u, v = eq_to_comps(eq_1, eq_2, xg, yg)
-        '''
-        TESTING CODE FOR SCALING FIX:
-        
-        # get maximum values of each
-        max_u = np.max(u)
-        max_v = np.max(v)
-        # find their ratio
-        ratio_max = max_u/max_v
-        # set the number of stacks of the higher one to be s_max
-        # the lower one, set to integer divider of ratio
-        if ratio_max >= 1:
-            s_max_u = s_max
-            s_max_v = int(s_max_u/ratio_max)  # note - rounding
-        else:
-            s_max_v = s_max
-            s_max_u = s_max_v*int(s_max_u/ratio_max)
-        
-        #AND THEN almost as before:
         # clear the current plot
         ax.clear()
         # use plotting stacks to display these
-        form_2_components_plot(xg, yg, u, zero_field, form_2_sgn, s_max_u, L, pt_den, fract, colour_str)
-        form_2_components_plot(xg, yg, zero_field, v, form_2_sgn, s_max_v, L, pt_den, fract, colour_str)
-        
-        canvas.draw()
-        #THIS DOES NOT WORK becasue:
-        #u and v are sthe same, by equal splitting.
-        '''
-        # clear the current plot
-        ax.clear()
-        # use plotting stacks to display these
-        form_2_components_plot(xg, yg, u, zero_field, form_2_sgn, s_max, L, pt_den, fract, colour_str)
-        form_2_components_plot(xg, yg, zero_field, v, form_2_sgn, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot(xg, yg, u, zero_field, form_2_sgn, s_max, L, fract, colour_str)
+        form_2_components_plot(xg, yg, zero_field, v, form_2_sgn, s_max, L, fract, colour_str)
         # display the new plot
         canvas.draw()
         # define as string message to show in the message box
-        
         uniqueness_message = '''
         THIS RESULT IN NOT UNIQUE!!! \n
         Depeding on the way that the 2 form
@@ -851,7 +827,7 @@ def form_1_stacks_response():
     # take all these values, and the input from field component bnoxes to set up the field:
     u, v = eq_to_comps(x_comp_str, y_comp_str, xg, yg)
     # plot the new field
-    stack_plot(xg, yg, ax, u, v, s_max, L, pt_den, fract)
+    stack_plot(xg, yg, ax, u, v, s_max, L, fract)
     # put it onto the screen
     canvas.draw()
     # display the fact that this is a 1 form therefore always shows stacks
@@ -902,12 +878,12 @@ def Int_deriv_2_form():
     u_str = str(simplify('-(' + form_2_str + ')*(' + vector_ey_str + ')' ))
     v_str = str(simplify( '(' + form_2_str + ')*(' + vector_ex_str + ')' ))
     # use the stacks plotter to present this
-    form_2_components_plot(xg, yg, u, v, form_2_sgn, s_max, L, pt_den, fract, colour_str, arrowheads=True)
+    form_2_components_plot(xg, yg, u, v, form_2_sgn, s_max, L, fract, colour_str, arrowheads=True)
 
 
 # define a function that will find the interior derivative of a given 1 form
 def Int_deriv_1_form():
-    global zero_form_str, zero_form, vector_ex_str, vector_ey_str, vector_ex_eq, vector_ey_eq, vector_ex, vector_ey
+    global zero_form_str, zero_form, vector_ex_str, vector_ey_str, vector_ex_eq, vector_ey_eq, vector_ex, vector_ey, x_comp, y_comp, x_comp_eq, y_comp_eq
     # take the supplied componments and save them globally
     vector_ex_str = str(simplify(int_vect_ex_entry.get()))
     vector_ey_str = str(simplify(int_vect_ey_entry.get()))
@@ -1091,15 +1067,15 @@ def Ext_deriv_response():
         # split this equation into two ARBITRARY parts
         # supposing that the 2 form came from those via the exterior derivative
         # for the example, split it into two EQUAL components
-        eq_1 = str(simplify('(' + form_2_str + ')/2'))
-        eq_2 = str(simplify('(' + form_2_str + ')/2'))
+        eq_1 = str(simplify('(' + form_2_str + ')' + '*(' + x_split_str + ')'))
+        eq_2 = str(simplify('(' + form_2_str + ')' + '*(' + y_split_str + ')'))
         # turn these equatiosn to components to use in plotting the 2 form from stacks
         u, v = eq_to_comps(eq_1, eq_2, xg, yg)
         # clear the current plot
         ax.clear()
         # use plotting stacks to display these
-        form_2_components_plot(xg, yg, u, zero_field, form_2_sgn, s_max, L, pt_den, fract, colour_str)
-        form_2_components_plot(xg, yg, zero_field, v, form_2_sgn, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot(xg, yg, u, zero_field, form_2_sgn, s_max, L, fract, colour_str)
+        form_2_components_plot(xg, yg, zero_field, v, form_2_sgn, s_max, L, fract, colour_str)
         # display the new plot
         canvas.draw()
         # define as string message to show in the message box
@@ -1178,16 +1154,16 @@ def wedge_product():
         # the stacks are dense. It's a general issue, but more clear here than other cases due to the nature of 2-forms.
         # 2- Would be nice to uniformly distribute the stacks in each direction after finishing the double stacking.
         if to_wedge_x_1_str != '0' and to_wedge_y_1_str != '0' and to_wedge_x_2_str != '0' and to_wedge_y_2_str != '0':
-            stack_plot(xg, yg, ax, u_1, 0, s_max, L, pt_den, fract, arrowheads=False, colour='green')
-            stack_plot(xg, yg, ax, 0, v_2, s_max, L, pt_den, fract, arrowheads=False, colour='green')
-            stack_plot(xg, yg, ax, 0, v_1, s_max, L, pt_den, fract, arrowheads=False, colour='red')
-            stack_plot(xg, yg, ax, -u_2, 0, s_max, L, pt_den, fract, arrowheads=False, colour='red')
+            stack_plot(xg, yg, ax, u_1, 0, s_max, L, fract, arrowheads=False, colour='green')
+            stack_plot(xg, yg, ax, 0, v_2, s_max, L, fract, arrowheads=False, colour='green')
+            stack_plot(xg, yg, ax, 0, v_1, s_max, L, fract, arrowheads=False, colour='red')
+            stack_plot(xg, yg, ax, -u_2, 0, s_max, L, fract, arrowheads=False, colour='red')
         elif to_wedge_x_1_str != '0' and to_wedge_y_2_str != '0':
-            stack_plot(xg, yg, ax, u_1, 0, s_max, L, pt_den, fract, arrowheads=False, colour='red')
-            stack_plot(xg, yg, ax, 0, v_2, s_max, L, pt_den, fract, arrowheads=False, colour='green')
+            stack_plot(xg, yg, ax, u_1, 0, s_max, L, fract, arrowheads=False, colour='red')
+            stack_plot(xg, yg, ax, 0, v_2, s_max, L, fract, arrowheads=False, colour='green')
         elif to_wedge_y_1_str != '0' and to_wedge_x_2_str != '0':
-            stack_plot(xg, yg, ax, 0, v_1, s_max, L, pt_den, fract, arrowheads=False, colour='green')
-            stack_plot(xg, yg, ax, -u_2, 0, s_max, L, pt_den, fract, arrowheads=False, colour='red')
+            stack_plot(xg, yg, ax, 0, v_1, s_max, L, fract, arrowheads=False, colour='green')
+            stack_plot(xg, yg, ax, -u_2, 0, s_max, L, fract, arrowheads=False, colour='red')
     elif stack_block_int == 0:
         # to do it with blocks, first, get the numercial 2 from
         # from previously found string
@@ -1266,11 +1242,34 @@ def plot_type_response(type_stack_block):
 
 # response to saving customisations
 def customisation_save():
-    global fract_s, fract, pt_den
+    global fract_s, fract, pt_den, x, y, xg, yg, field_unit, zero_field, vector_ex, vector_ey, zero_form, x_comp, y_comp
     # get the inputs
     fract_s = float(fract_s_entry.get())
     fract = float(fract_entry.get())
     pt_den = int(pt_den_entry.get())
+    # for these to correctly apply
+    # aslo need to change what depends on them
+    # therefore, here: grids:
+    # define x and y values
+    x = np.linspace(-L, L, pt_den)
+    y = np.linspace(-L, L, pt_den)
+    # create a grid on x-y plane
+    xg, yg = np.meshgrid(x, y)
+    # the field unit needs to update:
+    field_unit = np.ones(np.shape(xg))
+    # so does zero_field
+    zero_field = np.zeros(np.shape(xg))
+    # next ones may, or may not be present:
+    try:
+        # so do vector_ex and vector_ey
+        vector_ex = eval(vector_ex_eq)
+        vector_ey = eval(vector_ey_eq)
+        # and the zero_form
+        x_comp = eval(x_comp_eq)
+        y_comp = eval(y_comp_eq)
+        zero_form = x_comp*vector_ex + y_comp*vector_ey
+    except NameError:
+        pass
     # destroy the window
     customise_window.destroy()
 
@@ -1300,6 +1299,44 @@ def customise_calc():
     Custom_submit_btn = tk.Button(customise_window, text='SAVE', padx=20, pady=10, command=customisation_save)
     Custom_submit_btn.grid(row=6, column=0, pady=10)
 
+
+# define a function to save splittings
+def splitting_choice_save():
+    global x_split_str, y_split_str
+    # get the component split factors from inputs
+    x_split_str = str(simplify(x_split_entry.get()))
+    y_split_str = str(simplify(y_split_entry.get()))
+    # close the extra window
+    splitting_window.destroy()
+
+
+# define a function to let user input splitting options
+def splitting_choice():
+    global splitting_window, x_split_entry, y_split_entry
+    # start a new window 
+    splitting_window = tk.Toplevel()
+    splitting_window.title('Choose splitting in 2 form stacks')
+    splitting_window.geometry('400x300')
+    # info, that factors must add up to 1 to return same 2 form
+    text_warning_split = '''Both MUST add to 1 to retain 2 form \n
+    or must combine with 2 form to give the same expression \n
+    otherwise, the plotted 2 form will be different!
+                        '''
+    tk.Label(splitting_window, text=text_warning_split).grid(row=0, column=0, pady=10)
+    # define entry box for splitting factor that goes to x:
+    tk.Label(splitting_window, text='factor going toward x').grid(row=2, column=0)
+    x_split_entry = tk.Entry(splitting_window, width=40, borderwidth=1)
+    x_split_entry.insert(0, x_split_str)
+    x_split_entry.grid(row=3, column=0)
+    # define entry box for splitting factor that goes to y:
+    tk.Label(splitting_window, text='factor going toward y').grid(row=4, column=0)
+    y_split_entry = tk.Entry(splitting_window, width=40, borderwidth=1)
+    y_split_entry.insert(0, y_split_str)
+    y_split_entry.grid(row=5, column=0)
+    # define a button to SAVE these
+    Splitting_btn = tk.Button(splitting_window, text='SAVE', padx=20, pady=10, command=splitting_choice_save)
+    Splitting_btn.grid(row=6, column=0, pady=10)
+    
 
 '''
 
@@ -1345,6 +1382,12 @@ blocks_rb = tk.Radiobutton(right_frame, text='blocks', variable=stack_block, val
 blocks_rb.grid(row=0, column=1)
 stacks_rb = tk.Radiobutton(right_frame, text='stacks', variable=stack_block, value=1, command=lambda: plot_type_response(stack_block.get()))
 stacks_rb.grid(row=0, column=2)
+
+
+# define a button that will let the user chose the splitting option
+# for 2 forms plotted as stacks.
+splitting_opts_btn = tk.Button(right_frame, text='choose splitting', command=splitting_choice)
+splitting_opts_btn.grid(row=0, column=3, padx=10)
 
 # define a button that will just plot the 1 form
 # this will not be needed when its it merged with main GUI
