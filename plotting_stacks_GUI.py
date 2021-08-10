@@ -585,9 +585,9 @@ def line_int(N, u_str, v_str):
         canvas.draw()
         
         # update the total
-        LI_total += round(res, 6)
+        LI_total += res
         # update its label
-        LI_total_label.configure(text=LI_total)
+        LI_total_label.configure(text=str(round(LI_total, 6)))
         
         return res
     
