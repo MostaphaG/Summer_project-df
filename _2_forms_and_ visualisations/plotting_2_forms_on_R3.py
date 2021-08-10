@@ -101,6 +101,7 @@ def eq_to_comps(string_x, string_y, xg, yg):
     # return these
     return u, v
 
+
 # define a function that will find the 2 form from given expressions
 # in a given number of dimensions and in terms of given coordinate symbols
 def find_2_form(expressions, coords, pt_den, m=3):

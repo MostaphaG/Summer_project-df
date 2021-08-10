@@ -106,7 +106,7 @@ def stack_plot(xg, yg, axis, F_x, F_y, s_max, L, pt_den, fract, arrows=False, st
                     rect = patch.Rectangle((xg[i, j] - dist_points/2, yg[i, j]  - dist_points/2), dist_points, dist_points, color='#B5B5B5')
                     axis.add_patch(rect)
                     mag[i, j] = 0
-            if abs(mag[i, j]) == np.inf  or abs(mag[i, j]) > 1e15:
+            if abs(mag[i, j]) == np.inf  or abs(mag[i, j]) > 8e15:
                 # colour this point as a big red dot
                     circ = patch.Circle((xg[i, j], yg[i, j]), L*fract/3, color='red')
                     axis.add_patch(circ)
@@ -153,7 +153,7 @@ def stack_plot(xg, yg, axis, F_x, F_y, s_max, L, pt_den, fract, arrows=False, st
         # only here, need to do it to u and v not just mag
         for i in range(x_len):
             for j in range(y_len):
-                if isnan(F_x_local[i,j]) == True or isnan(F_y_local[i,j]) == True or abs(F_x_local[i, j]) == np.inf or abs(F_y_local[i, j]) == np.inf or abs(F_y_local[i, j]) > 1e10 or abs(F_x_local[i, j]) > 1e10:
+                if isnan(F_x_local[i,j]) == True or isnan(F_y_local[i,j]) == True or abs(F_x_local[i, j]) == np.inf or abs(F_y_local[i, j]) == np.inf or abs(F_y_local[i, j]) > 8e15 or abs(F_x_local[i, j]) > 8e15:
                     F_x_local[i,j] = F_y_local[i,j] = 0
         axis.quiver(xg, yg, F_x_local, F_y_local, pivot=orientation, scale=ScaleFactor, scale_units='xy') 
     else:
@@ -376,8 +376,7 @@ field_name_list = ['Default: y*sin(x)dx - x*cos(y)dy',
               'Falling cat field (Planar 3 link robot)',
               'Gravitational/Electric Point Charge: -x/(x**2+y**2)dx + -y/(x**2+y**2)dy',
               'Magnetic Field of Current Carrying Wire: -y/(x**2+y**2)dx + x/(x**2+y**2)dy',
-              'Black hole ext. y -> t, x->r: sqrt(1-2m/r)dt - 1/sqrt(1-2m/r) dr',
-              'Black hole int. y -> t, x->r: (1-2m/r)dt - 1/(1-2m/r) dr'
+              'BLACK HOLE!'
               ]
 
 
@@ -391,8 +390,7 @@ field_x_list = ['y*sin(x)',
                 '(3*cos(y) + 4)/(15 + 6*cos(x) + 6*cos(y))',
                 '-x/(x**2+y**2)',
                 '-y/(x**2+y**2)',
-                '-1/(sqrt(1-(2/sqrt(x**2 + y**2))))',
-                '-1/(1-(2/sqrt(x**2 + y**2)))'
+                '(x-y)/sqrt(x**2 + y**2) * (1/(sqrt(1- 2/(sqrt(x**2 + y**2)))))'
                 ]
 
 
@@ -406,8 +404,7 @@ field_y_list = ['- x*cos(y)',
                 '-(3*cos(x) + 4)/(15 + 6*cos(x) + 6*cos(y))',
                 '-y/(x**2+y**2)',
                 'x/(x**2+y**2)',
-                'sqrt(1-(2/(sqrt(x**2 + y**2))))',
-                '1-(2/(sqrt(x**2 + y**2)))'
+                '(x+y)/sqrt(x**2 + y**2) * (1/(sqrt(1- 2/(sqrt(x**2 + y**2)))))'
                 ]
 
 
@@ -452,9 +449,9 @@ main_axis.set_ylim(-ax_L, ax_L)
 '''define the initial polar plot also. Despite it not being plotted to start
 with needed for when Polar plot option is used'''
 
-r_min = 0.2
-r_den = 10
-theta_den = 20
+r_min = 0
+r_den = 11
+theta_den = 25
 
 # define the axis
 r = np.linspace(r_min, L, r_den)
