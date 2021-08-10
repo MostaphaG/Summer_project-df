@@ -437,8 +437,12 @@ ax.set_ylim(-ax_L, ax_L)
 colour_str = ['red', 'blue', 'grey']
 
 # predefine strings for splitting in x and in y for 2 form stacks
-x_split_str = '1/2'
-y_split_str = '1/2'
+xy_x_split_str = '1/2'
+xy_y_split_str = '1/2'
+xz_x_split_str = '1/2'
+xz_y_split_str = '1/2'
+yz_x_split_str = '1/2'
+yz_y_split_str = '1/2'
 
 # define the wanted 1 form on R3 in terms of each component:
 string_x = 'x*y*z'  # x component
@@ -487,19 +491,19 @@ form_2_str_dydz = str(simplify(str(unformat(result[2][0]))))
 # find all separately, to make switching axis and sliding faster
 
 # define components in the x-y plane:
-eq_1_xy = str(simplify('(' + form_2_str_dxdy + ')' + '*(' + x_split_str + ')'))
-eq_2_xy = str(simplify('(' + form_2_str_dxdy + ')' + '*(' + y_split_str + ')'))
+eq_1_xy = str(simplify('(' + form_2_str_dxdy + ')' + '*(' + xy_x_split_str + ')'))
+eq_2_xy = str(simplify('(' + form_2_str_dxdy + ')' + '*(' + xy_y_split_str + ')'))
 F_xy_x, F_xy_y = eq_to_comps(eq_1_xy, eq_2_xy, xg, yg)
 
 # define them in x-z plane
-eq_1_xz = str(simplify('(' + form_2_str_dxdz + ')' + '*(' + x_split_str + ')'))
-eq_2_xz = str(simplify('(' + form_2_str_dxdz + ')' + '*(' + y_split_str + ')'))
+eq_1_xz = str(simplify('(' + form_2_str_dxdz + ')' + '*(' + xz_x_split_str + ')'))
+eq_2_xz = str(simplify('(' + form_2_str_dxdz + ')' + '*(' + xz_y_split_str + ')'))
 F_xz_x, F_xz_z = eq_to_comps(eq_1_xz, eq_2_xz, xg, yg)
 
 
 # define them in y-z plane
-eq_1_yz = str(simplify('(' + form_2_str_dydz + ')' + '*(' + x_split_str + ')'))
-eq_2_yz = str(simplify('(' + form_2_str_dydz + ')' + '*(' + y_split_str + ')'))
+eq_1_yz = str(simplify('(' + form_2_str_dydz + ')' + '*(' + yz_x_split_str + ')'))
+eq_2_yz = str(simplify('(' + form_2_str_dydz + ')' + '*(' + yz_y_split_str + ')'))
 F_yz_y, F_yz_z = eq_to_comps(eq_1_yz, eq_2_yz, xg, yg)
 
 
@@ -531,7 +535,8 @@ def on_key_press(event):
 
 # define a function to respond to new 1 forms being input
 def form_1_to_2onR3():
-    global string_x, string_y, string_z, form_2
+    global string_x, string_y, string_z, form_2, F_xy_x, F_xy_y, F_xz_x, F_xz_z, F_yz_y, F_yz_z
+    global eq_1_xy, eq_2_xy, eq_1_xz, eq_2_xz, eq_1_yz, eq_2_yz
     # take the inputs from user into strings
     string_x = str(simplify(form_1_x_entry.get()))
     string_y = str(simplify(form_1_y_entry.get()))
@@ -547,14 +552,14 @@ def form_1_to_2onR3():
     form_2_str_dxdy = str(simplify(str(unformat(result[0][0]))))
     form_2_str_dxdz = str(simplify(str(unformat(result[1][0]))))
     form_2_str_dydz = str(simplify(str(unformat(result[2][0]))))
-    eq_1_xy = str(simplify('(' + form_2_str_dxdy + ')' + '*(' + x_split_str + ')'))
-    eq_2_xy = str(simplify('(' + form_2_str_dxdy + ')' + '*(' + y_split_str + ')'))
+    eq_1_xy = str(simplify('(' + form_2_str_dxdy + ')' + '*(' + xy_x_split_str + ')'))
+    eq_2_xy = str(simplify('(' + form_2_str_dxdy + ')' + '*(' + xy_y_split_str + ')'))
     F_xy_x, F_xy_y = eq_to_comps(eq_1_xy, eq_2_xy, xg, yg)
-    eq_1_xz = str(simplify('(' + form_2_str_dxdz + ')' + '*(' + x_split_str + ')'))
-    eq_2_xz = str(simplify('(' + form_2_str_dxdz + ')' + '*(' + y_split_str + ')'))
+    eq_1_xz = str(simplify('(' + form_2_str_dxdz + ')' + '*(' + xz_x_split_str + ')'))
+    eq_2_xz = str(simplify('(' + form_2_str_dxdz + ')' + '*(' + xz_y_split_str + ')'))
     F_xz_x, F_xz_z = eq_to_comps(eq_1_xz, eq_2_xz, xg, yg)
-    eq_1_yz = str(simplify('(' + form_2_str_dydz + ')' + '*(' + x_split_str + ')'))
-    eq_2_yz = str(simplify('(' + form_2_str_dydz + ')' + '*(' + y_split_str + ')'))
+    eq_1_yz = str(simplify('(' + form_2_str_dydz + ')' + '*(' + yz_x_split_str + ')'))
+    eq_2_yz = str(simplify('(' + form_2_str_dydz + ')' + '*(' + yz_y_split_str + ')'))
     F_yz_y, F_yz_z = eq_to_comps(eq_1_yz, eq_2_yz, xg, yg)
     # call the slide function to easily plot them depending on h and on axis_view
     slide()
