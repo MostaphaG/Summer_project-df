@@ -462,7 +462,7 @@ theta_den = 25
 
 # define the axis
 r = np.linspace(r_min, L, r_den)
-theta = np.linspace(0, 360, theta_den) * np.pi/180
+theta = np.linspace(0, 360 - 360/(theta_den-1), theta_den) * np.pi/180
 
 # define a polar grid
 rg, thetag = np.meshgrid(r, theta)
@@ -739,7 +739,7 @@ def Polar_grid_plot_response(tensor):
     L = float(L_entry.get())
     # using these redefine the new polar grids
     r = np.linspace(r_min, L, r_den)
-    theta = np.linspace(0, 360, theta_den) * np.pi/180
+    theta = np.linspace(0, 360 - 360/(theta_den-1), theta_den) * np.pi/180
     # mesh into a grid
     rg, thetag = np.meshgrid(r, theta)
     # convert grid to cartesian
@@ -778,7 +778,7 @@ def save_polar_grid():
     theta_den = int(theta_den_entry.get())
     # using these redefine the new polar grids
     r = np.linspace(r_min, L, r_den)
-    theta = np.linspace(0, 360, theta_den) * np.pi/180
+    theta = np.linspace(0, 360 - 360/(theta_den-1), theta_den) * np.pi/180
     rg, thetag = np.meshgrid(r, theta)
     Polar_grid_plot_response(tensor.get())
     # once these are saved (made global), destroy the new window
