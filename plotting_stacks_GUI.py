@@ -499,8 +499,6 @@ toolbar = NavigationToolbar2Tk(canvas, plot_frame)
 toolbar.update()  # allow the plot to update based on the toolbar
 canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
-LI_tot = 0
-
 # track the mouse presses for the toolbar to respond to
 def on_key_press(event):
     global x_pix, y_pix, x_m, y_m
@@ -519,47 +517,59 @@ def on_key_press(event):
         # Store the coordinates of the click in list
         LI_coord.append([x_m,y_m])
         line_int(1000, string_x, string_y)
-        
+
+
+# define a function that will complete the line integral
 def line_int(N, u_str, v_str):
-    
+    global LI_total
+    # set up a conuter to know how many time to complete the sum process
     c_count = len(LI_coord)
-    
-    if c_count > 1:
-        
+    if c_count >= 1:
+        # get coordinates from mouse clicks
         a = LI_coord[c_count - 2]
         b = LI_coord[c_count - 1]
-        
         # Plot line between points a and b
-        main_axis.add_line(Line2D((a[0],b[0]),(a[1],b[1]), linewidth=2, color='red'))
+        main_axis.add_line(Line2D((a[0], b[0]), (a[1], b[1]), linewidth=2, color='red'))
+        # if only one click was completed, plot a small circle
+        if len(LI_coord) == 1:
+            circle = patch.Circle(LI_coord[0], L*fract/6, color='red')
+            main_axis.add_patch(circle)
         
-        #linegrad = (b[1]-a[1])/(b[0]-a[0])
-        linelength = np.sqrt((b[0]-a[0])**2 + (b[1]-a[1])**2)
+        # linegrad = (b[1]-a[1])/(b[0]-a[0])  # keep as comment for now
+        # find line length
+        # linelength = np.sqrt((b[0]-a[0])**2 + (b[1]-a[1])**2)
         
+        # find the length of interval
+        # interval_len = linelength/N
+        
+        # find steps along the line, set by accuracy N
         dx = (b[0]-a[0])/N
         dy = (b[1]-a[1])/N
         
         # Create array to store interval point coordinates
-        intervals = np.zeros(shape=(2,N))
-        uv_store = np.zeros(shape=(2,N))
+        intervals = np.zeros(shape=(2, N))
+        uv_store = np.zeros(shape=(2, N))
         
         # Loop through to assign coordinates to interval points and plot them
         for i in range(N):
-            intervals[0,i] = a[0] + i*dx
-            intervals[1,i] = a[1] + i*dy
-            #ax.plot(intervals[0,i], intervals[1,i], 'bo', markersize=100/N)
-            
-        interval_len = linelength/N
+            intervals[0, i] = a[0] + i*dx
+            intervals[1, i] = a[1] + i*dy
+            # ax.plot(intervals[0,i], intervals[1,i], 'bo', markersize=100/N)
         
-        # Evaluate the vector components at the interval points    
-        uv_store[0,:] = eval(format_eq(u_str,1))
-        uv_store[1,:] = eval(format_eq(v_str,1))
+        # Evaluate the vector components at the interval points
+        uv_store[0, :] = eval(format_eq(u_str, 1))
+        uv_store[1, :] = eval(format_eq(v_str, 1))
         
         # Evaluate line integral as sum of vector components multiplied by the small x and y displacements 
-        res = dx*np.sum(uv_store[0,:]) + dy*np.sum(uv_store[1,:])
+        res = dx*np.sum(uv_store[0, :]) + dy*np.sum(uv_store[1, :])
         
+        # display the drawn on lines
         canvas.draw()
         
-        print(res)
+        # update the total
+        LI_total += round(res, 6)
+        # update its label
+        LI_total_label.configure(text=LI_total)
         
         return res
     
@@ -1116,14 +1126,15 @@ def deriv_calc(x_m, y_m):
         deriv_inset_ax.remove()
         
     # i.e. if click coordinates are undefined, do nothing
-    except: NameError
+    except NameError:
+        pass
 
 # Initialise the click button selection
 click_opt_int = 0
 
 # define a function that will update the variable that defines click action
 def click_option_handler(click_option):
-    global click_opt_int, toolbar
+    global click_opt_int, toolbar, LI_coord, LI_total_label, LI_total
     click_opt_int = click_option
     if click_opt_int == 0:
         fig.canvas.draw()
@@ -1134,6 +1145,11 @@ def click_option_handler(click_option):
         toolbar = NavigationToolbar2Tk(canvas, plot_frame)
         toolbar.update()
         canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+        try:
+            LI_instruction_label.destroy()
+            LI_total_label.destroy()
+        except UnboundLocalError:
+            pass
     # when 'tool' is not selected, disable the pan and zoom:
     elif 0 < click_opt_int < 5:
         fig.canvas.draw()
@@ -1147,12 +1163,34 @@ def click_option_handler(click_option):
         # get rid of the 2 buttons we don't want
         toolbar.children['!button4'].pack_forget()
         toolbar.children['!button5'].pack_forget()
+        try:
+            LI_instruction_label.destroy()
+            LI_total_label.destroy()
+        except UnboundLocalError:
+            pass
         deriv_calc(x_m, y_m)
     elif click_opt_int == 5:
-        # Initialise variable for storing click coordinates and total line integral
-        global LI_coord
+        # Initialise a global variable for storing click coordinates
+        # and total line integral
+        # home the main screen
+        toolbar.home()
+        # unclick any chosen options from toolbar
+        state = fig.canvas.toolbar.mode
+        if state == 'zoom rect':
+            toolbar.zoom()
+        if state == 'pan/zoom':
+            toolbar.pan()
+        # get rid of the 2 buttons we don't want
+        toolbar.children['!button4'].pack_forget()
+        toolbar.children['!button5'].pack_forget()
+        # set up an empty list to later store click coords
         LI_coord = []
-        LI_tot = 5
+        # initialise a variable that will keep track of total LI
+        LI_total = 0
+        # define a label that will display it
+        LI_instruction_label = tk.Label(right_frame, text='line integral result:').grid(row=20, column=0, padx=10)
+        LI_total_label = tk.Label(right_frame, text=LI_total)
+        LI_total_label.grid(row=20, column=1)
 
 
 # =============================================================================
