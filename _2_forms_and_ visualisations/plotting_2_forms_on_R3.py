@@ -73,6 +73,7 @@ def unformat(string):
     string = string.replace('**', '^')
     string = string.replace('np.log()', 'ln')
     string = string.replace('np.exp', 'e**')
+    string = string.replace('field_unit', '1')
     return string
 
 
@@ -657,7 +658,7 @@ def slide():
         elif axis_view == 'y':
             plot_form(form_2[1][:, h_index, :], xg, zg, fract_s)
         elif axis_view == 'x':
-            plot_form(form_2[2][:, :, h_index], yg, zg, fract_s)
+            plot_form(form_2[2][h_index, :, :], yg, zg, fract_s)
     # draw that onto the screen
     canvas.draw()
 
@@ -665,18 +666,33 @@ def slide():
 # deifne a function that will update the label
 def label_update(var):
     global h_index
-    # update current height
-    h_index += var
-    # update the label based on that
-    if axis_view == 'z':
+    # update current height, remembering to account for ends of array
+    if h_index == 0:
+        if var == -1:
+            tk.messagebox.showerror('WARNING', 'REACHED END INDEX')
+        else:
+            h_index += var
+            value_string = str(z[h_index])
+    else:
+        try:
+            h_index += var
+            value_string = str(z[h_index])
+        except IndexError:
+            h_index -= var
+            tk.messagebox.showerror('WARNING', 'REACHED END INDEX')
+    try:
         # update the label based on that
-        axis_height_txt.configure(text=str(z[h_index]))
-    elif axis_view == 'y':
-        # update the label based on that
-        axis_height_txt.configure(text=str(y[h_index]))
-    elif axis_view == 'x':
-        # update the label based on that
-        axis_height_txt.configure(text=str(x[h_index]))
+        if axis_view == 'z':
+            # update the label based on that
+            axis_height_txt.configure(text=value_string)
+        elif axis_view == 'y':
+            # update the label based on that
+            axis_height_txt.configure(text=value_string)
+        elif axis_view == 'x':
+            # update the label based on that
+            axis_height_txt.configure(text=value_string)
+    except UnboundLocalError:
+        pass
 
 
 # define a function that will repond to changing axis view with radiobuttons
