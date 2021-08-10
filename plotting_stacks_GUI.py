@@ -471,6 +471,9 @@ rg, thetag = np.meshgrid(r, theta)
 # poalr gird without converting to cartesian grid first
 a_polar = 1
 
+# set up a variable to keep track if LI was used recently
+LI_use_var = 0
+
 ''' end of polar setting up'''
 
 # set up initial strings for 2 forms window to display, for it to save properly after
@@ -518,6 +521,21 @@ def on_key_press(event):
         LI_coord.append([x_m,y_m])
         line_int(1000, string_x, string_y)
 
+
+# define a funciton to restart line integral calculation and lines
+def LI_restart():
+    global LI_total, LI_coord
+    # first, initialise variables again
+    LI_total = 0
+    LI_coord = []
+    # update the label
+    LI_total_label.configure(text=LI_total)
+    # NOT IDEAL BUT HOPEFULLY TEMPORARY
+    # call plot-respose to redraw (so lines are deleted)
+    # ideally would want a way of deleting lines without restarting the plot
+    PLOT_response()
+
+    
 
 # define a function that will complete the line integral
 def line_int(N, u_str, v_str):
@@ -1134,7 +1152,7 @@ click_opt_int = 0
 
 # define a function that will update the variable that defines click action
 def click_option_handler(click_option):
-    global click_opt_int, toolbar, LI_coord, LI_total_label, LI_total
+    global click_opt_int, toolbar, LI_coord, LI_total_label, LI_total, LI_instruction_label, LI_restart_btn, LI_use_var
     click_opt_int = click_option
     if click_opt_int == 0:
         fig.canvas.draw()
@@ -1148,8 +1166,18 @@ def click_option_handler(click_option):
         try:
             LI_instruction_label.destroy()
             LI_total_label.destroy()
+            LI_restart_btn.destroy()
         except UnboundLocalError:
             pass
+        # NOT IDEAL BUT HOPEFULLY TEMPORARY
+        # redraw the plot, to get rid of lines from line integral
+        # do so only if LI was used last
+        # ideally would want a way of deleting lines without restarting the plot
+        if LI_use_var == 1:
+            PLOT_response()
+        # update that LI is not being used, but tools
+        LI_use_var = 0
+        
     # when 'tool' is not selected, disable the pan and zoom:
     elif 0 < click_opt_int < 5:
         fig.canvas.draw()
@@ -1166,14 +1194,26 @@ def click_option_handler(click_option):
         try:
             LI_instruction_label.destroy()
             LI_total_label.destroy()
+            LI_restart_btn.destroy()
         except UnboundLocalError:
             pass
+        # NOT IDEAL BUT HOPEFULLY TEMPORARY
+        # redraw the plot, to get rid of lines from line integral
+        # do so only if LI was used last
+        # ideally would want a way of deleting lines without restarting the plot
+        if LI_use_var == 1:
+            PLOT_response()
+        # update that LI is not being used, but tools
+        LI_use_var = 0
+        # run deriv calc as per its calling
         deriv_calc(x_m, y_m)
     elif click_opt_int == 5:
         # Initialise a global variable for storing click coordinates
         # and total line integral
         # home the main screen
         toolbar.home()
+        # set the variable to show that LI was used
+        LI_use_var = 1
         # unclick any chosen options from toolbar
         state = fig.canvas.toolbar.mode
         if state == 'zoom rect':
@@ -1188,9 +1228,14 @@ def click_option_handler(click_option):
         # initialise a variable that will keep track of total LI
         LI_total = 0
         # define a label that will display it
-        LI_instruction_label = tk.Label(right_frame, text='line integral result:').grid(row=20, column=0, padx=10)
+        LI_instruction_label = tk.Label(right_frame, text='line integral result:')
+        LI_instruction_label.grid(row=20, column=0, padx=10)
         LI_total_label = tk.Label(right_frame, text=LI_total)
         LI_total_label.grid(row=20, column=1)
+        # display a restart button that will clear the lines
+        # and restart the variables.
+        LI_restart_btn = tk.Button(right_frame, text='Line int. restart', padx=20, command=LI_restart)
+        LI_restart_btn.grid(row=21, column=0, columnspan=2)
 
 
 # =============================================================================
