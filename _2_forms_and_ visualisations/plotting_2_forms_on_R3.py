@@ -13,6 +13,7 @@ from sympy import diff
 from matplotlib.lines import Line2D
 from matplotlib.backend_bases import key_press_handler
 from sympy import simplify
+from matplotlib import patches as patch
 
 # %%
 
@@ -373,6 +374,55 @@ def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L,
                     s += 1
     plt.close()
 
+
+# define a function to plot the simplified 2 forms, with coloured squares
+def plot_form(form_2, grid_x, grid_y, fract_s):
+    global Mag
+    # redefine the axis limits
+    ax.set_xlim(-ax_L, ax_L)
+    ax.set_ylim(-ax_L, ax_L)
+    # crop xg, yg and zg to size:
+    if axis_view == 'z':
+        grid_x = grid_x[:, :, h_index]
+        grid_y = grid_y[:, :, h_index]
+    elif axis_view == 'y':
+        grid_x = grid_x[h_index, :, :]
+        grid_y = grid_y[h_index, :, :]
+    elif axis_view == 'x':
+        grid_x = grid_x[:, h_index, :]
+        grid_y = grid_y[:, h_index, :]
+    # find the maximum of the 2-form, over the grid
+    max_val2 = np.max(form_2)
+    # get an array of relative magnitudes:
+    Mag = form_2/abs(max_val2)
+    # make Mag unitary:
+    Mag = Mag/abs(np.max(Mag))
+    # set a maximum side size as a fraction of the graph size
+    max_s = fract_s*L
+    # from the maximum size, set the Mag array to store shape sizes
+    Mag = Mag*max_s
+    # extract signs from that (+1, -1, and 0)
+    sign_mag = np.sign(Mag)
+    # clear the negative Magnitudes to be able to use these as shape size:
+    Mag = abs(Mag)
+    # define integer values of magnitude, linearly scaled
+    # save these as the Mag array.
+    for i in range(len(Mag[:, 0])):
+        for j in range(len(Mag[0, :])):
+            # Now, at every grid point, plot a square of size given by magnitude
+            # use colours to indicate orientation - clockwise (negative ==> blue)
+            # counterclockwise (positive ==> red)
+            if sign_mag[i, j] == -1:
+                rect = patch.Rectangle((grid_x[i, j] - Mag[i, j]/4, grid_y[i, j] - Mag[i, j]/4), Mag[i, j]/2, Mag[i, j]/2, color='blue')
+                ax.add_patch(rect)
+            elif sign_mag[i, j] == 1:
+                rect = patch.Rectangle((grid_x[i, j] - Mag[i, j]/4, grid_y[i, j] - Mag[i, j]/4), Mag[i, j]/2, Mag[i, j]/2, color='red')
+                ax.add_patch(rect)
+            else:
+                rect = patch.Rectangle((grid_x[i, j] - Mag[i, j]/4, grid_y[i, j] - Mag[i, j]/4), Mag[i, j]/2, Mag[i, j]/2, color='grey')
+                ax.add_patch(rect)  # not needed as zero sign will have zero magnitude therefore will not be seen anyway.
+
+
 '''
 
 Set up all needed parameters, plots etc
@@ -411,6 +461,9 @@ delta_factor = 10
 
 # fraction of sheet length to graph length
 fract = 0.05
+
+# same for block side size
+fract_s = 0.15
 
 # define the maximum number of stack to plot, dep. on magnitude
 s_max = 5
@@ -563,6 +616,10 @@ def form_1_to_2onR3():
     F_yz_y, F_yz_z = eq_to_comps(eq_1_yz, eq_2_yz, xg, yg)
     # call the slide function to easily plot them depending on h and on axis_view
     slide()
+    # display this new 2 form in its frame as labels
+    Label_2_form_xy.configure(text=str(simplify(unformat(result[0][0]))) + '  dx^dy')
+    Label_2_form_xz.configure(text=str(simplify(unformat(result[1][0]))) + '  dx^dz')
+    Label_2_form_yz.configure(text=str(simplify(unformat(result[2][0]))) + '  dy^dz')
 
 
 # define a function to update z Index and redraw the plot based on the slider
@@ -571,27 +628,36 @@ def slide():
     ax.clear()
     # replot the graph with that new h_index
     # and change the label under the slider to be the value of the chosen axis at that h_index
-    if axis_view == 'z':
-        form_2_components_plot_3(xg, yg, h_index, axis_view, F_xy_x, zero_field, s_max, L, pt_den, fract, colour_str)
-        form_2_components_plot_3(xg, yg, h_index, axis_view, zero_field, F_xy_y, s_max, L, pt_den, fract, colour_str)
-        ax.set_xlabel('$x$')
-        ax.set_ylabel('$y$')
-        # update the label based on that
-        axis_height_txt.configure(text=str(z[h_index]))
-    elif axis_view == 'y':
-        form_2_components_plot_3(xg, zg, h_index, axis_view, F_xz_x, zero_field, s_max, L, pt_den, fract, colour_str)
-        form_2_components_plot_3(xg, zg, h_index, axis_view, zero_field, F_xz_z, s_max, L, pt_den, fract, colour_str)
-        ax.set_xlabel('$x$')
-        ax.set_ylabel('$z$')
-        # update the label based on that
-        axis_height_txt.configure(text=str(y[h_index]))
-    elif axis_view == 'x':
-        form_2_components_plot_3(yg, zg, h_index, axis_view, F_yz_y, zero_field, s_max, L, pt_den, fract, colour_str)
-        form_2_components_plot_3(yg, zg, h_index, axis_view, zero_field, F_yz_z, s_max, L, pt_den, fract, colour_str)
-        ax.set_xlabel('$y$')
-        ax.set_ylabel('$z$')
-        # update the label based on that
-        axis_height_txt.configure(text=str(x[h_index]))
+    if stack_block_int == 1:
+            # 1 was chosen therefore complete stacks
+        if axis_view == 'z':
+            form_2_components_plot_3(xg, yg, h_index, axis_view, F_xy_x, zero_field, s_max, L, pt_den, fract, colour_str)
+            form_2_components_plot_3(xg, yg, h_index, axis_view, zero_field, F_xy_y, s_max, L, pt_den, fract, colour_str)
+            ax.set_xlabel('$x$')
+            ax.set_ylabel('$y$')
+            # update the label based on that
+            axis_height_txt.configure(text=str(z[h_index]))
+        elif axis_view == 'y':
+            form_2_components_plot_3(xg, zg, h_index, axis_view, F_xz_x, zero_field, s_max, L, pt_den, fract, colour_str)
+            form_2_components_plot_3(xg, zg, h_index, axis_view, zero_field, F_xz_z, s_max, L, pt_den, fract, colour_str)
+            ax.set_xlabel('$x$')
+            ax.set_ylabel('$z$')
+            # update the label based on that
+            axis_height_txt.configure(text=str(y[h_index]))
+        elif axis_view == 'x':
+            form_2_components_plot_3(yg, zg, h_index, axis_view, F_yz_y, zero_field, s_max, L, pt_den, fract, colour_str)
+            form_2_components_plot_3(yg, zg, h_index, axis_view, zero_field, F_yz_z, s_max, L, pt_den, fract, colour_str)
+            ax.set_xlabel('$y$')
+            ax.set_ylabel('$z$')
+            # update the label based on that
+            axis_height_txt.configure(text=str(x[h_index]))
+    elif stack_block_int == 0:
+        if axis_view == 'z':
+            plot_form(form_2[0][:, :, h_index], xg, yg, fract_s)
+        elif axis_view == 'y':
+            plot_form(form_2[1][:, h_index, :], xg, zg, fract_s)
+        elif axis_view == 'x':
+            plot_form(form_2[2][:, :, h_index], yg, zg, fract_s)
     # draw that onto the screen
     canvas.draw()
 
@@ -618,26 +684,16 @@ def view_response(view_var):
     # get and make global the axis view variable
     global axis_view
     axis_view = view_tk.get()
-    # clear the current plot
-    ax.clear()
-    # draw the new plots, depending on the chosen viewing direction
-    if axis_view == 'z':
-        form_2_components_plot_3(xg, yg, h_index, axis_view, F_xy_x, zero_field, s_max, L, pt_den, fract, colour_str)
-        form_2_components_plot_3(xg, yg, h_index, axis_view, zero_field, F_xy_y, s_max, L, pt_den, fract, colour_str)
-        ax.set_xlabel('$x$')
-        ax.set_ylabel('$y$')
-    elif axis_view == 'y':
-        form_2_components_plot_3(xg, zg, h_index, axis_view, F_xz_x, zero_field, s_max, L, pt_den, fract, colour_str)
-        form_2_components_plot_3(xg, zg, h_index, axis_view, zero_field, F_xz_z, s_max, L, pt_den, fract, colour_str)
-        ax.set_xlabel('$x$')
-        ax.set_ylabel('$z$')
-    elif axis_view == 'x':
-        form_2_components_plot_3(yg, zg, h_index, axis_view, F_yz_y, zero_field, s_max, L, pt_den, fract, colour_str)
-        form_2_components_plot_3(yg, zg, h_index, axis_view, zero_field, F_yz_z, s_max, L, pt_den, fract, colour_str)
-        ax.set_xlabel('$y$')
-        ax.set_ylabel('$z$')
+    # call slide function to plot based on the wanted axis view and height.
+    slide()
     # draw that onto the screen
     canvas.draw()
+
+
+# define a function to decide if stacks or blocks are being plotted
+def plot_type_responseR3(type_stack_block):
+    global stack_block_int
+    stack_block_int = int(type_stack_block)
 
 
 # define a label and arrows to change the axis value, and index
@@ -653,11 +709,11 @@ axis_height_txt = tk.Label(height_frame, text=str(z[11]))
 axis_height_txt.grid(row=1, column=0)
 
 # on the left, make a 'move down' button
-down_height = tk.Button(height_frame, text=' \/ ', command= lambda: label_update(-1))
+down_height = tk.Button(height_frame, text=' \/ ', command=lambda: label_update(-1))
 down_height.grid(row=2, column=0)
 
 # on the right, make a 'move up' button
-up_height = tk.Button(height_frame, text=' /\ ', command= lambda: label_update(1))
+up_height = tk.Button(height_frame, text=' /\ ', command=lambda: label_update(1))
 up_height.grid(row=0, column=0)
 
 # define a button to submit the currently chosen value:
@@ -676,28 +732,54 @@ view_z_btn = tk.Radiobutton(height_frame, text='x', variable=view_tk, value='x',
 # NOTE  NOT GREAT I KNOW BUT TEMPORARY:
 # define a new frame for the fields to be input
 field_input_frame = tk.LabelFrame(root, text='Fields frame', padx=32, pady=5)
-field_input_frame.grid(row=0, column=3)
+field_input_frame.grid(row=0, column=1)
+
+# define radiobuttons to pick stacks or blocks
+stack_block = tk.IntVar()  # Tkinter variable for Radiobuttons
+stack_block.set(1)
+stack_block_int = stack_block.get()
+blocks_rb = tk.Radiobutton(field_input_frame, text='blocks', variable=stack_block, value=0, command=lambda: plot_type_responseR3(stack_block.get()))
+blocks_rb.grid(row=0, column=1)
+stacks_rb = tk.Radiobutton(field_input_frame, text='stacks', variable=stack_block, value=1, command=lambda: plot_type_responseR3(stack_block.get()))
+stacks_rb.grid(row=0, column=2)
 
 # define entry boxes for the three 1 forms that are being plotted
 # define entries for a 1 form
-tk.Label(field_input_frame, text='x component of 1 form').grid(row=0, column=1)
+tk.Label(field_input_frame, text='x component of 1 form').grid(row=1, column=1)
 form_1_x_entry = tk.Entry(field_input_frame, width=20, borderwidth=2)
-form_1_x_entry.grid(row=1, column=1)
+form_1_x_entry.grid(row=2, column=1, columnspan=2)
 form_1_x_entry.insert(0, string_x)
 
-tk.Label(field_input_frame, text='y component of 1 form').grid(row=2, column=1)
+tk.Label(field_input_frame, text='y component of 1 form').grid(row=3, column=1)
 form_1_y_entry = tk.Entry(field_input_frame, width=20, borderwidth=2)
-form_1_y_entry.grid(row=3, column=1)
+form_1_y_entry.grid(row=4, column=1, columnspan=2)
 form_1_y_entry.insert(0, string_y)
 
-tk.Label(field_input_frame, text='z component of 1 form').grid(row=4, column=1)
+tk.Label(field_input_frame, text='z component of 1 form').grid(row=5, column=1)
 form_1_z_entry = tk.Entry(field_input_frame, width=20, borderwidth=2)
-form_1_z_entry.grid(row=5, column=1)
+form_1_z_entry.grid(row=6, column=1, columnspan=2)
 form_1_z_entry.insert(0, string_z)
 
 # deifne a button to plot from these:
 form_2_from_1_R3_btn = tk.Button(field_input_frame, text='2 form from 1 forms R3', padx=3, pady=5, command=form_1_to_2onR3)
-form_2_from_1_R3_btn.grid(row=6, column=1)
+form_2_from_1_R3_btn.grid(row=7, column=1, columnspan=2)
+
+# define a frame where the resulting 2 form can display
+form_2_frame = tk.LabelFrame(root, text='2 form frame', padx=32, pady=5)
+form_2_frame.grid(row=1, column=1)
+
+# in it, FOR NOW:
+# put the labels of the 2 form components
+# for the 2 form that is being plotted.
+Label_2_form_xy = tk.Label(form_2_frame, text=str(simplify(unformat(result[0][0]))) + '  dx^dy')
+Label_2_form_xy.grid(row=0, column=0)
+
+Label_2_form_xz = tk.Label(form_2_frame, text=str(simplify(unformat(result[1][0]))) + '  dx^dz')
+Label_2_form_xz.grid(row=1, column=0)
+
+Label_2_form_yz = tk.Label(form_2_frame, text=str(simplify(unformat(result[2][0]))) + '  dy^dz')
+Label_2_form_yz.grid(row=2, column=0)
+
 
 # return time to run
 stop = timeit.default_timer()
