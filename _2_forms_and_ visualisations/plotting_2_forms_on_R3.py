@@ -12,6 +12,7 @@ from sympy.parsing.sympy_parser import parse_expr
 from sympy import diff
 from matplotlib.lines import Line2D
 from matplotlib.backend_bases import key_press_handler
+from sympy import simplify
 
 # %%
 
@@ -25,7 +26,7 @@ root = tk.Tk()
 root.title('2 forms on R3')
 
 # set window size
-root.geometry('1000x800')
+root.geometry('1100x900')
 
 # define a frame to put the plot into:
 plot_frame = tk.LabelFrame(root, text='plot Frame', padx=5, pady=5)
@@ -50,26 +51,53 @@ def format_eq(string):
     return string
 
 
+# function to unformat equation to display back to user in same form
+def unformat(string):
+    # replace all the x and y with xg and yg:
+    string = string.replace('xg', 'x')
+    string = string.replace('yg', 'y')
+    string = string.replace('zg', 'z')
+    # where there are special functions, replace them with library directions
+    string = string.replace('np.pi', 'pi')
+    string = string.replace('np.sqrt', 'sqrt')
+    string = string.replace('np.sin', 'sin')
+    string = string.replace('np.cos', 'cos')
+    string = string.replace('np.tan', 'tan')
+    string = string.replace('np.arctan2', 'ARCTAN')
+    string = string.replace('ARCSIN', 'np.arcsin')
+    string = string.replace('np.arccos', 'ARCCOS')
+    string = string.replace('np.tanh', 'TANH')
+    string = string.replace('np.sinh', 'SINH')
+    string = string.replace('np.cosh', 'COSH')
+    string = string.replace('**', '^')
+    string = string.replace('np.log()', 'ln')
+    string = string.replace('np.exp', 'e**')
+    return string
+
+
 # define a function that takes input string that is python understood and turn into vector components:
-def eq_to_comps(string_x, string_y, string_z, xg, yg, zg):
-    # use this fucntion to replace given string to python understood equations:
+def eq_to_comps(string_x, string_y, xg, yg):
+    global equation_x, equation_y
+    # use the format_eq fucntion to make given string readable by python
     equation_x = format_eq(string_x)
     equation_y = format_eq(string_y)
-    equation_z = format_eq(string_z)
     # use these to define the field:
     # also: checking if equation equals zero, to then replace it with an array and not just 0:
-    F_x = eval(equation_x)
-    F_y = eval(equation_y)
-    F_z = eval(equation_z)
-    if equation_x.find('x') & equation_x.find('y') & equation_x.find('z') == -1:
-        F_x = eval(equation_x)*np.ones(np.shape(xg))
-    if equation_y.find('x') & equation_y.find('y') & equation_y.find('z') == -1:
-        F_y = eval(equation_y)*np.ones(np.shape(yg))
-    if equation_z.find('x') & equation_z.find('y') & equation_z.find('z') == -1:
-        F_z = eval(equation_z)*np.ones(np.shape(zg))
+    u = eval(equation_x)
+    v = eval(equation_y)
+    if equation_x.find('x') & equation_x.find('y') == -1:
+        u = eval(equation_x)*np.ones(np.shape(xg))
+    if equation_y.find('x') & equation_y.find('y') == -1:
+        v = eval(equation_y)*np.ones(np.shape(yg))
+    # deal properly with zero and constant fields too:
+    # check for when the derivative is zero, do not plot it as nothing
+    # if the other component is not zero.
+    if equation_x == '0' and equation_y != '0':
+        u = np.ones(np.shape(xg))
+    if equation_y == '0' and equation_x != '0':
+        v = np.ones(np.shape(yg))
     # return these
-    return F_x, F_y, F_z
-
+    return u, v
 
 # define a function that will find the 2 form from given expressions
 # in a given number of dimensions and in terms of given coordinate symbols
@@ -408,10 +436,14 @@ ax.set_ylim(-ax_L, ax_L)
 # last one is an in case, for when the magnitude is exactly zero.
 colour_str = ['red', 'blue', 'grey']
 
+# predefine strings for splitting in x and in y for 2 form stacks
+x_split_str = '1/2'
+y_split_str = '1/2'
+
 # define the wanted 1 form on R3 in terms of each component:
-string_x = 'x*sin(y)'  # x component
-string_y = 'y*cos(x)'  # y component
-string_z = 'x*y'  # z component
+string_x = 'x*y*z'  # x component
+string_y = 'y*z*x'  # y component
+string_z = 'z*x*y'  # z component
 
 # INITIAL CALCULATIONS
 
@@ -435,6 +467,11 @@ coords = ['x', 'y', 'z']
 # from these, use the find_2_form function to get the 2 form
 form_2 = find_2_form(expressions, coords, pt_den, m)
 
+# get it's string
+form_2_str_dxdy = str(simplify(str(unformat(result[0][0]))))
+form_2_str_dxdz = str(simplify(str(unformat(result[1][0]))))
+form_2_str_dydz = str(simplify(str(unformat(result[2][0]))))
+
 # because on R3, the x, y and z components are made up of
 # dy^dz, dx^dz and dx^dy
 # need to superpose stacks from the x y and z fields (depending on viewing)
@@ -450,24 +487,27 @@ form_2 = find_2_form(expressions, coords, pt_den, m)
 # find all separately, to make switching axis and sliding faster
 
 # define components in the x-y plane:
+eq_1_xy = str(simplify('(' + form_2_str_dxdy + ')' + '*(' + x_split_str + ')'))
+eq_2_xy = str(simplify('(' + form_2_str_dxdy + ')' + '*(' + y_split_str + ')'))
+F_xy_x, F_xy_y = eq_to_comps(eq_1_xy, eq_2_xy, xg, yg)
+
+# define them in x-z plane
+eq_1_xz = str(simplify('(' + form_2_str_dxdz + ')' + '*(' + x_split_str + ')'))
+eq_2_xz = str(simplify('(' + form_2_str_dxdz + ')' + '*(' + y_split_str + ')'))
+F_xz_x, F_xz_z = eq_to_comps(eq_1_xz, eq_2_xz, xg, yg)
 
 
-
-
-
-
-
-F_x, F_y, F_z = eq_to_comps(str(ext_ds[0, 1]) + ' + ' + str(ext_ds[0, 2]),
-                            str(ext_ds[1, 0]) + ' + ' + str(ext_ds[1, 2]),
-                            str(ext_ds[2, 0]) + ' + ' + str(ext_ds[2, 1]),
-                            xg, yg, zg)
-
+# define them in y-z plane
+eq_1_yz = str(simplify('(' + form_2_str_dydz + ')' + '*(' + x_split_str + ')'))
+eq_2_yz = str(simplify('(' + form_2_str_dydz + ')' + '*(' + y_split_str + ')'))
+F_yz_y, F_yz_z = eq_to_comps(eq_1_yz, eq_2_yz, xg, yg)
 
 
 # plot the starting field with desired parameters as specidfied above
 # arrow params not needed as arrows arent plotted
-form_2_components_plot_3(xg, yg, h_index, axis_view, F_x, zero_field, s_max, L, pt_den, fract, colour_str)
-form_2_components_plot_3(xg, yg, h_index, axis_view, zero_field, F_y, s_max, L, pt_den, fract, colour_str)
+# starting with viewing axis ='z' therefore xy plane
+form_2_components_plot_3(xg, yg, h_index, axis_view, F_xy_x, zero_field, s_max, L, pt_den, fract, colour_str)
+form_2_components_plot_3(xg, yg, h_index, axis_view, zero_field, F_xy_y, s_max, L, pt_den, fract, colour_str)
 
 # reduce white space from the figure in the plot frame
 fig.tight_layout()
@@ -489,6 +529,37 @@ def on_key_press(event):
     key_press_handler(event, canvas, toolbar)
 
 
+# define a function to respond to new 1 forms being input
+def form_1_to_2onR3():
+    global string_x, string_y, string_z, form_2
+    # take the inputs from user into strings
+    string_x = str(simplify(form_1_x_entry.get()))
+    string_y = str(simplify(form_1_y_entry.get()))
+    string_z = str(simplify(form_1_z_entry.get()))
+    # turn to sumpy expressions
+    sympy_expr_x = parse_expr(string_x, evaluate=False)
+    sympy_expr_y = parse_expr(string_y, evaluate=False)
+    sympy_expr_z = parse_expr(string_z, evaluate=False)
+    # combine the 2 into an array:
+    expressions = np.array([sympy_expr_x, sympy_expr_y, sympy_expr_z])
+    # ALL AS BEFORE:
+    form_2 = find_2_form(expressions, coords, pt_den, m)
+    form_2_str_dxdy = str(simplify(str(unformat(result[0][0]))))
+    form_2_str_dxdz = str(simplify(str(unformat(result[1][0]))))
+    form_2_str_dydz = str(simplify(str(unformat(result[2][0]))))
+    eq_1_xy = str(simplify('(' + form_2_str_dxdy + ')' + '*(' + x_split_str + ')'))
+    eq_2_xy = str(simplify('(' + form_2_str_dxdy + ')' + '*(' + y_split_str + ')'))
+    F_xy_x, F_xy_y = eq_to_comps(eq_1_xy, eq_2_xy, xg, yg)
+    eq_1_xz = str(simplify('(' + form_2_str_dxdz + ')' + '*(' + x_split_str + ')'))
+    eq_2_xz = str(simplify('(' + form_2_str_dxdz + ')' + '*(' + y_split_str + ')'))
+    F_xz_x, F_xz_z = eq_to_comps(eq_1_xz, eq_2_xz, xg, yg)
+    eq_1_yz = str(simplify('(' + form_2_str_dydz + ')' + '*(' + x_split_str + ')'))
+    eq_2_yz = str(simplify('(' + form_2_str_dydz + ')' + '*(' + y_split_str + ')'))
+    F_yz_y, F_yz_z = eq_to_comps(eq_1_yz, eq_2_yz, xg, yg)
+    # call the slide function to easily plot them depending on h and on axis_view
+    slide()
+
+
 # define a function to update z Index and redraw the plot based on the slider
 def slide():
     # remove the currently displayed plot
@@ -496,22 +567,22 @@ def slide():
     # replot the graph with that new h_index
     # and change the label under the slider to be the value of the chosen axis at that h_index
     if axis_view == 'z':
-        form_2_components_plot_3(xg, yg, h_index, axis_view, F_x, zero_field, s_max, L, pt_den, fract, colour_str)
-        form_2_components_plot_3(xg, yg, h_index, axis_view, zero_field, F_y, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot_3(xg, yg, h_index, axis_view, F_xy_x, zero_field, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot_3(xg, yg, h_index, axis_view, zero_field, F_xy_y, s_max, L, pt_den, fract, colour_str)
         ax.set_xlabel('$x$')
         ax.set_ylabel('$y$')
         # update the label based on that
         axis_height_txt.configure(text=str(z[h_index]))
     elif axis_view == 'y':
-        form_2_components_plot_3(xg, zg, h_index, axis_view, F_x, zero_field, s_max, L, pt_den, fract, colour_str)
-        form_2_components_plot_3(xg, zg, h_index, axis_view, zero_field, F_z, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot_3(xg, zg, h_index, axis_view, F_xz_x, zero_field, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot_3(xg, zg, h_index, axis_view, zero_field, F_xz_z, s_max, L, pt_den, fract, colour_str)
         ax.set_xlabel('$x$')
         ax.set_ylabel('$z$')
         # update the label based on that
         axis_height_txt.configure(text=str(y[h_index]))
     elif axis_view == 'x':
-        form_2_components_plot_3(yg, zg, h_index, axis_view, F_y, zero_field, s_max, L, pt_den, fract, colour_str)
-        form_2_components_plot_3(yg, zg, h_index, axis_view, zero_field, F_z, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot_3(yg, zg, h_index, axis_view, F_yz_y, zero_field, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot_3(yg, zg, h_index, axis_view, zero_field, F_yz_z, s_max, L, pt_den, fract, colour_str)
         ax.set_xlabel('$y$')
         ax.set_ylabel('$z$')
         # update the label based on that
@@ -536,26 +607,6 @@ def label_update(var):
         # update the label based on that
         axis_height_txt.configure(text=str(x[h_index]))
 
-# define a label and arrows to change the axis value, and index
-# instead of the previously tried slider and entry boxes:
-
-# Label to show current axis value
-axis_height_txt = tk.Label(root, text=str(z[11]))
-axis_height_txt.grid(row=2, column=0)
-
-# on the left, make a 'move down' button
-down_height = tk.Button(root, text=' \/ ', command= lambda: label_update(-1))
-down_height.grid(row=3, column=0)
-
-# on the right, make a 'move up' button
-down_height = tk.Button(root, text=' /\ ', command= lambda: label_update(1))
-down_height.grid(row=1, column=0)
-
-# define a button to submit the currently chosen value:
-Submit_h_btn = tk.Button(root, text='SUBMIT', padx=10, pady=50, command=slide)
-Submit_h_btn.grid(row=0, column=1)
-
-
 
 # define a function that will repond to changing axis view with radiobuttons
 def view_response(view_var):
@@ -566,31 +617,82 @@ def view_response(view_var):
     ax.clear()
     # draw the new plots, depending on the chosen viewing direction
     if axis_view == 'z':
-        form_2_components_plot_3(xg, yg, h_index, axis_view, F_x, zero_field, s_max, L, pt_den, fract, colour_str)
-        form_2_components_plot_3(xg, yg, h_index, axis_view, zero_field, F_y, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot_3(xg, yg, h_index, axis_view, F_xy_x, zero_field, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot_3(xg, yg, h_index, axis_view, zero_field, F_xy_y, s_max, L, pt_den, fract, colour_str)
         ax.set_xlabel('$x$')
         ax.set_ylabel('$y$')
     elif axis_view == 'y':
-        form_2_components_plot_3(xg, zg, h_index, axis_view, F_x, zero_field, s_max, L, pt_den, fract, colour_str)
-        form_2_components_plot_3(xg, zg, h_index, axis_view, zero_field, F_z, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot_3(xg, zg, h_index, axis_view, F_xz_x, zero_field, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot_3(xg, zg, h_index, axis_view, zero_field, F_xz_z, s_max, L, pt_den, fract, colour_str)
         ax.set_xlabel('$x$')
         ax.set_ylabel('$z$')
     elif axis_view == 'x':
-        form_2_components_plot_3(yg, zg, h_index, axis_view, F_y, zero_field, s_max, L, pt_den, fract, colour_str)
-        form_2_components_plot_3(yg, zg, h_index, axis_view, zero_field, F_z, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot_3(yg, zg, h_index, axis_view, F_yz_y, zero_field, s_max, L, pt_den, fract, colour_str)
+        form_2_components_plot_3(yg, zg, h_index, axis_view, zero_field, F_yz_z, s_max, L, pt_den, fract, colour_str)
         ax.set_xlabel('$y$')
         ax.set_ylabel('$z$')
     # draw that onto the screen
     canvas.draw()
 
 
+# define a label and arrows to change the axis value, and index
+# instead of the previously tried slider and entry boxes:
+
+# NOTE NOT GREAT I KNOW BUT TEMPORARY:
+# define a frame for the buttons moving the view_axis value
+height_frame = tk.LabelFrame(root, text='Fields frame', padx=32, pady=5)
+height_frame.grid(row=1, column=0)
+
+# Label to show current axis value
+axis_height_txt = tk.Label(height_frame, text=str(z[11]))
+axis_height_txt.grid(row=1, column=0)
+
+# on the left, make a 'move down' button
+down_height = tk.Button(height_frame, text=' \/ ', command= lambda: label_update(-1))
+down_height.grid(row=2, column=0)
+
+# on the right, make a 'move up' button
+up_height = tk.Button(height_frame, text=' /\ ', command= lambda: label_update(1))
+up_height.grid(row=0, column=0)
+
+# define a button to submit the currently chosen value:
+Submit_h_btn = tk.Button(height_frame, text='SUBMIT', padx=10, pady=50, command=slide)
+Submit_h_btn.grid(row=0, column=1, rowspan=3, padx=20)
+
+
 # define rediobuttons to chose from which axis the user is looking:
 view_tk = tk.StringVar()
 view_tk.set('z')
-view_z_btn = tk.Radiobutton(root, text='z', variable=view_tk, value='z', command=lambda: view_response(view_tk.get())).grid(row=1, column=1)
-view_z_btn = tk.Radiobutton(root, text='y', variable=view_tk, value='y', command=lambda: view_response(view_tk.get())).grid(row=2, column=1)
-view_z_btn = tk.Radiobutton(root, text='x', variable=view_tk, value='x', command=lambda: view_response(view_tk.get())).grid(row=3, column=1)
+view_z_btn = tk.Radiobutton(height_frame, text='z', variable=view_tk, value='z', command=lambda: view_response(view_tk.get())).grid(row=0, column=2)
+view_z_btn = tk.Radiobutton(height_frame, text='y', variable=view_tk, value='y', command=lambda: view_response(view_tk.get())).grid(row=1, column=2)
+view_z_btn = tk.Radiobutton(height_frame, text='x', variable=view_tk, value='x', command=lambda: view_response(view_tk.get())).grid(row=2, column=2)
 
+
+# NOTE  NOT GREAT I KNOW BUT TEMPORARY:
+# define a new frame for the fields to be input
+field_input_frame = tk.LabelFrame(root, text='Fields frame', padx=32, pady=5)
+field_input_frame.grid(row=0, column=3)
+
+# define entry boxes for the three 1 forms that are being plotted
+# define entries for a 1 form
+tk.Label(field_input_frame, text='x component of 1 form').grid(row=0, column=1)
+form_1_x_entry = tk.Entry(field_input_frame, width=20, borderwidth=2)
+form_1_x_entry.grid(row=1, column=1)
+form_1_x_entry.insert(0, string_x)
+
+tk.Label(field_input_frame, text='y component of 1 form').grid(row=2, column=1)
+form_1_y_entry = tk.Entry(field_input_frame, width=20, borderwidth=2)
+form_1_y_entry.grid(row=3, column=1)
+form_1_y_entry.insert(0, string_y)
+
+tk.Label(field_input_frame, text='z component of 1 form').grid(row=4, column=1)
+form_1_z_entry = tk.Entry(field_input_frame, width=20, borderwidth=2)
+form_1_z_entry.grid(row=5, column=1)
+form_1_z_entry.insert(0, string_z)
+
+# deifne a button to plot from these:
+form_2_from_1_R3_btn = tk.Button(field_input_frame, text='2 form from 1 forms R3', padx=3, pady=5, command=form_1_to_2onR3)
+form_2_from_1_R3_btn.grid(row=6, column=1)
 
 # return time to run
 stop = timeit.default_timer()

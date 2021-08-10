@@ -914,7 +914,7 @@ def Int_deriv_1_form():
     # then as a string to display in an extra window
     zero_form_str = str(simplify('(' + x_comp_str + ')*(' + vector_ex_str + ')' + ' + (' + y_comp_str + ')*(' + vector_ey_str + ')'))
     # plot the zero_form as contours with labeled levels
-    contour_levels = 10
+    contour_levels = np.linspace(np.min(zero_form), np.max(zero_form), 10)
     ax.contour(xg, yg, zero_form, contour_levels)
 
 
