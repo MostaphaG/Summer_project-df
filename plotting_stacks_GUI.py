@@ -51,7 +51,7 @@ def G(s, n, c):
 
 # define a function that will complete all stack plotting:
 def stack_plot(xg, yg, axis, F_x, F_y, s_max, L, pt_den, fract, arrows=False, stacks=True, orientation='mid', scale=1, w_head=1/8, h_head=1/4, axis_check=0, arrowheads=True, colour='green'):
-    global s_L, mag, bool_array
+    global s_L, mag, bool_array, test_mag
     # get the lengths of x and y from their grids
     
     x_len = len(xg[:, 0])
@@ -91,6 +91,8 @@ def stack_plot(xg, yg, axis, F_x, F_y, s_max, L, pt_den, fract, arrows=False, st
     # find the arrow length corresponding to each point and store in mag array
     mag = np.sqrt(F_x**2 + F_y**2)
     
+    test_mag = mag * 1
+    
     # find direction of each arrow
     angles = np.arctan2(F_y, F_x)   # theta defined from positive x axis ccw
     
@@ -106,7 +108,7 @@ def stack_plot(xg, yg, axis, F_x, F_y, s_max, L, pt_den, fract, arrows=False, st
                     rect = patch.Rectangle((xg[i, j] - dist_points/2, yg[i, j]  - dist_points/2), dist_points, dist_points, color='#B5B5B5')
                     axis.add_patch(rect)
                     mag[i, j] = 0
-            if abs(mag[i, j]) == np.inf  or abs(mag[i, j]) > 8e15:
+            if abs(mag[i, j]) == np.inf  or abs(mag[i, j]) > 1e15:
                 # colour this point as a big red dot
                     circ = patch.Circle((xg[i, j], yg[i, j]), L*fract/3, color='red')
                     axis.add_patch(circ)
@@ -153,7 +155,7 @@ def stack_plot(xg, yg, axis, F_x, F_y, s_max, L, pt_den, fract, arrows=False, st
         # only here, need to do it to u and v not just mag
         for i in range(x_len):
             for j in range(y_len):
-                if isnan(F_x_local[i,j]) == True or isnan(F_y_local[i,j]) == True or abs(F_x_local[i, j]) == np.inf or abs(F_y_local[i, j]) == np.inf or abs(F_y_local[i, j]) > 8e15 or abs(F_x_local[i, j]) > 8e15:
+                if isnan(F_x_local[i,j]) == True or isnan(F_y_local[i,j]) == True or abs(F_x_local[i, j]) == np.inf or abs(F_y_local[i, j]) == np.inf or abs(F_y_local[i, j]) > 1e15 or abs(F_x_local[i, j]) > 1e15:
                     F_x_local[i,j] = F_y_local[i,j] = 0
         axis.quiver(xg, yg, F_x_local, F_y_local, pivot=orientation, scale=ScaleFactor, scale_units='xy') 
     else:
@@ -390,7 +392,7 @@ field_x_list = ['y*sin(x)',
                 '(3*cos(y) + 4)/(15 + 6*cos(x) + 6*cos(y))',
                 '-x/(x**2+y**2)',
                 '-y/(x**2+y**2)',
-                '(x-y)/sqrt(x**2 + y**2) * (1/(sqrt(1- 2/(sqrt(x**2 + y**2)))))'
+                'x/(sqrt(x**2 + y**2)*(1-2/(sqrt(x**2 + y**2)))) - y'
                 ]
 
 
@@ -404,7 +406,7 @@ field_y_list = ['- x*cos(y)',
                 '-(3*cos(x) + 4)/(15 + 6*cos(x) + 6*cos(y))',
                 '-y/(x**2+y**2)',
                 'x/(x**2+y**2)',
-                '(x+y)/sqrt(x**2 + y**2) * (1/(sqrt(1- 2/(sqrt(x**2 + y**2)))))'
+                'y/(sqrt(x**2 + y**2)*(1-2/(sqrt(x**2 + y**2)))) + x'
                 ]
 
 
