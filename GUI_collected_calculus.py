@@ -1426,7 +1426,7 @@ Hodge_btn.grid(row=4, column=0)
 # will show a window and di
 # stack size and block size, stack size is already avaliable in main GUI
 # but ont blocvk size
-customise_calc_btn = tk.Button(small_frame, text='optimise', command=customise_calc)
+customise_calc_btn = tk.Button(small_frame, text='customise', command=customise_calc)
 customise_calc_btn.grid(row=3, column=1)
 
 '''
