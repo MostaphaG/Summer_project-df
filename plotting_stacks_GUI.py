@@ -1152,8 +1152,12 @@ click_opt_int = 0
 
 # define a function that will update the variable that defines click action
 def click_option_handler(click_option):
+    
+    
     global click_opt_int, toolbar, LI_coord, LI_total_label, LI_total, LI_instruction_label, LI_restart_btn, LI_use_var
     click_opt_int = click_option
+    
+    
     if click_opt_int == 0:
         fig.canvas.draw()
         # if the tools is selected again, add the zoom and pan buttons
@@ -1177,6 +1181,7 @@ def click_option_handler(click_option):
             PLOT_response()
         # update that LI is not being used, but tools
         LI_use_var = 0
+        
         
     # when 'tool' is not selected, disable the pan and zoom:
     elif 0 < click_opt_int < 5:
@@ -1207,7 +1212,10 @@ def click_option_handler(click_option):
         LI_use_var = 0
         # run deriv calc as per its calling
         deriv_calc(x_m, y_m)
+        
+        
     elif click_opt_int == 5:
+        fig.canvas.draw()
         # Initialise a global variable for storing click coordinates
         # and total line integral
         # home the main screen
