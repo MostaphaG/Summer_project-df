@@ -520,11 +520,11 @@ def on_key_press(event):
         if LI_shape_select.get() == 'lines':
             # Store the coordinates of the click in list
             LI_coord.append([x_m, y_m])
-            line_int(1000, string_x, string_y)
+            line_int(10000, string_x, string_y)
         elif LI_shape_select.get() == 'square':
             print('not implemented')   # insert function later
         elif LI_shape_select.get() == 'circle':
-            print('not implemented')     # insert function later
+            line_int_circ([x_m,y_m], 1, 10000, string_x, string_y)
 
 
 # define a funciton to restart line integral calculation and lines
@@ -546,6 +546,54 @@ def LI_shape_select_response(selected_shape):
     # deal with lines
     global LI_shape_selected
     LI_shape_select.set(selected_shape)
+
+# Compute line integral for circles
+def line_int_circ(cent, R, N, u_str, v_str):
+    #Parametric increment (theta)
+    dt = np.linspace(0,2*np.pi,N)
+    
+    # Centre point
+    xc = cent[0]
+    yc = cent[1]
+    
+    # Create array to store interval point coordinates
+    intervals = np.zeros(shape=(2,N))
+    uv_store = np.zeros(shape=(2,N))
+    dx = np.zeros(shape=(1,N))
+    dy = np.zeros(shape=(1,N))
+    
+    # Magnitude of increment equals that of the circumference subtended by dt for large N
+    A = 2*np.pi*R/N
+    
+    # Loop through to assign coordinates to interval points and plot them
+    intervals[0,:] = xc + R*np.cos(dt)
+    intervals[1,:] = yc + R*np.sin(dt)
+    
+    # for i in range(N):
+    #     ax.plot(intervals[0,i], intervals[1,i], 'bo', markersize=100/N)
+    
+    uv_store[0,:] = eval(format_eq(u_str,1))
+    uv_store[1,:] = eval(format_eq(v_str,1))
+    
+    # Increment vector components
+    dx = -A*np.sin(dt)
+    dy = A*np.cos(dt)
+    
+    res = np.sum(dx*uv_store[0,:] + dy*uv_store[1,:])
+    
+    # Plot the circle
+    circle1 = mpl.patches.Circle(cent, R, fill=False, color='red')
+    main_axis.add_artist(circle1)
+    fig.canvas.draw()
+    circle1.remove()
+    
+    # update the total
+    LI_total = res
+    # update its label
+    LI_total_label.configure(text=str(round(LI_total, 6)))
+    
+    return res
+
 
 
 # define a function that will complete the line integral
@@ -1262,6 +1310,8 @@ def click_option_handler(click_option):
         LI_shape_instruction.grid(row=22, column=0)
         LI_shape_drop = tk.OptionMenu(right_frame, LI_shape_select, *LI_shape_list, command=LI_shape_select_response)
         LI_shape_drop.grid(row=22, column=1)
+        
+
 
 
 # =============================================================================
