@@ -517,9 +517,14 @@ def on_key_press(event):
     elif 0 < click_opt_int < 5:
         deriv_calc(x_m,y_m)
     elif click_opt_int == 5:
-        # Store the coordinates of the click in list
-        LI_coord.append([x_m,y_m])
-        line_int(1000, string_x, string_y)
+        if LI_shape_select.get() == 'lines':
+            # Store the coordinates of the click in list
+            LI_coord.append([x_m, y_m])
+            line_int(1000, string_x, string_y)
+        elif LI_shape_select.get() == 'square':
+            print('not implemented')   # insert function later
+        elif LI_shape_select.get() == 'circle':
+            print('not implemented')     # insert function later
 
 
 # define a funciton to restart line integral calculation and lines
@@ -535,7 +540,13 @@ def LI_restart():
     # ideally would want a way of deleting lines without restarting the plot
     PLOT_response()
 
-    
+
+# define LI shape selection response to dropdown
+def LI_shape_select_response(selected_shape):
+    # deal with lines
+    global LI_shape_selected
+    LI_shape_select.set(selected_shape)
+
 
 # define a function that will complete the line integral
 def line_int(N, u_str, v_str):
@@ -1152,12 +1163,9 @@ click_opt_int = 0
 
 # define a function that will update the variable that defines click action
 def click_option_handler(click_option):
-    
-    
-    global click_opt_int, toolbar, LI_coord, LI_total_label, LI_total, LI_instruction_label, LI_restart_btn, LI_use_var
+    global click_opt_int, toolbar, LI_coord, LI_total_label, LI_total, LI_instruction_label, LI_restart_btn, LI_use_var, LI_shape_instruction, LI_shape_drop, LI_shape_select
     click_opt_int = click_option
-    
-    
+    # tools being selected
     if click_opt_int == 0:
         fig.canvas.draw()
         # if the tools is selected again, add the zoom and pan buttons
@@ -1171,6 +1179,8 @@ def click_option_handler(click_option):
             LI_instruction_label.destroy()
             LI_total_label.destroy()
             LI_restart_btn.destroy()
+            LI_shape_instruction.destroy()
+            LI_shape_drop.destroy
         except UnboundLocalError:
             pass
         # NOT IDEAL BUT HOPEFULLY TEMPORARY
@@ -1181,7 +1191,6 @@ def click_option_handler(click_option):
             PLOT_response()
         # update that LI is not being used, but tools
         LI_use_var = 0
-        
         
     # when 'tool' is not selected, disable the pan and zoom:
     elif 0 < click_opt_int < 5:
@@ -1200,6 +1209,8 @@ def click_option_handler(click_option):
             LI_instruction_label.destroy()
             LI_total_label.destroy()
             LI_restart_btn.destroy()
+            LI_shape_instruction.destroy()
+            LI_shape_drop.destroy()
         except UnboundLocalError:
             pass
         # NOT IDEAL BUT HOPEFULLY TEMPORARY
@@ -1212,8 +1223,7 @@ def click_option_handler(click_option):
         LI_use_var = 0
         # run deriv calc as per its calling
         deriv_calc(x_m, y_m)
-        
-        
+    # when line integrals are selected, need extra options
     elif click_opt_int == 5:
         fig.canvas.draw()
         # Initialise a global variable for storing click coordinates
@@ -1244,6 +1254,14 @@ def click_option_handler(click_option):
         # and restart the variables.
         LI_restart_btn = tk.Button(right_frame, text='Line int. restart', padx=20, command=LI_restart)
         LI_restart_btn.grid(row=21, column=0, columnspan=2)
+        # define a drop down to draw: connected lines, square or circle.
+        LI_shape_select = tk.StringVar()
+        LI_shape_list = ['lines', 'square', 'circle']
+        LI_shape_select.set(LI_shape_list[0])
+        LI_shape_instruction = tk.Label(right_frame, text='Select what to draw:')
+        LI_shape_instruction.grid(row=22, column=0)
+        LI_shape_drop = tk.OptionMenu(right_frame, LI_shape_select, *LI_shape_list, command=LI_shape_select_response)
+        LI_shape_drop.grid(row=22, column=1)
 
 
 # =============================================================================
