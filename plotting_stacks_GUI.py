@@ -579,7 +579,7 @@ def line_int_circ(cent, R, N, u_str, v_str):
     dx = -A*np.sin(dt)
     dy = A*np.cos(dt)
     
-    res = np.sum(dx*uv_store[0,:] + dy*uv_store[1,:])
+    res = np.sum(dx[:-1]*uv_store[0,:-1] + dy[:-1]*uv_store[1,:-1])
     
     # Plot the circle
     circle1 = mpl.patches.Circle(cent, R, fill=False, color='red')
