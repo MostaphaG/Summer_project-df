@@ -217,7 +217,7 @@ def G(s, n, c):
 
 # define a function that will plot stack components, coloured
 # as per the orientation of the 2 form at that grid point
-def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L, pt_den, fract, colour_str):
+def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L, pt_den, fract, colour_str, s_min=0):
     global s_L
     
     # depending on axis_view and h_index, get the planar u and v from the given
@@ -316,9 +316,10 @@ def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L,
             else:
                 color_index = 2  # in case it is zero exactly
             
-            for t in range(1, s_max+1):
-                if (t-1)/s_max <= R[i, j] <= t/s_max:
+            for t in range(s_min, s_max+2):
+                if (t-2)/s_max <= R[i, j] <= (t-1)/s_max:
                     R_int[i, j] = t
+            
             # set a varible for current considered magnitude as it is reused
             # avoids extracting from R many times.
             n = R_int[i, j]
@@ -462,7 +463,7 @@ field_unit = np.ones(np.shape(zg))
 delta_factor = 10
 
 # fraction of sheet length to graph length
-fract = 0.05
+fract = 0.096
 
 # same for block side size
 fract_s = 0.15
@@ -565,8 +566,8 @@ F_yz_y, F_yz_z = eq_to_comps(eq_1_yz, eq_2_yz, xg, yg)
 # plot the starting field with desired parameters as specidfied above
 # arrow params not needed as arrows arent plotted
 # starting with viewing axis ='z' therefore xy plane
-form_2_components_plot_3(xg, yg, h_index, axis_view, F_xy_x, zero_field, s_max, L, pt_den, fract, colour_str)
-form_2_components_plot_3(xg, yg, h_index, axis_view, zero_field, F_xy_y, s_max, L, pt_den, fract, colour_str)
+form_2_components_plot_3(xg, yg, h_index, axis_view, F_xy_x, zero_field, s_max, L, pt_den, fract, colour_str, 2)
+form_2_components_plot_3(xg, yg, h_index, axis_view, zero_field, F_xy_y, s_max, L, pt_den, fract, colour_str, 2)
 
 # reduce white space from the figure in the plot frame
 fig.tight_layout()
@@ -633,22 +634,22 @@ def slide():
     if stack_block_int == 1:
             # 1 was chosen therefore complete stacks
         if axis_view == 'z':
-            form_2_components_plot_3(xg, yg, h_index, axis_view, F_xy_x, zero_field, s_max, L, pt_den, fract, colour_str)
-            form_2_components_plot_3(xg, yg, h_index, axis_view, zero_field, F_xy_y, s_max, L, pt_den, fract, colour_str)
+            form_2_components_plot_3(xg, yg, h_index, axis_view, F_xy_x, zero_field, s_max, L, pt_den, fract, colour_str, 2)
+            form_2_components_plot_3(xg, yg, h_index, axis_view, zero_field, F_xy_y, s_max, L, pt_den, fract, colour_str, 2)
             ax.set_xlabel('$x$')
             ax.set_ylabel('$y$')
             # update the label based on that
             axis_height_txt.configure(text=str(z[h_index]))
         elif axis_view == 'y':
-            form_2_components_plot_3(xg, zg, h_index, axis_view, F_xz_x, zero_field, s_max, L, pt_den, fract, colour_str)
-            form_2_components_plot_3(xg, zg, h_index, axis_view, zero_field, F_xz_z, s_max, L, pt_den, fract, colour_str)
+            form_2_components_plot_3(xg, zg, h_index, axis_view, F_xz_x, zero_field, s_max, L, pt_den, fract, colour_str, 2)
+            form_2_components_plot_3(xg, zg, h_index, axis_view, zero_field, F_xz_z, s_max, L, pt_den, fract, colour_str, 2)
             ax.set_xlabel('$x$')
             ax.set_ylabel('$z$')
             # update the label based on that
             axis_height_txt.configure(text=str(y[h_index]))
         elif axis_view == 'x':
-            form_2_components_plot_3(yg, zg, h_index, axis_view, F_yz_y, zero_field, s_max, L, pt_den, fract, colour_str)
-            form_2_components_plot_3(yg, zg, h_index, axis_view, zero_field, F_yz_z, s_max, L, pt_den, fract, colour_str)
+            form_2_components_plot_3(yg, zg, h_index, axis_view, F_yz_y, zero_field, s_max, L, pt_den, fract, colour_str, 2)
+            form_2_components_plot_3(yg, zg, h_index, axis_view, zero_field, F_yz_z, s_max, L, pt_den, fract, colour_str, 2)
             ax.set_xlabel('$y$')
             ax.set_ylabel('$z$')
             # update the label based on that
