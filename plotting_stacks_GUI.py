@@ -1189,13 +1189,14 @@ def deriv_calc(x_m, y_m):
             stacks = False
         if tensor.get() == 2:
             arrows = True
-            stacks = True
+            stacks = True            
         
         stack_plot(dxg, dyg, deriv_inset_ax, u_s, v_s, 5, d_range, dpd, 0.1, arrows, stacks, orientation, scale_s, w_head, h_head, 1) 
     
         # Don't display the x and y axis values
-        deriv_inset_ax.set_xticks([])
-        deriv_inset_ax.set_yticks([])
+        if click_opt_int > 2:  
+            deriv_inset_ax.set_xticks([])
+            deriv_inset_ax.set_yticks([])
         
         # Redraw the figure canvas, showing the inset axis
         fig.canvas.draw()
@@ -1203,7 +1204,7 @@ def deriv_calc(x_m, y_m):
         deriv_inset_ax.remove()
         
     # i.e. if click coordinates are undefined, do nothing
-    except NameError:
+    except (NameError, UnboundLocalError):
         pass
 
 # Initialise the click button selection
@@ -1215,6 +1216,8 @@ def click_option_handler(click_option):
     click_opt_int = click_option
     # tools being selected
     if click_opt_int == 0:
+        x_m = None
+        y_m = None
         fig.canvas.draw()
         # if the tools is selected again, add the zoom and pan buttons
         # get rid of the modified toolbar:
@@ -1273,6 +1276,8 @@ def click_option_handler(click_option):
         deriv_calc(x_m, y_m)
     # when line integrals are selected, need extra options
     elif click_opt_int == 5:
+        x_m = None
+        y_m = None
         fig.canvas.draw()
         # Initialise a global variable for storing click coordinates
         # and total line integral
