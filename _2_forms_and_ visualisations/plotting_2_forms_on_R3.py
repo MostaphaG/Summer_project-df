@@ -13,6 +13,7 @@ from sympy import diff
 from matplotlib.lines import Line2D
 from matplotlib.backend_bases import key_press_handler
 from sympy import simplify
+from math import isnan
 from matplotlib import patches as patch
 
 # %%
@@ -260,7 +261,20 @@ def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L,
     mag = np.sqrt(u**2 + v**2)
     # find direction of each arrow
     theta = np.arctan2(v, u)   # theta defined from positive x axis ccw
-
+    
+    # deal with sinularities in mag
+    for i in range(x_len):
+        for j in range(y_len):
+            # set to zero points that are not defined or inf
+            if isnan(mag[i, j]) is True or abs(mag[i, j]) == np.inf  or abs(mag[i, j]) > 1e15:
+                # colour this region as a red dot, not square to
+                # not confuse with nigh mag 2 forms in stacks. or worse, in
+                # blocks
+                circ = patch.Circle((grid_x[i, j], grid_y[i, j]), L*fract/3, color='red')
+                ax.add_patch(circ)
+                mag[i, j] = 0
+    
+    
     # #########################################################################
     # use the the direction of arrows to define stack properties
     # #########################################################################
@@ -295,13 +309,13 @@ def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L,
     # change the 2_form signs to just be in terms of the selected plane
     if axis_view == 'x':
         form_2_sgn = np.sign(form_2[2])
-        form_2_sgn_planar = form_2_sgn[:, :, h_index]
+        form_2_sgn_planar = form_2_sgn[:, h_index, :]
     elif axis_view == 'y':
         form_2_sgn = np.sign(form_2[1])
         form_2_sgn_planar = form_2_sgn[h_index, :, :]
     elif axis_view == 'z':
         form_2_sgn = np.sign(form_2[0])
-        form_2_sgn_planar = form_2_sgn[:, h_index, :]
+        form_2_sgn_planar = form_2_sgn[:, :, h_index]
     
     # loop over each arrow coordinate in x and y
     for i in range(x_len):
