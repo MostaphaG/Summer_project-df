@@ -71,7 +71,7 @@ def unformat(string):
     string = string.replace('np.sinh', 'SINH')
     string = string.replace('np.cosh', 'COSH')
     string = string.replace('**', '^')
-    string = string.replace('np.log()', 'ln')
+    string = string.replace('np.log', 'ln')
     string = string.replace('np.exp', 'e**')
     string = string.replace('field_unit', '1')
     return string
@@ -295,13 +295,13 @@ def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L,
     # change the 2_form signs to just be in terms of the selected plane
     if axis_view == 'x':
         form_2_sgn = np.sign(form_2[2])
-        form_2_sgn_planar = form_2_sgn[h_index, :, :]
+        form_2_sgn_planar = form_2_sgn[:, :, h_index]
     elif axis_view == 'y':
         form_2_sgn = np.sign(form_2[1])
-        form_2_sgn_planar = form_2_sgn[:, h_index, :]
+        form_2_sgn_planar = form_2_sgn[h_index, :, :]
     elif axis_view == 'z':
         form_2_sgn = np.sign(form_2[0])
-        form_2_sgn_planar = form_2_sgn[:, :, h_index]
+        form_2_sgn_planar = form_2_sgn[:, h_index, :]
     
     # loop over each arrow coordinate in x and y
     for i in range(x_len):
@@ -469,7 +469,7 @@ fract = 0.096
 fract_s = 0.15
 
 # define the maximum number of stack to plot, dep. on magnitude
-s_max = 5
+s_max = 8
 
 # create a figure
 fig = plt.figure(figsize=(8, 6))
@@ -493,12 +493,8 @@ ax.set_ylim(-ax_L, ax_L)
 colour_str = ['red', 'blue', 'grey']
 
 # predefine strings for splitting in x and in y for 2 form stacks
-xy_x_split_str = '1/2'
-xy_y_split_str = '1/2'
-xz_x_split_str = '1/2'
-xz_y_split_str = '1/2'
-yz_x_split_str = '1/2'
-yz_y_split_str = '1/2'
+split_1_str = '1/2'
+split_2_str = '1/2'
 
 # define the wanted 1 form on R3 in terms of each component:
 string_x = 'x*y*z'  # x component
@@ -547,19 +543,19 @@ form_2_str_dydz = str(simplify(str(unformat(result[2][0]))))
 # find all separately, to make switching axis and sliding faster
 
 # define components in the x-y plane:
-eq_1_xy = str(simplify('(' + form_2_str_dxdy + ')' + '*(' + xy_x_split_str + ')'))
-eq_2_xy = str(simplify('(' + form_2_str_dxdy + ')' + '*(' + xy_y_split_str + ')'))
+eq_1_xy = str(simplify('(' + form_2_str_dxdy + ')' + '*(' + split_1_str + ')'))
+eq_2_xy = str(simplify('(' + form_2_str_dxdy + ')' + '*(' + split_2_str + ')'))
 F_xy_x, F_xy_y = eq_to_comps(eq_1_xy, eq_2_xy, xg, yg)
 
 # define them in x-z plane
-eq_1_xz = str(simplify('(' + form_2_str_dxdz + ')' + '*(' + xz_x_split_str + ')'))
-eq_2_xz = str(simplify('(' + form_2_str_dxdz + ')' + '*(' + xz_y_split_str + ')'))
+eq_1_xz = str(simplify('(' + form_2_str_dxdz + ')' + '*(' + split_1_str + ')'))
+eq_2_xz = str(simplify('(' + form_2_str_dxdz + ')' + '*(' + split_2_str + ')'))
 F_xz_x, F_xz_z = eq_to_comps(eq_1_xz, eq_2_xz, xg, yg)
 
 
 # define them in y-z plane
-eq_1_yz = str(simplify('(' + form_2_str_dydz + ')' + '*(' + yz_x_split_str + ')'))
-eq_2_yz = str(simplify('(' + form_2_str_dydz + ')' + '*(' + yz_y_split_str + ')'))
+eq_1_yz = str(simplify('(' + form_2_str_dydz + ')' + '*(' + split_1_str + ')'))
+eq_2_yz = str(simplify('(' + form_2_str_dydz + ')' + '*(' + split_2_str + ')'))
 F_yz_y, F_yz_z = eq_to_comps(eq_1_yz, eq_2_yz, xg, yg)
 
 
@@ -592,7 +588,7 @@ def on_key_press(event):
 # define a function to respond to new 1 forms being input
 def form_1_to_2onR3():
     global string_x, string_y, string_z, form_2, F_xy_x, F_xy_y, F_xz_x, F_xz_z, F_yz_y, F_yz_z
-    global eq_1_xy, eq_2_xy, eq_1_xz, eq_2_xz, eq_1_yz, eq_2_yz
+    global eq_1_xy, eq_2_xy, eq_1_xz, eq_2_xz, eq_1_yz, eq_2_yz, form_2_str_dxdy, form_2_str_dxdz, form_2_str_dydz
     # take the inputs from user into strings
     string_x = str(simplify(form_1_x_entry.get()))
     string_y = str(simplify(form_1_y_entry.get()))
@@ -608,21 +604,22 @@ def form_1_to_2onR3():
     form_2_str_dxdy = str(simplify(str(unformat(result[0][0]))))
     form_2_str_dxdz = str(simplify(str(unformat(result[1][0]))))
     form_2_str_dydz = str(simplify(str(unformat(result[2][0]))))
-    eq_1_xy = str(simplify('(' + form_2_str_dxdy + ')' + '*(' + xy_x_split_str + ')'))
-    eq_2_xy = str(simplify('(' + form_2_str_dxdy + ')' + '*(' + xy_y_split_str + ')'))
+    # AS BEFORE:
+    eq_1_xy = str(simplify('(' + form_2_str_dxdy + ')' + '*(' + split_1_str + ')'))
+    eq_2_xy = str(simplify('(' + form_2_str_dxdy + ')' + '*(' + split_2_str + ')'))
     F_xy_x, F_xy_y = eq_to_comps(eq_1_xy, eq_2_xy, xg, yg)
-    eq_1_xz = str(simplify('(' + form_2_str_dxdz + ')' + '*(' + xz_x_split_str + ')'))
-    eq_2_xz = str(simplify('(' + form_2_str_dxdz + ')' + '*(' + xz_y_split_str + ')'))
+    eq_1_xz = str(simplify('(' + form_2_str_dxdz + ')' + '*(' + split_1_str + ')'))
+    eq_2_xz = str(simplify('(' + form_2_str_dxdz + ')' + '*(' + split_2_str + ')'))
     F_xz_x, F_xz_z = eq_to_comps(eq_1_xz, eq_2_xz, xg, yg)
-    eq_1_yz = str(simplify('(' + form_2_str_dydz + ')' + '*(' + yz_x_split_str + ')'))
-    eq_2_yz = str(simplify('(' + form_2_str_dydz + ')' + '*(' + yz_y_split_str + ')'))
+    eq_1_yz = str(simplify('(' + form_2_str_dydz + ')' + '*(' + split_1_str + ')'))
+    eq_2_yz = str(simplify('(' + form_2_str_dydz + ')' + '*(' + split_2_str + ')'))
     F_yz_y, F_yz_z = eq_to_comps(eq_1_yz, eq_2_yz, xg, yg)
     # call the slide function to easily plot them depending on h and on axis_view
     slide()
     # display this new 2 form in its frame as labels
-    Label_2_form_xy.configure(text=str(simplify(unformat(result[0][0]))) + '  dx^dy')
-    Label_2_form_xz.configure(text=str(simplify(unformat(result[1][0]))) + '  dx^dz')
-    Label_2_form_yz.configure(text=str(simplify(unformat(result[2][0]))) + '  dy^dz')
+    Label_2_form_xy.configure(text=form_2_str_dxdy + '  dx^dy')
+    Label_2_form_xz.configure(text=form_2_str_dxdz + '  dx^dz')
+    Label_2_form_yz.configure(text=form_2_str_dydz + '  dy^dz')
 
 
 # define a function to update z Index and redraw the plot based on the slider
@@ -714,6 +711,44 @@ def plot_type_responseR3(type_stack_block):
     stack_block_int = int(type_stack_block)
 
 
+# define a function to save splittings
+def splitting_choice_save():
+    global split_1_str, split_2_str
+    # get the component split factors from inputs
+    split_1_str = str(simplify(split_1_entry.get()))
+    split_2_str = str(simplify(split_2_entry.get()))
+    # close the extra window
+    splitting_window.destroy()
+
+
+# define a function to let user input splitting options
+def splitting_choice():
+    global splitting_window, split_1_entry, split_2_entry
+    # start a new window 
+    splitting_window = tk.Toplevel()
+    splitting_window.title('Choose splitting in 2 form stacks')
+    splitting_window.geometry('400x300')
+    # info, that factors must add up to 1 to return same 2 form
+    text_warning_split = '''Both MUST add to 1 to retain 2 form \n
+    or must combine with 2 form to give the same expression \n
+    otherwise, the plotted 2 form will be different!
+                        '''
+    tk.Label(splitting_window, text=text_warning_split).grid(row=0, column=0, pady=10)
+    # define entry box for splitting factor that goes to x:
+    tk.Label(splitting_window, text='factor going toward component 1').grid(row=2, column=0)
+    split_1_entry = tk.Entry(splitting_window, width=40, borderwidth=1)
+    split_1_entry.insert(0, split_1_str)
+    split_1_entry.grid(row=3, column=0)
+    # define entry box for splitting factor that goes to y:
+    tk.Label(splitting_window, text='factor going toward component 2').grid(row=4, column=0)
+    split_2_entry = tk.Entry(splitting_window, width=40, borderwidth=1)
+    split_2_entry.insert(0, split_2_str)
+    split_2_entry.grid(row=5, column=0)
+    # define a button to SAVE these
+    Splitting_btn = tk.Button(splitting_window, text='SAVE', padx=20, pady=10, command=splitting_choice_save)
+    Splitting_btn.grid(row=6, column=0, pady=10)
+
+
 # define a label and arrows to change the axis value, and index
 # instead of the previously tried slider and entry boxes:
 
@@ -760,6 +795,12 @@ blocks_rb = tk.Radiobutton(field_input_frame, text='blocks', variable=stack_bloc
 blocks_rb.grid(row=0, column=1)
 stacks_rb = tk.Radiobutton(field_input_frame, text='stacks', variable=stack_block, value=1, command=lambda: plot_type_responseR3(stack_block.get()))
 stacks_rb.grid(row=0, column=2)
+
+
+# define a button that will let the user chose the splitting option
+# for 2 forms plotted as stacks.
+splitting_opts_btn = tk.Button(field_input_frame, text='choose splitting', command=splitting_choice)
+splitting_opts_btn.grid(row=8, column=1, padx=10, pady=40)
 
 # define entry boxes for the three 1 forms that are being plotted
 # define entries for a 1 form
