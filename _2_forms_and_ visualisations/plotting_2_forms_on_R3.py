@@ -219,7 +219,7 @@ def G(s, n, c):
 # define a function that will plot stack components, coloured
 # as per the orientation of the 2 form at that grid point
 def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L, pt_den, fract, colour_str, s_min=0):
-    global s_L
+    global s_L, mag
     
     # depending on axis_view and h_index, get the planar u and v from the given
     # 3D ones and the grids sorted
@@ -257,10 +257,36 @@ def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L,
     # #########################################################################
     # get variables needed for the initial, simplified stack plot
     # #########################################################################
+    
     # find the arrow length corresponding to each point and store in mag array
     mag = np.sqrt(u**2 + v**2)
+    
     # find direction of each arrow
     theta = np.arctan2(v, u)   # theta defined from positive x axis ccw
+    
+    
+    # get the 2 form signs and
+    # change the 2_form signs to just be in terms of the selected plane
+    if axis_view == 'x':
+        form_2_sgn = np.sign(form_2[2])
+        form_2_sgn_planar = form_2_sgn[:, h_index, :]
+    elif axis_view == 'y':
+        form_2_sgn = np.sign(form_2[1])
+        form_2_sgn_planar = form_2_sgn[h_index, :, :]
+    elif axis_view == 'z':
+        form_2_sgn = np.sign(form_2[0])
+        form_2_sgn_planar = form_2_sgn[:, :, h_index]
+    
+    # correct for singularities in planar form 2:
+    for i in range(x_len):
+        for j in range(y_len):
+            # set to zero points that are not defined or inf
+            if isnan(mag[i, j]) is True:
+                form_2_sgn_planar[i, j] = 0
+            if mag[i, j] == np.inf  or mag[i, j] > 1e15:
+                form_2_sgn_planar[i, j] = 1
+            if mag[i, j] == -np.inf  or mag[i, j] < -1e15:
+                form_2_sgn_planar[i, j] = -1
     
     # deal with sinularities in mag
     for i in range(x_len):
@@ -304,18 +330,6 @@ def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L,
     A_y = grid_y - (sheet_L/2)*np.cos(theta)
     B_x = grid_x - (sheet_L/2)*np.sin(theta)
     B_y = grid_y + (sheet_L/2)*np.cos(theta)
-    
-    # get the 2 form signs and
-    # change the 2_form signs to just be in terms of the selected plane
-    if axis_view == 'x':
-        form_2_sgn = np.sign(form_2[2])
-        form_2_sgn_planar = form_2_sgn[:, h_index, :]
-    elif axis_view == 'y':
-        form_2_sgn = np.sign(form_2[1])
-        form_2_sgn_planar = form_2_sgn[h_index, :, :]
-    elif axis_view == 'z':
-        form_2_sgn = np.sign(form_2[0])
-        form_2_sgn_planar = form_2_sgn[:, :, h_index]
     
     # loop over each arrow coordinate in x and y
     for i in range(x_len):

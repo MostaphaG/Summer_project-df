@@ -546,6 +546,9 @@ def LI_shape_select_response(selected_shape):
     # deal with lines
     global LI_shape_selected
     LI_shape_select.set(selected_shape)
+    # restart the plot and the integral values
+    LI_restart()
+    
 
 # Compute line integral for circles
 def line_int_circ(cent, R, N, u_str, v_str):
@@ -1315,7 +1318,7 @@ def click_option_handler(click_option):
         LI_shape_instruction.grid(row=22, column=0)
         LI_shape_drop = tk.OptionMenu(right_frame, LI_shape_select, *LI_shape_list, command=LI_shape_select_response)
         LI_shape_drop.grid(row=22, column=1)
-        
+
 
 
 
