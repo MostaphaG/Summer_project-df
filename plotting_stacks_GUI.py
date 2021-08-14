@@ -17,6 +17,10 @@ from PIL import Image, ImageTk
 from math import isnan
 from matplotlib import patches as patch
 
+# input many numpy functions to deal with user input
+from numpy import sin, cos, tan, sqrt, log, arctan, arcsin, arccos, tanh
+from numpy import sinh, cosh, arcsinh, arccosh, arctanh, exp, pi
+
 # %% VFA GUI
 
 # start the timer
@@ -278,20 +282,8 @@ def format_eq(string, LI=0):
     else:
         string = string.replace('x', 'xg')
         string = string.replace('y', 'yg')
-    
-    string = string.replace('z', 'zg')
+        string = string.replace('z', 'zg')
     # where there are special functions, replace them with library directions
-    string = string.replace('pi', 'np.pi')
-    string = string.replace('sqrt', 'np.sqrt')
-    string = string.replace('sin', 'np.sin')
-    string = string.replace('cos', 'np.cos')
-    string = string.replace('tan', 'np.tan')
-    string = string.replace('ARCTAN', 'np.arctan')
-    string = string.replace('ARCSIN', 'np.arcsin')
-    string = string.replace('ARCCOS', 'np.arccos')
-    string = string.replace('TANH', 'np.tanh')
-    string = string.replace('SINH', 'np.sinh')
-    string = string.replace('COSH', 'np.cosh')
     string = string.replace('^', '**')
     string = string.replace('ln', 'np.log')
     string = string.replace('e**', 'np.exp')
@@ -462,7 +454,7 @@ theta_den = 25
 
 # define the axis
 r = np.linspace(r_min, L, r_den)
-theta = np.linspace(0, 360 - 360/(theta_den-1), theta_den) * np.pi/180
+theta = np.linspace(360/(theta_den-1), 360, theta_den) * np.pi/180
 
 # define a polar grid
 rg, thetag = np.meshgrid(r, theta)
@@ -801,7 +793,7 @@ def Polar_grid_plot_response(tensor):
     L = float(L_entry.get())
     # using these redefine the new polar grids
     r = np.linspace(r_min, L, r_den)
-    theta = np.linspace(0, 360 - 360/(theta_den-1), theta_den) * np.pi/180
+    theta = np.linspace(360/(theta_den-1), 360, theta_den) * np.pi/180
     # mesh into a grid
     rg, thetag = np.meshgrid(r, theta)
     # convert grid to cartesian
@@ -840,7 +832,7 @@ def save_polar_grid():
     theta_den = int(theta_den_entry.get())
     # using these redefine the new polar grids
     r = np.linspace(r_min, L, r_den)
-    theta = np.linspace(0, 360 - 360/(theta_den-1), theta_den) * np.pi/180
+    theta = np.linspace(360/(theta_den-1), 360, theta_den) * np.pi/180
     rg, thetag = np.meshgrid(r, theta)
     Polar_grid_plot_response(tensor.get())
     # once these are saved (made global), destroy the new window
