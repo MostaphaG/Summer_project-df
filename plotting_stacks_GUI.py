@@ -516,7 +516,9 @@ def on_key_press(event):
         elif LI_shape_select.get() == 'square':
             print('not implemented')   # insert function later
         elif LI_shape_select.get() == 'circle':
-            line_int_circ([x_m,y_m], 1, 10000, string_x, string_y)
+            # get the radius and call approperiate function
+            Radius_LI_circ = float(Radius_LI_circ_entry.get())
+            line_int_circ([x_m,y_m], Radius_LI_circ, 10000, string_x, string_y)
 
 
 # define a funciton to restart line integral calculation and lines
@@ -536,8 +538,21 @@ def LI_restart():
 # define LI shape selection response to dropdown
 def LI_shape_select_response(selected_shape):
     # deal with lines
-    global LI_shape_selected
+    global LI_shape_selected, Radius_LI_circ_entry, Radius_LI_label
     LI_shape_select.set(selected_shape)
+    if selected_shape == 'circle':
+        # if circle is selected, display an entry box for the radius of it
+        Radius_LI_label = tk.Label(right_frame, text='input circle radius')
+        Radius_LI_label.grid(row=23, column=0)
+        Radius_LI_circ_entry = tk.Entry(right_frame, width=10)
+        Radius_LI_circ_entry.grid(row=23, column=1)
+        Radius_LI_circ_entry.insert(0, '3')
+    else:
+        try:
+            Radius_LI_label.destroy()
+            Radius_LI_circ_entry.destroy()
+        except UnboundLocalError:
+            pass
     # restart the plot and the integral values
     LI_restart()
     
@@ -1226,7 +1241,9 @@ def click_option_handler(click_option):
             LI_total_label.destroy()
             LI_restart_btn.destroy()
             LI_shape_instruction.destroy()
-            LI_shape_drop.destroy
+            LI_shape_drop.destroy()
+            Radius_LI_label.destroy()
+            Radius_LI_circ_entry.destroy()
         except UnboundLocalError:
             pass
         # NOT IDEAL BUT HOPEFULLY TEMPORARY
@@ -1257,6 +1274,8 @@ def click_option_handler(click_option):
             LI_restart_btn.destroy()
             LI_shape_instruction.destroy()
             LI_shape_drop.destroy()
+            Radius_LI_label.destroy()
+            Radius_LI_circ_entry.destroy()
         except UnboundLocalError:
             pass
         # NOT IDEAL BUT HOPEFULLY TEMPORARY

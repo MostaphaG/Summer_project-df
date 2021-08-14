@@ -17,6 +17,11 @@ from sympy.parsing.sympy_parser import parse_expr
 from sympy import simplify, integrate, Symbol
 from matplotlib import patches as patch
 
+# input many numpy functions to deal with user input
+from numpy import sin, cos, tan, sqrt, log, arctan, arcsin, arccos, tanh
+from numpy import sinh, cosh, arcsinh, arccosh, arctanh, exp, pi
+
+
 # %%
 
 # start the timer
@@ -75,17 +80,6 @@ def format_eq(string):
     string = string.replace('y', 'yg')
     string = string.replace('z', 'zg')
     # where there are special functions, replace them with library directions
-    string = string.replace('pi', 'np.pi')
-    string = string.replace('sqrt', 'np.sqrt')
-    string = string.replace('sin', 'np.sin')
-    string = string.replace('cos', 'np.cos')
-    string = string.replace('tan', 'np.tan')
-    string = string.replace('ARCTAN', 'np.arctan')
-    string = string.replace('ARCSIN', 'np.arcsin')
-    string = string.replace('ARCCOS', 'np.arccos')
-    string = string.replace('TANH', 'np.tanh')
-    string = string.replace('SINH', 'np.sinh')
-    string = string.replace('COSH', 'np.cosh')
     string = string.replace('^', '**')
     string = string.replace('ln', 'np.log')
     string = string.replace('e**', 'np.exp')
