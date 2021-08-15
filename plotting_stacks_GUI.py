@@ -375,9 +375,13 @@ field_name_list = ['Default: y*sin(x)dx - x*cos(y)dy',
               'Falling cat field (Planar 3 link robot)',
               'Gravitational/Electric Point Charge: -x/(x**2+y**2)dx + -y/(x**2+y**2)dy',
               'Magnetic Field of Current Carrying Wire: -y/(x**2+y**2)dx + x/(x**2+y**2)dy',
+              'Flamms paraboloid',
               'BLACK HOLE!'
               ]
 
+# Flamm's paraboloid ( https://rreusser.github.io/flamms-paraboloid/, https://en.wikipedia.org/wiki/Schwarzschild_metric")
+
+# Black hole field analogue "taking the Schwarzchild contraction factor, at \theta = pi/2, g = (1-(r_s/r))^(-1) and defining the one form w = \del(g)/\del(x) dx + \del(g)/\del(y) dy    
 
 # list of x components, in order of field_name_list
 field_x_list = ['y*sin(x)',
@@ -389,7 +393,8 @@ field_x_list = ['y*sin(x)',
                 '(3*cos(y) + 4)/(15 + 6*cos(x) + 6*cos(y))',
                 '-x/(x**2+y**2)',
                 '-y/(x**2+y**2)',
-                'x/(sqrt(x**2 + y**2)*(1-2/(sqrt(x**2 + y**2)))) - y'
+                'x/(sqrt(x**2 + y**2)*(1-2/(sqrt(x**2 + y**2)))) - y',
+                '-2*x*((x^2+y^2)^(-1.5))*(1-(2/sqrt(x^2+y^2)))^(-2)'
                 ]
 
 
@@ -403,7 +408,8 @@ field_y_list = ['- x*cos(y)',
                 '-(3*cos(x) + 4)/(15 + 6*cos(x) + 6*cos(y))',
                 '-y/(x**2+y**2)',
                 'x/(x**2+y**2)',
-                'y/(sqrt(x**2 + y**2)*(1-2/(sqrt(x**2 + y**2)))) + x'
+                'y/(sqrt(x**2 + y**2)*(1-2/(sqrt(x**2 + y**2)))) + x',
+                '-2*y*((x^2+y^2)^(-1.5))*(1-(2/sqrt(x^2+y^2)))^(-2)'
                 ]
 
 
