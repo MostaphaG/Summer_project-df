@@ -31,6 +31,39 @@ start = timeit.default_timer()
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+# define a function that will search for singularities and mark them on a very
+# fine grid, but looking point by point without saving
+def singularity_fine(u_str, v_str, dist_points, N=500):
+    global points
+    # set dot size as fraction of stack
+    dot_size = 10
+    # set grey square size as fract of point separation
+    square_size = 10
+    # set max accepted value before inf classed
+    max_inf = 100
+    # set up an array of NxN points
+    points = np.zeros(shape=(2, N+1))
+    # get interval_step size
+    interval_size = (2*L)/N
+    for i in range(N+1):
+        points[0, i] = -L + i*interval_size
+        points[1, i] = -L + i*interval_size
+    # loop over an array of N by N to check for singularities
+    for i in range(N+1):
+        for j in range(N+1):
+            # find the value of magnitudes at this point
+            value_u = eval(format_eq(u_str, 0, 1, i, j))
+            value_v = eval(format_eq(v_str, 0, 1, i, j))
+            if isnan(value_u) is True or isnan(value_v) is True:
+                #colour this region as a shaded square
+                rect = patch.Rectangle((points[0, i] - dist_points/square_size, points[1, j]  - dist_points/square_size), 2*dist_points/square_size, 2*dist_points/square_size, color='#B5B5B5')
+                main_axis.add_patch(rect)
+            if abs(value_u) == np.inf  or abs(value_u) > max_inf or abs(value_v) == np.inf  or abs(value_v) > max_inf:
+                # colour this point as a red dot
+                circ = patch.Circle((points[0, i], points[1, j]), L*fract/dot_size, color='red')
+                main_axis.add_patch(circ)
+
+
 # deifne a fucntion to check number parity
 def parity(x):
     '''
@@ -274,11 +307,14 @@ def stack_plot(xg, yg, axis, F_x, F_y, s_max, L, pt_den, fract, arrows=False, st
 
 
 # define a function to replace input string to be 'python understood'
-def format_eq(string, LI=0):
+def format_eq(string, LI=0, singular_ty=0, i=0, j=0):
     # replace all the x and y with xg and yg:
     if LI == 1 :
         string = string.replace('x', 'intervals[0,:]')
         string = string.replace('y', 'intervals[1,:]')
+    elif singular_ty == 1:
+        string = string.replace('x', 'points[' + str(0) + ', ' + str(i) + ']')
+        string = string.replace('y', 'points[' + str(1) + ', ' + str(j) + ']')
     else:
         string = string.replace('x', 'xg')
         string = string.replace('y', 'yg')
@@ -287,6 +323,20 @@ def format_eq(string, LI=0):
     string = string.replace('^', '**')
     string = string.replace('ln', 'np.log')
     string = string.replace('e**', 'np.exp')
+    return string
+
+
+# function to unformat equation to display back to user in same form
+def unformat(string):
+    # replace all the x and y with xg and yg:
+    string = string.replace('xg', 'x')
+    string = string.replace('yg', 'y')
+    string = string.replace('zg', 'z')
+    # where there are special functions, replace them with library directions
+    string = string.replace('**', '^')
+    string = string.replace('np.log', 'ln')
+    string = string.replace('np.exp', 'e**')
+    string = string.replace('field_unit', '1')
     return string
 
 
@@ -1004,6 +1054,64 @@ def scale_toggle_response():
         vect_type_response(tensor.get())
 
 
+# define response to button to show singularities
+def show_singularities():
+    # get the number of points to use:
+    fine_grid_N = int(fine_grid_N_entry.get())
+    # warn user
+    if fine_grid_N > 200:
+        tk.messagebox.showwarning('WARNING', 'This will run for a long time if there exist many singulairites and if the fine grid has too many points')
+    # ask for how many points to show
+    dist_points = xg[0, 1] - xg[0, 0]
+    singularity_fine(string_x, string_y, dist_points, N=fine_grid_N)
+    canvas.draw()
+
+
+# define a function that will respond to plotting a known singularity
+def known_singularity_response():
+    # get the variable
+    singularity_eq_type = singular_var.get()
+    # set up a finer grid than normal to show clearly
+    x_sing, y_sing = np.linspace(-L, L, pt_den*5), np.linspace(-L, L, pt_den*5)
+    known_singularity = known_singularity_entry.get()
+    known_singularity = format_eq(known_singularity)
+    if singularity_eq_type == singular_list[0]:
+        # from the input, define y values
+        if known_singularity.find('xg') == -1 & known_singularity.find('yg') == -1:
+            y_vals_singular = eval('(' + known_singularity + ') + 0*y_sing')
+        else:
+            # replace variables
+            known_singularity = known_singularity.replace('xg', 'x_sing')
+            known_singularity = known_singularity.replace('yg', 'y_sing')
+            y_vals_singular = eval(known_singularity)
+        # plot
+        main_axis.plot(x_sing, y_vals_singular, 'r-.')
+    elif singularity_eq_type == singular_list[1]:
+        # as above but the other way around
+        if known_singularity.find('xg') == -1 & known_singularity.find('yg') == -1:
+            x_vals_singular = eval('(' + known_singularity + ') + 0*x_sing')
+        else:
+            # replace variables
+            known_singularity = known_singularity.replace('xg', 'x_sing')
+            known_singularity = known_singularity.replace('yg', 'y_sing')
+            x_vals_singular = eval(known_singularity)
+        # plot
+        main_axis.plot(x_vals_singular, y_sing, 'r-.')
+    elif singularity_eq_type == singular_list[2]:
+        # split the string into the 2 coordinates
+        known_singularity = known_singularity.split(',')
+        point_x = eval(known_singularity[0])
+        point_y = eval(known_singularity[1])
+        circ = patch.Circle((point_x, point_y), L*fract/3, color='red')
+        main_axis.add_patch(circ)
+    canvas.draw()
+
+
+# define a function that will respond to dropdown for singularities
+# doesn't need to do anything.
+def singular_drop_response(var):
+    return
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # define wanted Radio buttons
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1048,6 +1156,36 @@ polar_grid_plot_btn.grid(row=1, column=0, columnspan=2)
 # and the result will be plotted
 wedge_2_btn = tk.Button(right_frame, text='wedge', command= wedge_2_response)
 wedge_2_btn.grid()
+
+
+# get a button to draw on singularities
+singularity_button = tk.Button(right_frame, text='show singularities', command=show_singularities)
+singularity_button.grid(row=16, column=0)
+# entry for N
+tk.Label(right_frame, text='number of sampling points').grid(row=16, column=2)
+fine_grid_N_entry = tk.Entry(right_frame, width=10)
+fine_grid_N_entry.grid(row=16, column=1)
+fine_grid_N_entry.insert(0, 10)
+
+# define an entry where the user can inpu known singularity equation
+# this will be taken and plotted as a red, dotted line
+tk.Label(right_frame, text='known singularity equation:').grid(row=17, column=0)
+
+# define a dropdown to select y= or x=
+singular_var = tk.StringVar()
+singular_list = ['y=', 'x=', 'point']
+singular_var.set(singular_list[0])
+# rest to define a known singularity equation
+tk.Label(right_frame, text='Select Inset Plot Point Density:').grid(row=3, column=0)
+dpd_drop = tk.OptionMenu(right_frame, singular_var, *singular_list, command=singular_drop_response)
+dpd_drop.grid(row=18, column=0)
+known_singularity_entry = tk.Entry(right_frame, width=20)
+known_singularity_entry.grid(row=18, column=1)
+known_singularity_entry.insert(0, '')
+
+# define asubmit button to that entry
+submit_known_singularity_btn = tk.Button(right_frame, text='singularity', command=known_singularity_response)
+submit_known_singularity_btn.grid(row=18, column=2)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # define wanted entry boxes
