@@ -3,6 +3,7 @@
 \usepackage[a4paper]{geometry}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{esint}
 \usepackage{float}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
@@ -280,5 +281,38 @@ For these plots, the 'dxg' and 'dyg' meshgrids must be centred on zero, rather t
 \end{equation}
 
 In this notation, $\Delta x$ and $\Delta y$ represent displacements within the inset axis. As a result, positive curl is shown by a linear field with counter-clockwise flow and negative by a clockwise flow, as would be given by the right hand rule. Additionally, the divergence and curl plots use scaling that matches the field, which ensures that the magnitude of the vectors varies appropriately. 
+
+\section{Line Integrals}
+\subsection{Lines}
+
+Upon selecting the line integral radio button, with the lines drop down selection, the user can draw lines on the plot by clicking to mark the successive start and end points as required. The users click coordinates are stored in a list (LI\textunderscore coord). The function 'line\textunderscore int' takes the two most recent entries in the list of coordinates and finds the approximate line integral using the following method:
+
+\begin{itemize}
+	\item Small displacements along the line in the $x$ and $y$ directions are calculated based on the last two entries in LI\textunderscore coord (coords of points $a$ and $b$) and the chosen number of intervals along the line, $N$. $dx = \frac{1}{N} (b_x - a_x)$,  $dy = \frac{1}{N} (b_y - a_y)$
+	\item A 2xN array 'intervals' is created and stores the coordinates of the points along the line which will be used in the final calculation. This is achieved using a for loop; $intervals(x_k) = a_x + k dx$, $intervals(y_k) = a_y + k dy$
+	\item Next the vector field components must be evaluated at each of the interval points along the line. These components are stored in the 2xN array 'uv\textunderscore store'. 
+	\item The line integral is approximated by summing the products of the small displacements $dx$ and $dy$ with the respective vector field components at each interval point. Since the displacements are the same along the straight line, the sum is simplified to:
+\end{itemize}
+
+\begin{equation}
+	\int_{a}^{b} \vec{F} \cdot \vec{dl} \approx \sum_{k=0}^{N-1} \vec{F}(x_k,y_k) \cdot \vec{dl}(x_k,y_k) = dx \sum_{k=0}^{N-1} F_x(x_k,y_k) + dy \sum_{k=0}^{N-1} F_y(x_k,y_k)
+\end{equation}
+
+Here, $\vec{F} = F_x \ \hat{i} + F_y \ \hat{j}$, $\vec{dl} = dx \ \hat{i} + dy \ \hat{j}$ and $(x_k,y_k)$ denotes the coordinates of the $k^{th}$ interval point along the line. Each successive line integral is added to the total and displayed in a GUI label. The reset button clears the plot, the list of coordinates and the total, allowing the user to start from scratch. 
+
+\subsection{Circles}
+
+Selecting the circles drop down option will allow the user to plot circles on the vector field, updating the position and radius (user selected by entry box) upon every click. Circles are centred on click location. The main difference from the calculation of straight line line integrals is that the displacement vectors are no longer constant, as they will be tangent to the circle at each interval point. The method is as follows: 
+
+\begin{itemize}
+	\item Define the small displacements $dx$ and $dy$ (arrays) for the $N$ interval points using $dx_k = -Asin(kdt)$ and $dy_k = Acos(kdt)$. $dt$ is a small angle increment and is stored as an array in the code (linspace from 0 to 2$\pi$ with $N$ points.) $A$, the magnitude of the displacement vector is chosen to be the length of the circumference swept out by each angle increment, $A = \frac{2\pi R}{N}$. 
+	\item Calculate the coordinates of interval points: $intervals(x_k) = x_m + Acos(kdt)$, $intervals(y_k) = y_m + Asin(kdt)$. $(x_m,y_m)$ are the coordinates of the users click. 
+	\item Evaluate the vector components at each interval point as before.
+	\item Find the total line integral using:
+\end{itemize}
+
+\begin{equation}
+	\ointctrclockwise \vec{F} \cdot \vec{dl} \approx \sum_{k=0}^{N-1} F_x(x_k,y_k)dx_k + \sum_{k=0}^{N-1} F_y(x_k,y_k)dy_k
+\end{equation}
 
 \end{document}

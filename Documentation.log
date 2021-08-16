@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (MiKTeX 21.3) (preloaded format=pdflatex 2021.4.1)  29 JUL 2021 11:47
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (MiKTeX 21.3) (preloaded format=pdflatex 2021.4.1)  16 AUG 2021 13:00
 entering extended mode
 **./Documentation.tex
 (Documentation.tex
@@ -154,6 +154,10 @@ LaTeX Font Info:    Redeclaring math symbol \hbar on input line 98.
 LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
 (Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
 ))
+(C:\Users\single user\AppData\Local\Programs\MiKTeX\tex/latex/esint\esint.sty
+Package: esint 
+\symlargesymbolsA=\mathgroup6
+)
 (C:\Users\single user\AppData\Local\Programs\MiKTeX\tex/latex/float\float.sty
 Package: float 2001/11/08 v1.3d Float enhancements (AL)
 \c@float@type=\count269
@@ -213,20 +217,20 @@ LaTeX Warning: Unused global option(s):
 (Documentation.aux)
 \openout1 = `Documentation.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 16.
+LaTeX Font Info:    ... okay on input line 16.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 16.
+LaTeX Font Info:    ... okay on input line 16.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 16.
+LaTeX Font Info:    ... okay on input line 16.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 16.
+LaTeX Font Info:    ... okay on input line 16.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 16.
+LaTeX Font Info:    ... okay on input line 16.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 16.
+LaTeX Font Info:    ... okay on input line 16.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 16.
+LaTeX Font Info:    ... okay on input line 16.
 
 (C:\Users\single user\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-
 pdf.mkii
@@ -326,16 +330,21 @@ File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
 [1
 
 {C:/Users/single user/AppData/Local/MiKTeX/pdftex/config/pdftex.map}]
-LaTeX Font Info:    Trying to load font information for U+msa on input line 32.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 33.
 
 
 (C:\Users\single user\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 32.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 33.
 
 (C:\Users\single user\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+LaTeX Font Info:    Trying to load font information for U+esint on input line 3
+3.
+(C:\Users\single user\AppData\Local\Programs\MiKTeX\tex/latex/esint\uesint.fd
+File: uesint.fd 
 )
 <Documentation_images/Geometry of 1 stack sheet.png, id=7, 699.61375pt x 477.78
 5pt>
@@ -343,10 +352,10 @@ File: Documentation_images/Geometry of 1 stack sheet.png Graphic file (type png
 )
 <use Documentation_images/Geometry of 1 stack sheet.png>
 Package pdftex.def Info: Documentation_images/Geometry of 1 stack sheet.png  us
-ed on input line 37.
+ed on input line 38.
 (pdftex.def)             Requested size: 279.84055pt x 191.11061pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 51--54
+Underfull \hbox (badness 10000) in paragraph at lines 52--55
 
  []
 
@@ -356,7 +365,7 @@ File: Documentation_images/Geometry of 1 stack sheet, displacement 1.png Graphi
 c file (type png)
 <use Documentation_images/Geometry of 1 stack sheet, displacement 1.png>
 Package pdftex.def Info: Documentation_images/Geometry of 1 stack sheet, displa
-cement 1.png  used on input line 59.
+cement 1.png  used on input line 60.
 (pdftex.def)             Requested size: 189.95161pt x 133.50012pt.
 [1 <./Documentation_images/Geometry of 1 stack sheet.png>]
 <Documentation_images/Geometry of 1 stack sheet, displacement 2.png, id=20, 596
@@ -365,16 +374,11 @@ File: Documentation_images/Geometry of 1 stack sheet, displacement 2.png Graphi
 c file (type png)
 <use Documentation_images/Geometry of 1 stack sheet, displacement 2.png>
 Package pdftex.def Info: Documentation_images/Geometry of 1 stack sheet, displa
-cement 2.png  used on input line 78.
+cement 2.png  used on input line 79.
 (pdftex.def)             Requested size: 178.86963pt x 138.21744pt.
  [2 <./Documentation_images/Geometry of 1 stack sheet, displacement 1.png> <./D
 ocumentation_images/Geometry of 1 stack sheet, displacement 2.png>]
-Underfull \hbox (badness 10000) in paragraph at lines 94--96
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 112--113
+Underfull \hbox (badness 10000) in paragraph at lines 95--97
 
  []
 
@@ -383,42 +387,48 @@ Underfull \hbox (badness 10000) in paragraph at lines 113--114
 
  []
 
-[3] [4] [5] [6] [7] [8] (Documentation.aux) ) 
+
+Underfull \hbox (badness 10000) in paragraph at lines 114--115
+
+ []
+
+[3] [4] [5] [6] [7] [8] [9] (Documentation.aux) ) 
 Here is how much of TeX's memory you used:
- 4207 strings out of 479321
- 62732 string characters out of 2853684
- 384528 words of memory out of 3000000
- 21596 multiletter control sequences out of 15000+600000
- 412283 words of font info for 61 fonts, out of 8000000 for 9000
+ 4276 strings out of 479321
+ 63842 string characters out of 2853684
+ 384603 words of memory out of 3000000
+ 21657 multiletter control sequences out of 15000+600000
+ 412685 words of font info for 67 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  72i,16n,78p,1249b,224s stack positions out of 5000i,500n,10000p,200000b,80000s
- <C:\Users\single user\AppData\Loc
-al\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1000.pk><C:/Users/single user/
-AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Use
-rs/single user/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmb
-x12.pfb><C:/Users/single user/AppData/Local/Programs/MiKTeX/fonts/type1/public/
-amsfonts/cm/cmex10.pfb><C:/Users/single user/AppData/Local/Programs/MiKTeX/font
-s/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/single user/AppData/Local/Progr
-ams/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi5.pfb><C:/Users/single user/AppDa
-ta/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/sin
-gle user/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7.pfb
-><C:/Users/single user/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfont
-s/cm/cmmi9.pfb><C:/Users/single user/AppData/Local/Programs/MiKTeX/fonts/type1/
-public/amsfonts/cm/cmr10.pfb><C:/Users/single user/AppData/Local/Programs/MiKTe
-X/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/single user/AppData/Local/
-Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/single user/A
-ppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/
-single user/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr9.p
+ <C:\Users\single user\AppData
+\Local\MiKTeX\fonts/pk/ljfour/public/esint/dpi600\esint10.pk> <C:\Users\single 
+user\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1000.pk><C:/Us
+ers/single user/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cm
+bx10.pfb><C:/Users/single user/AppData/Local/Programs/MiKTeX/fonts/type1/public
+/amsfonts/cm/cmbx12.pfb><C:/Users/single user/AppData/Local/Programs/MiKTeX/fon
+ts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/single user/AppData/Local/Prog
+rams/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/single user/App
+Data/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi5.pfb><C:/Users/s
+ingle user/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.p
 fb><C:/Users/single user/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfo
-nts/cm/cmsy10.pfb><C:/Users/single user/AppData/Local/Programs/MiKTeX/fonts/typ
-e1/public/amsfonts/cm/cmsy7.pfb><C:/Users/single user/AppData/Local/Programs/Mi
-KTeX/fonts/type1/public/amsfonts/cm/cmsy9.pfb><C:/Users/single user/AppData/Loc
-al/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti10.pfb><C:/Users/single u
-ser/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pf
-b>
-Output written on Documentation.pdf (9 pages, 403823 bytes).
+nts/cm/cmmi7.pfb><C:/Users/single user/AppData/Local/Programs/MiKTeX/fonts/type
+1/public/amsfonts/cm/cmmi9.pfb><C:/Users/single user/AppData/Local/Programs/MiK
+TeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/single user/AppData/Loca
+l/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/single use
+r/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Use
+rs/single user/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr
+7.pfb><C:/Users/single user/AppData/Local/Programs/MiKTeX/fonts/type1/public/am
+sfonts/cm/cmr9.pfb><C:/Users/single user/AppData/Local/Programs/MiKTeX/fonts/ty
+pe1/public/amsfonts/cm/cmsy10.pfb><C:/Users/single user/AppData/Local/Programs/
+MiKTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb><C:/Users/single user/AppData/L
+ocal/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy9.pfb><C:/Users/single 
+user/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti10.pfb><C
+:/Users/single user/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/s
+ymbols/msbm10.pfb>
+Output written on Documentation.pdf (10 pages, 415099 bytes).
 PDF statistics:
- 116 PDF objects out of 1000 (max. 8388607)
+ 125 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  16 words of extra memory for PDF output out of 10000 (max. 10000000)
 
