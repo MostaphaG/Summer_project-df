@@ -229,7 +229,7 @@ def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L,
         v = v[:, h_index, :]
     else:
         print('Error can\'t find this axis')
-
+    
     # get axis lengths:
     x_len = len(grid_x[:, 0])  # no need to change with axis_view
     y_len = len(grid_y[0, :])  # if grids are all same size
@@ -305,10 +305,24 @@ def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L,
     # of the arrow and with an arrowhead on top.
     # #########################################################################
     # find the maximum magnitude for scaling
-    max_size = np.max(mag)   # careful with singularities, else ---> nan
+    max_size = np.max(mag)
     
     # find the relative magnitude of vectors to maximum, as an array
     R = mag/max_size
+    
+    # to get tubing right, scale with respect to
+    # approperiate global max value
+    # to scale, limit s_max based on its max mag.
+    if axis_view == 'z':
+        mag_loc = int(max_global_dxdy/max_size)
+        R /= mag_loc
+    if axis_view == 'y':
+        mag_loc = int(max_global_dxdz/max_size)
+        R /= mag_loc
+    if axis_view == 'x':
+        mag_loc = int(max_global_dydz/max_size)
+        R /= mag_loc
+    
     
     # define tigonometirc shifts
     I_sin = np.sin(theta)
@@ -486,7 +500,7 @@ fract = 0.096
 fract_s = 0.15
 
 # define the maximum number of stack to plot, dep. on magnitude
-s_max = 8
+s_max = 10
 
 # create a figure
 fig = plt.figure(figsize=(8, 6))
@@ -544,6 +558,33 @@ form_2 = find_2_form(expressions, coords, pt_den, m)
 form_2_str_dxdy = str(simplify(str(unformat(result[0][0]))))
 form_2_str_dxdz = str(simplify(str(unformat(result[1][0]))))
 form_2_str_dydz = str(simplify(str(unformat(result[2][0]))))
+
+
+# find the max value of each, excluding singularities
+def find_global_max(string):
+    global values
+    # format
+    equation = format_eq(string)
+    # evaluate
+    values = eval(equation)
+    # get rid of infs and nans:
+    try:
+        for i in range(len(values[:, 0, 0])):
+            for j in range(len(values[0, :, 0])):
+                for k in range(len(values[0, 0, :])):
+                    if isnan(values[i, j, k]) is True or abs(values[i, j, k]) == np.inf or values[i, j, k] > 1e15:
+                        values[i, j, k] = 0
+    except TypeError:
+        pass
+    # now find maximum
+    maximum_in_it = np.max(values)
+    return maximum_in_it
+
+
+# use it to get max of all of these:
+max_global_dxdy = find_global_max(form_2_str_dxdy)
+max_global_dxdz = find_global_max(form_2_str_dxdz)
+max_global_dydz = find_global_max(form_2_str_dydz)
 
 # because on R3, the x, y and z components are made up of
 # dy^dz, dx^dz and dx^dy
@@ -606,6 +647,7 @@ def on_key_press(event):
 def form_1_to_2onR3():
     global string_x, string_y, string_z, form_2, F_xy_x, F_xy_y, F_xz_x, F_xz_z, F_yz_y, F_yz_z
     global eq_1_xy, eq_2_xy, eq_1_xz, eq_2_xz, eq_1_yz, eq_2_yz, form_2_str_dxdy, form_2_str_dxdz, form_2_str_dydz
+    global max_global_dxdy, max_global_dxdz, max_global_dydz
     # take the inputs from user into strings
     string_x = str(simplify(form_1_x_entry.get()))
     string_y = str(simplify(form_1_y_entry.get()))
@@ -622,6 +664,9 @@ def form_1_to_2onR3():
     form_2_str_dxdz = str(simplify(str(unformat(result[1][0]))))
     form_2_str_dydz = str(simplify(str(unformat(result[2][0]))))
     # AS BEFORE:
+    max_global_dxdy = find_global_max(form_2_str_dxdy)
+    max_global_dxdz = find_global_max(form_2_str_dxdz)
+    max_global_dydz = find_global_max(form_2_str_dydz)
     eq_1_xy = str(simplify('(' + form_2_str_dxdy + ')' + '*(' + split_1_str + ')'))
     eq_2_xy = str(simplify('(' + form_2_str_dxdy + ')' + '*(' + split_2_str + ')'))
     F_xy_x, F_xy_y = eq_to_comps(eq_1_xy, eq_2_xy, xg, yg)

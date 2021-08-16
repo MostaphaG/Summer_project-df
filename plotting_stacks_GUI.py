@@ -1076,34 +1076,55 @@ def known_singularity_response():
     known_singularity = known_singularity_entry.get()
     known_singularity = format_eq(known_singularity)
     if singularity_eq_type == singular_list[0]:
-        # from the input, define y values
-        if known_singularity.find('xg') == -1 & known_singularity.find('yg') == -1:
-            y_vals_singular = eval('(' + known_singularity + ') + 0*y_sing')
-        else:
-            # replace variables
-            known_singularity = known_singularity.replace('xg', 'x_sing')
-            known_singularity = known_singularity.replace('yg', 'y_sing')
-            y_vals_singular = eval(known_singularity)
-        # plot
-        main_axis.plot(x_sing, y_vals_singular, 'r-.')
+        # get each input separately
+        inputs = known_singularity.split('; ')
+        # find out how many of them have been put in:
+        number = len(inputs)
+        # loop over plotting all
+        for i in range(number):
+            known_singularity = inputs[i]
+            # from the input, define y values
+            if known_singularity.find('xg') == -1 & known_singularity.find('yg') == -1:
+                y_vals_singular = eval('(' + known_singularity + ') + 0*y_sing')
+            else:
+                # replace variables
+                known_singularity = known_singularity.replace('xg', 'x_sing')
+                known_singularity = known_singularity.replace('yg', 'y_sing')
+                y_vals_singular = eval(known_singularity)
+            # plot
+            main_axis.plot(x_sing, y_vals_singular, 'r-.')
     elif singularity_eq_type == singular_list[1]:
-        # as above but the other way around
-        if known_singularity.find('xg') == -1 & known_singularity.find('yg') == -1:
-            x_vals_singular = eval('(' + known_singularity + ') + 0*x_sing')
-        else:
-            # replace variables
-            known_singularity = known_singularity.replace('xg', 'x_sing')
-            known_singularity = known_singularity.replace('yg', 'y_sing')
-            x_vals_singular = eval(known_singularity)
-        # plot
-        main_axis.plot(x_vals_singular, y_sing, 'r-.')
+        # get each input separately
+        inputs = known_singularity.split('; ')
+        # find out how many of them have been put in:
+        number = len(inputs)
+        # loop over plotting all
+        for i in range(number):
+            known_singularity = inputs[i]
+            # as above but the other way around
+            if known_singularity.find('xg') == -1 & known_singularity.find('yg') == -1:
+                x_vals_singular = eval('(' + known_singularity + ') + 0*x_sing')
+            else:
+                # replace variables
+                known_singularity = known_singularity.replace('xg', 'x_sing')
+                known_singularity = known_singularity.replace('yg', 'y_sing')
+                x_vals_singular = eval(known_singularity)
+            # plot
+            main_axis.plot(x_vals_singular, y_sing, 'r-.')
     elif singularity_eq_type == singular_list[2]:
-        # split the string into the 2 coordinates
-        known_singularity = known_singularity.split(',')
-        point_x = eval(known_singularity[0])
-        point_y = eval(known_singularity[1])
-        circ = patch.Circle((point_x, point_y), L*fract/3, color='red')
-        main_axis.add_patch(circ)
+        # get each input separately
+        inputs = known_singularity.split('; ')
+        # find out how many of them have been put in:
+        number = len(inputs)
+        # loop over plotting all
+        for i in range(number):
+            known_singularity = inputs[i]
+            # split the string into the 2 coordinates
+            known_singularity = known_singularity.split(',')
+            point_x = eval(known_singularity[0])
+            point_y = eval(known_singularity[1])
+            circ = patch.Circle((point_x, point_y), L*fract/3, color='red')
+            main_axis.add_patch(circ)
     canvas.draw()
 
 
