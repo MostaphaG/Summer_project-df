@@ -394,7 +394,7 @@ small_frame.grid(row=2, column=1)
 
 # define scale of the graph
 L = 5
-pt_den = 21   # number of points on each axis
+pt_den = 11   # number of points on each axis
 
 # Initialise auto scaling variable
 ascale = tk.IntVar()
@@ -565,13 +565,13 @@ def on_key_press(event):
     elif 0 < click_opt_int < 5:
         deriv_calc(x_m,y_m)
     elif click_opt_int == 5:
-        if LI_shape_select.get() == 'lines':
+        if LI_shape_select.get() == 'Polygon':
             # Store the coordinates of the click in list
             LI_coord.append([x_m, y_m])
-            line_int(10000, string_x, string_y)
-        elif LI_shape_select.get() == 'square':
-            print('not implemented')   # insert function later
-        elif LI_shape_select.get() == 'circle':
+            line_int_poly(10000, string_x, string_y)
+        # elif LI_shape_select.get() == 'square':
+        #     print('not implemented')   # insert function later
+        elif LI_shape_select.get() == 'Circle':
             # get the radius and call approperiate function
             Radius_LI_circ = float(Radius_LI_circ_entry.get())
             line_int_circ([x_m,y_m], Radius_LI_circ, 10000, string_x, string_y)
@@ -595,10 +595,12 @@ def LI_restart():
 def LI_shape_select_response(selected_shape):
     # deal with lines
     global LI_shape_selected, Radius_LI_circ_entry, Radius_LI_label
+    
     LI_shape_select.set(selected_shape)
-    if selected_shape == 'circle':
+
+    if selected_shape == 'Circle':
         # if circle is selected, display an entry box for the radius of it
-        Radius_LI_label = tk.Label(right_frame, text='input circle radius')
+        Radius_LI_label = tk.Label(right_frame, text='Circle Radius:')
         Radius_LI_label.grid(row=23, column=0)
         Radius_LI_circ_entry = tk.Entry(right_frame, width=10)
         Radius_LI_circ_entry.grid(row=23, column=1)
@@ -607,7 +609,7 @@ def LI_shape_select_response(selected_shape):
         try:
             Radius_LI_label.destroy()
             Radius_LI_circ_entry.destroy()
-        except UnboundLocalError:
+        except UnboundLocalError:  
             pass
     # restart the plot and the integral values
     LI_restart()
@@ -661,22 +663,31 @@ def line_int_circ(cent, R, N, u_str, v_str):
     return res
 
 
-
 # define a function that will complete the line integral
-def line_int(N, u_str, v_str):
-    global LI_total
+def line_int_poly(N, u_str, v_str):
+    global LI_total, coord_array, coord_diff
     # set up a conuter to know how many time to complete the sum process
     c_count = len(LI_coord)
-    if c_count >= 1:
+    
+    # Tolerance for auto-joining lines together i.e. distance below which lines will join
+    ctol = 0.1
+    
+    coord_array = np.array(LI_coord)
+           
+    if c_count > 1:
+        
+        # Auto-join lines (check previous coords for if any are very close to eachother)
+        coord_diff = coord_array - coord_array[c_count-1,:]
+        for i in range(c_count):
+            if sqrt((coord_diff[i,0])**2 + (coord_diff[i,1])**2) < ctol:
+                LI_coord[c_count-1] = LI_coord[i]
+                
         # get coordinates from mouse clicks
         a = LI_coord[c_count - 2]
         b = LI_coord[c_count - 1]
         # Plot line between points a and b
         main_axis.add_line(Line2D((a[0], b[0]), (a[1], b[1]), linewidth=2, color='red'))
-        # if only one click was completed, plot a small circle
-        if len(LI_coord) == 1:
-            circle = patch.Circle(LI_coord[0], L*fract/6, color='red')
-            main_axis.add_patch(circle)
+        
         
         # linegrad = (b[1]-a[1])/(b[0]-a[0])  # keep as comment for now
         # find line length
@@ -717,8 +728,10 @@ def line_int(N, u_str, v_str):
         return res
     
     else:
-        pass
-
+        # If only clicked once, plot small red circle
+        circle = patch.Circle(LI_coord[0], L*fract/6, color='red')
+        main_axis.add_patch(circle)
+        canvas.draw()
 
 # connect figure event to a function that responds to clicks, defined above
 cid = fig.canvas.mpl_connect("button_press_event", on_key_press)
@@ -1499,6 +1512,7 @@ def click_option_handler(click_option):
         LI_use_var = 0
         # run deriv calc as per its calling
         deriv_calc(x_m, y_m)
+        
     # when line integrals are selected, need extra options
     elif click_opt_int == 5:
         x_m = None
@@ -1524,24 +1538,22 @@ def click_option_handler(click_option):
         # initialise a variable that will keep track of total LI
         LI_total = 0
         # define a label that will display it
-        LI_instruction_label = tk.Label(right_frame, text='line integral result:')
+        LI_instruction_label = tk.Label(right_frame, text='LI Total:')
         LI_instruction_label.grid(row=20, column=0, padx=10)
         LI_total_label = tk.Label(right_frame, text=LI_total)
         LI_total_label.grid(row=20, column=1)
         # display a restart button that will clear the lines
         # and restart the variables.
-        LI_restart_btn = tk.Button(right_frame, text='Line int. restart', padx=20, command=LI_restart)
+        LI_restart_btn = tk.Button(right_frame, text='LI Restart', padx=20, command=LI_restart)
         LI_restart_btn.grid(row=21, column=0, columnspan=2)
         # define a drop down to draw: connected lines, square or circle.
         LI_shape_select = tk.StringVar()
-        LI_shape_list = ['lines', 'square', 'circle']
+        LI_shape_list = ['Polygon', 'Circle']
         LI_shape_select.set(LI_shape_list[0])
         LI_shape_instruction = tk.Label(right_frame, text='Select what to draw:')
         LI_shape_instruction.grid(row=22, column=0)
         LI_shape_drop = tk.OptionMenu(right_frame, LI_shape_select, *LI_shape_list, command=LI_shape_select_response)
         LI_shape_drop.grid(row=22, column=1)
-
-
 
 
 # =============================================================================
