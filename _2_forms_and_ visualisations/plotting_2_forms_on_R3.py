@@ -208,7 +208,7 @@ def G(s, n, c):
 # define a function that will plot stack components, coloured
 # as per the orientation of the 2 form at that grid point
 def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L, pt_den, fract, colour_str, s_min=0):
-    global s_L, mag
+    global s_L, mag, mag_loc
     
     # depending on axis_view and h_index, get the planar u and v from the given
     # 3D ones and the grids sorted
@@ -313,17 +313,19 @@ def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L,
     # to get tubing right, scale with respect to
     # approperiate global max value
     # to scale, limit s_max based on its max mag.
-    if axis_view == 'z':
-        mag_loc = int(max_global_dxdy/max_size)
-        R /= mag_loc
-    if axis_view == 'y':
-        mag_loc = int(max_global_dxdz/max_size)
-        R /= mag_loc
-    if axis_view == 'x':
-        mag_loc = int(max_global_dydz/max_size)
-        R /= mag_loc
-    
-    
+    try:
+        if axis_view == 'z':
+            mag_loc = int(max_global_dxdy/max_size)
+            R /= mag_loc
+        if axis_view == 'y':
+            mag_loc = int(max_global_dxdz/max_size)
+            R /= mag_loc
+        if axis_view == 'x':
+            mag_loc = int(max_global_dydz/max_size)
+            R /= mag_loc
+    except ValueError:
+        print('NaN encountered in divide')
+        pass
     # define tigonometirc shifts
     I_sin = np.sin(theta)
     I_cos = np.cos(theta)

@@ -1069,6 +1069,7 @@ def show_singularities():
 
 # define a function that will respond to plotting a known singularity
 def known_singularity_response():
+    global magnitude_check
     # get the variable
     singularity_eq_type = singular_var.get()
     # set up a finer grid than normal to show clearly
@@ -1093,6 +1094,22 @@ def known_singularity_response():
                 y_vals_singular = eval(known_singularity)
             # plot
             main_axis.plot(x_sing, y_vals_singular, 'r-.')
+            # check if these actually are singularities
+            checker_singularities = 0
+            string_check_x = string_x.replace('x', 'x_sing')
+            string_check_x = string_check_x.replace('y', 'y_vals_singular')
+            string_check_y = string_y.replace('x', 'x_sing')
+            string_check_y = string_check_y.replace('y', 'y_vals_singular')
+            # get the magnitude
+            magnitude_check = np.sqrt(eval(string_check_x)**2 + eval(string_check_y)**2)
+            # check if this is a singularity
+            for i in range(len(magnitude_check)):
+                if isnan(magnitude_check[i]) is True or abs(magnitude_check[i]) == np.inf or magnitude_check[i] > 1e3:
+                    checker_singularities = 1
+                else:
+                    pass
+            if checker_singularities == 0:
+                tk.messagebox.showwarning('WARNING', 'The point you have input does not register as a singularity')
     elif singularity_eq_type == singular_list[1]:
         # get each input separately
         inputs = known_singularity.split('; ')
@@ -1111,6 +1128,22 @@ def known_singularity_response():
                 x_vals_singular = eval(known_singularity)
             # plot
             main_axis.plot(x_vals_singular, y_sing, 'r-.')
+            # check if these actually are singularities
+            checker_singularities = 0
+            string_check_x = string_x.replace('x', 'x_vals_singular')
+            string_check_x = string_check_x.replace('y', 'y_sing')
+            string_check_y = string_y.replace('x', 'x_vals_singular')
+            string_check_y = string_check_y.replace('y', 'y_sing')
+            # get the magnitude
+            magnitude_check = np.sqrt(eval(string_check_x)**2 + eval(string_check_y)**2)
+            # check if this is a singularity
+            for i in range(len(magnitude_check)):
+                if isnan(magnitude_check[i]) is True or abs(magnitude_check[i]) == np.inf or magnitude_check[i] > 1e3:
+                    checker_singularities = 1
+                else:
+                    pass
+            if checker_singularities == 0:
+                tk.messagebox.showwarning('WARNING', 'The point you have input does not register as a singularity')
     elif singularity_eq_type == singular_list[2]:
         # get each input separately
         inputs = known_singularity.split('; ')
@@ -1125,6 +1158,19 @@ def known_singularity_response():
             point_y = eval(known_singularity[1])
             circ = patch.Circle((point_x, point_y), L*fract/3, color='red')
             main_axis.add_patch(circ)
+            # check if this is actually a singularity and
+            # warn user if it is not.
+            string_check_x = string_x.replace('x', 'point_x')
+            string_check_x = string_check_x.replace('y', 'point_y')
+            string_check_y = string_y.replace('x', 'point_x')
+            string_check_y = string_check_y.replace('y', 'point_y')
+            # get the magnitude
+            magnitude_check = np.sqrt(eval(string_check_x)**2 + eval(string_check_y)**2)
+            # check if this is a singularity
+            if isnan(magnitude_check) is True or abs(magnitude_check) == np.inf or magnitude_check > 1e15:
+                pass
+            else:
+                tk.messagebox.showwarning('WARNING', 'The point you have input does not register as a singularity')
     canvas.draw()
 
 
