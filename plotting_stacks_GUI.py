@@ -1702,7 +1702,6 @@ set up all in LI tab
 
 
 # define a label that will display it
-LI_total = 0
 LI_instruction_label = tk.Label(LI_frame, text='LI Total:')
 LI_instruction_label.grid(row=0, column=0, padx=10)
 LI_total_label = tk.Label(LI_frame, text=LI_total)
