@@ -678,7 +678,7 @@ def on_key_press(event):
         if LI_shape_select.get() == 'Polygon':
             # Store the coordinates of the click in list
             LI_coord.append([x_m, y_m])
-            line_int_poly(10000, string_x, string_y)
+            line_int_poly(100000, string_x, string_y)
         # elif LI_shape_select.get() == 'square':
         #     print('not implemented')   # insert function later
         elif LI_shape_select.get() == 'Circle':
@@ -776,8 +776,8 @@ def line_int_circ(cent, R, N, u_str, v_str):
     # for i in range(N):
     #     ax.plot(intervals[0,i], intervals[1,i], 'bo', markersize=100/N)
     
-    uv_store[0,:] = eval(format_eq(u_str,1))
-    uv_store[1,:] = eval(format_eq(v_str,1))
+    uv_store[0,:] = eval(format_eq(u_str,LI=1))
+    uv_store[1,:] = eval(format_eq(v_str,LI=1))
     
     # Increment vector components
     dx = -A*np.sin(dt)
@@ -1218,10 +1218,10 @@ def deriv_calc(x_m, y_m):
             dy = np.linspace(-d_range, d_range, dpd)
             J = jacobian(2, string_x, string_y)
             # Evaluate the Jacobian elements at (x_m,y_m) click location 
-            du_dx = eval(format_eq_div(format_eq(J[0, 0])))
-            du_dy = eval(format_eq_div(format_eq(J[0, 1])))
-            dv_dx = eval(format_eq_div(format_eq(J[1, 0])))
-            dv_dy = eval(format_eq_div(format_eq(J[1, 1])))
+            du_dx = round(eval(format_eq_div(format_eq(J[0, 0]))),8)
+            du_dy = round(eval(format_eq_div(format_eq(J[0, 1]))),8)
+            dv_dx = round(eval(format_eq_div(format_eq(J[1, 0]))),8)
+            dv_dy = round(eval(format_eq_div(format_eq(J[1, 1]))),8)
             dxg, dyg = np.meshgrid(dx, dy)
             
             # Div --> Trace of the Jacobian Matrix
@@ -1698,6 +1698,7 @@ set up all in LI tab
 
 
 # define a label that will display it
+LI_total = 0
 LI_instruction_label = tk.Label(LI_frame, text='LI Total:')
 LI_instruction_label.grid(row=0, column=0, padx=10)
 LI_total_label = tk.Label(LI_frame, text=LI_total)
