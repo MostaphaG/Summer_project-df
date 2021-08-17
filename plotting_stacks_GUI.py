@@ -638,6 +638,9 @@ click_opt_int = 0
 x_m = float(0)
 y_m = float(0)
 
+# initial orientation for circle integration:
+orient_int = 'cw'
+
 # define initial stack bool
 stacks = True
 
@@ -688,7 +691,7 @@ def on_key_press(event):
         elif LI_shape_select.get() == 'Circle':
             # get the radius and call approperiate function
             Radius_LI_circ = eval(Radius_LI_circ_entry.get())
-            line_int_circ([x_m,y_m], Radius_LI_circ, 10000, string_x, string_y)
+            line_int_circ([x_m,y_m], Radius_LI_circ, 100000, string_x, string_y, orient_int)
 
 
 # connect figure event to a function that responds to clicks, defined above
@@ -723,10 +726,25 @@ def LI_restart():
         pass
 
 
+# define a button to change orientation of drawn shape
+def orient_int_response():
+    global orient_int
+    if orient_int == 'cw':
+        # change it to the other way around
+        orient_int = 'ccw'
+        # change the button display
+        orient_int_btn.configure(text=orient_int)
+    elif orient_int == 'ccw':
+        # change it to the other way around
+        orient_int = 'cw'
+        # change the button display
+        orient_int_btn.configure(text=orient_int)
+
+
 # define LI shape selection response to dropdown
 def LI_shape_select_response(selected_shape):
     # deal with lines
-    global LI_shape_selected, Radius_LI_circ_entry, Radius_LI_label
+    global LI_shape_selected, Radius_LI_circ_entry, Radius_LI_label, orient_int_btn
     
     LI_shape_select.set(selected_shape)
 
@@ -737,6 +755,10 @@ def LI_shape_select_response(selected_shape):
         Radius_LI_circ_entry = tk.Entry(LI_frame, width=10)
         Radius_LI_circ_entry.grid(row=3, column=1)
         Radius_LI_circ_entry.insert(0, '3')
+        # also define a button to change orientation
+        # define a button that will change circle orientation
+        orient_int_btn = tk.Button(LI_frame, text=orient_int, command=orient_int_response)
+        orient_int_btn.grid(row=4, column=1)
         # get rid of grid on plot
         main_axis.grid(False)
         # update canvas
@@ -752,42 +774,46 @@ def LI_shape_select_response(selected_shape):
         try:
             Radius_LI_label.destroy()
             Radius_LI_circ_entry.destroy()
+            orient_int_btn.destroy()
         except UnboundLocalError:  
             pass
 
 # Compute line integral for circles
-def line_int_circ(cent, R, N, u_str, v_str):
-    #Parametric increment (theta)
-    dt = np.linspace(0,2*np.pi,N)
+def line_int_circ(cent, R, N, u_str, v_str, orient_int):
+    global dt, LI_total_label, LI_total
+    # Parametric increment (theta)
+    dt = np.linspace(0, 2*np.pi, N)
     
     # Centre point
     xc = cent[0]
     yc = cent[1]
     
     # Create array to store interval point coordinates
-    intervals = np.zeros(shape=(2,N))
-    uv_store = np.zeros(shape=(2,N))
-    dx = np.zeros(shape=(1,N))
-    dy = np.zeros(shape=(1,N))
+    intervals = np.zeros(shape=(2, N))
+    uv_store = np.zeros(shape=(2, N))
+    dx = np.zeros(shape=(1, N))
+    dy = np.zeros(shape=(1, N))
     
     # Magnitude of increment equals that of the circumference subtended by dt for large N
     A = 2*np.pi*R/N
     
     # Loop through to assign coordinates to interval points and plot them
-    intervals[0,:] = xc + R*np.cos(dt)
-    intervals[1,:] = yc + R*np.sin(dt)
-    
-    # for i in range(N):
-    #     ax.plot(intervals[0,i], intervals[1,i], 'bo', markersize=100/N)
-    
-    uv_store[0,:] = eval(format_eq(u_str,LI=1))
-    uv_store[1,:] = eval(format_eq(v_str,LI=1))
+    # depending on chosen orientation
+    if orient_int == 'ccw':
+        intervals[0, :] = xc + R*np.cos(dt)
+        intervals[1, :] = yc + R*np.sin(dt)
+    else:
+        intervals[0, :] = xc - R*np.cos(dt)
+        intervals[1, :] = yc - R*np.sin(dt)
+    # get the points along the circle and save
+    uv_store[0, :] = eval(format_eq(u_str, LI=1))
+    uv_store[1, :] = eval(format_eq(v_str, LI=1))
     
     # Increment vector components
     dx = -A*np.sin(dt)
     dy = A*np.cos(dt)
     
-    res = np.sum(dx[:-1]*uv_store[0,:-1] + dy[:-1]*uv_store[1,:-1])
+    res = np.sum(dx[:-1]*uv_store[0, :-1] + dy[:-1]*uv_store[1, :-1])
     
     # Plot the circle
     circle1 = mpl.patches.Circle(cent, R, fill=False, color='red')
@@ -1705,10 +1731,12 @@ LI_instruction_label = tk.Label(LI_frame, text='LI Total:')
 LI_instruction_label.grid(row=0, column=0, padx=10)
 LI_total_label = tk.Label(LI_frame, text=LI_total)
 LI_total_label.grid(row=0, column=1)
+
 # display a restart button that will clear the lines
 # and restart the variables.
 LI_restart_btn = tk.Button(LI_frame, text='LI Restart', padx=20, command=LI_restart)
 LI_restart_btn.grid(row=1, column=0, columnspan=2)
+
 # define a drop down to draw: connected lines, square or circle.
 LI_shape_select = tk.StringVar()
 LI_shape_list = ['Polygon', 'Circle']
