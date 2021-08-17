@@ -340,6 +340,64 @@ def unformat(string):
     return string
 
 
+# define a function that takes input string that is python understood and turn into vector components:
+def eq_to_comps(string_x, string_y, xg, yg):
+    global equation_x, equation_y
+    # use the format_eq fucntion to make given string readable by python
+    equation_x = format_eq(string_x)
+    equation_y = format_eq(string_y)
+    # use these to define the field:
+    # also: checking if equation equals zero, to then replace it with an array and not just 0:
+    u = eval(equation_x)
+    v = eval(equation_y)
+    if equation_x.find('x') & equation_x.find('y') == -1:
+        u = eval(equation_x)*np.ones(np.shape(xg))
+    if equation_y.find('x') & equation_y.find('y') == -1:
+        v = eval(equation_y)*np.ones(np.shape(yg))
+    # return these
+    return u, v
+
+
+# define a function to take care of tab changes
+def tab_selection(event):
+    global click_opt_int, toolbar, LI_coord, LI_total_label, LI_total, LI_instruction_label, LI_restart_btn, LI_use_var, LI_shape_instruction, LI_shape_drop, LI_shape_select
+    global x_m, y_m
+    selected_tab = event.widget.select()
+    tab_text = event.widget.tab(selected_tab, "text")
+    print('you changed tab to ', tab_text)
+    if tab_text == 'LI':
+        x_m = None
+        y_m = None
+        fig.canvas.draw()
+        # Initialise a global variable for storing click coordinates
+        # and total line integral
+        # home the main screen
+        toolbar.home()
+        # set the variable to show that LI was used
+        LI_use_var = 1
+        # unclick any chosen options from toolbar
+        state = fig.canvas.toolbar.mode
+        if state == 'zoom rect':
+            toolbar.zoom()
+        if state == 'pan/zoom':
+            toolbar.pan()
+        # get rid of the 2 buttons we don't want
+        toolbar.children['!button4'].pack_forget()
+        toolbar.children['!button5'].pack_forget()
+        # set up an empty list to later store click coords
+        LI_coord = []
+        # initialise a variable that will keep track of total LI
+        LI_total = 0
+        # set variable for mouse to respond to integrals in new tab
+        click_opt_int = 5
+    elif tab_text == 'main':
+        LI_restart()
+        # by default return to initial 'tools'
+        click_opt_int = 0
+        click_option.set(0)
+        click_option_handler(click_option.get())
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # set up basic layout of the window
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -373,8 +431,8 @@ toggle_image_off = ImageTk.PhotoImage(toggle_image_off)
 # and top left for plot
 
 # right frame:
-right_frame = tk.LabelFrame(root, text='Options Frame', padx=5, pady=5)
-right_frame.grid(row=1, column=1)
+right_frame_frame = tk.LabelFrame(root, text='Options Frame', padx=5, pady=5)
+right_frame_frame.grid(row=1, column=1)
 
 # bot frame:
 bot_frame = tk.LabelFrame(root, text='Field Input Frame', padx=100, pady=5)
@@ -388,13 +446,36 @@ plot_frame.grid(row=1, column=0)
 small_frame = tk.LabelFrame(root, text='Plot Customisation Frame', padx=35, pady=5)
 small_frame.grid(row=2, column=1)
 
+# define notebook for tabs
+notebook = ttk.Notebook(right_frame_frame)
+notebook.grid(row=0, column=0)
+
+# main options:
+right_frame = tk.LabelFrame(notebook)
+right_frame.grid(row=1, column=1)
+# Line integrals
+LI_frame = tk.Frame(notebook)
+LI_frame.grid(row=0, column=2)
+# calculus
+calculus_frame = tk.Frame(notebook)
+calculus_frame.grid(row=0, column=2)
+
+# finsalise them
+notebook.add(right_frame, text='main')
+notebook.add(LI_frame, text='LI')
+notebook.add(calculus_frame, text='calculus')
+
+# bind the clicks on tabs to a function
+notebook.bind_all('<<NotebookTabChanged>>', tab_selection)
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # set up initial parameters and plot the initial graph, put it in plot frame
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # define scale of the graph
 L = 5
-pt_den = 11   # number of points on each axis
+pt_den = 21   # number of points on each axis
 
 # Initialise auto scaling variable
 ascale = tk.IntVar()
@@ -412,25 +493,22 @@ u = yg*np.sin(xg)  # x component
 v = -xg*np.cos(yg)  # y component
 # for no dependance in any initial component, use : np.zeros(np.shape(xg)) or yg
 
-'''
-SET UP A LIST OF DEFAULT VECTOR FIELDS TO DISPLAY IN DROPDOWN MENU
-'''
+'''SET UP A LIST OF DEFAULT VECTOR FIELDS TO DISPLAY IN DROPDOWN MENU'''
 # list of names of fields to display
 field_name_list = ['Default: y*sin(x)dx - x*cos(y)dy',
-              'Simple pendulum: ydx  - sin(x)dy',
-              'Harmonic oscillator: ydx -xdy',
-              'Linear field example 1: (14*x - 4*y)dx + (-1*x + 4*y)dy',
-              'Linear field example 2: xdx',
-              'Constant field: 6dx + 3dy',
-              'Falling cat field (Planar 3 link robot)',
-              'Gravitational/Electric Point Charge: -x/(x**2+y**2)dx + -y/(x**2+y**2)dy',
-              'Magnetic Field of Current Carrying Wire: -y/(x**2+y**2)dx + x/(x**2+y**2)dy',
-              'Flamms paraboloid',
-              'BLACK HOLE!'
-              ]
-
+                   'Simple pendulum: ydx  - sin(x)dy',
+                   'Harmonic oscillator: ydx -xdy',
+                   'Linear field example 1: (14*x - 4*y)dx + (-1*x + 4*y)dy',
+                   'Linear field example 2: xdx',
+                   'Constant field: 6dx + 3dy',
+                   'Falling cat field (Planar 3 link robot)',
+                   'Gravitational/Electric Point Charge: -x/(x**2+y**2)dx + -y/(x**2+y**2)dy',
+                   'Magnetic Field of Current Carrying Wire: -y/(x**2+y**2)dx + x/(x**2+y**2)dy',
+                   'Flamms paraboloid',
+                   'BLACK HOLE!'
+                   ]
+# NOTE:
 # Flamm's paraboloid ( https://rreusser.github.io/flamms-paraboloid/, https://en.wikipedia.org/wiki/Schwarzschild_metric")
-
 # Black hole field analogue "taking the Schwarzchild contraction factor, at \theta = pi/2, g = (1-(r_s/r))^(-1) and defining the one form w = \del(g)/\del(x) dx + \del(g)/\del(y) dy    
 
 # list of x components, in order of field_name_list
@@ -447,7 +525,6 @@ field_x_list = ['y*sin(x)',
                 '-2*x*((x^2+y^2)^(-1.5))*(1-(2/sqrt(x^2+y^2)))^(-2)'
                 ]
 
-
 # list of y components, in order of field_name_list
 field_y_list = ['- x*cos(y)',
                 '-sin(x)',
@@ -461,7 +538,6 @@ field_y_list = ['- x*cos(y)',
                 'y/(sqrt(x**2 + y**2)*(1-2/(sqrt(x**2 + y**2)))) + x',
                 '-2*y*((x^2+y^2)^(-1.5))*(1-(2/sqrt(x^2+y^2)))^(-2)'
                 ]
-
 
 # set up quiver factors
 arrows = False  # set up if arrows should be plotted on stacks or not.
@@ -501,8 +577,9 @@ main_axis.set_xlim(-ax_L, ax_L)
 main_axis.set_ylim(-ax_L, ax_L)
 
 
-'''define the initial polar plot also. Despite it not being plotted to start
-with needed for when Polar plot option is used'''
+''' define the initial polar plot also '''
+# Despite it not being plotted to start with needed for when
+# Polar plot option is used
 
 r_min = 0
 r_den = 11
@@ -530,7 +607,20 @@ to_wedge_y_1_str = ''
 to_wedge_x_2_str = ''
 to_wedge_y_2_str = ''
 
+# Initialise the click button selection
+click_opt_int = 0
+
+# define initial pixes coordinates for the function to use
+# when mouse is clicked, these are changed to the pressed position
+x_m = float(0)
+y_m = float(0)
+
+# define initial stack bool
 stacks = True
+
+# =============================================================================
+# set up initial plot and canvas
+# =============================================================================
 
 # plot the cartessian field with desired parameters as specidfied above
 plottedfield = stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0)
@@ -549,6 +639,7 @@ canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 toolbar = NavigationToolbar2Tk(canvas, plot_frame)
 toolbar.update()  # allow the plot to update based on the toolbar
 canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+
 
 # track the mouse presses for the toolbar to respond to
 def on_key_press(event):
@@ -577,6 +668,18 @@ def on_key_press(event):
             line_int_circ([x_m,y_m], Radius_LI_circ, 10000, string_x, string_y)
 
 
+# connect figure event to a function that responds to clicks, defined above
+cid = fig.canvas.mpl_connect("button_press_event", on_key_press)
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# define other needed functions, for input reponses
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+''' LINE INTEGRALS'''
+
+
 # define a funciton to restart line integral calculation and lines
 def LI_restart():
     global LI_total, LI_coord
@@ -600,10 +703,10 @@ def LI_shape_select_response(selected_shape):
 
     if selected_shape == 'Circle':
         # if circle is selected, display an entry box for the radius of it
-        Radius_LI_label = tk.Label(right_frame, text='Circle Radius:')
-        Radius_LI_label.grid(row=23, column=0)
-        Radius_LI_circ_entry = tk.Entry(right_frame, width=10)
-        Radius_LI_circ_entry.grid(row=23, column=1)
+        Radius_LI_label = tk.Label(LI_frame, text='Circle Radius:')
+        Radius_LI_label.grid(row=3, column=0)
+        Radius_LI_circ_entry = tk.Entry(LI_frame, width=10)
+        Radius_LI_circ_entry.grid(row=3, column=1)
         Radius_LI_circ_entry.insert(0, '3')
     else:
         try:
@@ -733,29 +836,8 @@ def line_int_poly(N, u_str, v_str):
         main_axis.add_patch(circle)
         canvas.draw()
 
-# connect figure event to a function that responds to clicks, defined above
-cid = fig.canvas.mpl_connect("button_press_event", on_key_press)
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# define other needed functions, for input reponses
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-# define a function that takes input string that is python understood and turn into vector components:
-def eq_to_comps(string_x, string_y, xg, yg):
-    global equation_x, equation_y
-    # use the format_eq fucntion to make given string readable by python
-    equation_x = format_eq(string_x)
-    equation_y = format_eq(string_y)
-    # use these to define the field:
-    # also: checking if equation equals zero, to then replace it with an array and not just 0:
-    u = eval(equation_x)
-    v = eval(equation_y)
-    if equation_x.find('x') & equation_x.find('y') == -1:
-        u = eval(equation_x)*np.ones(np.shape(xg))
-    if equation_y.find('x') & equation_y.find('y') == -1:
-        v = eval(equation_y)*np.ones(np.shape(yg))
-    # return these
-    return u, v
+''' RESPONSE FUNCTIONS TO PLOT '''
 
 
 # define a function that will respond to radio buttons behind choosing vector types:
@@ -817,6 +899,26 @@ def PLOT_response():
     pt_den_entry.configure(bg='white')
 
 
+# define a function that will respons to field selection in the drop down menu
+def field_selection_response(event):
+    # clear the x and y component boxes
+    x_comp_entry.delete(0, 'end')
+    y_comp_entry.delete(0, 'end')
+    # get the index at which this entry is
+    selected_index = field_name_list.index(str(field_select_drop.get()))
+    # using that index, get the x and y components from their lists
+    # and insert these into x and y comp. entry boxes
+    x_comp_selected = field_x_list[selected_index]
+    y_comp_selected = field_y_list[selected_index]
+    x_comp_entry.insert(0, x_comp_selected)
+    y_comp_entry.insert(0, y_comp_selected)
+    # now call the plot function to finalise all these onto the plot
+    PLOT_response()
+
+
+''' CUSTOMISATIONS '''
+
+
 # define a function to respond to submitting arrohead changes in the new window
 def custom_submission():
     # first, take from entry boxes, wanted parameters and make them global:
@@ -864,48 +966,25 @@ def custom_btn_reponse():
     submit_arr_btn.grid(row=8, column=0, pady=10)
 
 
-# define a function to repond to plotting apolar grid
-# takes the same field, but plots it on a polar grid
-def Polar_grid_plot_response(tensor):
-    global xg, yg, u, v, s_max, pt_den_entry
-    # set the number of sheets to use from input box
-    s_max = int(s_max_entry.get())
-    # the polar grid comes from global already defined
-    # to change it, change it in the poalr field window
-    # apart from size, this should be based on L
-    # therefore use it to redefine it with that.
-    L = float(L_entry.get())
-    # using these redefine the new polar grids
-    r = np.linspace(r_min, L, r_den)
-    theta = np.linspace(360/(theta_den-1), 360, theta_den) * np.pi/180
-    # mesh into a grid
-    rg, thetag = np.meshgrid(r, theta)
-    # convert grid to cartesian
-    xg = rg*np.cos(thetag)
-    yg = rg*np.sin(thetag)
-    # reevaluate the given fields with these new grids:
-    string_x = str(x_comp_entry.get())
-    string_y = str(y_comp_entry.get())
-    u, v = eq_to_comps(string_x, string_y, xg, yg)
-    # clear the plot that is already there:
-    main_axis.clear()
-    # use the selected tensor to determine what to plot:
-    # 0 is just stacks, 1 is for only arrows and 2 is for both
-    if tensor == 0:
-        arrows = False  
-        stacks = True
-    elif tensor == 1:
-        arrows = True  
-        stacks = False
-    elif tensor == 2:
-        arrows = True
-        stacks = True
-    # using those, create the plot and display it
-    stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0)
-    canvas.draw()
-    # colour pt_den red to show that it is not approperiate to use it now
-    # need to def # of points along r and theta, in the additional window
-    pt_den_entry.configure(bg='red')
+# define a response funcction to autoscale toggle button
+def scale_toggle_response():
+    global ascale
+    if ascale.get() == 0:
+        # the burron is off, and has been clicked therefore change the
+        # variable to an and the image to on
+        ascale.set(1)
+        ascale_toggle.configure(image=toggle_image_on)
+        # for it to update, reclick whatever radiobutton is selected
+        # or, if stacks only is chosen, change it to both, to show some change
+        vect_type_response(tensor.get())
+    else:
+        # the button is on and has been clicked
+        # set it to off and change image
+        ascale.set(0)
+        ascale_toggle.configure(image=toggle_image_off)
+        # for it to update, reclick whatever radiobutton is selected
+        # or, if stacks only is chosen, change it to both, to show some change
+        vect_type_response(tensor.get())
 
 
 # deifne a response to the SAVE button in the polar grid customisation window
@@ -950,21 +1029,57 @@ def polar_grid_custom_reponse():
     save_polar_grid_btn.grid(row=6, column=0, pady=10)
 
 
-# define a function that will respons to field selection in the drop down menu
-def field_selection_response(event):
-    # clear the x and y component boxes
-    x_comp_entry.delete(0, 'end')
-    y_comp_entry.delete(0, 'end')
-    # get the index at which this entry is
-    selected_index = field_name_list.index(str(field_select_drop.get()))
-    # using that index, get the x and y components from their lists
-    # and insert these into x and y comp. entry boxes
-    x_comp_selected = field_x_list[selected_index]
-    y_comp_selected = field_y_list[selected_index]
-    x_comp_entry.insert(0, x_comp_selected)
-    y_comp_entry.insert(0, y_comp_selected)
-    # now call the plot function to finalise all these onto the plot
-    PLOT_response()
+''' POLAR PLOTS '''
+
+# define a function to repond to plotting apolar grid
+# takes the same field, but plots it on a polar grid
+def Polar_grid_plot_response(tensor):
+    global xg, yg, u, v, s_max, pt_den_entry
+    # set the number of sheets to use from input box
+    s_max = int(s_max_entry.get())
+    # the polar grid comes from global already defined
+    # to change it, change it in the poalr field window
+    # apart from size, this should be based on L
+    # therefore use it to redefine it with that.
+    L = float(L_entry.get())
+    # using these redefine the new polar grids
+    r = np.linspace(r_min, L, r_den)
+    theta = np.linspace(360/(theta_den-1), 360, theta_den) * np.pi/180
+    # mesh into a grid
+    rg, thetag = np.meshgrid(r, theta)
+    # convert grid to cartesian
+    xg = rg*np.cos(thetag)
+    yg = rg*np.sin(thetag)
+    # reevaluate the given fields with these new grids:
+    string_x = str(x_comp_entry.get())
+    string_y = str(y_comp_entry.get())
+    u, v = eq_to_comps(string_x, string_y, xg, yg)
+    # clear the plot that is already there:
+    main_axis.clear()
+    # use the selected tensor to determine what to plot:
+    # 0 is just stacks, 1 is for only arrows and 2 is for both
+    if tensor == 0:
+        arrows = False  
+        stacks = True
+    elif tensor == 1:
+        arrows = True  
+        stacks = False
+    elif tensor == 2:
+        arrows = True
+        stacks = True
+    # using those, create the plot and display it
+    stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0)
+    canvas.draw()
+    # colour pt_den red to show that it is not approperiate to use it now
+    # need to def # of points along r and theta, in the additional window
+    pt_den_entry.configure(bg='red')
+
+
+'''
+
+DIFFERENTIAL CALCULUS FUNCTIONS
+
+'''
 
 # define a function that will wedge two 1 forms and plot them
 def wedge_product():
@@ -982,7 +1097,8 @@ def wedge_product():
     # plot these as stacks, with no arrowheads, on top of one another.
     arrows = False
     stacks = True
-
+    '''
+    COMMENT
     # Given w_1 = fdx+gdy  and w_2=hdx+mdy. The graphical representation must be:
     # fdx /\ mdy "and" -hdx/\gdy {equivalend to [(u_1,0)+(0,v2)] and [(-u_2,0)+(0,v1)]},
     # which is executed when the if condition below is satisfited. Basically two rectangular
@@ -992,12 +1108,10 @@ def wedge_product():
     # or sit in some gaps and hence increasing the denisty as result of its scaling function.
     # If any of the coefficients (f,g,h and m)  is zero, the stacking reduces to one "function*dx/\dy", these are executed in the elif options.
     # One situation to be added when (u_1*v_2-u2*v_1).all() = 0, the scaling function here is zero and hence no 2-form should be produced/ or produced in faded color.
-    
+     
     # Issues:
-    # 1- The max number of stacks possible will hinder good visualization when
-    # the stacks are dense. It's a general issue, but more clear here than other cases due to the nature of 2-forms.
     # 2- Would be nice to uniformly distribute the stacks in each direction after finishing the double stacking.
-    
+    '''
     if u_1.any() != 0 and v_1.any() != 0 and u_2.any() != 0 and v_2.any() != 0:
         stack_plot(xg, yg, main_axis, u_1, 0, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0, arrowheads=False, colour='red')
         stack_plot(xg, yg, main_axis, 0, v_2, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0, arrowheads=False, colour='green')
@@ -1046,25 +1160,181 @@ def wedge_2_response():
     plot_wedge_btn.grid(row=8, column=0, pady=10)
 
 
-# define a response funcction to autoscale toggle button
-def scale_toggle_response():
-    global ascale
-    if ascale.get() == 0:
-        # the burron is off, and has been clicked therefore change the
-        # variable to an and the image to on
-        ascale.set(1)
-        ascale_toggle.configure(image=toggle_image_on)
-        # for it to update, reclick whatever radiobutton is selected
-        # or, if stacks only is chosen, change it to both, to show some change
-        vect_type_response(tensor.get())
-    else:
-        # the button is on and has been clicked
-        # set it to off and change image
-        ascale.set(0)
-        ascale_toggle.configure(image=toggle_image_off)
-        # for it to update, reclick whatever radiobutton is selected
-        # or, if stacks only is chosen, change it to both, to show some change
-        vect_type_response(tensor.get())
+# define a function that will calculate the local, geometrical derivative
+def deriv_calc(x_m, y_m):
+    global i_m, j_m  # deriv_inset_ax
+    
+    # Try and except to account for the error caused when zoom window selected without first clicking
+    # (i.e. undefined x_pix and y_pix)
+    
+    try:
+    
+        # Range and point density of the derivative plot
+        d_range = 0.33*L/(zoom_slider.get())
+        d_length = d_length_select.get()
+        dpd = dpd_select.get()
+        d_scale = scale*(zoom_slider.get())
+        
+        # Select index for the middle of the new derivative axis
+        i_m = int(round((dpd/2)-0.1))
+        j_m = int(round((dpd/2)-0.1))
+        
+        # Divergence Plot
+        if click_opt_int > 2:
+            dx = np.linspace(-d_range, d_range, dpd)
+            dy = np.linspace(-d_range, d_range, dpd)
+            J = jacobian(2, string_x, string_y)
+            # Evaluate the Jacobian elements at (x_m,y_m) click location 
+            du_dx = eval(format_eq_div(format_eq(J[0, 0])))
+            du_dy = eval(format_eq_div(format_eq(J[0, 1])))
+            dv_dx = eval(format_eq_div(format_eq(J[1, 0])))
+            dv_dy = eval(format_eq_div(format_eq(J[1, 1])))
+            dxg, dyg = np.meshgrid(dx, dy)
+            
+            # Div --> Trace of the Jacobian Matrix
+            u_div = (du_dx + dv_dy)*dxg
+            v_div = (du_dx + dv_dy)*dyg
+            
+            #Curl --> Skew Symmetric Part of Jacobian Matrix 0.5*(A-A^T)
+            u_curl = -0.5*(du_dy - dv_dx)*dyg
+            v_curl = 0.5*(du_dy - dv_dx)*dxg
+            
+        # Zoom/Derivative Plot
+        else:
+            # define new axis in the derivative plot
+            dx = np.linspace(-d_range+x_m, d_range+x_m, dpd)
+            dy = np.linspace(-d_range+y_m, d_range+y_m, dpd)
+            dxg, dyg = np.meshgrid(dx, dy)
+            # define the vector field in these new axis
+            u1, v1 = eq_to_comps(string_x, string_y, dxg, dyg)
+            # Calculate derivative field components
+            # This is done geometrically by subracting thevector at the centre of the
+            # grid, from vectors at other grid positions in the derivative axis.
+            du1 = u1 - u1[i_m, j_m]
+            dv1 = v1 - v1[i_m, j_m]
+      
+        # Create axes at clicked position from supplied position and given axis sizes
+        deriv_inset_ax = main_axis.inset_axes([(x_pix-178)/500 - (0.931*d_length/(2*L)), (y_pix-59)/500 - (0.931*d_length/(2*L)), 0.931*d_length/L, 0.931*d_length/L])
+        
+        # Check radiobutton selection
+        if click_opt_int == 1:
+            u_s = u1
+            v_s = v1
+            scale_s = d_scale
+            
+        elif click_opt_int == 2:
+            u_s = du1
+            v_s = dv1
+            scale_s = scale
+            
+        elif click_opt_int == 3:
+            u_s = u_div
+            v_s = v_div
+            scale_s = scale
+            
+        elif click_opt_int == 4:
+            u_s = u_curl
+            v_s = v_curl
+            scale_s = scale
+    
+        if tensor.get() == 0:
+            arrows = False
+            stacks = True
+        if tensor.get() == 1:
+            arrows = True
+            stacks = False
+        if tensor.get() == 2:
+            arrows = True
+            stacks = True            
+        
+        stack_plot(dxg, dyg, deriv_inset_ax, u_s, v_s, 5, d_range, dpd, 0.1, arrows, stacks, orientation, scale_s, w_head, h_head, 1) 
+    
+        # Don't display the x and y axis values
+        if click_opt_int > 2:  
+            deriv_inset_ax.set_xticks([])
+            deriv_inset_ax.set_yticks([])
+        
+        # Redraw the figure canvas, showing the inset axis
+        fig.canvas.draw()
+        deriv_inset_ax.clear()
+        deriv_inset_ax.remove()
+        
+    # i.e. if click coordinates are undefined, do nothing
+    except (NameError, UnboundLocalError):
+        pass
+
+
+# Calculate the Jacobian matrix of the defined vector field
+def jacobian(m, u_str, v_str):
+    # take the input strings and turn them into sympy expressions to be able to
+    # use sympy's partial differentiation
+    u_str = u_str.replace('^','**')
+    v_str = v_str.replace('^','**')
+    sympy_expr_x = parse_expr(u_str, evaluate=False)
+    sympy_expr_y = parse_expr(v_str, evaluate=False)
+    # define a sympy expression for string 0
+    # sympy_expr_zero = parse_expr('0*x', evaluate=False)
+    
+    # combine the 2 into a list:
+    expressions = np.array([sympy_expr_x, sympy_expr_y])
+    # set up an array to store derrivatives.
+    J = np.empty((m, m), dtype='object')
+    # set up an array of coordinates that need to be used (in standard order)
+    coords = ['x', 'y']
+    # loop over differentiating each, when differentiating w.r.t its coord, set to 0
+    for coord_index in range(len(coords)):
+        # loop over differentiating each component:
+        for comp_index in range(len(expressions)):
+            J[comp_index, coord_index] = str(diff(expressions[comp_index], coords[coord_index]))
+    return J
+
+
+# define a function that will update the variable that defines click action
+# and deals with setting up responses to click option changes
+def click_option_handler(click_option):
+    global click_opt_int, toolbar, LI_coord, LI_total_label, LI_total, LI_instruction_label, LI_restart_btn, LI_use_var, LI_shape_instruction, LI_shape_drop, LI_shape_select
+    click_opt_int = click_option
+    # tools being selected
+    if click_opt_int == 0:
+        x_m = None
+        y_m = None
+        fig.canvas.draw()
+        # if the tools is selected again, add the zoom and pan buttons
+        # get rid of the modified toolbar:
+        toolbar.destroy()
+        # put the default matplotlib toolbar, back on:
+        toolbar = NavigationToolbar2Tk(canvas, plot_frame)
+        toolbar.update()
+        canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+    # when 'tool' is not selected, disable the pan and zoom:
+    elif 0 < click_opt_int < 5:
+        fig.canvas.draw()
+        toolbar.home()
+        # close the selected mouse options
+        state = fig.canvas.toolbar.mode
+        if state == 'zoom rect':
+            toolbar.zoom()
+        if state == 'pan/zoom':
+            toolbar.pan()
+        # get rid of the 2 buttons we don't want
+        toolbar.children['!button4'].pack_forget()
+        toolbar.children['!button5'].pack_forget()
+        # run deriv calc as per its calling
+        deriv_calc(x_m, y_m)
+
+
+# Additional formatting function used in divergence plots
+def format_eq_div(string):
+    string = string.replace('xg', 'x_m')
+    string = string.replace('yg', 'y_m')
+    return string
+
+
+def update_deriv(self):
+    deriv_calc(x_m,y_m)
+
+
+''' SINGULARITIES '''
 
 
 # define response to button to show singularities
@@ -1192,27 +1462,129 @@ def known_singularity_response():
 def singular_drop_response(var):
     return
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# define wanted Radio buttons
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-'''define buttons to choose quiver, quiver and stack or just stack plots'''
+
+# =============================================================================
+# DEFINE ALL NEEDED WIDGETS
+# =============================================================================
+
+'''
+
+DEFINE ALL WIDGETS IN MAIN TAB
+
+'''
+
 # define a number that will tarck which vector field is wanted
 tensor = tk.IntVar()
 tensor.set(0)
 
-tensor_label = tk.Label(right_frame, text='Toggle Arrows/Stacks:')
-tensor_label.grid(row = 10, column = 0)
+tensor_label = tk.Label(right_frame, text='Arrows/Stacks:')
+tensor_label.grid(row=7, column=0)
 
 # define each button and put them on the screen, in the right_frame
-arrow_btn = tk.Radiobutton(right_frame, text='arrow', variable=tensor, value=1, command=lambda: vect_type_response(tensor.get())).grid(row=10, column=1)
-arrow_stack_btn = tk.Radiobutton(right_frame, text='both', variable=tensor, value=2, command=lambda: vect_type_response(tensor.get())).grid(row=10, column=2)
-stack_btn = tk.Radiobutton(right_frame, text='stack', variable=tensor, value=0, command=lambda: vect_type_response(tensor.get())).grid(row=10, column=3)
+arrow_btn = tk.Radiobutton(right_frame, text='arrow', variable=tensor, value=1, command=lambda: vect_type_response(tensor.get())).grid(row=7, column=1)
+arrow_stack_btn = tk.Radiobutton(right_frame, text='both', variable=tensor, value=2, command=lambda: vect_type_response(tensor.get())).grid(row=7, column=3)
+stack_btn = tk.Radiobutton(right_frame, text='stack', variable=tensor, value=0, command=lambda: vect_type_response(tensor.get())).grid(row=7, column=2)
+
+# define a button for 2 1 forms to wedge
+# this will open a new window where the uder can input 2 2 forms that will be wedged
+# and the result will be plotted
+wedge_2_btn = tk.Button(calculus_frame, text='wedge', command= wedge_2_response)
+wedge_2_btn.grid(row=0, column=0)
+
+# get a button to draw on singularities
+singularity_button = tk.Button(right_frame, text='search singularities', command=show_singularities)
+singularity_button.grid(row=8, column=0)
+# entry for N
+tk.Label(right_frame, text='number of sampling points').grid(row=8, column=2)
+fine_grid_N_entry = tk.Entry(right_frame, width=10)
+fine_grid_N_entry.grid(row=8, column=1)
+fine_grid_N_entry.insert(0, 10)
+
+# define an entry where the user can inpu known singularity equation
+# this will be taken and plotted as a red, dotted line
+tk.Label(right_frame, text='known singularity equation:').grid(row=9, column=0)
+
+# define a dropdown to select y= or x=
+singular_var = tk.StringVar()
+singular_list = ['y=', 'x=', 'point']
+singular_var.set(singular_list[0])
+# rest to define a known singularity equation
+tk.Label(right_frame, text='expression type').grid(row=10, column=0)
+dpd_drop = tk.OptionMenu(right_frame, singular_var, *singular_list, command=singular_drop_response)
+dpd_drop.grid(row=10, column=1)
+known_singularity_entry = tk.Entry(right_frame, width=20)
+known_singularity_entry.grid(row=10, column=2)
+known_singularity_entry.insert(0, '')
+
+# define asubmit button to that entry
+submit_known_singularity_btn = tk.Button(right_frame, text='show expression', command=known_singularity_response)
+submit_known_singularity_btn.grid(row=11, column=2)
+
+# DERIVATIVE FUNCTIONS
+
+# Radiobuttons to select what happens when clicking the plot
+click_option = tk.IntVar()
+click_option.set(0)
+click_option_Tools_btn = tk.Radiobutton(right_frame, text='Tools', variable=click_option, value=0, command=lambda: click_option_handler(click_option.get()))
+click_option_Zoom_btn = tk.Radiobutton(right_frame, text='Zoom', variable=click_option, value=1, command=lambda: click_option_handler(click_option.get()))
+click_option_Deriv_btn = tk.Radiobutton(right_frame, text='Deriv.', variable=click_option, value=2, command=lambda: click_option_handler(click_option.get()))
+click_option_Div_btn = tk.Radiobutton(right_frame, text='Div.', variable=click_option, value=3, command=lambda: click_option_handler(click_option.get()))
+click_option_Curl_btn = tk.Radiobutton(right_frame, text='Curl', variable=click_option, value=4, command=lambda: click_option_handler(click_option.get()))
+click_option_Tools_btn.grid(row=1, column=0)
+click_option_Zoom_btn.grid(row=1, column=1)
+click_option_Deriv_btn.grid(row=1, column=2)
+click_option_Div_btn.grid(row=2, column=0)
+click_option_Curl_btn.grid(row=2, column=1)
+
+# Zooming window zoom slider
+tk.Label(right_frame, text='Zoom').grid(row=3, column=0)
+zoom_slider = tk.Scale(right_frame, from_=1, to=50, orient=tk.HORIZONTAL)
+zoom_slider.bind("<ButtonRelease-1>", update_deriv)
+zoom_slider.grid(row=3, column=1)
+
+# Drop down to select the derivative plot point density (dpd)
+dpd_select = tk.IntVar()
+dpd_select.set(5)
+dpd_list = [5, 7, 9]
+
+tk.Label(right_frame, text='Select Inset Plot Point Density:').grid(row=4, column=0)
+dpd_drop = tk.OptionMenu(right_frame, dpd_select, *dpd_list, command = update_deriv)
+dpd_drop.grid(row=4, column=1)
+
+# Drop down to select inset axis size (d_length)
+d_length_select = tk.DoubleVar()
+d_length_list = [1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0]
+d_length_select.set(d_length_list[2])
+tk.Label(right_frame, text='Select Inset Plot Size :').grid(row=5, column=0)
+d_length_drop = tk.OptionMenu(right_frame, d_length_select, *d_length_list, command = update_deriv)
+d_length_drop.grid(row=5, column=1)
+
+# Autoscale Toggle
+ascale_label = tk.Label(right_frame, text='Toggle Autoscaling:')
+ascale_label.grid(row=6, column=0)
+ascale_toggle = tk.Button(right_frame, image=toggle_image_off, bd=0, command=scale_toggle_response)
+ascale_toggle.grid(row=6, column=1, pady=5)
+
+# Step function - for singularities
+#def step(a):
+#    rows = len(a[:,0])
+#    columns = len(a[0,:])
+#    for i in range(rows):  
+#        for j in range(columns):
+#            if -1 < a[i,j] < 1:
+#                a[i,j] = 0
+#            else:
+#                a[i,j] = 1
+#    return a
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# define wanted standard buttons
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+'''
+
+set up all in SMALL FRAME
+
+'''
+
 
 # define the PLOT button
 PLOT_btn = tk.Button(small_frame, text='PLOT', padx=60, pady=30, command=PLOT_response)
@@ -1231,46 +1603,6 @@ polar_grid_custom_btn.grid(row=1, column=3)
 polar_grid_plot_btn = tk.Button(small_frame, text='polar grid plot', command= lambda: Polar_grid_plot_response(tensor.get()))
 polar_grid_plot_btn.grid(row=1, column=0, columnspan=2)
 
-# define a button for 2 1 forms to wedge
-# this will open a new window where the uder can input 2 2 forms that will be wedged
-# and the result will be plotted
-wedge_2_btn = tk.Button(right_frame, text='wedge', command= wedge_2_response)
-wedge_2_btn.grid()
-
-
-# get a button to draw on singularities
-singularity_button = tk.Button(right_frame, text='show singularities', command=show_singularities)
-singularity_button.grid(row=16, column=0)
-# entry for N
-tk.Label(right_frame, text='number of sampling points').grid(row=16, column=2)
-fine_grid_N_entry = tk.Entry(right_frame, width=10)
-fine_grid_N_entry.grid(row=16, column=1)
-fine_grid_N_entry.insert(0, 10)
-
-# define an entry where the user can inpu known singularity equation
-# this will be taken and plotted as a red, dotted line
-tk.Label(right_frame, text='known singularity equation:').grid(row=17, column=0)
-
-# define a dropdown to select y= or x=
-singular_var = tk.StringVar()
-singular_list = ['y=', 'x=', 'point']
-singular_var.set(singular_list[0])
-# rest to define a known singularity equation
-tk.Label(right_frame, text='Select Inset Plot Point Density:').grid(row=3, column=0)
-dpd_drop = tk.OptionMenu(right_frame, singular_var, *singular_list, command=singular_drop_response)
-dpd_drop.grid(row=18, column=0)
-known_singularity_entry = tk.Entry(right_frame, width=20)
-known_singularity_entry.grid(row=18, column=1)
-known_singularity_entry.insert(0, '')
-
-# define asubmit button to that entry
-submit_known_singularity_btn = tk.Button(right_frame, text='singularity', command=known_singularity_response)
-submit_known_singularity_btn.grid(row=18, column=2)
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# define wanted entry boxes
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-''' define entry boxes to update: L, pt_den, s_max and a  and a PLOT button '''
 # define entry boxes for each (in order): L, pt_den, s_max and a ; and info txt
 # Also input into them the initial values
 tk.Label(small_frame, text='Size').grid(row=2, column=0)
@@ -1287,6 +1619,14 @@ tk.Label(small_frame, text='max sheets').grid(row=2, column=2)
 s_max_entry = tk.Entry(small_frame, width=11, borderwidth=1)
 s_max_entry.grid(row=3, column=2, padx = 2)
 s_max_entry.insert(0, s_max)
+
+
+'''
+
+set up all in BOTTOM FRAME
+
+'''
+
 
 # define entry boxes for the field equations in x and y
 tk.Label(bot_frame, text='x component').grid(row=1, column=0)
@@ -1305,10 +1645,6 @@ y_comp_entry.insert(0, '-x*cos(y)')
 string_x = str(x_comp_entry.get())
 string_y = str(y_comp_entry.get())
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Define wanted dropdown menus
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 field_select = tk.StringVar()
 field_select.set(field_name_list[0])
 
@@ -1320,381 +1656,32 @@ field_select_drop.current(0)
 field_select_drop.grid(row=4, column=0)
 field_select_drop.bind("<<ComboboxSelected>>", field_selection_response)
 
-# Testing matplotlib objects in functions
 
-# def fun_test(axis):
-#     ax_test = axis.inset_axes([0.1,0.1,0.2,0.2])
-#     fig.canvas.draw()
-#     deriv_inset_ax.clear()
-#     deriv_inset_ax.remove()
+'''
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Derivative Plot
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+set up all in LI tab
 
-# define initial pixes coordinates for the function to use
-# when mouse is clicked, these are changed to the pressed position
-x_m = float(0)
-y_m = float(0)
+'''
 
 
-# define a function that will calculate the local, geometrical derivative
-def deriv_calc(x_m, y_m):
-    global i_m, j_m  # deriv_inset_ax
-    
-    # Try and except to account for the error caused when zoom window selected without first clicking
-    # (i.e. undefined x_pix and y_pix)
-    
-    try:
-    
-        # Range and point density of the derivative plot
-        d_range = 0.33*L/(zoom_slider.get())
-        d_length = d_length_select.get()
-        dpd = dpd_select.get()
-        d_scale = scale*(zoom_slider.get())
-        
-        # Select index for the middle of the new derivative axis
-        i_m = int(round((dpd/2)-0.1))
-        j_m = int(round((dpd/2)-0.1))
-        
-        # Divergence Plot
-        if click_opt_int > 2:
-            dx = np.linspace(-d_range, d_range, dpd)
-            dy = np.linspace(-d_range, d_range, dpd)
-            J = jacobian(2, string_x, string_y)
-            # Evaluate the Jacobian elements at (x_m,y_m) click location 
-            du_dx = eval(format_eq_div(format_eq(J[0, 0])))
-            du_dy = eval(format_eq_div(format_eq(J[0, 1])))
-            dv_dx = eval(format_eq_div(format_eq(J[1, 0])))
-            dv_dy = eval(format_eq_div(format_eq(J[1, 1])))
-            dxg, dyg = np.meshgrid(dx, dy)
-            
-            # Div --> Trace of the Jacobian Matrix
-            u_div = (du_dx + dv_dy)*dxg
-            v_div = (du_dx + dv_dy)*dyg
-            
-            #Curl --> Skew Symmetric Part of Jacobian Matrix 0.5*(A-A^T)
-            u_curl = -0.5*(du_dy - dv_dx)*dyg
-            v_curl = 0.5*(du_dy - dv_dx)*dxg
-            
-        # Zoom/Derivative Plot
-        else:
-            # define new axis in the derivative plot
-            dx = np.linspace(-d_range+x_m, d_range+x_m, dpd)
-            dy = np.linspace(-d_range+y_m, d_range+y_m, dpd)
-            dxg, dyg = np.meshgrid(dx, dy)
-            # define the vector field in these new axis
-            u1, v1 = eq_to_comps(string_x, string_y, dxg, dyg)
-            # Calculate derivative field components
-            # This is done geometrically by subracting thevector at the centre of the
-            # grid, from vectors at other grid positions in the derivative axis.
-            du1 = u1 - u1[i_m, j_m]
-            dv1 = v1 - v1[i_m, j_m]
-      
-        # Create axes at clicked position from supplied position and given axis sizes
-        deriv_inset_ax = main_axis.inset_axes([(x_pix-178)/500 - (0.931*d_length/(2*L)), (y_pix-59)/500 - (0.931*d_length/(2*L)), 0.931*d_length/L, 0.931*d_length/L])
-        
-        # Check radiobutton selection
-        if click_opt_int == 1:
-            u_s = u1
-            v_s = v1
-            scale_s = d_scale
-            
-        elif click_opt_int == 2:
-            u_s = du1
-            v_s = dv1
-            scale_s = scale
-            
-        elif click_opt_int == 3:
-            u_s = u_div
-            v_s = v_div
-            scale_s = scale
-            
-        elif click_opt_int == 4:
-            u_s = u_curl
-            v_s = v_curl
-            scale_s = scale
-    
-        if tensor.get() == 0:
-            arrows = False
-            stacks = True
-        if tensor.get() == 1:
-            arrows = True
-            stacks = False
-        if tensor.get() == 2:
-            arrows = True
-            stacks = True            
-        
-        stack_plot(dxg, dyg, deriv_inset_ax, u_s, v_s, 5, d_range, dpd, 0.1, arrows, stacks, orientation, scale_s, w_head, h_head, 1) 
-    
-        # Don't display the x and y axis values
-        if click_opt_int > 2:  
-            deriv_inset_ax.set_xticks([])
-            deriv_inset_ax.set_yticks([])
-        
-        # Redraw the figure canvas, showing the inset axis
-        fig.canvas.draw()
-        deriv_inset_ax.clear()
-        deriv_inset_ax.remove()
-        
-    # i.e. if click coordinates are undefined, do nothing
-    except (NameError, UnboundLocalError):
-        pass
+# define a label that will display it
+LI_instruction_label = tk.Label(LI_frame, text='LI Total:')
+LI_instruction_label.grid(row=0, column=0, padx=10)
+LI_total_label = tk.Label(LI_frame, text=LI_total)
+LI_total_label.grid(row=0, column=1)
+# display a restart button that will clear the lines
+# and restart the variables.
+LI_restart_btn = tk.Button(LI_frame, text='LI Restart', padx=20, command=LI_restart)
+LI_restart_btn.grid(row=1, column=0, columnspan=2)
+# define a drop down to draw: connected lines, square or circle.
+LI_shape_select = tk.StringVar()
+LI_shape_list = ['Polygon', 'Circle']
+LI_shape_select.set(LI_shape_list[0])
+LI_shape_instruction = tk.Label(LI_frame, text='Select what to draw:')
+LI_shape_instruction.grid(row=2, column=0)
+LI_shape_drop = tk.OptionMenu(LI_frame, LI_shape_select, *LI_shape_list, command=LI_shape_select_response)
+LI_shape_drop.grid(row=2, column=1)
 
-# Initialise the click button selection
-click_opt_int = 0
-
-# define a function that will update the variable that defines click action
-def click_option_handler(click_option):
-    global click_opt_int, toolbar, LI_coord, LI_total_label, LI_total, LI_instruction_label, LI_restart_btn, LI_use_var, LI_shape_instruction, LI_shape_drop, LI_shape_select
-    click_opt_int = click_option
-    # tools being selected
-    if click_opt_int == 0:
-        x_m = None
-        y_m = None
-        fig.canvas.draw()
-        # if the tools is selected again, add the zoom and pan buttons
-        # get rid of the modified toolbar:
-        toolbar.destroy()
-        # put the default matplotlib toolbar, back on:
-        toolbar = NavigationToolbar2Tk(canvas, plot_frame)
-        toolbar.update()
-        canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-        try:
-            LI_instruction_label.destroy()
-            LI_total_label.destroy()
-            LI_restart_btn.destroy()
-            LI_shape_instruction.destroy()
-            LI_shape_drop.destroy()
-            Radius_LI_label.destroy()
-            Radius_LI_circ_entry.destroy()
-        except UnboundLocalError:
-            pass
-        # NOT IDEAL BUT HOPEFULLY TEMPORARY
-        # redraw the plot, to get rid of lines from line integral
-        # do so only if LI was used last
-        # ideally would want a way of deleting lines without restarting the plot
-        if LI_use_var == 1:
-            PLOT_response()
-        # update that LI is not being used, but tools
-        LI_use_var = 0
-        
-    # when 'tool' is not selected, disable the pan and zoom:
-    elif 0 < click_opt_int < 5:
-        fig.canvas.draw()
-        toolbar.home()
-        # close the selected mouse options
-        state = fig.canvas.toolbar.mode
-        if state == 'zoom rect':
-            toolbar.zoom()
-        if state == 'pan/zoom':
-            toolbar.pan()
-        # get rid of the 2 buttons we don't want
-        toolbar.children['!button4'].pack_forget()
-        toolbar.children['!button5'].pack_forget()
-        try:
-            LI_instruction_label.destroy()
-            LI_total_label.destroy()
-            LI_restart_btn.destroy()
-            LI_shape_instruction.destroy()
-            LI_shape_drop.destroy()
-            Radius_LI_label.destroy()
-            Radius_LI_circ_entry.destroy()
-        except UnboundLocalError:
-            pass
-        # NOT IDEAL BUT HOPEFULLY TEMPORARY
-        # redraw the plot, to get rid of lines from line integral
-        # do so only if LI was used last
-        # ideally would want a way of deleting lines without restarting the plot
-        if LI_use_var == 1:
-            PLOT_response()
-        # update that LI is not being used, but tools
-        LI_use_var = 0
-        # run deriv calc as per its calling
-        deriv_calc(x_m, y_m)
-        
-    # when line integrals are selected, need extra options
-    elif click_opt_int == 5:
-        x_m = None
-        y_m = None
-        fig.canvas.draw()
-        # Initialise a global variable for storing click coordinates
-        # and total line integral
-        # home the main screen
-        toolbar.home()
-        # set the variable to show that LI was used
-        LI_use_var = 1
-        # unclick any chosen options from toolbar
-        state = fig.canvas.toolbar.mode
-        if state == 'zoom rect':
-            toolbar.zoom()
-        if state == 'pan/zoom':
-            toolbar.pan()
-        # get rid of the 2 buttons we don't want
-        toolbar.children['!button4'].pack_forget()
-        toolbar.children['!button5'].pack_forget()
-        # set up an empty list to later store click coords
-        LI_coord = []
-        # initialise a variable that will keep track of total LI
-        LI_total = 0
-        # define a label that will display it
-        LI_instruction_label = tk.Label(right_frame, text='LI Total:')
-        LI_instruction_label.grid(row=20, column=0, padx=10)
-        LI_total_label = tk.Label(right_frame, text=LI_total)
-        LI_total_label.grid(row=20, column=1)
-        # display a restart button that will clear the lines
-        # and restart the variables.
-        LI_restart_btn = tk.Button(right_frame, text='LI Restart', padx=20, command=LI_restart)
-        LI_restart_btn.grid(row=21, column=0, columnspan=2)
-        # define a drop down to draw: connected lines, square or circle.
-        LI_shape_select = tk.StringVar()
-        LI_shape_list = ['Polygon', 'Circle']
-        LI_shape_select.set(LI_shape_list[0])
-        LI_shape_instruction = tk.Label(right_frame, text='Select what to draw:')
-        LI_shape_instruction.grid(row=22, column=0)
-        LI_shape_drop = tk.OptionMenu(right_frame, LI_shape_select, *LI_shape_list, command=LI_shape_select_response)
-        LI_shape_drop.grid(row=22, column=1)
-
-
-# =============================================================================
-# Calculate the Jacobian matrix of the defined vector field
-# =============================================================================
-
-def jacobian(m, u_str, v_str):
-    # take the input strings and turn them into sympy expressions to be able to
-    # use sympy's partial differentiation
-    
-    u_str = u_str.replace('^','**')
-    v_str = v_str.replace('^','**')
-    
-    sympy_expr_x = parse_expr(u_str, evaluate=False)
-    sympy_expr_y = parse_expr(v_str, evaluate=False)
-    
-    # define a sympy expression for string 0
-    # sympy_expr_zero = parse_expr('0*x', evaluate=False)
-    
-    # combine the 2 intoa list:
-    expressions = np.array([sympy_expr_x, sympy_expr_y])
-    
-    # set up an array to store derrivatives.
-    J = np.empty((m, m), dtype='object')
-    
-    # set up an array of coordinates that need to be used (in standard order)
-    coords = ['x', 'y']
-    
-    # set up an array to store the results
-    # result = np.empty((int((m-1)*m/2), 1), dtype='object')
-    # for i in range(int((m-1)*m/2)):
-    #     result[i] = str(result[i])
-    
-    # loop over differentiating each, when differentiating w.r.t its coord, set to 0
-    for coord_index in range(len(coords)):
-        # loop over differentiating each component:
-        for comp_index in range(len(expressions)):
-            J[comp_index, coord_index] = str(diff(expressions[comp_index], coords[coord_index]))
-            
-    return J
-
-# =============================================================================
-# Additional formatting function used in divergence plots
-# =============================================================================
-
-def format_eq_div(string):
-    string = string.replace('xg', 'x_m')
-    string = string.replace('yg', 'y_m')
-    return string
-
-def update_deriv(self):
-    deriv_calc(x_m,y_m)
-    
-# =============================================================================
-# Radiobutton to select what happens when clicking the plot
-# =============================================================================
-
-# click_option_label = tk.Label(right_frame, text='Select Toolbar and Zooming Windows:')
-# click_option_label.grid(row = -1, column = 0)
-
-click_option = tk.IntVar()
-click_option.set(0)
-
-click_option_Tools_btn = tk.Radiobutton(right_frame, text='Tools', variable=click_option, value=0, command=lambda: click_option_handler(click_option.get()))
-click_option_Zoom_btn = tk.Radiobutton(right_frame, text='Zoom', variable=click_option, value=1, command=lambda: click_option_handler(click_option.get()))
-click_option_Deriv_btn = tk.Radiobutton(right_frame, text='Deriv.', variable=click_option, value=2, command=lambda: click_option_handler(click_option.get()))
-click_option_Div_btn = tk.Radiobutton(right_frame, text='Div.', variable=click_option, value=3, command=lambda: click_option_handler(click_option.get()))
-click_option_Curl_btn = tk.Radiobutton(right_frame, text='Curl', variable=click_option, value=4, command=lambda: click_option_handler(click_option.get()))
-click_option_LI_btn = tk.Radiobutton(right_frame, text='Line Int.', variable=click_option, value=5, command=lambda: click_option_handler(click_option.get()))
-
-click_option_Tools_btn.grid(row=0, column=0)
-click_option_Zoom_btn.grid(row=0, column=1)
-click_option_Deriv_btn.grid(row=0, column=2)
-click_option_Div_btn.grid(row=1, column=0)
-click_option_Curl_btn.grid(row=1, column=1)
-click_option_LI_btn.grid(row=1, column=2)
-
-# =============================================================================
-# Zooming window zoom slider
-# =============================================================================
-
-tk.Label(right_frame, text='Zoom').grid(row=2, column=0)
-zoom_slider = tk.Scale(right_frame, from_=1, to=50, orient=tk.HORIZONTAL)
-zoom_slider.bind("<ButtonRelease-1>", update_deriv)
-zoom_slider.grid(row=2, column=1)
-
-# =============================================================================
-# Drop down to select the derivative plot point density (dpd)
-# =============================================================================
-
-dpd_select = tk.IntVar()
-dpd_select.set(5)
-dpd_list = [5, 7, 9]
-
-tk.Label(right_frame, text='Select Inset Plot Point Density:').grid(row=3, column=0)
-dpd_drop = tk.OptionMenu(right_frame, dpd_select, *dpd_list, command = update_deriv)
-dpd_drop.grid(row=3, column=1)
-
-# =============================================================================
-# Drop down to select inset axis size (d_length)
-# =============================================================================
-
-d_length_select = tk.DoubleVar()
-d_length_list = [1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0]
-d_length_select.set(d_length_list[2])
-
-tk.Label(right_frame, text='Select Inset Plot Size :').grid(row=4, column=0)
-d_length_drop = tk.OptionMenu(right_frame, d_length_select, *d_length_list, command = update_deriv)
-d_length_drop.grid(row=4, column=1)
-
-# =============================================================================
-# Autoscale Toggle
-# =============================================================================
-
-ascale_label = tk.Label(right_frame, text='Toggle Autoscaling:')
-ascale_label.grid(row=5, column=0)
-
-ascale_toggle = tk.Button(right_frame, image=toggle_image_off, bd=0, command=scale_toggle_response)
-ascale_toggle.grid(row=5, column=1, pady=5)
-
-# =============================================================================
-# Step function - for singularities
-# =============================================================================
-
-# takes a matrix a and sorts through elements setting to zero if condition is met and one otherwise  
-# used to remove singularity in Grav&Mag predefined field
-
-# Problem with this strategy is that 0*nan = nan so this was not eliminating the singularity
-# and causing error when automatically scaling. Still could be useful if used to define the zero region
-# in a plot with a central singularity. 
-
-#def step(a):
-#    rows = len(a[:,0])
-#    columns = len(a[0,:])
-#    for i in range(rows):  
-#        for j in range(columns):
-#            if -1 < a[i,j] < 1:
-#                a[i,j] = 0
-#            else:
-#                a[i,j] = 1
-#    return a
 
 # return time to run
 stop = timeit.default_timer()
