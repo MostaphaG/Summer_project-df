@@ -365,7 +365,7 @@ def tab_selection(event):
     selected_tab = event.widget.select()
     tab_text = event.widget.tab(selected_tab, "text")
     print('you changed tab to ', tab_text)
-    if tab_text == 'LI':
+    if tab_text == 'Line Integrals':
         x_m = None
         y_m = None
         fig.canvas.draw()
@@ -390,13 +390,32 @@ def tab_selection(event):
         LI_total = 0
         # set variable for mouse to respond to integrals in new tab
         click_opt_int = 5
-    elif tab_text == 'main':
+        # restart the plot, in case calculus code was used last
+        PLOT_response()
+        # set up grid initally as polygon is selected
+        main_axis.grid(True)
+        # draw it on
+        canvas.draw()
+    elif tab_text == 'Main':
         LI_restart()
         # by default return to initial 'tools'
         click_opt_int = 0
         click_option.set(0)
         click_option_handler(click_option.get())
-
+        LI_shape_select.set(LI_shape_list[0])
+        # restart the plot, in case calculus code was used last
+        PLOT_response()
+        # get rid of the grid
+        main_axis.grid(False)
+        # draw it on
+        canvas.draw()
+    elif tab_text == 'Calculus':
+        # show an empty plot as nothing has been implemented yet
+        # and no wedge has been done
+        # TEMPORARY
+        main_axis.clear()
+        canvas.draw()
+        tk.messagebox.showinfo('EMPTY PLOT INFO', 'Calculus code has not been merged here yet and no wedge was selected yet')
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # set up basic layout of the window
@@ -461,9 +480,9 @@ calculus_frame = tk.Frame(notebook)
 calculus_frame.grid(row=0, column=2)
 
 # finsalise them
-notebook.add(right_frame, text='main')
-notebook.add(LI_frame, text='LI')
-notebook.add(calculus_frame, text='calculus')
+notebook.add(right_frame, text='Main')
+notebook.add(LI_frame, text='Line Integrals')
+notebook.add(calculus_frame, text='Calculus')
 
 # bind the clicks on tabs to a function
 notebook.bind_all('<<NotebookTabChanged>>', tab_selection)
@@ -692,6 +711,12 @@ def LI_restart():
     # call plot-respose to redraw (so lines are deleted)
     # ideally would want a way of deleting lines without restarting the plot
     PLOT_response()
+    # get the grid drawn on as needed
+    if LI_shape_select.get() == 'Polygon':
+        main_axis.grid(True)
+        canvas.draw()
+    else:
+        pass
 
 
 # define LI shape selection response to dropdown
@@ -708,15 +733,23 @@ def LI_shape_select_response(selected_shape):
         Radius_LI_circ_entry = tk.Entry(LI_frame, width=10)
         Radius_LI_circ_entry.grid(row=3, column=1)
         Radius_LI_circ_entry.insert(0, '3')
+        # get rid of grid on plot
+        main_axis.grid(False)
+        # update canvas
+        canvas.draw()
     else:
+        # restart the plot and the integral values
+        LI_restart()
+        # set up a grid
+        main_axis.grid(True)
+        # update canvas
+        canvas.draw()
+        # get rid of circle options
         try:
             Radius_LI_label.destroy()
             Radius_LI_circ_entry.destroy()
         except UnboundLocalError:  
             pass
-    # restart the plot and the integral values
-    LI_restart()
-    
 
 # Compute line integral for circles
 def line_int_circ(cent, R, N, u_str, v_str):
