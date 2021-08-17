@@ -687,7 +687,7 @@ def on_key_press(event):
         #     print('not implemented')   # insert function later
         elif LI_shape_select.get() == 'Circle':
             # get the radius and call approperiate function
-            Radius_LI_circ = float(Radius_LI_circ_entry.get())
+            Radius_LI_circ = eval(Radius_LI_circ_entry.get())
             line_int_circ([x_m,y_m], Radius_LI_circ, 10000, string_x, string_y)
 
 
