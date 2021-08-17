@@ -618,6 +618,10 @@ a_polar = 1
 # set up a variable to keep track if LI was used recently
 LI_use_var = 0
 
+# set up line intergal enpty variables
+LI_total = 0
+LI_coord = []
+
 ''' end of polar setting up'''
 
 # set up initial strings for 2 forms window to display, for it to save properly after
