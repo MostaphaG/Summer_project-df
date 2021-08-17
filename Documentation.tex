@@ -184,7 +184,7 @@ This has been implemented in code. The parameters for this are as follows:
 \textbf{custom\textunderscore btn\textunderscore response}: when the button called `customise' is pressed, this function responds by opening a new (`optimisation settings') window, in which features can be customised. It includes entry boxes where the user can input new values for parameters such as `fract', `w\textunderscore head' and `h\textunderscore head' (described previously). These are initially filled with current values, changing them and pressing `SUBMIT ALL' updates the plot.\\
 \textbf{custom\textunderscore submission}: Responds to the `SUBMIT ALL' in the new `optimisation settings' window. When the button is pressed, the input values are globally saved. The current axis are cleared, a new plot is constructed as per the new specifications and it is displayed on the `canvas' of the correct frame. The updated plot is initially only a stack plot, therefore the radio-buttons are returned to the original position of `stacks'. The new window is then closed.
 
-\section{2-forms from 1-forms, exterior derivative (on $\mathbb{R}^{m}$)}
+\section{Mathematically: 2-forms from 1-forms, exterior derivative (on $\mathbb{R}^{m}$)}
 The code includes a script that calculates 2-forms from a given 1-form in a specified number of dimensions.
 It requires input of the 1-form components respectively to their elemental 1-form (in code: string\textunderscore x, string\textunderscore y, etc.), variable arrays (in code: $x$, $y$ etc.) as well as grids (in code: $xg$, $yg$, etc.) of these and a list of symbols for each variable used in the equations (coords).
 The code, so far, has to be changed manually to include the change of all given components from \textbf{string} type to \textbf{sympy.core.mul.Mul}. The number of used dimensions has to also be input as an integer (`$m$' in the code). The variable, `expressions' has to also be appended with the correct number of components.
@@ -323,29 +323,31 @@ The main difference from the calculation of straight line integrals is that the 
 
 
 
-\section{2 forms on $\mathbb{R}^{2}$}
+\section{Graphical representations of 2 forms on $\mathbb{R}^{2}$}
 \subsection{2 form representations - blocks and stacks}
 Two alternative ways of representing 2 forms have been considered. The first, simpler method considers the 2 form magnitude at different points in space and represents them as squares, whose size is determined by the magnitude, and whose colour determines the orientation, obtained by the sign of the 2 form at that point.
 
 \noindent The plotting of these is completed by defining Rectangular patches, provided by the matplotlib library. The size of each rectangle is defined in terms of a fraction of a user defined total (customisable) and depends on the relative, unitary magnitude of the 2 form, with respect to its maximum value.
 
-\noindent Due to the simple approach of this method, no complications occur. The 2 forms are simply represented. However, they do not clearly show the most important characteristics of 2 forms. They, by requirement: have gaps between them, will overlap if magnitudes are large enough and in no way graphically represent the idea of 2 forms being elemental areas through which integration can be completed.
+\noindent Due to the simple approach of this method, no complications occur. The 2 forms are simply represented. However, they do not clearly show the most important characteristics of 2 forms. They, by requirement: have gaps between them, will overlap if magnitudes are large enough and in no way graphically represent the idea of 2 forms being elemental areas through which integration can be completed.\\
 
-A graphically clearer way of representing 2 forms is through the superposition of stacks from one forms. In this case, 2 forms are represented by squares, where
+A graphically clearer way of representing 2 forms is through the superposition of stacks from elemental one forms. This process includes finding expressions for fields in the $x$ and in the $y$ directions such that the desired 2 form is being represented. These are then plotted using the $x$ field for stacks in the $x$ direction and the $y$ field for stacks only in the $y$ direction.
 
+\noindent The result forms a gird that covers the defined region with squares, whose inside is dissected into further sections, depending on the 2 form magnitude at that position. Furthermore, more dissections occur inside, depending on which component of the 2 form is dominant at that position.
 
+This approach clearly presents all characteristics of 2 forms. The region is covered, no overlap is allowed and it can be seen how integration over such areas can yield known results. Another characteristic which, through this, can be reproduced is merging of 2 form 'tubes' on $\mathbb{R}^{2}$, which we will return to later.
 
-
-\subsection{2 forms on R2 from a wedge product}
-
-
-
-
-\subsection{2 forms on R2 from the exterior derivative}
+However, there exist major issues with this approach (which will also be explained in more detail in the coming subsections). These include the above-mentioned processes of finding 1 forms that reproduce the desired 2 form. This can be done through two approaches, un-doing the exterior derivative, or through undoing a wedge product.Both of which give the desired 2 form in terms of component 1 forms.
 
 
+\subsection{2 forms on R2 through the exterior derivative}
+One way to obtain a 2 form from component 1 forms is to ask the user for a 1 form and compute the exterior derivative of it. This way, both are known, the 2 form and the 1 form that it originated from. To complete the above mentioned process, the input 1 forms can be differentiated (as in the Jacobian) and the skew-symmetric parts can be taken (these are the components that form the resulting 2 form). These components can then be plotted as stacks in the $x$ direction (differential of the $dx$ component w.r.t $y$) and in the $y$ direction (differential of the $dy$ component w.r.t $x$). However, there exists a problem with this procedure, and that is, the non-uniqueness of the result. Many 1 forms may become the same 2 form upon the exterior derivative, due to cancellations occurring between $dx \wedge dy$ and $dy\wedge dx$ components. This means that, the graphical representation of a given 2 form will vary, depending on its origin. Which should clearly not be the case.
+The cancellations could be solved if code was written that would scan the two resulting equations for any cancelling or merging components and delete or distribute them (respectively). This however will still make the 2 form not unique, it will simply be another representation.
 
+A method of excluding such cancellations was found and implemented such that given 2 forms yield identical representations. This was done through, first obtaining the mathematical expression of the 2 form through the exterior derivative as described previously. The result was then simplified by changing it to a 'SymPy' expression and using the 'simplify' function. Once this was completed, the 2 form was split into two, equal elements, $dx \wedge dy$ and $dy\wedge dx$. Which determine the derivatives of 1 form components that can be used to plot stacks as described previously.
+Once again however, this was established not to be fully functional. The issue now was, the splitting of the 2 form is also not unique, it is arbitrary. Any splitting will work, so long as the components return the same 2 form when merged (by inverting the elementary 2 form and adding).
 
+This issue was found to be fundamental. As clear and intuitive as this method is for graphically representing 2 forms, it does not provide a unique way of doing so. TO be precise, at the very least, no such method has yet been found. In fact, all the representations it does provide are elements of a rotation group ($SO(2)$) of the resulting 2 form. To present this idea more clearly, lets look at the more rigorous proof of the above stated non-uniqueness.
 
 \subsection{Proof of the non-uniqueness of 2 forms}
 
@@ -353,26 +355,102 @@ A graphically clearer way of representing 2 forms is through the superposition o
 
 
 
+\subsection{2 forms on R2 through the wedge product}
+There exists yet another way of defining 2 forms through stacks that represent 1 forms. This includes splitting the 2 form into components, not into $\wedge dy$ and $dy\wedge dx$ that are understood to originate from the exterior derivative, but into $f(x, y)dx \wedge g(x, y)dy$, where the 2 form is $f(x,y)g(x,y) dx\wedge dy$. This was not coded, as it yields another issue. Similarly to the last considered method, the splitting of the 2 form into a product of two functions is not unique. Again, as above for the previous method, it is also possible here to let the user input two 1 forms to wedge together into a 2 form, but once again, this may also include cancellations or merges between components, which make the 2 form not unique.
+
+\subsection{2 form representation as stacks in code}
+Due to the fact that unique representations could not be deduced. The code we produced allows the user to choose, what representation they would like to see.
+
+\textbf{User-supplied 2 forms} are being plotted as stacks by splitting the expression into two components $dx\wedge dy$ and $dy\wedge dx$. The splitting of the expression is set by the user via the 'set splitting' button (by default splitting occurs into two equal halves). These are then being plotted as previously stated, one as the $x$ component and the other as the $y$ component. This plotting is done via a function ('form\textunderscore 2\textunderscore components\textunderscore plot') which is very similar in operation to stack\textunderscore plot. The new function however, also uses the end 2 form expression, evaluates it numerically, finds its sign and depending on this, colours the stacks. It was chosen to colour via the convention that grey signifies zero magnitude at that position, red represents positive (ccw) 2 form magnitude and blue stands for negative (cw) magnitude.
+
+
+\textbf{2 forms from the exterior derivative} are plotted by a similar process as above, with the initial addition of finding the mathematical expression of the 2 form and simplifying it (as has been described above). Once the 2 form is found, it is input into the entry box for 2 forms and is highlighted in light green to display that this is currently being displayed (as opposed to other options including the supplied 1 forms).
+
+
+\textbf{2 forms through the wedge product} is completed by first asking the user to input two 1 forms that are to be wedged together, in terms of their components in $dx$ and $dy$ (other on $\mathbb{R}^{3}$). This is done by displaying a new window for these inputs after the 'wedge' button is pressed. Once these are submitted this extra window is closed, although its entries are saved and display again when it is re-opened. The inputs are simplified by briefly passing them into 'SymPy' expressions. The components of these inputs are then calculated using the previously described 'eq\textunderscore to\textunderscore comps'. The 2 form is then found by concatenating strings of input in such a way as to result in the correct 2 form. This is also simplified in the same way and displays in the 2 form entry box, which, once again, light up to a light green. The plotting of superposing stacks is then completed by using the stack\textunderscore plot function with disabled arrowheads.
+
+Given $w_{1} = f(x, y) dx + g(x, y) dy$  and $w_{2} = h(x, y) dx + m(x, y) dy$. The graphical representation must be made up of:
+
+
+\begin{equation}
+	\label{T2} \begin{split}
+		f(x, y) dx\wedge m(x, y) dy + &h(x, y) dy\wedge g(x, y) dx \\
+		= \\
+		f(x, y)m(x, y) dx\wedge dy + h(x, y)g(x, y) dx\wedge dy &= (f(x, y)m(x, y) - g(x, y)h(x, y)) dx\wedge dy  
+	\end{split}
+\end{equation}
+
+
+which is executed when the if condition in the response function is satisfied.
+Two rectangular stacks with the scaling factor are accounted to by giving similar colours to the vertical  and horizontal stacks (red and green). After the first rectangular stacks are added the second group will either sit on top of the first (in which case scaling contribution is zero) or sit in some gaps, hence increasing the density as result of its scaling function.
+If any of the coefficient functions (f, g, h or m)  is zero, the stacking reduces to one function together with its elemental 2 form $dx\wedge dy$, these are executed in the 'elif' options under the if statement.
+
+
+\subsection{2 form representation as blocks in code}
+The simpler method is also implemented to show the comparison between the  locally detailed, non-unique (stacks( and locally undefined, global, unique (blocks).
+This is more simply implemented by defining the above described process of plotting blocks in a single function and calling it with the appropriate 2 form whenever necessary.
+The option as to which should be used is given to the user through radio buttons, however, when stacks is selected, a message box displays, warning the user of the non-uniqueness of the result.
+
 \subsection{Interior derivative acting on 2 forms}
+The code includes the option to calculate the interior derivative of a 2 form (and a 1 form) on $\mathbb{R}^{2}$. \textit{Note: it has not yet been generalised to $\mathbb{R}^{3}$}. After pressing the button ('interior derivative'), a new window displays, which asks the user to chose which option to evaluate with. The interior derivative can be applied to a 2 form only, or to a 2 form and 1 from simultaneously. Once the option is chosen, it asks the user for a vector field to do the calculation with respect to in terms of the $x$ and $y$ components. The two windows are then shut.
 
+\noindent \textbf{To complete the interior derivative of the 2 form}, the code takes given inputs (2 form and 'background' vector field), formats and simplifies them (as before) and calculates the resulting 1 form by the standard procedure (thanks to linearity of the interior derivative):
 
+\begin{equation}
+	\label{T2} \begin{split}
+		\iota_{\vec{u}}(\omega) = f u_{1} dy - f u_{2} dx
+	\end{split}
+\end{equation}
+where $\omega = f dx\wedge dy$ and $\vec{u} = u_{1}dx + u_{2}dy$.
+This is found numerically and as a string, to be able to plot it, and to be able to display it to the user.
+This resulting 1 form in put into entries for 1 form components and the boxes are coloured into light green to show that these are currently displayed. The result is plotted using the 'form\textunderscore 2\textunderscore components\textunderscore plot' function with $u$ and $v$ given by the expression as shown above. This function is used as opposed to stack\textunderscore plot, as it also includes colouring of stacks, depending on the sign of the original 2 form at that location.
+This process is specified in the 'Int\textunderscore deriv\textunderscore 2\textunderscore form' function. This is called when the selected option is '2 form only' by the 'Int\textunderscore deriv\textunderscore 22\textunderscore form' function.
 
+\noindent \textbf{To complete the interior derivative of the 2 form and the 1 form} a similar process is completed, but the 1 form is also taken into account. The 1 form calculation is completed by a function called 'Int\textunderscore deriv\textunderscore 1\textunderscore form'. The two functions are separate in order to be able to more easily call their combinations when user wished to use both, or each one separately. This function completes a similar process to the above described (for 2 froms) however, it is based on a different equation, as follows:
 
+\begin{equation}
+	\label{T2} \begin{split}
+		\iota_{\vec{u}}(\omega) = f_{x} u_{1} + f_{y} u_{2}
+	\end{split}
+\end{equation}
+where $\omega = f_{x} dx + f_{y} dy$ and $\vec{u}$ is as previously. The result is a zero form (scalar function), which can be most easily represented via its contours. Because in the GUI, there exists no entry box for a zero from, the result of that is displayed underneath the 1 form entry box in red, as a Tkinter label.
 
+When \textbf{the two require being computed together}, both function are called with appropriate canvas preparation by the function 'Int\textunderscore deriv\textunderscore 21\textunderscore form'. This finds the result of the 2 form, which returns a vector field, which 'sits on top of' the computed 1 form. This can visualised as a vector field lying on a scalar function landscape.
 
+\noindent These functions are called by a response to the PLOT button in the window where the user defines the background vector field. Depending on which option was selected in the previous window ('2 form only' or 'both'), The plot button binds to different functions and hence responds appropriately.
 
 \section{Forms on $\mathbb{R}^{3}$}
 \subsection{Representing 2 forms on $\mathbb{R}^{3}$}
+On $\mathbb{R}^{3}$, 1 forms are parallel, two dimensional sheets, perpendicular to the elemental 1 form. 2 forms can thus be represented as intersections of such sheets, forming tubes, which define elemental, oriented areas that are the 2 form. This is very difficult to show on a solid, rotating gird of many, small intersecting sheets, therefore a different approach has been used. The code lets the user inspect planes though a three dimensional cube by selecting the viewing axis and the depth into the solid.
+This, visually, gives the same looking 2 forms. This is because the viewer is slicing through the tubes at a selected height.
+
+As the sheets are defined by elemental one forms, if any component of the viewed 2 form was in the direction of the axis along which the viewer is looking, the tubes would not be pointing in their direction and thus would be closed. Therefore:
+\begin{itemize}
+	\item Viewing from the $z$ axis, only the 2 form components in $dx\wedge dy$ would be apparent
+	\item Viewing from the $y$ axis, only the 2 form components in $dx\wedge dz$ would be apparent
+	\item Viewing from the $x$ axis, only the 2 form components in $dy\wedge dz$ would be apparent
+\end{itemize} 
+
+The process of calculating and plotting these is similar to the previously defined process used in plotting two forms on $\mathbb{R}^{2}$, (block plots are also implemented in a similar manner).
+
+This time the 'result' calculated by the two form finder (described previously) has three entries, each of which needs to be split (again, customisable but with default being equal split) and components need to be found for stacks to be superposed. This time the process yields six components (two for each plane).
+
+\textit{NOTE:For now, the only implemented way of defining 2 forms on $\mathbb{R}^{3}$ is through the exterior derivative. Upgrades which will include plotting from a given expression are coming.}
+
+\noindent An extra process is required to make tubes update in the viewing axis accordingly to changing the height along it. This is because when expressions are proportional to functions of the viewing axis coordinate, they would not scale, they would simply be an additional constant that would vanish in the representation because of our applied relative scaling of stacks. A global scaling needs to be applied to correctly handle this.
+This is done by finding the maximum value across all height points (excluding singularities) for that two form component, dividing the local maximum (in the plane) by that global maximum and multiplying the relative scaling array by that value.
+To accomodate for that and a few other issues mentioned below, the plotting now is done by using a newly defined function 'form\textunderscore 1\textunderscore to\textunderscore 2onR3', which works in a similar manner to the stacks\textunderscore plot. With the mentioned extra operations.
+
+Because 2 form 'tubes' must be closed, this function includes a variable that sets the minimum number of stacks ('s\textunderscore min') to two. This way, full squares are always being displayed and them dissected depending on magnitude, but will not become open areas.
+
+Another extra operation is that it required two dimensional arrays to work with stacks, but provided are now found in terms of grids which are three dimensional. Thus slicing must be done. This is done an if-elif-else statement, one test for each axis projection. These deal with slicing grids, stack components and the slicing of the 2 form signs array.
+The strange thing about this slicing is that, due to the way meshgrids are defined ; while the component along the z axis is in fact a slice of $[:, :, height]$ as expected. The x and y slicing is switched.
+Also, singularities now not only must be excluded in the components (or ion the magnitude) but also when the 2 form sign is to be taken.
+
+It may be worth noting that a slider has not been implemented to complete the process of changing the viewing height along the viewing axis. This was  due to issues with Tkinter sliders, in getting them to go up in any, user defined intervals (without rounding, as then the exact value has to be found in the array to obtain its index for slicing).
 
 
-
-
-
-
-
-\subsection{Representing 1 forms on $\mathbb{R}^{3}$}
-
-
+\section{Singularities}
 
 
 

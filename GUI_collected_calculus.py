@@ -1130,11 +1130,8 @@ def wedge_product():
         # the second group will either sit on top of the first (in which case scaling contibution is zero)
         # or sit in some gaps and hence increasing the denisty as result of its scaling function.
         # If any of the coefficients (f,g,h and m)  is zero, the stacking reduces to one "function*dx/\dy", these are executed in the elif options.
-        # One situation to be added when (u_1*v_2-u2*v_1).all() = 0, the scaling function here is zero and hence no 2-form should be produced/ or produced in faded color.
         # !!! ISSUES:
-        # 1- The max number of stacks possible will hinder good visualization when
-        # the stacks are dense. It's a general issue, but more clear here than other cases due to the nature of 2-forms.
-        # 2- Would be nice to uniformly distribute the stacks in each direction after finishing the double stacking.
+        # Would be nice to uniformly distribute the stacks in each direction after finishing the double stacking.
         if to_wedge_x_1_str != '0' and to_wedge_y_1_str != '0' and to_wedge_x_2_str != '0' and to_wedge_y_2_str != '0':
             stack_plot(xg, yg, ax, u_1, 0, s_max, L, fract, arrowheads=False, colour='green', s_min=2)
             stack_plot(xg, yg, ax, 0, v_2, s_max, L, fract, arrowheads=False, colour='green', s_min=2)
@@ -1146,6 +1143,7 @@ def wedge_product():
         elif to_wedge_y_1_str != '0' and to_wedge_x_2_str != '0':
             stack_plot(xg, yg, ax, 0, v_1, s_max, L, fract, arrowheads=False, colour='green', s_min=2)
             stack_plot(xg, yg, ax, -u_2, 0, s_max, L, fract, arrowheads=False, colour='red', s_min=2)
+    # deal with plotting when blocks are desired
     elif stack_block_int == 0:
         # to do it with blocks, first, get the numercial 2 from
         # from previously found string

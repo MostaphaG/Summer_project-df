@@ -212,21 +212,30 @@ def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L,
     
     # depending on axis_view and h_index, get the planar u and v from the given
     # 3D ones and the grids sorted
+    # Also
+    # get the 2 form signs and
+    # change the 2_form signs to just be in terms of the selected plane
     if axis_view == 'z':
         grid_x = grid_x[:, :, h_index]
         grid_y = grid_y[:, :, h_index]
         u = u[:, :, h_index]
         v = v[:, :, h_index]
+        form_2_sgn = np.sign(form_2[0])
+        form_2_sgn_planar = form_2_sgn[:, :, h_index]
     elif axis_view == 'y':
         grid_x = grid_x[h_index, :, :]
         grid_y = grid_y[h_index, :, :]
         u = u[h_index, :, :]
         v = v[h_index, :, :]
+        form_2_sgn = np.sign(form_2[1])
+        form_2_sgn_planar = form_2_sgn[h_index, :, :]
     elif axis_view == 'x':
         grid_x = grid_x[:, h_index, :]
         grid_y = grid_y[:, h_index, :]
         u = u[:, h_index, :]
         v = v[:, h_index, :]
+        form_2_sgn = np.sign(form_2[2])
+        form_2_sgn_planar = form_2_sgn[:, h_index, :]
     else:
         print('Error can\'t find this axis')
     
@@ -252,30 +261,7 @@ def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L,
     
     # find direction of each arrow
     theta = np.arctan2(v, u)   # theta defined from positive x axis ccw
-    
-    
-    # get the 2 form signs and
-    # change the 2_form signs to just be in terms of the selected plane
-    if axis_view == 'x':
-        form_2_sgn = np.sign(form_2[2])
-        form_2_sgn_planar = form_2_sgn[:, h_index, :]
-    elif axis_view == 'y':
-        form_2_sgn = np.sign(form_2[1])
-        form_2_sgn_planar = form_2_sgn[h_index, :, :]
-    elif axis_view == 'z':
-        form_2_sgn = np.sign(form_2[0])
-        form_2_sgn_planar = form_2_sgn[:, :, h_index]
-    
-    # correct for singularities in planar form 2:
-    for i in range(x_len):
-        for j in range(y_len):
-            # set to zero points that are not defined or inf
-            if isnan(mag[i, j]) is True:
-                form_2_sgn_planar[i, j] = 0
-            if mag[i, j] == np.inf  or mag[i, j] > 1e15:
-                form_2_sgn_planar[i, j] = 1
-            if mag[i, j] == -np.inf  or mag[i, j] < -1e15:
-                form_2_sgn_planar[i, j] = -1
+            
     
     # deal with sinularities in mag
     for i in range(x_len):
@@ -288,6 +274,15 @@ def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L,
                 circ = patch.Circle((grid_x[i, j], grid_y[i, j]), L*fract/3, color='red')
                 ax.add_patch(circ)
                 mag[i, j] = 0
+            # ALso, since we got this lop anyway
+            # correct for singularities in planar form 2:
+            # set to zero points that are not defined or inf
+            if isnan(mag[i, j]) is True:
+                form_2_sgn_planar[i, j] = 0
+            if mag[i, j] == np.inf  or mag[i, j] > 1e15:
+                form_2_sgn_planar[i, j] = 1
+            if mag[i, j] == -np.inf  or mag[i, j] < -1e15:
+                form_2_sgn_planar[i, j] = -1
     
     
     # #########################################################################
@@ -315,14 +310,14 @@ def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L,
     # to scale, limit s_max based on its max mag.
     try:
         if axis_view == 'z':
-            mag_loc = int(max_global_dxdy/max_size)
-            R /= mag_loc
+            mag_loc = max_size/max_global_dxdy
+            R *= mag_loc
         if axis_view == 'y':
-            mag_loc = int(max_global_dxdz/max_size)
-            R /= mag_loc
+            mag_loc = max_size/max_global_dxdz
+            R *= mag_loc
         if axis_view == 'x':
-            mag_loc = int(max_global_dydz/max_size)
-            R /= mag_loc
+            mag_loc = max_size/max_global_dydz
+            R *= mag_loc
     except ValueError:
         print('NaN encountered in divide')
         pass

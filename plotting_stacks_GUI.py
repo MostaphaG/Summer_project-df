@@ -852,10 +852,10 @@ def line_int_poly(N, u_str, v_str):
     # Tolerance for auto-joining lines together i.e. distance below which lines will join
     ctol = 0.1
     
+    # array of coordinates
     coord_array = np.array(LI_coord)
-           
+    
     if c_count > 1:
-        
         # Auto-join lines (check previous coords for if any are very close to eachother)
         coord_diff = coord_array - coord_array[c_count-1,:]
         for i in range(c_count):
@@ -863,16 +863,11 @@ def line_int_poly(N, u_str, v_str):
                 LI_coord[c_count-1] = LI_coord[i]
                 LI_verts = LI_coord[i:]
                 break
-            
-        
-
-            
         # get coordinates from mouse clicks
         a = LI_coord[c_count - 2]
         b = LI_coord[c_count - 1]
         # Plot line between points a and b
         main_axis.add_line(Line2D((a[0], b[0]), (a[1], b[1]), linewidth=2, color='red'))
-        
         
         # linegrad = (b[1]-a[1])/(b[0]-a[0])  # keep as comment for now
         # find line length
@@ -910,7 +905,6 @@ def line_int_poly(N, u_str, v_str):
         # update its label
         LI_total_label.configure(text=str(round(LI_total, 6)))
         
-        
         if len(LI_verts) > 3:
             shape_area = calc_area(LI_verts)
             shape_area_label.configure(text=str(round(shape_area, 3)))
@@ -925,22 +919,25 @@ def line_int_poly(N, u_str, v_str):
         main_axis.add_patch(circle)
         canvas.draw()
 
+
 # Calc polygon area when user completes a shape
 def calc_area(vert_list):
-    
+    # gte number of verticies
     n = len(vert_list)
+    # set up array of vertiies from list
     M = np.array(vert_list)
-    
+    # initialise variables
     S1 = 0
     S2 = 0
-    
+    # loop over the verticies
     for i in range(n-1):
-        S1 = S1 + (M[i,0]*M[i+1,1])
-        S2 = S2 + (M[i,1]*M[i+1,0])   
-    
+        # find total side lengths
+        S1 = S1 + (M[i, 0] * M[i+1, 1])
+        S2 = S2 + (M[i, 1] * M[i+1, 0])
+    # get area from these
     A = 0.5*abs(S1-S2)
-
     return A
+
 
 ''' RESPONSE FUNCTIONS TO PLOT '''
 
