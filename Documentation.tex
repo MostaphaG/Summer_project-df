@@ -300,16 +300,18 @@ Upon selecting the 'line integrals' tab, with the polygons drop down selection, 
 
 Here, $\vec{F} = F_x \ \hat{i} + F_y \ \hat{j}$, $\vec{dl} = dx \ \hat{i} + dy \ \hat{j}$ and $(x_k,y_k)$ denotes the coordinates of the $k^{th}$ interval point along the line. Each successive line integral is added to the total and displayed in a GUI label. The reset button clears the plot, the list of coordinates and the total, allowing the user to start from scratch.
 
-\noindent This function operates not only over single starlight lines but also joins them head-to-tail to create polygonal shapes by accessing previous mouse click coordinates from LI\textunderscore coord. The polygons can be closed by clicking near \textbf{any} previously clicked point. This is code by defining these coordinates as equal when the distance between them is smaller than a selected interval 'ctol'. Which is set to be 0.1 (in axis units).
+\noindent This function operates not only over single starlight lines but also joins them head-to-tail to create polygonal shapes by accessing previous mouse click coordinates from LI\textunderscore coord. The polygons can be closed by clicking near \textbf{any} previously clicked point. This is coded by defining these coordinates as equal when the distance between them is smaller than a selected interval 'ctol'. Which is set to be 0.1 (in axis units).
 
 \noindent This function also plots a square grid to aid the user in drawing rectangles on the plot, without the need for an additional function to draw squares. This grid is removed when any other option is selected. 
 
 \subsection{Circles}
 
-Selecting the circles drop down option will allow the user to plot circles on the vector field, updating the position and radius (user selected by entry box) upon every click. Circles are centred on click location. The main difference from the calculation of straight line line integrals is that the displacement vectors are no longer constant, as they will be tangent to the circle at each interval point. The method is as follows: 
+Selecting the circles drop down option will allow the user to plot circles on the vector field, updating the position and radius (user selected by entry box) upon every click. Circles are centred on click location. The user is also allowed to select the orientation of the integral by use of a button. This button displays the currently used orientation, and changes when it is clicked (between 'cw' and 'ccw'). To redo the calculation with the newly selected orientation, the plot has to once again be clicked.
+
+The main difference from the calculation of straight line integrals is that the displacement vectors are no longer constant, as they will be tangent to the circle at each interval point. The method is as follows: 
 
 \begin{itemize}
-	\item Define the small displacements $dx$ and $dy$ (arrays) for the $N$ interval points using $dx_k = -Asin(kdt)$ and $dy_k = Acos(kdt)$. $dt$ is a small angle increment and is stored as an array in the code (linspace from 0 to 2$\pi$ with $N$ points.) $A$, the magnitude of the displacement vector is chosen to be the length of the circumference swept out by each angle increment, $A = \frac{2\pi R}{N}$. 
+	\item Define the small displacements $dx$ and $dy$ (arrays) for the $N$ interval points using $dx_k = -Asin(kdt)$ and $dy_k = Acos(kdt)$ (changed to negations using an if-else statement, depending on chosen orientation). $dt$ is a small angle increment and is stored as an array in the code (linspace from 0 to 2$\pi$ with $N$ points.) $A$, the magnitude of the displacement vector is chosen to be the length of the circumference swept out by each angle increment, $A = \frac{2\pi R}{N}$. 
 	\item Calculate the coordinates of interval points: $intervals(x_k) = x_m + Acos(kdt)$, $intervals(y_k) = y_m + Asin(kdt)$. $(x_m,y_m)$ are the coordinates of the users click. 
 	\item Evaluate the vector components at each interval point as before.
 	\item Find the total line integral using:
@@ -318,5 +320,61 @@ Selecting the circles drop down option will allow the user to plot circles on th
 \begin{equation}
 	\ointctrclockwise \vec{F} \cdot \vec{dl} \approx \sum_{k=0}^{N-1} F_x(x_k,y_k)dx_k + \sum_{k=0}^{N-1} F_y(x_k,y_k)dy_k
 \end{equation}
+
+
+
+\section{2 forms on $\mathbb{R}^{2}$}
+\subsection{2 form representations - blocks and stacks}
+Two alternative ways of representing 2 forms have been considered. The first, simpler method considers the 2 form magnitude at different points in space and represents them as squares, whose size is determined by the magnitude, and whose colour determines the orientation, obtained by the sign of the 2 form at that point.
+
+\noindent The plotting of these is completed by defining Rectangular patches, provided by the matplotlib library. The size of each rectangle is defined in terms of a fraction of a user defined total (customisable) and depends on the relative, unitary magnitude of the 2 form, with respect to its maximum value.
+
+\noindent Due to the simple approach of this method, no complications occur. The 2 forms are simply represented. However, they do not clearly show the most important characteristics of 2 forms. They, by requirement: have gaps between them, will overlap if magnitudes are large enough and in no way graphically represent the idea of 2 forms being elemental areas through which integration can be completed.
+
+A graphically clearer way of representing 2 forms is through the superposition of stacks from one forms. In this case, 2 forms are represented by squares, where
+
+
+
+
+\subsection{2 forms on R2 from a wedge product}
+
+
+
+
+\subsection{2 forms on R2 from the exterior derivative}
+
+
+
+
+
+\subsection{Proof of the non-uniqueness of 2 forms}
+
+
+
+
+
+\subsection{Interior derivative acting on 2 forms}
+
+
+
+
+
+
+
+\section{Forms on $\mathbb{R}^{3}$}
+\subsection{Representing 2 forms on $\mathbb{R}^{3}$}
+
+
+
+
+
+
+
+\subsection{Representing 1 forms on $\mathbb{R}^{3}$}
+
+
+
+
+
 
 \end{document}

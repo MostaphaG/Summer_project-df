@@ -338,7 +338,7 @@ Define other functions needed to be used in the responses to GUI interactions
 
 # define a function that will plot stack components, coloured
 # as per the orientation of the 2 form at that grid point
-def form_2_components_plot(xg, yg, u, v, form_2_sgn, s_max, L, fract, colour_str, arrowheads=False, w_head=1/8, h_head=1/4):
+def form_2_components_plot(xg, yg, u, v, form_2_sgn, s_max, L, fract, colour_str, arrowheads=False, w_head=1/8, h_head=1/4, s_min=0):
     global s_L
     # get axis lengths:
     x_len = len(xg[:, 0])
@@ -420,8 +420,8 @@ def form_2_components_plot(xg, yg, u, v, form_2_sgn, s_max, L, fract, colour_str
             else:
                 color_index = 2  # just in case
             
-            for t in range(1, s_max+1):
-                if (t-1)/s_max <= R[i, j] <= t/s_max:
+            for t in range(s_min, s_max+2):
+                if (t-2)/s_max <= R[i, j] <= (t-1)/s_max:
                     R_int[i, j] = t
             # set a varible for current considered magnitude as it is reused
             # avoids extracting from R many times.
@@ -492,7 +492,7 @@ def form_2_components_plot(xg, yg, u, v, form_2_sgn, s_max, L, fract, colour_str
 
 
 # define a function that will complete all stack plotting:
-def stack_plot(xg, yg, axis, u, v, s_max, L, fract, arrows=False, orientation='mid', scale=1, w_head=1/8, h_head=1/4, axis_check=0, arrowheads=True, colour='green'):
+def stack_plot(xg, yg, axis, u, v, s_max, L, fract, arrows=False, orientation='mid', scale=1, w_head=1/8, h_head=1/4, axis_check=0, arrowheads=True, colour='green', s_min=0):
     global s_L
     # get the lengths of x and y from their grids
     
@@ -580,8 +580,8 @@ def stack_plot(xg, yg, axis, u, v, s_max, L, fract, arrows=False, orientation='m
         for j in range(y_len):
             # define it for all magnitudes. Separately for odd and even corr. number of sheets:
             # Label each element with the number of stacks required: linear scaling
-            for t in range(1, s_max+1):
-                if (t-1)/s_max <= R[i, j] <= t/s_max:
+            for t in range(s_min, s_max+2):
+                if (t-2)/s_max <= R[i, j] <= (t-1)/s_max:
                     R_int[i, j] = t
             # set a varible for current considered magnitude as it is reused
             # avoids extracting from R many times.
@@ -770,8 +770,8 @@ def form_2_response():
         # clear the current plot
         ax.clear()
         # use plotting stacks to display these
-        form_2_components_plot(xg, yg, u, zero_field, form_2_sgn, s_max, L, fract, colour_str)
-        form_2_components_plot(xg, yg, zero_field, v, form_2_sgn, s_max, L, fract, colour_str)
+        form_2_components_plot(xg, yg, u, zero_field, form_2_sgn, s_max, L, fract, colour_str, 2)
+        form_2_components_plot(xg, yg, zero_field, v, form_2_sgn, s_max, L, fract, colour_str, 2)
         # display the new plot
         canvas.draw()
         # define as string message to show in the message box
@@ -860,7 +860,7 @@ def Int_deriv_2_form():
     u_str = str(simplify('-(' + form_2_str + ')*(' + vector_ey_str + ')' ))
     v_str = str(simplify( '(' + form_2_str + ')*(' + vector_ex_str + ')' ))
     # use the stacks plotter to present this
-    form_2_components_plot(xg, yg, u, v, form_2_sgn, s_max, L, fract, colour_str, arrowheads=True)
+    form_2_components_plot(xg, yg, u, v, form_2_sgn, s_max, L, fract, colour_str, arrowheads=True, s_min=2)
 
 
 # define a function that will find the interior derivative of a given 1 form
@@ -1056,8 +1056,8 @@ def Ext_deriv_response():
         # clear the current plot
         ax.clear()
         # use plotting stacks to display these
-        form_2_components_plot(xg, yg, u, zero_field, form_2_sgn, s_max, L, fract, colour_str)
-        form_2_components_plot(xg, yg, zero_field, v, form_2_sgn, s_max, L, fract, colour_str)
+        form_2_components_plot(xg, yg, u, zero_field, form_2_sgn, s_max, L, fract, colour_str, s_min=2)
+        form_2_components_plot(xg, yg, zero_field, v, form_2_sgn, s_max, L, fract, colour_str, s_min=2)
         # display the new plot
         canvas.draw()
         # define as string message to show in the message box
@@ -1136,16 +1136,16 @@ def wedge_product():
         # the stacks are dense. It's a general issue, but more clear here than other cases due to the nature of 2-forms.
         # 2- Would be nice to uniformly distribute the stacks in each direction after finishing the double stacking.
         if to_wedge_x_1_str != '0' and to_wedge_y_1_str != '0' and to_wedge_x_2_str != '0' and to_wedge_y_2_str != '0':
-            stack_plot(xg, yg, ax, u_1, 0, s_max, L, fract, arrowheads=False, colour='green')
-            stack_plot(xg, yg, ax, 0, v_2, s_max, L, fract, arrowheads=False, colour='green')
-            stack_plot(xg, yg, ax, 0, v_1, s_max, L, fract, arrowheads=False, colour='red')
-            stack_plot(xg, yg, ax, -u_2, 0, s_max, L, fract, arrowheads=False, colour='red')
+            stack_plot(xg, yg, ax, u_1, 0, s_max, L, fract, arrowheads=False, colour='green', s_min=2)
+            stack_plot(xg, yg, ax, 0, v_2, s_max, L, fract, arrowheads=False, colour='green', s_min=2)
+            stack_plot(xg, yg, ax, 0, v_1, s_max, L, fract, arrowheads=False, colour='red', s_min=2)
+            stack_plot(xg, yg, ax, -u_2, 0, s_max, L, fract, arrowheads=False, colour='red', s_min=2)
         elif to_wedge_x_1_str != '0' and to_wedge_y_2_str != '0':
-            stack_plot(xg, yg, ax, u_1, 0, s_max, L, fract, arrowheads=False, colour='red')
-            stack_plot(xg, yg, ax, 0, v_2, s_max, L, fract, arrowheads=False, colour='green')
+            stack_plot(xg, yg, ax, u_1, 0, s_max, L, fract, arrowheads=False, colour='red', s_min=2)
+            stack_plot(xg, yg, ax, 0, v_2, s_max, L, fract, arrowheads=False, colour='green', s_min=2)
         elif to_wedge_y_1_str != '0' and to_wedge_x_2_str != '0':
-            stack_plot(xg, yg, ax, 0, v_1, s_max, L, fract, arrowheads=False, colour='green')
-            stack_plot(xg, yg, ax, -u_2, 0, s_max, L, fract, arrowheads=False, colour='red')
+            stack_plot(xg, yg, ax, 0, v_1, s_max, L, fract, arrowheads=False, colour='green', s_min=2)
+            stack_plot(xg, yg, ax, -u_2, 0, s_max, L, fract, arrowheads=False, colour='red', s_min=2)
     elif stack_block_int == 0:
         # to do it with blocks, first, get the numercial 2 from
         # from previously found string
