@@ -494,7 +494,7 @@ notebook.bind_all('<<NotebookTabChanged>>', tab_selection)
 
 # define scale of the graph
 L = 5
-pt_den = 21   # number of points on each axis
+pt_den = 11   # number of points on each axis
 
 # Initialise auto scaling variable
 ascale = tk.IntVar()
@@ -621,6 +621,8 @@ LI_use_var = 0
 # set up line intergal enpty variables
 LI_total = 0
 LI_coord = []
+shape_area = 0
+ratio1 = 0
 
 ''' end of polar setting up'''
 
@@ -708,12 +710,16 @@ cid = fig.canvas.mpl_connect("button_press_event", on_key_press)
 
 # define a funciton to restart line integral calculation and lines
 def LI_restart():
-    global LI_total, LI_coord
+    global LI_total, LI_coord, shape_area
     # first, initialise variables again
     LI_total = 0
     LI_coord = []
+    shape_area = 0
+    ratio1 = 0
     # update the label
     LI_total_label.configure(text=LI_total)
+    shape_area_label.configure(text=shape_area)
+    ratio1_label.configure(text=ratio1)
     # NOT IDEAL BUT HOPEFULLY TEMPORARY
     # call plot-respose to redraw (so lines are deleted)
     # ideally would want a way of deleting lines without restarting the plot
@@ -795,7 +801,7 @@ def line_int_circ(cent, R, N, u_str, v_str, orient_int):
     dy = np.zeros(shape=(1, N))
     
     # Magnitude of increment equals that of the circumference subtended by dt for large N
-    A = 2*np.pi*R/N
+    A = 2*np.pi*R/(N)
     
     # Loop through to assign coordinates to interval points and plot them
     # depending on chosen orientation
@@ -813,6 +819,7 @@ def line_int_circ(cent, R, N, u_str, v_str, orient_int):
     dx = -A*np.sin(dt)
     dy = A*np.cos(dt)
     
+    # res = np.sum(dx[:-1]*uv_store[0, :-1] + dy[:-1]*uv_store[1, :-1])
     res = np.sum(dx[:-1]*uv_store[0, :-1] + dy[:-1]*uv_store[1, :-1])
     
     # Plot the circle
@@ -826,12 +833,19 @@ def line_int_circ(cent, R, N, u_str, v_str, orient_int):
     # update its label
     LI_total_label.configure(text=str(round(LI_total, 6)))
     
+    # Shape area label
+    shape_area = np.pi*R**2
+    shape_area_label.configure(text=str(round(shape_area, 3)))
+    
+    ratio1 = LI_total/shape_area
+    ratio1_label.configure(text=str(round(ratio1, 3)))
+    
     return res
 
 
 # define a function that will complete the line integral
 def line_int_poly(N, u_str, v_str):
-    global LI_total, coord_array, coord_diff
+    global LI_total, coord_array, coord_diff, LI_verts
     # set up a conuter to know how many time to complete the sum process
     c_count = len(LI_coord)
     
@@ -847,7 +861,12 @@ def line_int_poly(N, u_str, v_str):
         for i in range(c_count):
             if sqrt((coord_diff[i,0])**2 + (coord_diff[i,1])**2) < ctol:
                 LI_coord[c_count-1] = LI_coord[i]
-                
+                LI_verts = LI_coord[i:]
+                break
+            
+        
+
+            
         # get coordinates from mouse clicks
         a = LI_coord[c_count - 2]
         b = LI_coord[c_count - 1]
@@ -891,6 +910,13 @@ def line_int_poly(N, u_str, v_str):
         # update its label
         LI_total_label.configure(text=str(round(LI_total, 6)))
         
+        
+        if len(LI_verts) > 3:
+            shape_area = calc_area(LI_verts)
+            shape_area_label.configure(text=str(round(shape_area, 3)))
+            ratio1 = LI_total/shape_area
+            ratio1_label.configure(text=str(round(ratio1, 3)))
+            
         return res
     
     else:
@@ -899,6 +925,22 @@ def line_int_poly(N, u_str, v_str):
         main_axis.add_patch(circle)
         canvas.draw()
 
+# Calc polygon area when user completes a shape
+def calc_area(vert_list):
+    
+    n = len(vert_list)
+    M = np.array(vert_list)
+    
+    S1 = 0
+    S2 = 0
+    
+    for i in range(n-1):
+        S1 = S1 + (M[i,0]*M[i+1,1])
+        S2 = S2 + (M[i,1]*M[i+1,0])   
+    
+    A = 0.5*abs(S1-S2)
+
+    return A
 
 ''' RESPONSE FUNCTIONS TO PLOT '''
 
@@ -1731,6 +1773,14 @@ LI_instruction_label = tk.Label(LI_frame, text='LI Total:')
 LI_instruction_label.grid(row=0, column=0, padx=10)
 LI_total_label = tk.Label(LI_frame, text=LI_total)
 LI_total_label.grid(row=0, column=1)
+
+tk.Label(LI_frame, text='Shape Area:').grid(row=0, column=2)
+shape_area_label = tk.Label(LI_frame, text=shape_area)
+shape_area_label.grid(row=0, column=3)
+
+tk.Label(LI_frame, text='Ratio:').grid(row=0, column=4)
+ratio1_label = tk.Label(LI_frame, text=ratio1)
+ratio1_label.grid(row=0, column=5)
 
 # display a restart button that will clear the lines
 # and restart the variables.
