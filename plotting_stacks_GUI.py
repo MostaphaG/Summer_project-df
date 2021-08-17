@@ -1533,30 +1533,29 @@ wedge_2_btn.grid(row=0, column=0)
 singularity_button = tk.Button(right_frame, text='search singularities', command=show_singularities)
 singularity_button.grid(row=8, column=0)
 # entry for N
-tk.Label(right_frame, text='number of sampling points').grid(row=8, column=2)
-fine_grid_N_entry = tk.Entry(right_frame, width=10)
+tk.Label(right_frame, text='<-- sampling points').grid(row=8, column=2, columnspan=2)
+fine_grid_N_entry = tk.Entry(right_frame, width=5)
 fine_grid_N_entry.grid(row=8, column=1)
 fine_grid_N_entry.insert(0, 10)
 
 # define an entry where the user can inpu known singularity equation
 # this will be taken and plotted as a red, dotted line
-tk.Label(right_frame, text='known singularity equation:').grid(row=9, column=0)
+tk.Label(right_frame, text='equation of known singularity :').grid(row=9, column=0, columnspan=2)
 
 # define a dropdown to select y= or x=
 singular_var = tk.StringVar()
 singular_list = ['y=', 'x=', 'point']
 singular_var.set(singular_list[0])
-# rest to define a known singularity equation
-tk.Label(right_frame, text='expression type').grid(row=10, column=0)
 dpd_drop = tk.OptionMenu(right_frame, singular_var, *singular_list, command=singular_drop_response)
-dpd_drop.grid(row=10, column=1)
+dpd_drop.grid(row=10, column=0)
+# equation entry box
 known_singularity_entry = tk.Entry(right_frame, width=20)
-known_singularity_entry.grid(row=10, column=2)
+known_singularity_entry.grid(row=10, column=1)
 known_singularity_entry.insert(0, '')
 
 # define asubmit button to that entry
 submit_known_singularity_btn = tk.Button(right_frame, text='show expression', command=known_singularity_response)
-submit_known_singularity_btn.grid(row=11, column=2)
+submit_known_singularity_btn.grid(row=11, column=0)
 
 # DERIVATIVE FUNCTIONS
 
