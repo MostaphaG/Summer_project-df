@@ -719,10 +719,13 @@ def LI_restart():
     shape_area = 0
     ratio1 = 0
     ratio2 = 0
+    flux = 0
     # update the label
     LI_total_label.configure(text=LI_total)
     shape_area_label.configure(text=shape_area)
     ratio1_label.configure(text=ratio1)
+    flux_label.configure(text=flux)
+    ratio2_label.configure(text=ratio2)
     # NOT IDEAL BUT HOPEFULLY TEMPORARY
     # call plot-respose to redraw (so lines are deleted)
     # ideally would want a way of deleting lines without restarting the plot
@@ -758,6 +761,7 @@ def LI_shape_select_response(selected_shape):
     LI_shape_select.set(selected_shape)
 
     if selected_shape == 'Circle':
+        LI_restart()
         # if circle is selected, display an entry box for the radius of it
         Radius_LI_label = tk.Label(LI_frame, text='Circle Radius:')
         Radius_LI_label.grid(row=5, column=0)
