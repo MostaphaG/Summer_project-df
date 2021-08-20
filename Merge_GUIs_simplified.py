@@ -516,7 +516,7 @@ def tab_selection(event):
         form_2_components_plot(xg, yg, form_2/2, zero_field, form_2_sgn, s_max, L, fract, colour_str, 2)
         form_2_components_plot(xg, yg, zero_field, form_2/2, form_2_sgn, s_max, L, fract, colour_str, 2)
         canvas.draw()
-    elif tab_text == '$\mathbb{R}^{3}$':
+    elif tab_text == '\mathbb{R}^{3}':
         global form_2_frame
         global F_xy_x, F_xy_y, F_xz_x, F_xz_z, F_yz_y, F_yz_z
         global max_global_dxdy, max_global_dxdz, max_global_dydz
