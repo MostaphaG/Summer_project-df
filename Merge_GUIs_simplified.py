@@ -516,7 +516,7 @@ def tab_selection(event):
         form_2_components_plot(xg, yg, form_2/2, zero_field, form_2_sgn, s_max, L, fract, colour_str, 2)
         form_2_components_plot(xg, yg, zero_field, form_2/2, form_2_sgn, s_max, L, fract, colour_str, 2)
         canvas.draw()
-    elif tab_text == '\mathbb{R}^{3}':
+    elif tab_text == '$\mathbb{R}^{3}$':
         global form_2_frame
         global F_xy_x, F_xy_y, F_xz_x, F_xz_z, F_yz_y, F_yz_z
         global max_global_dxdy, max_global_dxdz, max_global_dydz
@@ -697,7 +697,7 @@ notebook.bind_all('<<NotebookTabChanged>>', tab_selection)
 
 # define scale of the graph
 L = 5
-pt_den = 21   # number of points on each axis
+pt_den = 21 # number of points on each axis
 
 # Initialise auto scaling variable
 ascale = tk.IntVar()
@@ -826,10 +826,13 @@ rg, thetag = np.meshgrid(r, theta)
 a_polar = 1
 
 # set up line intergal enpty variables
-LI_total = 0
 LI_coord = []
+LI_total = 0
+flux = 0
 shape_area = 0
 ratio1 = 0
+ratio2 = 0
+
 
 ''' DEFINE CALCULUS PARAMETERS, 2 forms and R3 stuff '''
 
@@ -848,7 +851,7 @@ x_m = float(0)
 y_m = float(0)
 
 # initial orientation for circle integration:
-orient_int = 'cw'
+orient_int = 'ccw'
 
 # define initial stack bool
 stacks = True
@@ -986,14 +989,18 @@ cid = fig.canvas.mpl_connect("button_press_event", on_key_press)
 def LI_restart():
     global LI_total, LI_coord, shape_area
     # first, initialise variables again
-    LI_total = 0
     LI_coord = []
+    LI_total = 0
+    flux = 0
     shape_area = 0
     ratio1 = 0
+    ratio2 = 0
     # update the label
     LI_total_label.configure(text=LI_total)
+    flux_label.configure(text=flux)
     shape_area_label.configure(text=shape_area)
     ratio1_label.configure(text=ratio1)
+    ratio2_label.configure(text=ratio2)
     # NOT IDEAL BUT HOPEFULLY TEMPORARY
     # call plot-respose to redraw (so lines are deleted)
     # ideally would want a way of deleting lines without restarting the plot
@@ -1033,14 +1040,14 @@ def LI_shape_select_response(selected_shape):
         LI_restart()
         # if circle is selected, display an entry box for the radius of it
         Radius_LI_label = tk.Label(LI_frame, text='Circle Radius:')
-        Radius_LI_label.grid(row=3, column=0)
+        Radius_LI_label.grid(row=5, column=0)
         Radius_LI_circ_entry = tk.Entry(LI_frame, width=10)
-        Radius_LI_circ_entry.grid(row=3, column=1)
-        Radius_LI_circ_entry.insert(0, '3')
+        Radius_LI_circ_entry.grid(row=5, column=1)
+        Radius_LI_circ_entry.insert(0, '1')
         # also define a button to change orientation
         # define a button that will change circle orientation
         orient_int_btn = tk.Button(LI_frame, text=orient_int, command=orient_int_response)
-        orient_int_btn.grid(row=4, column=1)
+        orient_int_btn.grid(row=5, column=2)
         # get rid of grid on plot
         main_axis.grid(False)
         # update canvas
@@ -1075,6 +1082,8 @@ def line_int_circ(cent, R, N, u_str, v_str, orient_int):
     uv_store = np.zeros(shape=(2, N))
     dx = np.zeros(shape=(1, N))
     dy = np.zeros(shape=(1, N))
+    dx_norm = np.zeros(shape=(1, N))
+    dy_norm = np.zeros(shape=(1, N))
     
     # Magnitude of increment equals that of the circumference subtended by dt for large N
     A = 2*np.pi*R/(N)
@@ -1095,8 +1104,12 @@ def line_int_circ(cent, R, N, u_str, v_str, orient_int):
     dx = -A*np.sin(dt)
     dy = A*np.cos(dt)
     
+    dx_norm = A*np.cos(dt)
+    dy_norm = A*np.sin(dt)
+    
     # res = np.sum(dx[:-1]*uv_store[0, :-1] + dy[:-1]*uv_store[1, :-1])
     res = np.sum(dx[:-1]*uv_store[0, :-1] + dy[:-1]*uv_store[1, :-1])
+    flux = np.sum(dx_norm[:-1]*uv_store[0, :-1] + dy_norm[:-1]*uv_store[1, :-1])
     
     # Plot the circle
     circle1 = mpl.patches.Circle(cent, R, fill=False, color='red')
@@ -1106,15 +1119,20 @@ def line_int_circ(cent, R, N, u_str, v_str, orient_int):
     
     # update the total
     LI_total = res
-    # update its label
-    LI_total_label.configure(text=str(round(LI_total, 6)))
     
-    # Shape area label
+    # Update labels
+    LI_total_label.configure(text=str(round(LI_total, 4)))
+    
+    flux_label.configure(text=str(round(flux, 4)))
+
     shape_area = np.pi*R**2
-    shape_area_label.configure(text=str(round(shape_area, 3)))
+    shape_area_label.configure(text=str(round(shape_area, 4)))
     
     ratio1 = LI_total/shape_area
-    ratio1_label.configure(text=str(round(ratio1, 3)))
+    ratio1_label.configure(text=str(round(ratio1, 4)))
+    
+    ratio2 = flux/shape_area
+    ratio2_label.configure(text=str(round(ratio2, 4)))
     
     return res
 
@@ -1179,13 +1197,14 @@ def line_int_poly(N, u_str, v_str):
         # update the total
         LI_total += res
         # update its label
-        LI_total_label.configure(text=str(round(LI_total, 6)))
+        LI_total_label.configure(text=str(round(LI_total, 4)))
         
         if len(LI_verts) > 3:
             shape_area = calc_area(LI_verts)
-            shape_area_label.configure(text=str(round(shape_area, 3)))
+            shape_area_label.configure(text=str(round(abs(shape_area), 4)))
+            
             ratio1 = LI_total/shape_area
-            ratio1_label.configure(text=str(round(ratio1, 3)))
+            ratio1_label.configure(text=str(round(ratio1, 4)))
             
         return res
     
@@ -1196,7 +1215,9 @@ def line_int_poly(N, u_str, v_str):
         canvas.draw()
 
 
-# Calc polygon area when user completes a shape
+# Calc polygon (signed) area when user completes a shape
+# CCW is +ve, CW is -ve
+
 def calc_area(vert_list):
     # gte number of verticies
     n = len(vert_list)
@@ -1211,7 +1232,7 @@ def calc_area(vert_list):
         S1 = S1 + (M[i, 0] * M[i+1, 1])
         S2 = S2 + (M[i, 1] * M[i+1, 0])
     # get area from these
-    A = 0.5*abs(S1-S2)
+    A = 0.5*(S1-S2)
     return A
 
 
@@ -3003,32 +3024,39 @@ set up all in LI tab
 
 
 # define a label that will display it
-LI_instruction_label = tk.Label(LI_frame, text='LI Total:')
-LI_instruction_label.grid(row=0, column=0, padx=10)
-LI_total_label = tk.Label(LI_frame, text=LI_total)
-LI_total_label.grid(row=0, column=1)
-
-tk.Label(LI_frame, text='Shape Area:').grid(row=0, column=2)
+tk.Label(LI_frame, text='Shape Area:').grid(row=0, column=0)
 shape_area_label = tk.Label(LI_frame, text=shape_area)
-shape_area_label.grid(row=0, column=3)
+shape_area_label.grid(row=0, column=1)
 
-tk.Label(LI_frame, text='Ratio:').grid(row=0, column=4)
+tk.Label(LI_frame, text='LI Total:').grid(row=1, column=0, padx=10)
+LI_total_label = tk.Label(LI_frame, text=LI_total)
+LI_total_label.grid(row=1, column=1)
+
+tk.Label(LI_frame, text='Ratio:').grid(row=1, column=2)
 ratio1_label = tk.Label(LI_frame, text=ratio1)
-ratio1_label.grid(row=0, column=5)
+ratio1_label.grid(row=1, column=3)
+
+tk.Label(LI_frame, text='Flux:').grid(row=2, column=0)
+flux_label = tk.Label(LI_frame, text=flux)
+flux_label.grid(row=2, column=1)
+
+tk.Label(LI_frame, text='Ratio:').grid(row=2, column=2)
+ratio2_label = tk.Label(LI_frame, text=ratio2)
+ratio2_label.grid(row=2, column=3)
 
 # display a restart button that will clear the lines
 # and restart the variables.
 LI_restart_btn = tk.Button(LI_frame, text='LI Restart', padx=20, command=LI_restart)
-LI_restart_btn.grid(row=1, column=0, columnspan=2)
+LI_restart_btn.grid(row=3, column=0, columnspan=2)
 
 # define a drop down to draw: connected lines, square or circle.
 LI_shape_select = tk.StringVar()
 LI_shape_list = ['Polygon', 'Circle']
 LI_shape_select.set(LI_shape_list[0])
 LI_shape_instruction = tk.Label(LI_frame, text='Select what to draw:')
-LI_shape_instruction.grid(row=2, column=0)
+LI_shape_instruction.grid(row=4, column=0)
 LI_shape_drop = tk.OptionMenu(LI_frame, LI_shape_select, *LI_shape_list, command=LI_shape_select_response)
-LI_shape_drop.grid(row=2, column=1)
+LI_shape_drop.grid(row=4, column=1)
 
 
 

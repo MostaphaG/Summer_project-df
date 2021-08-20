@@ -1291,6 +1291,8 @@ def deriv_calc(x_m, y_m):
     # Try and except to account for the error caused when zoom window selected without first clicking
     # (i.e. undefined x_pix and y_pix)
     
+    polar_check = 1
+    
     try:
     
         # Range and point density of the derivative plot
@@ -1300,8 +1302,8 @@ def deriv_calc(x_m, y_m):
         d_scale = scale*(zoom_slider.get())
         
         # Select index for the middle of the new derivative axis
-        i_m = int(round((dpd/2)-0.1))
-        j_m = int(round((dpd/2)-0.1))
+        # i_m = int(round((dpd/2)-0.1))
+        # j_m = int(round((dpd/2)-0.1))
         
         # Divergence Plot
         if click_opt_int > 2:
@@ -1334,8 +1336,8 @@ def deriv_calc(x_m, y_m):
             # Calculate derivative field components
             # This is done geometrically by subracting thevector at the centre of the
             # grid, from vectors at other grid positions in the derivative axis.
-            du1 = u1 - u1[i_m, j_m]
-            dv1 = v1 - v1[i_m, j_m]
+            du1 = u1 - eval(format_eq_div(format_eq(string_x)))
+            dv1 = v1 - eval(format_eq_div(format_eq(string_y)))
       
         # Create axes at clicked position from supplied position and given axis sizes
         deriv_inset_ax = main_axis.inset_axes([(x_pix-178)/500 - (0.931*d_length/(2*L)), (y_pix-59)/500 - (0.931*d_length/(2*L)), 0.931*d_length/L, 0.931*d_length/L])
