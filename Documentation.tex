@@ -323,31 +323,32 @@ The main difference from the calculation of straight line integrals is that the 
 
 
 
-\section{Graphical representations of 2 forms on $\mathbb{R}^{2}$}
-\subsection{2 form representations - blocks and stacks}
-Two alternative ways of representing 2 forms have been considered. The first, simpler method considers the 2 form magnitude at different points in space and represents them as squares, whose size is determined by the magnitude, and whose colour determines the orientation, obtained by the sign of the 2 form at that point.
+\section{Non-unique and wrong graphical representations of 2 forms on $\mathbb{R}^{2}$}
+\subsection{Blocks and stacks}
+Two alternative ways of representing 2 forms have initially been considered. Both of which were later established to be incorrect. These are still discussed here, for record and, as it is believed to give good insight into problems that arise when attempting this task 
+The first, simpler method considers the 2 form magnitude at different points in space and represents them as squares, whose size is determined by the magnitude, and whose colour shows the orientation, obtained by the sign of the 2 form at that point. This method has been dubbed as plotting 2 forms through 'Blocks'.
 
-\noindent The plotting of these is completed by defining Rectangular patches, provided by the matplotlib library. The size of each rectangle is defined in terms of a fraction of a user defined total (customisable) and depends on the relative, unitary magnitude of the 2 form, with respect to its maximum value.
+\noindent The plotting of these is completed by defining rectangular patches, provided by the matplotlib library. The size of each rectangle is defined in terms of a fraction of a user defined total (customisable) and depends on the relative, unitary magnitude of the 2 form, with respect to its maximum value over the defined region.
 
-\noindent Due to the simple approach of this method, no complications occur. The 2 forms are simply represented. However, they do not clearly show the most important characteristics of 2 forms. They, by requirement: have gaps between them, will overlap if magnitudes are large enough and in no way graphically represent the idea of 2 forms being elemental areas through which integration can be completed.\\
+\noindent Due to the simple approach of this method, no coding complications occur. The 2 forms are simply represented. However, they do not clearly show the most important characteristics of 2 forms. They, by requirement: have gaps between them, will overlap if magnitudes are large enough and in no way graphically represent the idea of 2 forms being elemental areas through which integration can be completed.\\
 
 A graphically clearer way of representing 2 forms is through the superposition of stacks from elemental one forms. This process includes finding expressions for fields in the $x$ and in the $y$ directions such that the desired 2 form is being represented. These are then plotted using the $x$ field for stacks in the $x$ direction and the $y$ field for stacks only in the $y$ direction.
 
-\noindent The result forms a gird that covers the defined region with squares, whose inside is dissected into further sections, depending on the 2 form magnitude at that position. Furthermore, more dissections occur inside, depending on which component of the 2 form is dominant at that position.
+\noindent The result forms a gird that covers the defined region with squares, whose inside is dissected into further sections (separately in the x and in the y directions), depending on the 2 form magnitude at that position. More dissections occur inside, depending on which component of the 2 form is dominant at that position. This dominating is defined through the expressions of 1 forms that are being superposed.
 
-This approach clearly presents all characteristics of 2 forms. The region is covered, no overlap is allowed and it can be seen how integration over such areas can yield known results. Another characteristic which, through this, can be reproduced is merging of 2 form 'tubes' on $\mathbb{R}^{2}$, which we will return to later.
+This approach clearly presents all characteristics of 2 forms. The region is covered, no overlap is allowed and it can be seen how integration over such areas can yield known results. Another characteristic which, through this, can be reproduced is merging of 2 form 'tubes' on $\mathbb{R}^{3}$, which we will return to later.
 
-However, there exist major issues with this approach (which will also be explained in more detail in the coming subsections). These include the above-mentioned processes of finding 1 forms that reproduce the desired 2 form. This can be done through two approaches, un-doing the exterior derivative, or through undoing a wedge product.Both of which give the desired 2 form in terms of component 1 forms.
+However, there exist major issues with this approach (which will also be explained in more detail in the coming subsections). These include the above-mentioned processes of finding 1 forms that reproduce the desired 2 form. This has been attempted through two approaches, un-doing the exterior derivative, or through undoing a wedge product. Both of which give the desired 2 form in terms of component 1 forms.
 
 
 \subsection{2 forms on R2 through the exterior derivative}
-One way to obtain a 2 form from component 1 forms is to ask the user for a 1 form and compute the exterior derivative of it. This way, both are known, the 2 form and the 1 form that it originated from. To complete the above mentioned process, the input 1 forms can be differentiated (as in the Jacobian) and the skew-symmetric parts can be taken (these are the components that form the resulting 2 form). These components can then be plotted as stacks in the $x$ direction (differential of the $dx$ component w.r.t $y$) and in the $y$ direction (differential of the $dy$ component w.r.t $x$). However, there exists a problem with this procedure, and that is, the non-uniqueness of the result. Many 1 forms may become the same 2 form upon the exterior derivative, due to cancellations occurring between $dx \wedge dy$ and $dy\wedge dx$ components. This means that, the graphical representation of a given 2 form will vary, depending on its origin. Which should clearly not be the case.
-The cancellations could be solved if code was written that would scan the two resulting equations for any cancelling or merging components and delete or distribute them (respectively). This however will still make the 2 form not unique, it will simply be another representation.
+One way to obtain a 2 form from component 1 forms is to ask the user for a 1 form and compute the exterior derivative of it. This way, both are known, the 2 form and the 1 form that it originated from. To complete the above mentioned process, the input 1 forms can be differentiated (as in the Jacobian) and the skew-symmetric parts can be taken (these are the components that form the resulting 2 form). These components can then be plotted as stacks in the $x$ direction (differential of the $dx$ component w.r.t $y$) and in the $y$ direction (differential of the $dy$ component w.r.t $x$). However, there exists a problem with this procedure, and that is, the non-uniqueness of the result. Many 1 forms may become the same 2 form upon the exterior derivative, due to cancellations occurring between $dx \wedge dy$ and $dy\wedge dx$ components. This means that, the graphical representation of a given 2 form will vary, depending on its origin. Which should clearly not be the case, as the 2 form should be its own, separate, object, defined uniquely in space.
+The cancellations could be solved if code was written that would scan the two resulting equations for any cancelling or merging components and delete or distribute them (respectively). This would be difficult and is not needed. This is because this process will still make the 2 form not unique, it will simply be another representation. There also exists a much simpler method, which we will come back to.
 
 A method of excluding such cancellations was found and implemented such that given 2 forms yield identical representations. This was done through, first obtaining the mathematical expression of the 2 form through the exterior derivative as described previously. The result was then simplified by changing it to a 'SymPy' expression and using the 'simplify' function. Once this was completed, the 2 form was split into two, equal elements, $dx \wedge dy$ and $dy\wedge dx$. Which determine the derivatives of 1 form components that can be used to plot stacks as described previously.
 Once again however, this was established not to be fully functional. The issue now was, the splitting of the 2 form is also not unique, it is arbitrary. Any splitting will work, so long as the components return the same 2 form when merged (by inverting the elementary 2 form and adding).
 
-This issue was found to be fundamental. As clear and intuitive as this method is for graphically representing 2 forms, it does not provide a unique way of doing so. TO be precise, at the very least, no such method has yet been found. In fact, all the representations it does provide are elements of a rotation group ($SO(2)$) of the resulting 2 form. To present this idea more clearly, lets look at the more rigorous proof of the above stated non-uniqueness.
+This issue was found to be fundamental. As clear and intuitive as this method seems to be for graphically representing 2 forms, it does not provide a unique way of doing so. In fact, all the representations it does provide are elements of a rotation group ($SO(2)$) of the resulting 2 form. To present this idea more clearly, lets look at the more rigorous proof of the above stated non-uniqueness which arises through splitting the 2 form.
 
 \subsection{Proof of the non-uniqueness of 2 forms}
 
@@ -356,41 +357,47 @@ This issue was found to be fundamental. As clear and intuitive as this method is
 
 
 \subsection{2 forms on R2 through the wedge product}
-There exists yet another way of defining 2 forms through stacks that represent 1 forms. This includes splitting the 2 form into components, not into $\wedge dy$ and $dy\wedge dx$ that are understood to originate from the exterior derivative, but into $f(x, y)dx \wedge g(x, y)dy$, where the 2 form is $f(x,y)g(x,y) dx\wedge dy$. This was not coded, as it yields another issue. Similarly to the last considered method, the splitting of the 2 form into a product of two functions is not unique. Again, as above for the previous method, it is also possible here to let the user input two 1 forms to wedge together into a 2 form, but once again, this may also include cancellations or merges between components, which make the 2 form not unique.
+There exists yet another way of defining 2 forms through stacks that represent 1 forms. This includes splitting the 2 form into components, not into $\wedge dy$ and $dy\wedge dx$ that are understood to originate from the exterior derivative, but into $f(x, y)dx \wedge g(x, y)dy$, where the 2 form is $f(x,y)g(x,y) dx\wedge dy$. This yields another issue. Similarly to the last considered method, the splitting of the 2 form into a product of two functions is not unique. Again, as above for the previous method, it is also possible here to let the user input two 1 forms to wedge together into a 2 form, but once again, this may also include cancellations or merges between components, which make the 2 form not unique.
 
-\subsection{2 form representation as stacks in code}
-Due to the fact that unique representations could not be deduced. The code we produced allows the user to choose, what representation they would like to see.
+\subsection{initial 2 form representation as stacks in code}
+Due to the fact that unique representations could not be deduced. The code we produced initially allowed the user to choose, what representation they would like to see.
 
-\textbf{User-supplied 2 forms} are being plotted as stacks by splitting the expression into two components $dx\wedge dy$ and $dy\wedge dx$. The splitting of the expression is set by the user via the 'set splitting' button (by default splitting occurs into two equal halves). These are then being plotted as previously stated, one as the $x$ component and the other as the $y$ component. This plotting is done via a function ('form\textunderscore 2\textunderscore components\textunderscore plot') which is very similar in operation to stack\textunderscore plot. The new function however, also uses the end 2 form expression, evaluates it numerically, finds its sign and depending on this, colours the stacks. It was chosen to colour via the convention that grey signifies zero magnitude at that position, red represents positive (ccw) 2 form magnitude and blue stands for negative (cw) magnitude.
-
-
-\textbf{2 forms from the exterior derivative} are plotted by a similar process as above, with the initial addition of finding the mathematical expression of the 2 form and simplifying it (as has been described above). Once the 2 form is found, it is input into the entry box for 2 forms and is highlighted in light green to display that this is currently being displayed (as opposed to other options including the supplied 1 forms).
+\textbf{User-supplied 2 forms} were being plotted as stacks by splitting the expression into two components $dx\wedge dy$ and $dy\wedge dx$. The splitting of the expression was set by the user via the 'set splitting' button (by default splitting occurs into two equal halves). These have then been plotted as previously stated, one as the $x$ component and the other as the $y$ component. This plotting was done via a function ('form\textunderscore 2\textunderscore components\textunderscore plot') which is very similar in operation to stack\textunderscore plot. The new function however, also uses the end 2 form expression, evaluates it numerically, finds its sign and depending on this, colours the stacks (it is still used in the end version of the code). It was chosen to colour via the convention that grey signifies zero magnitude at that position, red represents positive (axially ccw) 2 form magnitude and blue stands for negative (axially cw) magnitude.
 
 
-\textbf{2 forms through the wedge product} is completed by first asking the user to input two 1 forms that are to be wedged together, in terms of their components in $dx$ and $dy$ (other on $\mathbb{R}^{3}$). This is done by displaying a new window for these inputs after the 'wedge' button is pressed. Once these are submitted this extra window is closed, although its entries are saved and display again when it is re-opened. The inputs are simplified by briefly passing them into 'SymPy' expressions. The components of these inputs are then calculated using the previously described 'eq\textunderscore to\textunderscore comps'. The 2 form is then found by concatenating strings of input in such a way as to result in the correct 2 form. This is also simplified in the same way and displays in the 2 form entry box, which, once again, light up to a light green. The plotting of superposing stacks is then completed by using the stack\textunderscore plot function with disabled arrowheads.
+\textbf{2 forms from the exterior derivative} were plotted by a similar process as above, with the initial addition of finding the mathematical expression of the 2 form and simplifying it (as has been described above) by the find\textunderscore 2\textunderscore form function. Once the 2 form was found, it was input into the entry box for 2 forms and was highlighted in light green to show what is currently being displayed (as opposed to other options including the supplied 1 forms). This process of highlighting is still used in the end resulting code. 
 
-Given $w_{1} = f(x, y) dx + g(x, y) dy$  and $w_{2} = h(x, y) dx + m(x, y) dy$. The graphical representation must be made up of:
+
+\textbf{2 forms through the wedge product} is (same as in the end resulting code) completed by first asking the user to input two 1 forms that are to be wedged together, in terms of their components in $dx$ and $dy$ (other on $\mathbb{R}^{3}$). This is done by displaying a new window for these inputs after the 'wedge' button is pressed. Once these are submitted this extra window is closed, although its entries are saved and display again when it is re-opened. The inputs are simplified by briefly passing them into 'SymPy' expressions. The components of these inputs were then calculated using the previously described 'eq\textunderscore to\textunderscore comps'. The 2 form was found by concatenating strings of input in such a way as to result in the correct 2 form. This was also simplified in the same way and displayed in the 2 form entry box, which, once again, light up to a light green. The plotting of superposing stacks was then completed by using the stack\textunderscore plot function with disabled arrowheads.
+
+Mathematically, given $w_{1} = f(x, y) dx + g(x, y) dy$  and $w_{2} = h(x, y) dx + m(x, y) dy$. The 2 form on $\mathbb{R}^{2}$, $\alpha$, must be made up of:
 
 
 \begin{equation}
 	\label{T2} \begin{split}
-		f(x, y) dx\wedge m(x, y) dy + &h(x, y) dy\wedge g(x, y) dx \\
+		\alpha = w_{1}\wedge w_{2} = f(x, y) dx\wedge m(x, y) dy + &h(x, y) dy\wedge g(x, y) dx \\
 		= \\
 		f(x, y)m(x, y) dx\wedge dy + h(x, y)g(x, y) dx\wedge dy &= (f(x, y)m(x, y) - g(x, y)h(x, y)) dx\wedge dy  
 	\end{split}
 \end{equation}
 
 
-which is executed when the if condition in the response function is satisfied.
-Two rectangular stacks with the scaling factor are accounted to by giving similar colours to the vertical  and horizontal stacks (red and green). After the first rectangular stacks are added the second group will either sit on top of the first (in which case scaling contribution is zero) or sit in some gaps, hence increasing the density as result of its scaling function.
-If any of the coefficient functions (f, g, h or m)  is zero, the stacking reduces to one function together with its elemental 2 form $dx\wedge dy$, these are executed in the 'elif' options under the if statement.
+which is used to be found by and plotted as stacks when an if condition was satisfied, stating that none of the entries were zero. Currently, this is still being used, to find the 2 form mathematically.
+Two rectangular stacks with the scaling factor were accounted to by giving similar colours to the vertical  and horizontal stacks (red and green). After the first rectangular stacks were added the second group either sat on top of the first (in which case scaling contribution was zero) or sat in some gaps, hence increasing the density as result of its scaling function.
+If any of the coefficient functions (f, g, h or m) were zero, the stacking reduced to one function together with its elemental 2 form $dx\wedge dy$, these were executed in the 'elif' options under the if statement. This code, although it did not use splitting, and included cancellations was also incorrect. This was because, the 2 form did not fill space, its x and y contributions were implied by density of long vertical and horizontal lines that span many stacks etc.
 
 
 \subsection{2 form representation as blocks in code}
-The simpler method is also implemented to show the comparison between the  locally detailed, non-unique (stacks( and locally undefined, global, unique (blocks).
-This is more simply implemented by defining the above described process of plotting blocks in a single function and calling it with the appropriate 2 form whenever necessary.
-The option as to which should be used is given to the user through radio buttons, however, when stacks is selected, a message box displays, warning the user of the non-uniqueness of the result.
+The simpler method was also implemented to show the comparison between the  locally detailed, non-unique (stacks) and locally undefined, global, unique (blocks). Despite the fact that blocks were known to be the wrong representation, an option to plot them was still implemented to highlight the difference between unique and non-unique representation methods. 
+This was more simply implemented by defining the above described process of plotting blocks in a single function and calling it with the appropriate 2 form whenever necessary.
+The option as to which should be used was given to the user through radio buttons, however, when stacks was selected, a message box displayed, warning the user of the non-uniqueness of the result and its dependancy of their splitting choice.
 
+\section{Correct 2 form on $\mathbb{R}^{2}$ representation}
+
+
+
+
+\section{Other calculus using 2 forms}
 \subsection{Interior derivative acting on 2 forms}
 The code includes the option to calculate the interior derivative of a 2 form (and a 1 form) on $\mathbb{R}^{2}$. \textit{Note: it has not yet been generalised to $\mathbb{R}^{3}$}. After pressing the button ('interior derivative'), a new window displays, which asks the user to chose which option to evaluate with. The interior derivative can be applied to a 2 form only, or to a 2 form and 1 from simultaneously. Once the option is chosen, it asks the user for a vector field to do the calculation with respect to in terms of the $x$ and $y$ components. The two windows are then shut.
 
@@ -418,6 +425,13 @@ where $\omega = f_{x} dx + f_{y} dy$ and $\vec{u}$ is as previously. The result 
 When \textbf{the two require being computed together}, both function are called with appropriate canvas preparation by the function 'Int\textunderscore deriv\textunderscore 21\textunderscore form'. This finds the result of the 2 form, which returns a vector field, which 'sits on top of' the computed 1 form. This can visualised as a vector field lying on a scalar function landscape.
 
 \noindent These functions are called by a response to the PLOT button in the window where the user defines the background vector field. Depending on which option was selected in the previous window ('2 form only' or 'both'), The plot button binds to different functions and hence responds appropriately.
+
+\subsection{Hodge}
+
+
+NOT IMPLEMENTED YET
+
+
 
 \section{Forms on $\mathbb{R}^{3}$}
 \subsection{Representing 2 forms on $\mathbb{R}^{3}$}

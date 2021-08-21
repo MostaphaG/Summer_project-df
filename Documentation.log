@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 20.6.29) (preloaded format=pdflatex 2021.7.9)  17 AUG 2021 22:25
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 20.6.29) (preloaded format=pdflatex 2021.7.9)  21 AUG 2021 15:02
 entering extended mode
 **./Documentation.tex
 (Documentation.tex
@@ -379,7 +379,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 114--115
  []
 
 [3] [4] [5] [6] [7] [8] [9]
-Underfull \hbox (badness 10000) in paragraph at lines 332--333
+Underfull \hbox (badness 10000) in paragraph at lines 333--334
 
  []
 
@@ -420,7 +420,7 @@ ograms/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/macus/AppData
 rs/macus/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti10.pf
 b><C:/Users/macus/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/sym
 bols/msbm10.pfb>
-Output written on Documentation.pdf (15 pages, 448623 bytes).
+Output written on Documentation.pdf (15 pages, 451530 bytes).
 PDF statistics:
  145 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
