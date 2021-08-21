@@ -368,8 +368,8 @@ def format_eq(string, LI=0, singular_ty=0, i=0, j=0):
         string = string.replace('z', 'zg')
     # where there are special functions, replace them with library directions
     string = string.replace('^', '**')
-    string = string.replace('ln', 'np.log')
-    string = string.replace('e**', 'np.exp')
+    string = string.replace('ln', 'log')
+    string = string.replace('e**', 'exp')
     return string
 
 
@@ -381,8 +381,8 @@ def unformat(string):
     string = string.replace('zg', 'z')
     # where there are special functions, replace them with library directions
     string = string.replace('**', '^')
-    string = string.replace('np.log', 'ln')
-    string = string.replace('np.exp', 'e**')
+    string = string.replace('log', 'ln')
+    string = string.replace('exp', 'e**')
     string = string.replace('field_unit', '1')
     return string
 
@@ -1100,7 +1100,7 @@ def LI_shape_select_response(selected_shape):
         grid_LI_poly_label.grid(row=5, column=0)
         grid_sep_poly_entry = tk.Entry(LI_frame, width=10)
         grid_sep_poly_entry.grid(row=5, column=1)
-        grid_sep_poly_entry.insert(0, '2')
+        grid_sep_poly_entry.insert(0, '')
         # define a button to submit these changes
         submit_poly_sep_grid = tk.Button(LI_frame, text='Submit grid', command=poly_grid_submit)
         submit_poly_sep_grid.grid(row=5, column=2)
@@ -1735,10 +1735,19 @@ def known_singularity_response():
             main_axis.plot(x_sing, y_vals_singular, 'r-.')
             # check if these actually are singularities
             checker_singularities = 0
+            # get the strings of fields
+            # and format them to be evaluated on the plotted grids
             string_check_x = string_x.replace('x', 'x_sing')
             string_check_x = string_check_x.replace('y', 'y_vals_singular')
             string_check_y = string_y.replace('x', 'x_sing')
             string_check_y = string_check_y.replace('y', 'y_vals_singular')
+            # also replace for ln exp and **
+            string_check_x = string_check_x.replace('^', '**')
+            string_check_x = string_check_x.replace('ln', 'log')
+            string_check_x = string_check_x.replace('e**', 'exp')
+            string_check_y = string_check_y.replace('^', '**')
+            string_check_y = string_check_y.replace('ln', 'log')
+            string_check_y = string_check_y.replace('e**', 'exp')
             # get the magnitude
             magnitude_check = np.sqrt(eval(string_check_x)**2 + eval(string_check_y)**2)
             # check if this is a singularity
@@ -1773,6 +1782,13 @@ def known_singularity_response():
             string_check_x = string_check_x.replace('y', 'y_sing')
             string_check_y = string_y.replace('x', 'x_vals_singular')
             string_check_y = string_check_y.replace('y', 'y_sing')
+            # also replace for ln exp and **
+            string_check_x = string_check_x.replace('^', '**')
+            string_check_x = string_check_x.replace('ln', 'log')
+            string_check_x = string_check_x.replace('e**', 'exp')
+            string_check_y = string_check_y.replace('^', '**')
+            string_check_y = string_check_y.replace('ln', 'log')
+            string_check_y = string_check_y.replace('e**', 'exp')
             # get the magnitude
             magnitude_check = np.sqrt(eval(string_check_x)**2 + eval(string_check_y)**2)
             # check if this is a singularity
@@ -1803,6 +1819,13 @@ def known_singularity_response():
             string_check_x = string_check_x.replace('y', 'point_y')
             string_check_y = string_y.replace('x', 'point_x')
             string_check_y = string_check_y.replace('y', 'point_y')
+            # also replace for ln exp and **
+            string_check_x = string_check_x.replace('^', '**')
+            string_check_x = string_check_x.replace('ln', 'log')
+            string_check_x = string_check_x.replace('e**', 'exp')
+            string_check_y = string_check_y.replace('^', '**')
+            string_check_y = string_check_y.replace('ln', 'log')
+            string_check_y = string_check_y.replace('e**', 'exp')
             # get the magnitude
             magnitude_check = np.sqrt(eval(string_check_x)**2 + eval(string_check_y)**2)
             # check if this is a singularity
@@ -1824,11 +1847,11 @@ def singular_drop_response(var):
 
 # define a function that will plot stack components, coloured
 # as per the orientation of the 2 form at that grid point
-def form_2_components_plot(xg, yg, u, v, form_2_sgn, s_max, L, fract, colour_str, arrowheads=False, w_head=1/8, h_head=1/4, s_min=2):
+def form_2_components_plot(grid_x, grid_y, u, v, form_2_sgn, s_max, L, fract, colour_str, arrowheads=False, w_head=1/8, h_head=1/4, s_min=2):
     global s_L
     # get axis lengths:
-    x_len = len(xg[:, 0])
-    y_len = len(yg[:, 0])
+    x_len = len(grid_x[:, 0])
+    y_len = len(grid_y[:, 0])
     
     # Scaling of axes and setting equal proportions circles look like circles
     main_axis.set_aspect('equal')
@@ -1846,6 +1869,27 @@ def form_2_components_plot(xg, yg, u, v, form_2_sgn, s_max, L, fract, colour_str
     mag = np.sqrt(u**2 + v**2)
     # find direction of each arrow
     theta = np.arctan2(v, u)   # theta defined from positive x axis ccw
+    
+    # deal with sinularities in mag
+    for i in range(x_len):
+        for j in range(y_len):
+            # set to zero points that are not defined or inf
+            if isnan(mag[i, j]) is True or abs(mag[i, j]) == np.inf  or abs(mag[i, j]) > 1e15:
+                # colour this region as a red dot, not square to
+                # not confuse with nigh mag 2 forms in stacks. or worse, in
+                # blocks
+                circ = patch.Circle((grid_x[i, j], grid_y[i, j]), L*fract/3, color='red')
+                main_axis.add_patch(circ)
+                mag[i, j] = 0
+            # ALso, since we got this lop anyway
+            # correct for singularities in planar form 2:
+            # set to zero points that are not defined or inf
+            if isnan(mag[i, j]) is True:
+                form_2_sgn[i, j] = 0
+            if mag[i, j] == np.inf  or mag[i, j] > 1e15:
+                form_2_sgn[i, j] = 1
+            if mag[i, j] == -np.inf  or mag[i, j] < -1e15:
+                form_2_sgn[i, j] = -1
     
     # #########################################################################
     # use the the direction of arrows to define stack properties
@@ -1872,26 +1916,26 @@ def form_2_components_plot(xg, yg, u, v, form_2_sgn, s_max, L, fract, colour_str
     I_cos = np.cos(theta)
     
     # define the points that set out a line of the stack sheet (middle line)
-    A_x = xg + (sheet_L/2)*np.sin(theta)
-    A_y = yg - (sheet_L/2)*np.cos(theta)
-    B_x = xg - (sheet_L/2)*np.sin(theta)
-    B_y = yg + (sheet_L/2)*np.cos(theta)
+    A_x = grid_x + (sheet_L/2)*np.sin(theta)
+    A_y = grid_y - (sheet_L/2)*np.cos(theta)
+    B_x = grid_x - (sheet_L/2)*np.sin(theta)
+    B_y = grid_y + (sheet_L/2)*np.cos(theta)
     
     # define points of stack arrowheads as arrays for all stacks
-    p_sh1x = xg + (s_L/2)*I_cos + (sheet_L*w_head)*I_sin
-    p_sh1y = yg + (s_L/2)*I_sin - (sheet_L*w_head)*I_cos
-    p_sh2x = xg + (s_L/2)*I_cos - (sheet_L*w_head)*I_sin
-    p_sh2y = yg + (s_L/2)*I_sin + (sheet_L*w_head)*I_cos
-    p_sh3x = xg + (s_L*0.5 + s_L*h_head)*I_cos
-    p_sh3y = yg + (s_L*0.5 + s_L*h_head)*I_sin
+    p_sh1x = grid_x + (s_L/2)*I_cos + (sheet_L*w_head)*I_sin
+    p_sh1y = grid_y + (s_L/2)*I_sin - (sheet_L*w_head)*I_cos
+    p_sh2x = grid_x + (s_L/2)*I_cos - (sheet_L*w_head)*I_sin
+    p_sh2y = grid_y + (s_L/2)*I_sin + (sheet_L*w_head)*I_cos
+    p_sh3x = grid_x + (s_L*0.5 + s_L*h_head)*I_cos
+    p_sh3y = grid_y + (s_L*0.5 + s_L*h_head)*I_sin
     
     # define these for when there is only 1 line in the stack plot:
-    P_sh1x = xg + (sheet_L*w_head)*I_sin
-    P_sh1y = yg - (sheet_L*w_head)*I_cos
-    P_sh2x = xg - (sheet_L*w_head)*I_sin
-    P_sh2y = yg + (sheet_L*w_head)*I_cos
-    P_sh3x = xg + (s_L*h_head)*I_cos
-    P_sh3y = yg + (s_L*h_head)*I_sin
+    P_sh1x = grid_x + (sheet_L*w_head)*I_sin
+    P_sh1y = grid_y - (sheet_L*w_head)*I_cos
+    P_sh2x = grid_x - (sheet_L*w_head)*I_sin
+    P_sh2y = grid_y + (sheet_L*w_head)*I_cos
+    P_sh3x = grid_x + (s_L*h_head)*I_cos
+    P_sh3y = grid_y + (s_L*h_head)*I_sin
     
     # loop over each arrow coordinate in x and y
     for i in range(x_len):
@@ -2371,8 +2415,9 @@ def Ext_deriv_response():
 
 
 # define a function that will wedge two 1 forms and plot them
-def wedge_product():
-    global to_wedge_x_1_str, to_wedge_y_1_str, to_wedge_x_2_str, to_wedge_y_2_str, form_2_str, form_2_eq, form_2, form_2_sgn
+def wedge_product_R2():
+    global to_wedge_x_1_str, to_wedge_y_1_str, to_wedge_x_2_str, to_wedge_y_2_str
+    global form_2_str, form_2_eq, form_2, form_2_sgn
     # get globals
     update_variables()
     # from these, establish the new fract, approperiate for 2 forms
@@ -2383,8 +2428,6 @@ def wedge_product():
     to_wedge_y_1_str = str(simplify(str(to_wedge_y_1_entry.get())))
     to_wedge_x_2_str = str(simplify(str(to_wedge_x_2_entry.get())))
     to_wedge_y_2_str = str(simplify(str(to_wedge_y_2_entry.get())))
-    u_1, v_1 = eq_to_comps(to_wedge_x_1_str, to_wedge_y_1_str, xg, yg)
-    u_2, v_2 = eq_to_comps(to_wedge_x_2_str, to_wedge_y_2_str, xg, yg)
     # clear the axis:
     main_axis.clear()
     # first, find the result of the 2 form
@@ -2396,49 +2439,26 @@ def wedge_product():
     form_2_entry.delete(0, 'end')
     form_2_entry.insert(0, form_2_str)
     # plot these as stacks, with no arrowheads, on top of one another.
-    
-    # Given w_1 = fdx+gdy  and w_2=hdx+mdy. The graphical representation must be:
-    # fdx /\ mdy "and" -hdx/\gdy {equivalend to [(u_1,0)+(0,v2)] and [(-u_2,0)+(0,v1)]},
-    # which is executed when the if condition below is satisfited. Basically two rectangular
-    # stacks with the scaling factor are accounted to via giving similar colors to the vertical
-    # stacks (red) and green to the horizantal ones. After the first rectagular stacks are added
-    # the second group will either sit on top of the first (in which case scaling contibution is zero)
-    # or sit in some gaps and hence increasing the denisty as result of its scaling function.
-    # If any of the coefficients (f,g,h and m)  is zero, the stacking reduces to one "function*dx/\dy", these are executed in the elif options.
-    # !!! ISSUES:
-    # Would be nice to uniformly distribute the stacks in each direction after finishing the double stacking.
-    if to_wedge_x_1_str != '0' and to_wedge_y_1_str != '0' and to_wedge_x_2_str != '0' and to_wedge_y_2_str != '0':
-        stack_plot(xg, yg, main_axis, u_1, 0, s_max, L, pt_den, fract, arrowheads=False, colour='green', check_2_frm=1)
-        stack_plot(xg, yg, main_axis, 0, v_2, s_max, L, pt_den, fract, arrowheads=False, colour='green', check_2_frm=1)
-        stack_plot(xg, yg, main_axis, 0, v_1, s_max, L, pt_den, fract, arrowheads=False, colour='red', check_2_frm=1)
-        stack_plot(xg, yg, main_axis, -u_2, 0, s_max, L, pt_den, fract, arrowheads=False, colour='red', check_2_frm=1)
-    elif to_wedge_x_1_str != '0' and to_wedge_y_2_str != '0':
-        stack_plot(xg, yg, main_axis, u_1, 0, s_max, L, pt_den, fract, arrowheads=False, colour='red', check_2_frm=1)
-        stack_plot(xg, yg, main_axis, 0, v_2, s_max, L, pt_den, fract, arrowheads=False, colour='green', check_2_frm=1)
-    elif to_wedge_y_1_str != '0' and to_wedge_x_2_str != '0':
-        stack_plot(xg, yg, main_axis, 0, v_1, s_max, L, pt_den, fract, arrowheads=False, colour='green', check_2_frm=1)
-        stack_plot(xg, yg, main_axis, -u_2, 0, s_max, L, pt_den, fract, arrowheads=False, colour='red', check_2_frm=1)
-    # first check against cancellation effects
-    if str(simplify( '(' + to_wedge_x_1_str + ')*(' +  to_wedge_y_2_str + ')' + ' - (' + to_wedge_y_1_str + ')*(' +  to_wedge_x_2_str + ')' )) == '0':
-        # delete whatever plot was created
-        main_axis.clear()
-        # update axis limits, becuase now they were cleared
-        main_axis.set_aspect('equal')
-        ax_L = L + L/delta_factor
-        main_axis.set_xlim(-ax_L, ax_L)
-        main_axis.set_ylim(-ax_L, ax_L)
-        # display a window info that the wedge product is zero
-        tk.messagebox.showinfo('Nothing to show', "The wedge product is zero")
-    # put these onto the canvas
+     # format it to be python understood
+    form_2_eq = format_eq(form_2_str)
+    # check against constant and zero 2 forms being supplied
+    form_2_eq = form_2_constant_correction(form_2_eq)
+    # get the numerical evaluation of it
+    form_2 = eval(form_2_eq)
+    # get the signs of thsi new 2 form
+    form_2_sgn = np.sign(form_2)
+    # use plotting stacks to display these
+    # ALWAYS HALF AND HALF SPLITTING NOW
+    form_2_components_plot(xg, yg, form_2/2, zero_field, form_2_sgn, s_max, L, fract, colour_str)
+    form_2_components_plot(xg, yg, zero_field, form_2/2, form_2_sgn, s_max, L, fract, colour_str)
+    # display the new plot
     canvas.draw()
-    # close the extra window
-    wedge_2_window.destroy()
-    # neither the entered single 1 form or the single 2 form are being plotted
-    # but the resulting 2 form is input into the entry box
-    # therefore make 2 form green.
+    # display a background green on the 2 form entry to show that
+    # this entry is being displayed now.
+    form_2_entry.configure(bg='#C0F6BB')
+    # undo it for 1 forms
     x_comp_entry.configure(bg='#FFFFFF')
     y_comp_entry.configure(bg='#FFFFFF')
-    form_2_entry.configure(bg='#C0F6BB')
     # update the label to remove the zero form if int deriv of both was used
     Label_zero_form.configure(text='')
 
@@ -2467,7 +2487,7 @@ def wedge_2_response():
     to_wedge_y_2_entry.insert(0, to_wedge_y_2_str)
     to_wedge_y_2_entry.grid(row=7, column=0)
     # define a button that will plot these
-    plot_wedge_btn = tk.Button(wedge_2_window, text='PLOT', padx=20, pady=10, command=wedge_product)
+    plot_wedge_btn = tk.Button(wedge_2_window, text='PLOT', padx=20, pady=10, command=wedge_product_R2)
     plot_wedge_btn.grid(row=8, column=0, pady=10)
 
 
@@ -2558,7 +2578,6 @@ def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L,
     # find direction of each arrow
     theta = np.arctan2(v, u)   # theta defined from positive x axis ccw
     
-    
     # deal with sinularities in mag
     for i in range(x_len):
         for j in range(y_len):
@@ -2579,7 +2598,6 @@ def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L,
                 form_2_sgn_planar[i, j] = 1
             if mag[i, j] == -np.inf  or mag[i, j] < -1e15:
                 form_2_sgn_planar[i, j] = -1
-    
     
     # #########################################################################
     # use the the direction of arrows to define stack properties
