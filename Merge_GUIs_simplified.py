@@ -516,6 +516,11 @@ def tab_selection(event):
         form_2_components_plot(xg, yg, form_2/2, zero_field, form_2_sgn, s_max, L, fract, colour_str, 2)
         form_2_components_plot(xg, yg, zero_field, form_2/2, form_2_sgn, s_max, L, fract, colour_str, 2)
         canvas.draw()
+        # disable the PLOT button and the ploar grid button
+        PLOT_btn['state'] = tk.DISABLED
+        polar_grid_plot_btn['state'] = tk.DISABLED
+        # clear the zero form label as plot comes back to default
+        Label_zero_form.configure(text='')
     elif tab_text == '\mathbb{R}^{3}':
         global form_2_frame
         global F_xy_x, F_xy_y, F_xz_x, F_xz_z, F_yz_y, F_yz_z
@@ -1028,16 +1033,48 @@ def orient_int_response():
         orient_int_btn.configure(text=orient_int)
 
 
+# define a function that will change grid separation when in poly
+def poly_grid_submit():
+    # get the entry box input
+    grid_separation_str = grid_sep_poly_entry.get()
+    # evaluate it and make sure to avoid negatives and zero
+    grid_separation = eval(grid_separation_str)
+    if grid_separation < 0:
+        grid_separation *= -1
+    elif grid_separation == 0:
+        tk.messagebox.showwarning('ERROR', 'Can\' t have zero separation')
+        # set it to something managable
+        grid_separation = 1
+    else:
+        pass
+    # get an array of values for grid to plot at
+    major_ticks = np.arange(-L, L + 0.01, grid_separation)
+    # update the grid based on that
+    main_axis.grid(False)  # remove initial
+    main_axis.set_xticks(major_ticks)  # update ticks
+    main_axis.set_yticks(major_ticks)
+    main_axis.grid(True)
+    canvas.draw()
+    # in case original input was changed, update it
+    grid_sep_poly_entry.delete(0, 'end')
+    grid_sep_poly_entry.insert(0, str(round(grid_separation, 6)))
+
+
 # define LI shape selection response to dropdown
 def LI_shape_select_response(selected_shape):
     # deal with lines
     global LI_shape_selected, Radius_LI_circ_entry, Radius_LI_label, orient_int_btn
-    
+    global grid_sep_poly_entry, grid_LI_poly_label, submit_poly_sep_grid
+    # get the chosen shape
     LI_shape_select.set(selected_shape)
-
+    # depending on that selection, prepare rest of frame:
     if selected_shape == 'Circle':
         # restart the plot and the integral values
         LI_restart()
+        # get rid of grid specifications also
+        grid_LI_poly_label.destroy()
+        grid_sep_poly_entry.destroy()
+        submit_poly_sep_grid.destroy()
         # if circle is selected, display an entry box for the radius of it
         Radius_LI_label = tk.Label(LI_frame, text='Circle Radius:')
         Radius_LI_label.grid(row=5, column=0)
@@ -1057,6 +1094,16 @@ def LI_shape_select_response(selected_shape):
         LI_restart()
         # set up a grid
         main_axis.grid(True)
+        # add an entry so the user can choose what grid they want
+        # by choosing grid lines separation
+        grid_LI_poly_label = tk.Label(LI_frame, text='grid separation:')
+        grid_LI_poly_label.grid(row=5, column=0)
+        grid_sep_poly_entry = tk.Entry(LI_frame, width=10)
+        grid_sep_poly_entry.grid(row=5, column=1)
+        grid_sep_poly_entry.insert(0, '2')
+        # define a button to submit these changes
+        submit_poly_sep_grid = tk.Button(LI_frame, text='Submit grid', command=poly_grid_submit)
+        submit_poly_sep_grid.grid(row=5, column=2)
         # update canvas
         canvas.draw()
         # get rid of circle options
@@ -2043,6 +2090,8 @@ def form_2_response():
     # undo it for 1 forms
     x_comp_entry.configure(bg='#FFFFFF')
     y_comp_entry.configure(bg='#FFFFFF')
+    # update the label to remove the zero form if int deriv of both was used
+    Label_zero_form.configure(text='')
 
 
 # plots the vetor field with stacks only
@@ -2065,6 +2114,8 @@ def form_1_stacks_response():
     y_comp_entry.configure(bg='#C0F6BB')
     # get rid of the 2 form colour:
     form_2_entry.configure(bg='#FFFFFF')
+    # update the label to remove the zero form if int deriv of both was used
+    Label_zero_form.configure(text='')
 
 
 # performs the interior derivative on supplied 2 form and plots it as stacks
@@ -2072,6 +2123,7 @@ def form_1_stacks_response():
 # if combined, use different fucntion.
 def Int_deriv_2_form():
     global u, v, u_str, v_str, vector_ex_str, vector_ey_str, vector_ex_eq, vector_ey_eq, vector_ex, vector_ey
+    global form_2, form_2_eq, form_2_sgn
     # get globals
     update_variables()
     # from these, establish the new fract, approperiate for 2 forms
@@ -2096,7 +2148,7 @@ def Int_deriv_2_form():
     form_2_eq = form_2_constant_correction(form_2_eq)
     # get the numerical evaluation of it
     form_2 = eval(form_2_eq)
-    # get the signs of thsi new 2 form
+    # get the signs of this new 2 form
     form_2_sgn = np.sign(form_2)
     # using interior product, get the u and v (dx and dy) components
     # of the resulting 1 form
@@ -2107,7 +2159,7 @@ def Int_deriv_2_form():
     u_str = str(simplify('-(' + form_2_str + ')*(' + vector_ey_str + ')' ))
     v_str = str(simplify( '(' + form_2_str + ')*(' + vector_ex_str + ')' ))
     # use the stacks plotter to present this
-    form_2_components_plot(xg, yg, u, v, form_2_sgn, s_max, L, fract, colour_str, arrowheads=True)
+    stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, s_min=1)
 
 
 # define a function that will find the interior derivative of a given 1 form
@@ -2150,7 +2202,11 @@ def Int_deriv_1_form():
     zero_form_str = zero_form_str.replace('x', 'contour_x_grid')
     zero_form_str = zero_form_str.replace('y', 'contour_y_grid')
     # get it numerically
-    zero_form = eval(zero_form_str)
+    # and take care of evaluation when the result is zero
+    if zero_form_str.find('contour_x_grid') & zero_form_str.find('contour_y_grid') == -1:
+        zero_form = eval(zero_form_str)*np.ones(np.shape(contour_x_grid))
+    else:
+        zero_form = eval(zero_form_str)
     # plot the zero_form as contours with labeled levels
     CS = main_axis.contour(contour_x_grid, contour_y_grid, zero_form, 15)
     main_axis.clabel(CS, inline=True, fontsize=7)
@@ -2167,6 +2223,8 @@ def Int_deriv_22_form():
     Int_deriv_2_form()
     # draw its result
     canvas.draw()
+    # update the label to remove the zero form if int deriv of both was used
+    Label_zero_form.configure(text='')
     # change the entry box 1 form to the calculated ones
     x_comp_entry.delete(0, 'end')
     y_comp_entry.delete(0, 'end')
@@ -2308,6 +2366,8 @@ def Ext_deriv_response():
     # undo it for 1 forms
     x_comp_entry.configure(bg='#FFFFFF')
     y_comp_entry.configure(bg='#FFFFFF')
+    # update the label to remove the zero form if int deriv of both was used
+    Label_zero_form.configure(text='')
 
 
 # define a function that will wedge two 1 forms and plot them
@@ -2379,6 +2439,8 @@ def wedge_product():
     x_comp_entry.configure(bg='#FFFFFF')
     y_comp_entry.configure(bg='#FFFFFF')
     form_2_entry.configure(bg='#C0F6BB')
+    # update the label to remove the zero form if int deriv of both was used
+    Label_zero_form.configure(text='')
 
 
 # define a reponse function, opens new window where two 1 forms to be wedged can be entered
