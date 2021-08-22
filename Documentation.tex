@@ -5,6 +5,7 @@
 \usepackage{amssymb}
 \usepackage{esint}
 \usepackage{float}
+\usepackage{hyperref}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 
@@ -177,7 +178,8 @@ This has been implemented in code. The parameters for this are as follows:
 	\item h\textunderscore head (optional, default=4): Sets the fraction that defines the height of the arrowhead parallel to the vector field magnitude at that point, from the total size of the stack.
 \end{itemize}
 \textbf{on\textunderscore key\textunderscore press}: Function that tracks mouse key presses, needed for the 'Matplotlib' toolbar to function\\
-\textbf{format\textunderscore eq}: Takes a single string, converts all variables in it that are common in vector field equations, and turns them into things that python can understand. Returns the corrected string\\
+\textbf{format\textunderscore eq}: Takes a single string, converts all variables in it that are common in vector field equations, and turns them into things that python can understand. Returns the corrected string
+Might be worth noting that many functions are untouched, because, to avoid issues in string replacements in compound function names, we use functions as defined by the numpy library b y importing them directly. This way the user can input their expressions in the standard, consistent, numpy format (without the initial module name calling). \\
 \textbf{eq\textunderscore to\textunderscore comps}: Takes the two strings given by the user (equations for the field in the $x$ and $y$ directions) as well as the x and y grids. Uses the above function (format\textunderscore eq) to make the string 'python readable'. If one or more of the strings does not contain $x$ or $y$, it defines an array of ones and multiplies by the given constant. This is done for the component to be over all points along the grid and for shapes to match. Otherwise, it evaluates the given equation and returns the vector field components $u$ and $v$ in the usual way.\\
 \textbf{vect\textunderscore type\textunderscore response}: Responds to changes in Radio-buttons that set the type of field to be plotted (arrow, stacks or both). Takes in a value from the Radio-buttons corresponding to the chosen field type. It clear the current plot. Checks which button has been selected and uses ax.quiver and previously user defined stack\textunderscore plot to create the updated graph. It then updates it on the GUI by using canvas.draw() for the canvas being defined on the main window, in its own frame. Returns no variables.\\
 \textbf{PLOT\textunderscore response}: Responds to the `PLOT' button being pressed. Updates the axis scaling, point density, maximum number of sheets per stack, linear scaling (`$a$') and the new field components. Takes in no input. collects all needed variables by the `.get()' method of Tkinter objects. After running, it plots the new specified field, with the new parameters as a stack only plot and changes the status of the Radio-buttons to one again be - stacks only (therefore for tensor (same variable name as in VFA java code) to equal 0)\\
@@ -362,7 +364,15 @@ There exists yet another way of defining 2 forms through stacks that represent 1
 \subsection{initial 2 form representation as stacks in code}
 Due to the fact that unique representations could not be deduced. The code we produced initially allowed the user to choose, what representation they would like to see.
 
-\textbf{User-supplied 2 forms} were being plotted as stacks by splitting the expression into two components $dx\wedge dy$ and $dy\wedge dx$. The splitting of the expression was set by the user via the 'set splitting' button (by default splitting occurs into two equal halves). These have then been plotted as previously stated, one as the $x$ component and the other as the $y$ component. This plotting was done via a function ('form\textunderscore 2\textunderscore components\textunderscore plot') which is very similar in operation to stack\textunderscore plot. The new function however, also uses the end 2 form expression, evaluates it numerically, finds its sign and depending on this, colours the stacks (it is still used in the end version of the code). It was chosen to colour via the convention that grey signifies zero magnitude at that position, red represents positive (axially ccw) 2 form magnitude and blue stands for negative (axially cw) magnitude.
+\textbf{User-supplied 2 forms} were being plotted as stacks by splitting the expression into two components $dx\wedge dy$ and $dy\wedge dx$. The splitting of the expression was set by the user via the 'set splitting' button (by default splitting occurs into two equal halves). These have then been plotted as previously stated, one as the $x$ component and the other as the $y$ component. This plotting was done via a function ('form\textunderscore 2\textunderscore components\textunderscore plot') which is very similar in operation to stack\textunderscore plot. The new function however, also uses the end 2 form expression, evaluates it numerically, finds its sign and depending on this, colours the stacks (it is still used in the end version of the code). It was chosen to colour via the convention that grey signifies zero magnitude at that position, red represents positive (axially ccw) 2 form magnitude and blue stands for negative (axially cw) magnitude. Because 2 form areas must fill space, this function includes a variable that sets the minimum number of stacks ('s\textunderscore min') to two. This way, full squares are always being displayed and then dissected depending on magnitude, but will not become open areas. Also, to avoid the same issue, the size of stacks (initially set by the user as a customisation option) is now calculated from the chosen number of points along each axis automatically to fill space (this occurs when tabs are opened and when the number of points is changed). The equation by which this is done is the following:
+
+\begin{equation}
+	\label{T2} \begin{split}
+		d = \frac{2}{n-1}
+	\end{split}
+\end{equation}
+
+for the stack size $d$ and the number of points along the axis $n$. 
 
 
 \textbf{2 forms from the exterior derivative} were plotted by a similar process as above, with the initial addition of finding the mathematical expression of the 2 form and simplifying it (as has been described above) by the find\textunderscore 2\textunderscore form function. Once the 2 form was found, it was input into the entry box for 2 forms and was highlighted in light green to show what is currently being displayed (as opposed to other options including the supplied 1 forms). This process of highlighting is still used in the end resulting code. 
@@ -393,9 +403,18 @@ This was more simply implemented by defining the above described process of plot
 The option as to which should be used was given to the user through radio buttons, however, when stacks was selected, a message box displayed, warning the user of the non-uniqueness of the result and its dependancy of their splitting choice.
 
 \section{Correct 2 form on $\mathbb{R}^{2}$ representation}
+A unique, locally detailed, space filling representation of 2 forms has been found. This is the representation currently used by the code. It continues the idea of representing 2 forms as superposition of stacks, however, no longer as a superposition of two separate 1 forms. The way it is currently done is through plotting the 2 form expression as stacks in both $x$ and in $y$ separately. This is equivalent to equally splitting the 2 form in the previous representation, however, it was found that, despite being only one element of the $SO(2)$ rotation group, it is sufficient to describe all 2 form properties. Thus it was established that this representation is fulfilling.
 
+The reason for that statement is the following. The 2 form, to be correctly represented must contain information about oriented areas, and how their number varies in space. It was originally thought that the information about such variation must be included in the dominant component ($x$ or $y$ of the 2 form, at that position). However, this can also be more simply represented by looking at variation in the number of areas at neighbouring positions.
 
+The current method of plotting relies on constructing a space filling, square gird and dissecting each square (equally in the $x$ and $y$) depending on the 2 form magnitude at that position. This guarantees uniqueness as the magnitude is well defined, and it continues to display the variation, when the grid is fine enough and s\textunderscore max value is chosen to be sufficient.
+The splitting ambiguity can be thought of as confusion by attempting to split these squares not by the 2 form alone, but by considering extra information - dominance of the $dx$ or $dy$ component. This information is not contained in the resulting 2 form, and therefore, of-course it cannot be reliably, clearly represented.
+The problem can (on some level) be compared to being given an area to draw (the 2 form) and saying that this cannot be done because the shape was not given (1 forms). Yes, the shape will not be known, but it is arbitrary and is not contained in the asked task (of drawing an area, the 2 form). In this analogy, our method can be compared to responding to such a task by drawing many small squares whose total area matches that given area. The task has been accomplished, and it can easily be seen how these can distribute over space to different shapes. We draw squares, not rectangles in $x$ and $y$, but the variation over these can easily be seen by the number of these squares over the region changing.
 
+It may also be noted that this idea was sparked by the problem of cancellations, which was found to be the case of correct arithmetic, but incorrect geometry. Mathematically, the components will cancel to give the same 2 form, however, when attempting to display the 2 form in terms of 1 forms this cancellation will not be geometrically valid.
+Hence, the 2 form can always (mathematically) be found as two 1 forms, however, to represent it graphically, we must abandon this approach. Surely it is correct, but it is not necessary to represent 2 forms. All that is needed is the 2 form itself.
+
+This has been implemented by simply removing options to plot blocks and to choose splitting factors, instead, the 2 form was simply plotted by the same function as previously, half in the $u$ and half in the $v$.
 
 \section{Other calculus using 2 forms}
 \subsection{Interior derivative acting on 2 forms}
@@ -438,35 +457,42 @@ NOT IMPLEMENTED YET
 On $\mathbb{R}^{3}$, 1 forms are parallel, two dimensional sheets, perpendicular to the elemental 1 form. 2 forms can thus be represented as intersections of such sheets, forming tubes, which define elemental, oriented areas that are the 2 form. This is very difficult to show on a solid, rotating gird of many, small intersecting sheets, therefore a different approach has been used. The code lets the user inspect planes though a three dimensional cube by selecting the viewing axis and the depth into the solid.
 This, visually, gives the same looking 2 forms. This is because the viewer is slicing through the tubes at a selected height.
 
-As the sheets are defined by elemental one forms, if any component of the viewed 2 form was in the direction of the axis along which the viewer is looking, the tubes would not be pointing in their direction and thus would be closed. Therefore:
+As the sheets are defined by stacks which run perpendicular to their corresponding direction, if any component of the viewed 2 form was in the direction of the axis along which the viewer is looking, the tubes would not be pointing in their direction and thus would be closed. Therefore:
 \begin{itemize}
 	\item Viewing from the $z$ axis, only the 2 form components in $dx\wedge dy$ would be apparent
 	\item Viewing from the $y$ axis, only the 2 form components in $dx\wedge dz$ would be apparent
 	\item Viewing from the $x$ axis, only the 2 form components in $dy\wedge dz$ would be apparent
 \end{itemize} 
 
-The process of calculating and plotting these is similar to the previously defined process used in plotting two forms on $\mathbb{R}^{2}$, (block plots are also implemented in a similar manner).
+The process of calculating and plotting these is similar to the previously defined process used in plotting two forms on $\mathbb{R}^{2}$ (the new, corrected one). The initial methods for representing 2 forms (blocks and 1 form splitting) have initially also been implemented here, but have since been changed to correctly display.
 
-This time the 'result' calculated by the two form finder (described previously) has three entries, each of which needs to be split (again, customisable but with default being equal split) and components need to be found for stacks to be superposed. This time the process yields six components (two for each plane).
-
-\textit{NOTE:For now, the only implemented way of defining 2 forms on $\mathbb{R}^{3}$ is through the exterior derivative. Upgrades which will include plotting from a given expression are coming.}
+This time the 'result' calculated by the two form finder (described previously) has three entries, each of which needs to be split into two equal parts (again, used to be customisable by the user, to display non-uniqueness when represented using split 1 forms. That process used six components (two for each plane) calculated from the found 2 form, which were plotted as stacks. Only three of which are now needed because the new representation is identical to equal splitting, however, the six were kept in the code. This is because that allows us to still use the eq\textunderscore to\textunderscore comps function, which always works with two inputs. These are then plotted similarly to the process of doing so on $\mathbb{R}^{2}$. It is done by a function (form\textunderscore 2\textunderscore components\textunderscore plot\textunderscore 3), nearly identical to the one used on $\mathbb{R}^{2}$, with the change that this one accepts all parameters in three dimensional grids and splits them correctly to corresponding planes, which is completed through slicing.
+This slicing is done an if-elif-else statement, one test for each axis projection. These deal with slicing grids, stack components and the slicing of the 2 form signs array.
+The strange thing about this slicing is that, due to the way meshgrids are defined ; while the component along the z axis is in fact a slice of $[:, :, height]$ as expected. The x and y slicing is switched.
+Also, singularities now not only must be excluded in the components (or in the magnitude) but also when the 2 form sign is to be taken.
+It may also be noted that this function, as the corresponding one on $\mathbb{R}^{2}$, also has (for the same reason) s\textunderscore max set to two.
 
 \noindent An extra process is required to make tubes update in the viewing axis accordingly to changing the height along it. This is because when expressions are proportional to functions of the viewing axis coordinate, they would not scale, they would simply be an additional constant that would vanish in the representation because of our applied relative scaling of stacks. A global scaling needs to be applied to correctly handle this.
-This is done by finding the maximum value across all height points (excluding singularities) for that two form component, dividing the local maximum (in the plane) by that global maximum and multiplying the relative scaling array by that value.
-To accomodate for that and a few other issues mentioned below, the plotting now is done by using a newly defined function 'form\textunderscore 1\textunderscore to\textunderscore 2onR3', which works in a similar manner to the stacks\textunderscore plot. With the mentioned extra operations.
-
-Because 2 form 'tubes' must be closed, this function includes a variable that sets the minimum number of stacks ('s\textunderscore min') to two. This way, full squares are always being displayed and them dissected depending on magnitude, but will not become open areas.
-
-Another extra operation is that it required two dimensional arrays to work with stacks, but provided are now found in terms of grids which are three dimensional. Thus slicing must be done. This is done an if-elif-else statement, one test for each axis projection. These deal with slicing grids, stack components and the slicing of the 2 form signs array.
-The strange thing about this slicing is that, due to the way meshgrids are defined ; while the component along the z axis is in fact a slice of $[:, :, height]$ as expected. The x and y slicing is switched.
-Also, singularities now not only must be excluded in the components (or ion the magnitude) but also when the 2 form sign is to be taken.
+This is done by finding the maximum value across all height points (excluding singularities), defined globally, for that two form component, dividing the local maximum (in the plane) by that global maximum and multiplying the relative scaling array by that value.
 
 It may be worth noting that a slider has not been implemented to complete the process of changing the viewing height along the viewing axis. This was  due to issues with Tkinter sliders, in getting them to go up in any, user defined intervals (without rounding, as then the exact value has to be found in the array to obtain its index for slicing).
 
-
 \section{Singularities}
+It was noticed when experimenting with the Vector Field Analyser \url{https://math.la.asu.edu/~kawski/vfa2/index.html} that singularities in fields break the code. Worst of all, singularities that fall on or near grid points, break the linear scaling, making the entirety of it plot as a zero field (relatively). Not only that but singularities were not displaying when off the grid, and undefined regions were simply not plotted. We have decided to input such options into our code.
 
+To begin with, there are some issues with the ideal scenario of finding all singularities, plotting them on and excluding them from scaling. However, this is difficult mainly due to the fact that no function has been found that will record singularities in mathematical expressions above $\mathbb{R}^{2}$. Only SymPy 'singularities has been found' which functions for single variables functions and has inconvenient outputs (for plotting).
 
+Many attempts were made to include such in our code, with limited success.
+The end result includes a three way mechanism for coping with singularities.
+First of all, if any such points (including not a number evaluations, infinities and values above $1e15$ that python at times mistakes for infinities) lie on a grid point, they are removed and plotted on. If the value was large, or infinite (according to python evaluation), it is plotted as a red circle. If it was evaluated as NaN, it is plotted as a grey square.
+If singularities lie off grid points, two options are given to the user. They can search through the region with a finer grid of a chosen number of points per side, or define their own singularity.
 
+If they choose to search, the code runs through a grid of finer points (as specified) looking for on grid large values (above $1000$), or infinities and plotting them as described above (but smaller). The mechanism for doing to is made for efficient by not saving all points to evaluate at, however, it can still be very slow for very fine grids, therefore the user is warned of slow processing if the value they input is above $200$ per axis.
+
+If they choose to define their own singularities. They can do so by defining an equation in $x$, an equation in $x$ or by supplying point coordinates. This will plot the given equation on the graph. These plots will stack if more than one is given. Many expressions can also be input simultaneously by separating them with a semi-colon (';'). If the expression in $y$ is input in terms of $y$ only (or conversely the $x$ expression is in terms of $x$ only), it is assumed to be and error and is plotted as if the opposing variables was given. For example, inputting $x = \sqrt{4 - x^2}$, instead of solving the equation for x , a line of $x = \sqrt{4 - y^2}$ is plotted.
+
+The point option accepts points in standard format ($x$ coordinate, then $y$), separated by a comma. If more than one is to be input, it can be done through a semi-colon as before. The code does not accept brackets surrounding the point coordinates.
+
+These self input singularities also run a background check. When an expression or a point singularity is input, the code will check for singular points along it. If it does not find any (not even a single point), it will warn the user that the code could not find any singularity at their asked positioning. Perhaps it is worthy of note that, despite such warning being showed, as asked, the plot will be created. It is also important to note that the code will not display this, even if most points evaluate not to be singular. This has been implemented because evaluations are not very exact and can at times be faulty.
 
 \end{document}
