@@ -1,28 +1,33 @@
-\BOOKMARK [1][-]{section.0.1}{\376\377\000G\000e\000o\000m\000e\000t\000r\000y\000\040\000o\000f\000\040\000s\000t\000a\000c\000k\000\040\000v\000e\000c\000t\000o\000r\000s}{}% 1
-\BOOKMARK [2][-]{subsection.0.1.1}{\376\377\000T\000r\000a\000n\000s\000l\000a\000t\000i\000o\000n\000s\000\040\000n\000e\000e\000d\000e\000d\000\040\000t\000o\000\040\000d\000e\000f\000i\000n\000e\000\040\000s\000t\000a\000c\000k\000\040\000v\000e\000c\000t\000o\000r\000s\000\040\000a\000n\000d\000\040\000a\000r\000r\000o\000w\000h\000e\000a\000d\000s}{section.0.1}% 2
-\BOOKMARK [2][-]{subsection.0.1.2}{\376\377\000G\000e\000n\000e\000r\000a\000l\000\040\000f\000r\000o\000m\000\040\000o\000f\000\040\000s\000t\000a\000c\000k\000\040\000s\000h\000e\000e\000t\000\040\000p\000o\000s\000i\000t\000i\000o\000n\000s\000,\000\040\000f\000o\000r\000\040\000a\000n\000y\000\040\000n\000u\000m\000b\000e\000r\000\040\000o\000f\000\040\000s\000h\000e\000e\000t\000s}{section.0.1}% 3
-\BOOKMARK [2][-]{subsection.0.1.3}{\376\377\000v\000a\000r\000i\000a\000b\000l\000e\000s\000\040\000i\000n\000\040\000s\000t\000a\000c\000k\000\040\000p\000l\000o\000t\000\040\000c\000o\000d\000e}{section.0.1}% 4
-\BOOKMARK [1][-]{section.0.2}{\376\377\000I\000n\000i\000t\000i\000a\000l\000\040\000G\000U\000I\000\040\000o\000f\000\040\000t\000h\000e\000\040\000q\000u\000i\000v\000e\000r\000\040\000a\000n\000d\000\040\000s\000t\000a\000c\000k\000\040\000p\000l\000o\000t}{}% 5
-\BOOKMARK [2][-]{subsection.0.2.1}{\376\377\000E\000x\000p\000l\000a\000i\000n\000i\000n\000g\000\040\000u\000s\000e\000r\000\040\000d\000e\000f\000i\000n\000e\000d\000\040\000f\000u\000n\000c\000t\000i\000o\000n\000s\000\040\000i\000n\000\040\000t\000h\000e\000\040\000G\000U\000I\000\040\000c\000o\000d\000e}{section.0.2}% 6
-\BOOKMARK [1][-]{section.0.3}{\376\377\000M\000a\000t\000h\000e\000m\000a\000t\000i\000c\000a\000l\000l\000y\000:\000\040\0002\000-\000f\000o\000r\000m\000s\000\040\000f\000r\000o\000m\000\040\0001\000-\000f\000o\000r\000m\000s\000,\000\040\000e\000x\000t\000e\000r\000i\000o\000r\000\040\000d\000e\000r\000i\000v\000a\000t\000i\000v\000e\000\040\000\050\000o\000n\000\040\000R\000m\000\051}{}% 7
-\BOOKMARK [1][-]{section.0.4}{\376\377\000I\000n\000s\000e\000t\000\040\000P\000l\000o\000t\000s}{}% 8
-\BOOKMARK [2][-]{subsection.0.4.1}{\376\377\000D\000e\000r\000i\000v\000a\000t\000i\000v\000e\000\040\000W\000i\000n\000d\000o\000w}{section.0.4}% 9
-\BOOKMARK [2][-]{subsection.0.4.2}{\376\377\000Z\000o\000o\000m\000\040\000W\000i\000n\000d\000o\000w\000\040\000a\000n\000d\000\040\000Z\000o\000o\000m\000\040\000S\000l\000i\000d\000e\000r}{section.0.4}% 10
-\BOOKMARK [2][-]{subsection.0.4.3}{\376\377\000D\000i\000v\000e\000r\000g\000e\000n\000c\000e\000\040\000a\000n\000d\000\040\000C\000u\000r\000l\000\040\000W\000i\000n\000d\000o\000w\000s}{section.0.4}% 11
-\BOOKMARK [1][-]{section.0.5}{\376\377\000L\000i\000n\000e\000\040\000I\000n\000t\000e\000g\000r\000a\000l\000s}{}% 12
-\BOOKMARK [2][-]{subsection.0.5.1}{\376\377\000L\000i\000n\000e\000s}{section.0.5}% 13
-\BOOKMARK [2][-]{subsection.0.5.2}{\376\377\000C\000i\000r\000c\000l\000e\000s}{section.0.5}% 14
-\BOOKMARK [1][-]{section.0.6}{\376\377\000N\000o\000n\000-\000u\000n\000i\000q\000u\000e\000\040\000a\000n\000d\000\040\000w\000r\000o\000n\000g\000\040\000g\000r\000a\000p\000h\000i\000c\000a\000l\000\040\000r\000e\000p\000r\000e\000s\000e\000n\000t\000a\000t\000i\000o\000n\000s\000\040\000o\000f\000\040\0002\000\040\000f\000o\000r\000m\000s\000\040\000o\000n\000\040\000R\0002}{}% 15
-\BOOKMARK [2][-]{subsection.0.6.1}{\376\377\000B\000l\000o\000c\000k\000s\000\040\000a\000n\000d\000\040\000s\000t\000a\000c\000k\000s}{section.0.6}% 16
-\BOOKMARK [2][-]{subsection.0.6.2}{\376\377\0002\000\040\000f\000o\000r\000m\000s\000\040\000o\000n\000\040\000R\0002\000\040\000t\000h\000r\000o\000u\000g\000h\000\040\000t\000h\000e\000\040\000e\000x\000t\000e\000r\000i\000o\000r\000\040\000d\000e\000r\000i\000v\000a\000t\000i\000v\000e}{section.0.6}% 17
-\BOOKMARK [2][-]{subsection.0.6.3}{\376\377\000P\000r\000o\000o\000f\000\040\000o\000f\000\040\000t\000h\000e\000\040\000n\000o\000n\000-\000u\000n\000i\000q\000u\000e\000n\000e\000s\000s\000\040\000o\000f\000\040\0002\000\040\000f\000o\000r\000m\000s}{section.0.6}% 18
-\BOOKMARK [2][-]{subsection.0.6.4}{\376\377\0002\000\040\000f\000o\000r\000m\000s\000\040\000o\000n\000\040\000R\0002\000\040\000t\000h\000r\000o\000u\000g\000h\000\040\000t\000h\000e\000\040\000w\000e\000d\000g\000e\000\040\000p\000r\000o\000d\000u\000c\000t}{section.0.6}% 19
-\BOOKMARK [2][-]{subsection.0.6.5}{\376\377\000i\000n\000i\000t\000i\000a\000l\000\040\0002\000\040\000f\000o\000r\000m\000\040\000r\000e\000p\000r\000e\000s\000e\000n\000t\000a\000t\000i\000o\000n\000\040\000a\000s\000\040\000s\000t\000a\000c\000k\000s\000\040\000i\000n\000\040\000c\000o\000d\000e}{section.0.6}% 20
-\BOOKMARK [2][-]{subsection.0.6.6}{\376\377\0002\000\040\000f\000o\000r\000m\000\040\000r\000e\000p\000r\000e\000s\000e\000n\000t\000a\000t\000i\000o\000n\000\040\000a\000s\000\040\000b\000l\000o\000c\000k\000s\000\040\000i\000n\000\040\000c\000o\000d\000e}{section.0.6}% 21
-\BOOKMARK [1][-]{section.0.7}{\376\377\000C\000o\000r\000r\000e\000c\000t\000\040\0002\000\040\000f\000o\000r\000m\000\040\000o\000n\000\040\000R\0002\000\040\000r\000e\000p\000r\000e\000s\000e\000n\000t\000a\000t\000i\000o\000n}{}% 22
-\BOOKMARK [1][-]{section.0.8}{\376\377\000O\000t\000h\000e\000r\000\040\000c\000a\000l\000c\000u\000l\000u\000s\000\040\000u\000s\000i\000n\000g\000\040\0002\000\040\000f\000o\000r\000m\000s}{}% 23
-\BOOKMARK [2][-]{subsection.0.8.1}{\376\377\000I\000n\000t\000e\000r\000i\000o\000r\000\040\000d\000e\000r\000i\000v\000a\000t\000i\000v\000e\000\040\000a\000c\000t\000i\000n\000g\000\040\000o\000n\000\040\0002\000\040\000f\000o\000r\000m\000s}{section.0.8}% 24
-\BOOKMARK [2][-]{subsection.0.8.2}{\376\377\000H\000o\000d\000g\000e}{section.0.8}% 25
-\BOOKMARK [1][-]{section.0.9}{\376\377\000F\000o\000r\000m\000s\000\040\000o\000n\000\040\000R\0003}{}% 26
-\BOOKMARK [2][-]{subsection.0.9.1}{\376\377\000R\000e\000p\000r\000e\000s\000e\000n\000t\000i\000n\000g\000\040\0002\000\040\000f\000o\000r\000m\000s\000\040\000o\000n\000\040\000R\0003}{section.0.9}% 27
-\BOOKMARK [1][-]{section.0.10}{\376\377\000S\000i\000n\000g\000u\000l\000a\000r\000i\000t\000i\000e\000s}{}% 28
+\BOOKMARK [0][-]{chapter.1}{1-Forms Graphical Representation}{}% 1
+\BOOKMARK [1][-]{section.1.1}{Geometry of stack vectors}{chapter.1}% 2
+\BOOKMARK [2][-]{subsection.1.1.1}{Translations needed to define stack vectors and arrowheads}{section.1.1}% 3
+\BOOKMARK [2][-]{subsection.1.1.2}{General from of stack sheet positions, for any number of sheets}{section.1.1}% 4
+\BOOKMARK [2][-]{subsection.1.1.3}{variables in stack plot code}{section.1.1}% 5
+\BOOKMARK [1][-]{section.1.2}{Initial GUI of the quiver and stack plot}{chapter.1}% 6
+\BOOKMARK [2][-]{subsection.1.2.1}{Explaining user defined functions in the GUI code}{section.1.2}% 7
+\BOOKMARK [0][-]{chapter.2}{Differential Forms Calculus}{}% 8
+\BOOKMARK [1][-]{section.2.1}{Mathematically: 2-forms from 1-forms, exterior derivative \(on Rm\)}{chapter.2}% 9
+\BOOKMARK [0][-]{chapter.3}{1-Forms Calculus}{}% 10
+\BOOKMARK [1][-]{section.3.1}{Inset Plots}{chapter.3}% 11
+\BOOKMARK [2][-]{subsection.3.1.1}{Derivative Window}{section.3.1}% 12
+\BOOKMARK [2][-]{subsection.3.1.2}{Zoom Window and Zoom Slider}{section.3.1}% 13
+\BOOKMARK [2][-]{subsection.3.1.3}{Divergence and Curl Windows}{section.3.1}% 14
+\BOOKMARK [1][-]{section.3.2}{Line Integrals}{chapter.3}% 15
+\BOOKMARK [2][-]{subsection.3.2.1}{Lines}{section.3.2}% 16
+\BOOKMARK [2][-]{subsection.3.2.2}{Circles}{section.3.2}% 17
+\BOOKMARK [0][-]{chapter.4}{2-Forms Graphical Representation}{}% 18
+\BOOKMARK [1][-]{section.4.1}{Non-unique graphical representations of 2-forms on R2}{chapter.4}% 19
+\BOOKMARK [2][-]{subsection.4.1.1}{Blocks and stacks}{section.4.1}% 20
+\BOOKMARK [2][-]{subsection.4.1.2}{2-forms on R2 through the exterior derivative}{section.4.1}% 21
+\BOOKMARK [2][-]{subsection.4.1.3}{2-forms on R2 through the wedge product}{section.4.1}% 22
+\BOOKMARK [2][-]{subsection.4.1.4}{Lessons learnt}{section.4.1}% 23
+\BOOKMARK [2][-]{subsection.4.1.5}{Proof of the non-uniqueness of 2 forms}{section.4.1}% 24
+\BOOKMARK [2][-]{subsection.4.1.6}{Initial 2-form representation as stacks in code}{section.4.1}% 25
+\BOOKMARK [2][-]{subsection.4.1.7}{2-form representation as blocks in code}{section.4.1}% 26
+\BOOKMARK [1][-]{section.4.2}{Correct 2 form on R2 representation}{chapter.4}% 27
+\BOOKMARK [0][-]{chapter.5}{2-Forms Calculus}{}% 28
+\BOOKMARK [1][-]{section.5.1}{Interior derivative acting on 2 forms}{chapter.5}% 29
+\BOOKMARK [1][-]{section.5.2}{Hodge}{chapter.5}% 30
+\BOOKMARK [0][-]{chapter.6}{Differential Forms on R3}{}% 31
+\BOOKMARK [1][-]{section.6.1}{Representing 2 forms on R3}{chapter.6}% 32
+\BOOKMARK [0][-]{chapter.7}{Singularities}{}% 33
