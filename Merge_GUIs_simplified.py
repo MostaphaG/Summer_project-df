@@ -1630,13 +1630,13 @@ def deriv_calc(x_m,y_m):
                         v_curl[N-j, i] = (V_comm_4*k + W_comm_4*l)*l/A
             
             
-            # correct for singular values
-            # for i in range(dpd):
-            #     for j in range(dpd):
-            #         if isnan(u_div[i, j]) or u_div[i, j] > 1e15 or  u_div[i, j] < 1e-14:
-            #             u_div[i, j] = 0
-            #         if isnan(v_div[i, j]) or v_div[i, j] > 1e15 or v_div[i, j] < 1e-14:
-            #             v_div[i, j] = 0
+        # correct for singular values
+        for i in range(dpd):
+            for j in range(dpd):
+                if isnan(u_div[i, j]) or u_div[i, j] > 1e15 or  u_div[i, j] < 1e-14:
+                    u_div[i, j] = 0
+                if isnan(v_div[i, j]) or v_div[i, j] > 1e15 or v_div[i, j] < 1e-14:
+                    v_div[i, j] = 0
                     
         # Create axes at clicked position from supplied position and given axis sizes
         deriv_inset_ax = main_axis.inset_axes([(x_pix-178)/500 - (0.931*d_length/(2*L)), (y_pix-59)/500 - (0.931*d_length/(2*L)), 0.931*d_length/L, 0.931*d_length/L])
