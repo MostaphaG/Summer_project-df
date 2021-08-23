@@ -1536,7 +1536,7 @@ DIFFERENTIAL CALCULUS FUNCTIONS
 
 # define a function that will calculate the local, geometrical derivative
 def deriv_calc(x_m,y_m):
-    
+    global u_div, v_div
     # Try and except to account for the error caused when zoom window selected without first clicking
     # (i.e. undefined x_pix and y_pix)
     
@@ -1628,16 +1628,16 @@ def deriv_calc(x_m,y_m):
                         v_curl[N-i, N-j] = (V_comm_3*(-l) + W_comm_3*k)*k/A
                         u_curl[N-j, i] = (V_comm_4*k + W_comm_4*l)*k/A
                         v_curl[N-j, i] = (V_comm_4*k + W_comm_4*l)*l/A
-            
-            
+        
+        
         # correct for singular values
         for i in range(dpd):
             for j in range(dpd):
-                if isnan(u_div[i, j]) or u_div[i, j] > 1e15 or  u_div[i, j] < 1e-14:
+                if isnan(u_div[i, j]) is True or abs(u_div[i, j]) > 1e15 or  abs(u_div[i, j]) < 1e-10:
                     u_div[i, j] = 0
-                if isnan(v_div[i, j]) or v_div[i, j] > 1e15 or v_div[i, j] < 1e-14:
+                if isnan(v_div[i, j]) is True or abs(v_div[i, j]) > 1e15 or abs(v_div[i, j]) < 1e-10:
                     v_div[i, j] = 0
-                    
+        
         # Create axes at clicked position from supplied position and given axis sizes
         deriv_inset_ax = main_axis.inset_axes([(x_pix-178)/500 - (0.931*d_length/(2*L)), (y_pix-59)/500 - (0.931*d_length/(2*L)), 0.931*d_length/L, 0.931*d_length/L])
         
@@ -1673,7 +1673,6 @@ def deriv_calc(x_m,y_m):
             stacks = True            
         
         stack_plot(dxg, dyg, deriv_inset_ax, u_s, v_s, 5, d_range, dpd, 0.1, arrows, stacks, orientation, scale_s, w_head, h_head, 1) 
-    
         # Don't display the x and y axis values
         # if click_opt_int > 2:  
         #     deriv_inset_ax.set_xticks([])
@@ -3048,7 +3047,7 @@ click_option_Curl_btn.grid(row=2, column=1)
 
 # Zooming window zoom slider
 tk.Label(right_frame, text='Zoom').grid(row=3, column=0)
-zoom_slider = tk.Scale(right_frame, from_=1, to=50, orient=tk.HORIZONTAL)
+zoom_slider = tk.Scale(right_frame, from_=1, to=200, orient=tk.HORIZONTAL)
 zoom_slider.bind("<ButtonRelease-1>", update_deriv)
 zoom_slider.grid(row=3, column=1)
 
