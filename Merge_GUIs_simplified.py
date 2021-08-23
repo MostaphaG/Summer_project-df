@@ -702,7 +702,7 @@ notebook.bind_all('<<NotebookTabChanged>>', tab_selection)
 
 # define scale of the graph
 L = 5
-pt_den = 21 # number of points on each axis
+pt_den = 11 # number of points on each axis
 
 # Initialise auto scaling variable
 ascale = tk.IntVar()
@@ -729,7 +729,7 @@ v = -xg*np.cos(yg)  # y component
 field_name_list = ['Default: y*sin(x)dx - x*cos(y)dy',
                    'Simple pendulum: ydx  - sin(x)dy',
                    'Harmonic oscillator: ydx -xdy',
-                   'Linear field example 1: (14*x - 4*y)dx + (-1*x + 4*y)dy',
+                   'Linear field example 1: (x + 2*y)dx + (3*x - 4*y)dy',
                    'Linear field example 2: xdx',
                    'Constant field: 6dx + 3dy',
                    'Falling cat field (Planar 3 link robot)',
@@ -746,7 +746,7 @@ field_name_list = ['Default: y*sin(x)dx - x*cos(y)dy',
 field_x_list = ['y*sin(x)',
                 'y',
                 'y',
-                '14*x - 4*y',
+                'x + 2*y',
                 'x',
                 '6',
                 '(3*cos(y) + 4)/(15 + 6*cos(x) + 6*cos(y))',
@@ -760,7 +760,7 @@ field_x_list = ['y*sin(x)',
 field_y_list = ['- x*cos(y)',
                 '-sin(x)',
                 '-x',
-                '(-1*x + 4*y)',
+                '3*x - 4*y',
                 '0',
                 '3',
                 '-(3*cos(x) + 4)/(15 + 6*cos(x) + 6*cos(y))',
@@ -784,7 +784,7 @@ delta_factor = 10
 fract = 0.05
 
 # define the maximum number of stack to plot, dep. on magnitude (initialy)
-s_max = 5
+s_max = 4
 
 # set screen dpi
 my_dpi = 100
@@ -1137,19 +1137,20 @@ def line_int_circ(cent, R, N, u_str, v_str, orient_int):
     
     # Loop through to assign coordinates to interval points and plot them
     # depending on chosen orientation
-    if orient_int == 'ccw':
-        intervals[0, :] = xc + R*np.cos(dt)
-        intervals[1, :] = yc + R*np.sin(dt)
-    else:
-        intervals[0, :] = xc - R*np.cos(dt)
-        intervals[1, :] = yc - R*np.sin(dt)
+    intervals[0, :] = xc + R*np.cos(dt)
+    intervals[1, :] = yc + R*np.sin(dt)
+
     # get the points along the circle and save
     uv_store[0, :] = eval(format_eq(u_str, LI=1))
     uv_store[1, :] = eval(format_eq(v_str, LI=1))
     
     # Increment vector components
-    dx = -A*np.sin(dt)
-    dy = A*np.cos(dt)
+    if orient_int == 'ccw':  
+        dx = -A*np.sin(dt)
+        dy = A*np.cos(dt)
+    else:
+        dx = A*np.sin(dt)
+        dy = -A*np.cos(dt)
     
     dx_norm = A*np.cos(dt)
     dy_norm = A*np.sin(dt)
@@ -1175,7 +1176,7 @@ def line_int_circ(cent, R, N, u_str, v_str, orient_int):
     shape_area = np.pi*R**2
     shape_area_label.configure(text=str(round(shape_area, 4)))
     
-    ratio1 = LI_total/shape_area
+    ratio1 = LI_total/abs(shape_area)
     ratio1_label.configure(text=str(round(ratio1, 4)))
     
     ratio2 = flux/shape_area
@@ -1186,7 +1187,7 @@ def line_int_circ(cent, R, N, u_str, v_str, orient_int):
 
 # define a function that will complete the line integral
 def line_int_poly(N, u_str, v_str):
-    global LI_total, coord_array, coord_diff, LI_verts
+    global LI_total, coord_array, coord_diff, LI_verts, flux
     # set up a conuter to know how many time to complete the sum process
     c_count = len(LI_coord)
     
@@ -1235,14 +1236,19 @@ def line_int_poly(N, u_str, v_str):
         uv_store[0, :] = eval(format_eq(u_str, 1))
         uv_store[1, :] = eval(format_eq(v_str, 1))
         
+        flux_inc = 0
+        
         # Evaluate line integral as sum of vector components multiplied by the small x and y displacements 
         res = dx*np.sum(uv_store[0, :]) + dy*np.sum(uv_store[1, :])
+        flux_inc = dy*np.sum(uv_store[0, :]) - dx*np.sum(uv_store[1, :])
         
         # display the drawn on lines
         canvas.draw()
         
         # update the total
         LI_total += res
+        flux += flux_inc
+        
         # update its label
         LI_total_label.configure(text=str(round(LI_total, 4)))
         
@@ -1250,8 +1256,21 @@ def line_int_poly(N, u_str, v_str):
             shape_area = calc_area(LI_verts)
             shape_area_label.configure(text=str(round(abs(shape_area), 4)))
             
+            if shape_area < 0:
+                shape_area = (-1)*shape_area
+                flux = (-1)*flux
+            else:
+                pass
+            
             ratio1 = LI_total/shape_area
             ratio1_label.configure(text=str(round(ratio1, 4)))
+            
+            ratio2 = flux/shape_area
+            ratio2_label.configure(text=str(round(ratio2, 4)))
+            
+            flux_label.configure(text=str(round(flux, 4)))
+            
+            flux = 0
             
         return res
     
@@ -3202,7 +3221,7 @@ height_frame = tk.LabelFrame(r3_frame, text='viewing frame', padx=32, pady=5)
 height_frame.grid(row=0, column=0)
 
 # Label to show current axis value
-axis_height_txt = tk.Label(height_frame, text=str(z[11]))
+axis_height_txt = tk.Label(height_frame, text=str(z[0]))
 axis_height_txt.grid(row=1, column=0)
 
 # on the left, make a 'move down' button
