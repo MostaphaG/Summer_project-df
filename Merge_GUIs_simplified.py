@@ -1535,100 +1535,93 @@ DIFFERENTIAL CALCULUS FUNCTIONS
 
 
 # define a function that will calculate the local, geometrical derivative
-def deriv_calc(x_m,y_m):
-    global u_div, v_div
-    # Try and except to account for the error caused when zoom window selected without first clicking
-    # (i.e. undefined x_pix and y_pix)
+def deriv_calc(x_m, y_m):
     
-    try:
+    # Range and point density of the derivative plot
+    d_range = 0.33*L/(zoom_slider.get())
+    d_length = d_length_select.get()
+    dpd = dpd_select.get()
+    d_scale = scale*(zoom_slider.get())
     
-        # Range and point density of the derivative plot
-        d_range = 0.33*L/(zoom_slider.get())
-        d_length = d_length_select.get()
-        dpd = dpd_select.get()
-        d_scale = scale*(zoom_slider.get())
-        
-        # define new axis in the derivative plot
-        dx = np.linspace(-d_range+x_m, d_range+x_m, dpd)
-        dy = np.linspace(-d_range+y_m, d_range+y_m, dpd)
-        dxg, dyg = np.meshgrid(dx, dy)
-        # define the vector field in these new axis
-        uzoom, vzoom = eq_to_comps(string_x, string_y, dxg, dyg)
+    # define new axis in the derivative plot
+    dx = np.linspace(-d_range+x_m, d_range+x_m, dpd)
+    dy = np.linspace(-d_range+y_m, d_range+y_m, dpd)
+    dxg, dyg = np.meshgrid(dx, dy)
+    # define the vector field in these new axis
+    uzoom, vzoom = eq_to_comps(string_x, string_y, dxg, dyg)
 
-        # Define the components of the derivative field
-        V = uzoom - eval(format_eq_div(format_eq(string_x)))
-        W = vzoom - eval(format_eq_div(format_eq(string_y)))
+    # Define the components of the derivative field
+    V = uzoom - eval(format_eq_div(format_eq(string_x)))
+    W = vzoom - eval(format_eq_div(format_eq(string_y)))
+    
+    if click_opt_int > 2:
+        # prepare grids to store the components
+        u_div = np.zeros(shape=(dpd, dpd))
+        v_div = np.zeros(shape=(dpd, dpd))
+        u_curl = np.zeros(shape=(dpd, dpd))
+        v_curl = np.zeros(shape=(dpd, dpd))
         
-        if click_opt_int > 2:
-      
-            # prepare grids to store the components
-            u_div = np.zeros(shape=(dpd, dpd))
-            v_div = np.zeros(shape=(dpd, dpd))
-            u_curl = np.zeros(shape=(dpd, dpd))
-            v_curl = np.zeros(shape=(dpd, dpd))
+        # get corrected dpd (for loops)
+        N = dpd - 1
+        
+        # get number of points in quadrant
+        if dpd % 2 == 1:
+            quad_x = int(dpd/2)
+            quad_y = int((dpd+1)/2)
+        else:
+            quad_x = int(dpd/2)
+            quad_y = int(dpd/2)
+        
+        
+        # loop over quadrants, making sure to preserve squares for pi/2 rotations
+        # OUTER LOOP
+        for i in range(quad_x):
+            # get the l number, for projection of j on radial / i on tangent
+            l = i - 0.5*(N)
             
-            # get corrected dpd (for loops)
-            N = dpd - 1
-            
-            # get number of points in quadrant
-            if dpd % 2 == 1:
-                quad_x = int(dpd/2)
-                quad_y = int((dpd+1)/2)
-            else:
-                quad_x = int(dpd/2)
-                quad_y = int(dpd/2)
-            
-            
-            # loop over quadrants, making sure to preserve squares for pi/2 rotations
-            # OUTER LOOP
-            for i in range(quad_x):
-                # get the l number, for projection of j on radial / i on tangent
-                l = i - 0.5*(N)
+            # INNER LOOP
+            for j in range(quad_y):
+                # get the k number of projection: i on radial / j on tangent
+                k = j - 0.5*(N)
                 
-                # INNER LOOP
-                for j in range(quad_y):
-                    # get the k number of projection: i on radial / j on tangent
-                    k = j - 0.5*(N)
+                # get the commuting parts of V and W for each square corner
+                # (x and y components of the subtracted field)
+                V_comm_1 = 0.25*(2*V[i, j] + W[j, N-i] - W[N-j, i])
+                V_comm_2 = 0.25*(2*V[j, N-i] + W[N-i, N-j] - W[i, j])
+                V_comm_3 = 0.25*(2*V[N-i, N-j] + W[N-j, i] - W[j, N-i])
+                V_comm_4 = 0.25*(2*V[N-j, i] + W[i, j] - W[N-i, N-j])
+                
+                W_comm_1 = 0.25*(2*W[i, j] - V[j, N-i] + V[N-j, i])
+                W_comm_2 = 0.25*(2*W[j, N-i] - V[N-i, N-j] + V[i, j])
+                W_comm_3 = 0.25*(2*W[N-i, N-j] - V[N-j, i] + V[j, N-i])
+                W_comm_4 = 0.25*(2*W[N-j, i] - V[i, j] + V[N-i, N-j])
+                
+                # gte a normalisation factor from l and k
+                A = k**2 + l**2
+                
+                # for each corner of the square
+                # find the div and curl field in u and in v
+                # saving these into their arrays
+                
+                if click_opt_int == 3:    
+                    u_div[i, j] = (V_comm_1*k + W_comm_1*l)*k/A
+                    v_div[i, j] = (V_comm_1*k + W_comm_1*l)*l/A
+                    u_div[j, N-i] = (V_comm_2*l + W_comm_2*(-k))*l/A
+                    v_div[j, N-i] = (V_comm_2*l + W_comm_2*(-k))*(-k)/A
+                    u_div[N-i, N-j] = (V_comm_3*(-k) + W_comm_3*(-l))*(-k)/A
+                    v_div[N-i, N-j] = (V_comm_3*(-k) + W_comm_3*(-l))*(-l)/A
+                    u_div[N-j, i] = (V_comm_4*(-l) + W_comm_4*k)*(-l)/A
+                    v_div[N-j, i] = (V_comm_4*(-l) + W_comm_4*k)*k/A
                     
-                    # get the commuting parts of V and W for each square corner
-                    # (x and y components of the subtracted field)
-                    V_comm_1 = 0.25*(2*V[i, j] + W[j, N-i] - W[N-j, i])
-                    V_comm_2 = 0.25*(2*V[j, N-i] + W[N-i, N-j] - W[i, j])
-                    V_comm_3 = 0.25*(2*V[N-i, N-j] + W[N-j, i] - W[j, N-i])
-                    V_comm_4 = 0.25*(2*V[N-j, i] + W[i, j] - W[N-i, N-j])
-                    
-                    W_comm_1 = 0.25*(2*W[i, j] - V[j, N-i] + V[N-j, i])
-                    W_comm_2 = 0.25*(2*W[j, N-i] - V[N-i, N-j] + V[i, j])
-                    W_comm_3 = 0.25*(2*W[N-i, N-j] - V[N-j, i] + V[j, N-i])
-                    W_comm_4 = 0.25*(2*W[N-j, i] - V[i, j] + V[N-i, N-j])
-                    
-                    # gte a normalisation factor from l and k
-                    A = k**2 + l**2
-                    
-                    # for each corner of the square
-                    # find the div and curl field in u and in v
-                    # saving these into their arrays
-                    
-                    if click_opt_int == 3:    
-                        u_div[i, j] = (V_comm_1*k + W_comm_1*l)*k/A
-                        v_div[i, j] = (V_comm_1*k + W_comm_1*l)*l/A
-                        u_div[j, N-i] = (V_comm_2*l + W_comm_2*(-k))*l/A
-                        v_div[j, N-i] = (V_comm_2*l + W_comm_2*(-k))*(-k)/A
-                        u_div[N-i, N-j] = (V_comm_3*(-k) + W_comm_3*(-l))*(-k)/A
-                        v_div[N-i, N-j] = (V_comm_3*(-k) + W_comm_3*(-l))*(-l)/A
-                        u_div[N-j, i] = (V_comm_4*(-l) + W_comm_4*k)*(-l)/A
-                        v_div[N-j, i] = (V_comm_4*(-l) + W_comm_4*k)*k/A
-                        
-                    if click_opt_int == 4:        
-                        u_curl[i, j] = (V_comm_1*l + W_comm_1*(-k))*l/A
-                        v_curl[i, j] = (V_comm_1*l + W_comm_1*(-k))*(-k)/A
-                        u_curl[j, N-i] = (V_comm_2*(-k) + W_comm_2*(-l))*(-k)/A
-                        v_curl[j, N-i] = (V_comm_2*(-k) + W_comm_2*(-l))*(-l)/A
-                        u_curl[N-i, N-j] = (V_comm_3*(-l) + W_comm_3*k)*(-l)/A
-                        v_curl[N-i, N-j] = (V_comm_3*(-l) + W_comm_3*k)*k/A
-                        u_curl[N-j, i] = (V_comm_4*k + W_comm_4*l)*k/A
-                        v_curl[N-j, i] = (V_comm_4*k + W_comm_4*l)*l/A
-        
+                if click_opt_int == 4:        
+                    u_curl[i, j] = (V_comm_1*l + W_comm_1*(-k))*l/A
+                    v_curl[i, j] = (V_comm_1*l + W_comm_1*(-k))*(-k)/A
+                    u_curl[j, N-i] = (V_comm_2*(-k) + W_comm_2*(-l))*(-k)/A
+                    v_curl[j, N-i] = (V_comm_2*(-k) + W_comm_2*(-l))*(-l)/A
+                    u_curl[N-i, N-j] = (V_comm_3*(-l) + W_comm_3*k)*(-l)/A
+                    v_curl[N-i, N-j] = (V_comm_3*(-l) + W_comm_3*k)*k/A
+                    u_curl[N-j, i] = (V_comm_4*k + W_comm_4*l)*k/A
+                    v_curl[N-j, i] = (V_comm_4*k + W_comm_4*l)*l/A
         
         # correct for singular values
         for i in range(dpd):
@@ -1637,55 +1630,52 @@ def deriv_calc(x_m,y_m):
                     u_div[i, j] = 0
                 if isnan(v_div[i, j]) is True or abs(v_div[i, j]) > 1e15 or abs(v_div[i, j]) < 1e-10:
                     v_div[i, j] = 0
-        
-        # Create axes at clicked position from supplied position and given axis sizes
-        deriv_inset_ax = main_axis.inset_axes([(x_pix-178)/500 - (0.931*d_length/(2*L)), (y_pix-59)/500 - (0.931*d_length/(2*L)), 0.931*d_length/L, 0.931*d_length/L])
-        
-        # Check radiobutton selection
-        if click_opt_int == 1:
-            u_s = uzoom
-            v_s = vzoom
-            scale_s = d_scale
-            
-        elif click_opt_int == 2:
-            u_s = V
-            v_s = W
-            scale_s = d_scale
-            
-        elif click_opt_int == 3:
-            u_s = u_div
-            v_s = v_div
-            scale_s = d_scale
-            
-        elif click_opt_int == 4:
-            u_s = u_curl
-            v_s = v_curl
-            scale_s = d_scale
     
-        if tensor.get() == 0:
-            arrows = False
-            stacks = True
-        if tensor.get() == 1:
-            arrows = True
-            stacks = False
-        if tensor.get() == 2:
-            arrows = True
-            stacks = True            
+    # Create axes at clicked position from supplied position and given axis sizes
+    deriv_inset_ax = main_axis.inset_axes([(x_pix-178)/500 - (0.931*d_length/(2*L)), (y_pix-59)/500 - (0.931*d_length/(2*L)), 0.931*d_length/L, 0.931*d_length/L])
+    
+    # Check radiobutton selection
+    if click_opt_int == 1:
+        u_s = uzoom
+        v_s = vzoom
+        scale_s = d_scale
         
-        stack_plot(dxg, dyg, deriv_inset_ax, u_s, v_s, 5, d_range, dpd, 0.1, arrows, stacks, orientation, scale_s, w_head, h_head, 1) 
-        # Don't display the x and y axis values
-        # if click_opt_int > 2:  
-        #     deriv_inset_ax.set_xticks([])
-        #     deriv_inset_ax.set_yticks([])
+    elif click_opt_int == 2:
+        u_s = V
+        v_s = W
+        scale_s = d_scale
         
-        # Redraw the figure canvas, showing the inset axis
-        fig.canvas.draw()
-        deriv_inset_ax.clear()
-        deriv_inset_ax.remove()
+    elif click_opt_int == 3:
+        u_s = u_div
+        v_s = v_div
+        scale_s = d_scale
         
-    # i.e. if click coordinates are undefined, do nothing
-    except (NameError, UnboundLocalError, TypeError):
-        pass
+    elif click_opt_int == 4:
+        u_s = u_curl
+        v_s = v_curl
+        scale_s = d_scale
+
+    if tensor.get() == 0:
+        arrows = False
+        stacks = True
+    if tensor.get() == 1:
+        arrows = True
+        stacks = False
+    if tensor.get() == 2:
+        arrows = True
+        stacks = True            
+    
+    stack_plot(dxg, dyg, deriv_inset_ax, u_s, v_s, 5, d_range, dpd, 0.1, arrows, stacks, orientation, scale_s, w_head, h_head, 1) 
+    # Don't display the x and y axis values
+    # if click_opt_int > 2:  
+    #     deriv_inset_ax.set_xticks([])
+    #     deriv_inset_ax.set_yticks([])
+    
+    # Redraw the figure canvas, showing the inset axis
+    fig.canvas.draw()
+    deriv_inset_ax.clear()
+    deriv_inset_ax.remove()
+
 
 
 # Calculate the Jacobian matrix of the defined vector field
@@ -1715,6 +1705,8 @@ def jacobian(m, u_str, v_str):
 # and deals with setting up responses to click option changes
 def click_option_handler(click_option):
     global click_opt_int, toolbar, LI_coord, LI_total_label, LI_total, LI_instruction_label, LI_restart_btn, LI_shape_select, x_m, y_m
+    global x_pix, y_pix, x_m, y_m
+    # get the selected option
     click_opt_int = click_option
     # tools being selected
     if click_opt_int == 0:
@@ -1742,7 +1734,14 @@ def click_option_handler(click_option):
         toolbar.children['!button4'].pack_forget()
         toolbar.children['!button5'].pack_forget()
         # run deriv calc as per its calling
-        deriv_calc(x_m,y_m)
+        # unless the canvas has not been clicked yet, in that case, make up
+        # values
+        if str(x_m) == 'None':
+            x_m = 3.62101167
+            y_m = 1.60383546
+            x_pix = 592
+            y_pix = 391
+        deriv_calc(x_m, y_m)
 
 
 # Additional formatting function used in divergence plots
