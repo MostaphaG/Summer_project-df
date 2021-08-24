@@ -1783,7 +1783,7 @@ def click_option_handler(click_option):
         toolbar.update()
         canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
     # when 'tool' is not selected, disable the pan and zoom:
-    elif click_opt_int > 0:
+    elif 0 < click_opt_int < 5 :
         fig.canvas.draw()
         toolbar.home()
         # close the selected mouse options
