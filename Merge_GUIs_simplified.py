@@ -138,17 +138,8 @@ def stack_plot(xg, yg, axis, F_x, F_y, s_max, L, pt_den, fract, arrows=False, st
     x_len = len(xg[:, 0])
     y_len = len(yg[0, :])
     
-    # Scaling of axes and setting equal proportions circles look like circles
-    # axis.set_aspect('equal')
-    # ax_L = L + L/delta_factor
-    # axis.set_xlim(-ax_L, ax_L)
-    # axis.set_ylim(-ax_L, ax_L)
-    
     # Account for change to grid centre for divergence plot
     if axis_check == 1:
-        # if click_opt_int > 2:       
-        #     axis.set_xlim(-L-L/5, L+L/5)
-        #     axis.set_ylim(-L-L/5, L+L/5)
         axis.set_xlim(-L+x_m-L/5, L+x_m+L/5)
         axis.set_ylim(-L+y_m-L/5, L+y_m+L/5)
         
@@ -456,6 +447,8 @@ def tab_selection(event):
         # restore the fields input frame
         notebook_bottom.add(bot_frame, text='fields')
         notebook_bottom.select(0)
+        notebook_singular.add(singular_frame, text='singularities')
+        notebook_singular.select(0)
         # enable the plot and polar buttons again
         PLOT_btn['state'] = tk.NORMAL
         polar_grid_plot_btn['state'] = tk.NORMAL
@@ -478,7 +471,6 @@ def tab_selection(event):
         toolbar.children['!button4'].pack_forget()
         toolbar.children['!button5'].pack_forget()
         # set variable for mouse to respond to integrals in new tab
-        #click_opt_int = 5
         LI_selected = True
         # chenage fract to a better one for 1-forms
         fract = 0.05
@@ -517,11 +509,14 @@ def tab_selection(event):
         PLOT_btn['state'] = tk.NORMAL
         polar_grid_plot_btn['state'] = tk.NORMAL
     elif tab_text == 'Calculus':
+        global calculus_form_tracker, R2_tools_opt
         main_axis.clear()
         # get globals form entry boxes
         update_variables()
         # from these, establish the new fract, approperiate for 2-forms
         fract = 2/((pt_den-1))
+        # update variable to track 1 forms and 2 forms in this tab
+        calculus_form_tracker = 2
         # put the initial plot onto the canvas
         form_2_components_plot(xg, yg, form_2/2, zero_field, form_2_sgn, s_max, L, fract, colour_str, 2)
         form_2_components_plot(xg, yg, zero_field, form_2/2, form_2_sgn, s_max, L, fract, colour_str, 2)
@@ -611,6 +606,8 @@ def tab_selection(event):
         Entry_2_form_R3_dydz.insert(0, str(form_2_str_dydz))
         # hide the VFA input frame for now
         notebook_bottom.hide(0)
+        # hide singularity notebook
+        notebook_singular.hide(0)
         # disable the PLOT button and the ploar grid button
         PLOT_btn['state'] = tk.DISABLED
         polar_grid_plot_btn['state'] = tk.DISABLED
@@ -694,7 +691,13 @@ notebook.grid(row=0, column=0)
 # notebook for bottom field input, when needed to disappear.
 notebook_bottom = ttk.Notebook(bot_frame_frame)
 notebook_bottom.grid(row=0, column=0)
+#singularities notebook
+notebook_singular = ttk.Notebook(right_frame_frame)
+notebook_singular.grid(row=1, column=0)
 
+# singularities:
+singular_frame = tk.LabelFrame(notebook_singular)
+singular_frame.grid(row=0, column=1)
 # main options:
 right_frame = tk.LabelFrame(notebook)
 right_frame.grid(row=0, column=1)
@@ -717,6 +720,7 @@ notebook.add(LI_frame, text='Line Integrals')
 notebook.add(calculus_frame, text='Calculus')
 notebook.add(r3_frame, text='\mathbb{R}^{3}')
 notebook_bottom.add(bot_frame, text='fields')
+notebook_singular.add(singular_frame, text='singularities')
 
 # bind the clicks on tabs to a function
 notebook.bind_all('<<NotebookTabChanged>>', tab_selection)
@@ -878,6 +882,11 @@ to_wedge_y_2_str = ''
 # Initialise the click button selection
 click_opt_int = 0
 
+# variable to keep track of what is being plotted in the calculus code
+# a 1 form or a 2 form
+# starts set to 2 form, as that is the default when opening the tab
+calculus_form_tracker = 2
+
 # define initial pixes coordinates for the function to use
 # when mouse is clicked, these are changed to the pressed position
 x_m = float(0)
@@ -988,7 +997,7 @@ def on_key_press(event):
         
     # when the derivative option is selected, cerry out the derivative when clicked
     elif 0 < click_opt_int < 5:
-        deriv_calc(x_m,y_m)
+        deriv_calc(x_m, y_m)
         
     if tab_text == 'Line Integrals':
         if LI_shape_select.get() == 'Polygon':
@@ -1006,6 +1015,12 @@ def on_key_press(event):
                 Radius_LI_circ_entry.delete(0, 'end')
                 Radius_LI_circ_entry.insert(0 , str(Radius_LI_circ))
             line_int_circ([x_m,y_m], Radius_LI_circ, 100000, string_x, string_y, orient_int)
+    # when want to use zoom or tools in calculus:
+    if tab_text == 'Calculus':
+        if R2_tools_opt_int == 1:
+            form_2_zoom(x_m, y_m)
+        else:
+            key_press_handler(event, canvas, toolbar)
 
 
 # connect figure event to a function that responds to clicks, defined above
@@ -1980,17 +1995,23 @@ def singular_drop_response(var):
 
 # define a function that will plot stack components, coloured
 # as per the orientation of the 2-form at that grid point
-def form_2_components_plot(grid_x, grid_y, u, v, form_2_sgn, s_max, L, fract, colour_str, arrowheads=False, w_head=1/8, h_head=1/4, s_min=2):
+def form_2_components_plot(grid_x, grid_y, u, v, form_2_sgn, s_max, L, fract, colour_str, arrowheads=False, w_head=1/8, h_head=1/4, s_min=2, ax=main_axis, axis_check=1):
     global s_L
     # get axis lengths:
     x_len = len(grid_x[:, 0])
     y_len = len(grid_y[:, 0])
     
-    # Scaling of axes and setting equal proportions circles look like circles
-    main_axis.set_aspect('equal')
-    ax_L = L + L/delta_factor
-    main_axis.set_xlim(-ax_L, ax_L)
-    main_axis.set_ylim(-ax_L, ax_L)
+    if axis_check == 1:
+        # Scaling of axes and setting equal proportions circles look like circles
+        ax.set_aspect('equal')
+        # get L from the gien grids
+        size_L = np.max(grid_x)
+        ax_L = L + L/delta_factor
+        ax.set_xlim(-ax_L, ax_L)
+        ax.set_ylim(-ax_L, ax_L)
+    else:
+        ax.set_xlim(-L + x_m - L/5, L + x_m + L/5)
+        ax.set_ylim(-L + y_m - L/5, L + y_m + L/5)
     
     # define an empty array of magnitudes, to then fill with integer rel. mags
     R_int = np.zeros(shape=((x_len), (y_len)))
@@ -2011,8 +2032,8 @@ def form_2_components_plot(grid_x, grid_y, u, v, form_2_sgn, s_max, L, fract, co
                 # colour this region as a red dot, not square to
                 # not confuse with nigh mag 2-forms in stacks. or worse, in
                 # blocks
-                circ = patch.Circle((grid_x[i, j], grid_y[i, j]), L*fract/3, color='red')
-                main_axis.add_patch(circ)
+                circ = patch.Circle((grid_x[i, j], grid_y[i, j]), size_L*fract/3, color='red')
+                ax.add_patch(circ)
                 mag[i, j] = 0
             # ALso, since we got this lop anyway
             # correct for singularities in planar form 2:
@@ -2109,15 +2130,15 @@ def form_2_components_plot(grid_x, grid_y, u, v, form_2_sgn, s_max, L, fract, co
                     By2 = B_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
                     
                     # from these, define the 2 lines, for this run
-                    main_axis.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=0.5, color=colour_str[color_index]))
-                    main_axis.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=0.7, color=colour_str[color_index]))
+                    ax.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=0.5, color=colour_str[color_index]))
+                    ax.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=0.7, color=colour_str[color_index]))
                     
                     # update parameter to reapet and draw all needed arrows
                     s += 1
             # deal with the odd number of stacks:
             elif parity(n) is False:
                 # Add the centre line for odd numbers of stacks
-                main_axis.add_line(Line2D((A_x[i, j], B_x[i, j]), (A_y[i, j], B_y[i, j]), linewidth=0.7, color=colour_str[color_index]))
+                ax.add_line(Line2D((A_x[i, j], B_x[i, j]), (A_y[i, j], B_y[i, j]), linewidth=0.7, color=colour_str[color_index]))
                 
                 # then loop over the remaining lines as per the recursion formula:
                 s = 1  # change the looping parametr to exclude already completed 0 (corr. to middle sheet here)
@@ -2136,20 +2157,20 @@ def form_2_components_plot(grid_x, grid_y, u, v, form_2_sgn, s_max, L, fract, co
                     
                     # from these, define the 2 displaced lines
                     
-                    main_axis.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=0.7, color=colour_str[color_index]))
-                    main_axis.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=0.7, color=colour_str[color_index]))
+                    ax.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=0.7, color=colour_str[color_index]))
+                    ax.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=0.7, color=colour_str[color_index]))
                     
                     # change the parameter to loop over all changes in displacement for current magnitude
                     s += 1
             if arrowheads is True:
                 # plot lines of arrowheads from central sheet for n = 1 or on top sheet for n>1 
                 if n > 1:   # for all lines ubt the single sheet one
-                    main_axis.add_line(Line2D((p_sh1x[i, j], p_sh3x[i, j]), (p_sh1y[i, j], p_sh3y[i, j]), linewidth=1, color=colour_str[color_index]))
-                    main_axis.add_line(Line2D((p_sh2x[i, j], p_sh3x[i, j]), ((p_sh2y[i, j], p_sh3y[i, j])), linewidth=1, color=colour_str[color_index]))
+                    ax.add_line(Line2D((p_sh1x[i, j], p_sh3x[i, j]), (p_sh1y[i, j], p_sh3y[i, j]), linewidth=1, color=colour_str[color_index]))
+                    ax.add_line(Line2D((p_sh2x[i, j], p_sh3x[i, j]), ((p_sh2y[i, j], p_sh3y[i, j])), linewidth=1, color=colour_str[color_index]))
                 # then define it for the stacks with only 1 sheet:
                 else:
-                    main_axis.add_line(Line2D((P_sh1x[i, j], P_sh3x[i, j]), (P_sh1y[i, j], P_sh3y[i, j]), linewidth=1, color=colour_str[color_index]))
-                    main_axis.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color=colour_str[color_index]))
+                    ax.add_line(Line2D((P_sh1x[i, j], P_sh3x[i, j]), (P_sh1y[i, j], P_sh3y[i, j]), linewidth=1, color=colour_str[color_index]))
+                    ax.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color=colour_str[color_index]))
             else:
                 pass
 
@@ -2236,10 +2257,91 @@ Define response functions to GUI interactions
 
 '''
 
+# define a function that will let the user zoom with a mouse, on R2
+def form_2_zoom(x_m, y_m):
+    # define axis to be used in the inset
+    zoomR2_range = (1/3)*L/(zoom_slider_R2.get())
+    zoomR2_length = 1.5
+    zoomR2pd = 9  # BOTH zoomR2pd and zoomR2_length are temporary
+    # will be able to update these with dropdowns later like in Main tab
+    fract_zoom = 2/(zoomR2pd - 1)
+    R2x = np.linspace(-zoomR2_range + x_m, zoomR2_range + x_m, zoomR2pd)
+    R2y = np.linspace(-zoomR2_range + y_m, zoomR2_range + y_m, zoomR2pd)
+    R2xg, R2yg = np.meshgrid(R2x, R2y)
+    
+    # Create axes at clicked position from supplied position and axis sizes
+    zoomR2_inset_ax = main_axis.inset_axes([(x_pix-178)/500 - (0.931*zoomR2_length/(2*L)), (y_pix-59)/500 - (0.931*zoomR2_length/(2*L)), 0.931*zoomR2_length/L, 0.931*zoomR2_length/L])
+    
+    # determine which one is being plotted
+    # a 1-form or a 2-form
+    # based on that, complete the plot in the inset axis
+    if calculus_form_tracker == 1:
+        # define the vector field in these new axis
+        uzoomR2, vzoomR2 = eq_to_comps(string_x, string_y, R2xg, R2yg)
+        # plot as stacks
+        stack_plot(R2xg, R2yg, zoomR2_inset_ax, uzoomR2, vzoomR2, s_max, zoomR2_range, zoomR2pd, 0.1, False, True, 'mid', 1, w_head, h_head, 1)
+    # complete the process for when 2 form is to be zoomed
+    elif calculus_form_tracker == 2:
+        # define the 2 form over this region, on these axis
+        form_2_zoom_str = form_2_str.replace('x', 'R2xg')
+        form_2_zoom_str = form_2_zoom_str.replace('y', 'R2yg')
+        form_2_zoom_str = form_2_zoom_str.replace('^', '**')
+        form_2_zoom_str = form_2_zoom_str.replace('ln', 'log')
+        # evalue it numerically
+        form_2_zoom_values = eval(form_2_zoom_str)
+        # get its signs
+        form_2_zoom_sgn = np.sign(form_2_zoom_values)
+        # redo zero_field too
+        zero_field_zoom = np.zeros(np.shape(form_2_zoom_values))
+        # plot it
+        form_2_components_plot(R2xg, R2yg, form_2_zoom_values/2, zero_field_zoom, form_2_zoom_sgn, s_max, zoomR2_range, fract_zoom, colour_str, ax=zoomR2_inset_ax, axis_check=0)
+        form_2_components_plot(R2xg, R2yg, zero_field_zoom, form_2_zoom_values/2, form_2_zoom_sgn, s_max, zoomR2_range, fract_zoom, colour_str, ax=zoomR2_inset_ax, axis_check=0)
+    # Don't display the x and y axis values
+    zoomR2_inset_ax.set_xticks([])
+    zoomR2_inset_ax.set_yticks([])
+    
+    # redraw
+    fig.canvas.draw()
+    zoomR2_inset_ax.clear()
+    zoomR2_inset_ax.remove()
+
+
+# define a funvtion to call to select R2 tools
+def R2_tools_handler(R2_tools_opt_var):
+    global R2_tools_opt_int, toolbar
+    # get the variable as an integer, make it global not to have to repeat this
+    R2_tools_opt_int = R2_tools_opt_var
+    if R2_tools_opt_int == 0:
+        fig.canvas.draw()
+        toolbar.home()
+        # close the selected mouse options
+        state = fig.canvas.toolbar.mode
+        if state == 'zoom rect':
+            toolbar.zoom()
+        if state == 'pan/zoom':
+            toolbar.pan()
+        # get rid of the 2 buttons we don't want
+        toolbar.children['!button4'].pack_forget()
+        toolbar.children['!button5'].pack_forget()
+        # tools, therefore disable the slider
+        zoom_slider_R2.configure(state=tk.DISABLED)
+    else:
+        # enable it again
+        zoom_slider_R2.configure(state=tk.NORMAL)
+
+
+# upate the zooming tool
+def update_2_form_zoom(self):
+    form_2_zoom(x_m, y_m)
+
+
 # gets 2-form from entry box and plots it as coloured blocks only
 def form_2_response():
-    global form_2_str, form_2_eq, form_2_sgn, form_2, comp_x, comp_y, u, v, fract
     # get globals
+    global form_2_str, form_2_eq, form_2_sgn, form_2, comp_x, comp_y, u, v, fract
+    global calculus_form_tracker, fract
+    # set tracker
+    calculus_form_tracker = 2
     update_variables()
     # from these, establish the new fract, approperiate for 2-forms
     fract = 2/((pt_den-1))
@@ -2273,7 +2375,9 @@ def form_2_response():
 
 # plots the vetor field with stacks only
 def form_1_stacks_response():
-    global u, v, fract
+    global u, v, fract, calculus_form_tracker
+    # set the tracker
+    calculus_form_tracker = 1
     # clear the current axis
     main_axis.clear()
     # get input values
@@ -2398,6 +2502,9 @@ def Int_deriv_1_form():
 
 # define a function that will respond to plotting the 2-form only
 def Int_deriv_22_form():
+    global calculus_form_tracker
+    # set the tracker
+    calculus_form_tracker = 1
     # clear the axis
     main_axis.clear()
     # call the asked fucntion
@@ -2421,6 +2528,9 @@ def Int_deriv_22_form():
 # define a function that will find the interior derivative of both the 2-form
 # and a 1-form, merged.
 def Int_deriv_21_form():
+    global calculus_form_tracker
+    # set the tracker
+    calculus_form_tracker = 1
     # clear the axis
     main_axis.clear()
     # first call the function to plot a 2-form and plot it
@@ -2506,6 +2616,9 @@ def Int_deriv_response():
 # perform ext deriv on the result of int_deriv and plots it as stacks
 def Ext_deriv_response():
     global form_2, form_2_str, form_2_sgn
+    global calculus_form_tracker
+    # set the tracker
+    calculus_form_tracker = 2
     # get globals
     update_variables()
     # from these, establish the new fract, approperiate for 2-forms
@@ -2555,6 +2668,9 @@ def Ext_deriv_response():
 def wedge_product_R2():
     global to_wedge_x_1_str, to_wedge_y_1_str, to_wedge_x_2_str, to_wedge_y_2_str
     global form_2_str, form_2_eq, form_2, form_2_sgn
+    global calculus_form_tracker
+    # set the tracker
+    calculus_form_tracker = 2
     # get globals
     update_variables()
     # from these, establish the new fract, approperiate for 2-forms
@@ -3138,32 +3254,32 @@ arrow_stack_btn = tk.Radiobutton(right_frame, text='both', variable=tensor, valu
 stack_btn = tk.Radiobutton(right_frame, text='stack', variable=tensor, value=0, command=lambda: vect_type_response(tensor.get())).grid(row=7, column=2)
 
 # get a button to draw on singularities
-singularity_button = tk.Button(right_frame, text='search singularities', command=show_singularities)
-singularity_button.grid(row=8, column=0)
+singularity_button = tk.Button(singular_frame, text='search singularities', command=show_singularities)
+singularity_button.grid(row=0, column=0)
 # entry for N
-tk.Label(right_frame, text='<-- sampling points').grid(row=8, column=2, columnspan=2)
-fine_grid_N_entry = tk.Entry(right_frame, width=5)
-fine_grid_N_entry.grid(row=8, column=1)
+tk.Label(singular_frame, text='<-- sampling points').grid(row=0, column=2, columnspan=2)
+fine_grid_N_entry = tk.Entry(singular_frame, width=5)
+fine_grid_N_entry.grid(row=0, column=1)
 fine_grid_N_entry.insert(0, 10)
 
 # define an entry where the user can inpu known singularity equation
 # this will be taken and plotted as a red, dotted line
-tk.Label(right_frame, text='equation of known singularity :').grid(row=9, column=0, columnspan=2)
+tk.Label(singular_frame, text='equation of known singularity :').grid(row=1, column=0, columnspan=2)
 
 # define a dropdown to select y= or x=
 singular_var = tk.StringVar()
 singular_list = ['y=', 'x=', 'point']
 singular_var.set(singular_list[0])
-dpd_drop = tk.OptionMenu(right_frame, singular_var, *singular_list, command=singular_drop_response)
-dpd_drop.grid(row=10, column=0)
+dpd_drop = tk.OptionMenu(singular_frame, singular_var, *singular_list, command=singular_drop_response)
+dpd_drop.grid(row=2, column=0)
 # equation entry box
-known_singularity_entry = tk.Entry(right_frame, width=20)
-known_singularity_entry.grid(row=10, column=1)
+known_singularity_entry = tk.Entry(singular_frame, width=20)
+known_singularity_entry.grid(row=2, column=1)
 known_singularity_entry.insert(0, '')
 
 # define asubmit button to that entry
-submit_known_singularity_btn = tk.Button(right_frame, text='show expression', command=known_singularity_response)
-submit_known_singularity_btn.grid(row=11, column=0)
+submit_known_singularity_btn = tk.Button(singular_frame, text='show expression', command=known_singularity_response)
+submit_known_singularity_btn.grid(row=3, column=0)
 
 # DERIVATIVE FUNCTIONS
 
@@ -3395,6 +3511,22 @@ Hodge_1_form_btn.grid(row=11, column=0)
 
 Hodge_2_form_btn = tk.Button(calculus_frame, text='Hodge 2-Form', padx=67, pady=10, command=Hodge_2_form_response)
 Hodge_2_form_btn.grid(row=11, column=1)
+
+# define radiobuttons button to choose zooming with the mouse on 2-forms on R2
+# and as opposed to tools
+R2_tools_opt = tk.IntVar()
+R2_tools_opt.set(0)
+R2_tools_Tools_btn = tk.Radiobutton(calculus_frame, text='Tools', variable=R2_tools_opt, value=0, command=lambda: R2_tools_handler(R2_tools_opt.get()))
+R2_tools_Zoom_btn = tk.Radiobutton(calculus_frame, text='Zoom', variable=R2_tools_opt, value=1, command=lambda: R2_tools_handler(R2_tools_opt.get()))
+R2_tools_Tools_btn.grid(row=12, column=0)
+R2_tools_Zoom_btn.grid(row=12, column=1)
+
+# set up a zooming tool for that too
+tk.Label(calculus_frame, text='Zoom').grid(row=13, column=0)
+zoom_slider_R2 = tk.Scale(calculus_frame, from_=1, to=20, orient=tk.HORIZONTAL)
+zoom_slider_R2.bind("<ButtonRelease-1>", update_2_form_zoom)
+zoom_slider_R2.grid(row=13, column=1)
+zoom_slider_R2.configure(state=tk.DISABLED)
 
 
 '''
