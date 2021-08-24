@@ -460,7 +460,7 @@ def tab_selection(event):
         PLOT_btn['state'] = tk.NORMAL
         polar_grid_plot_btn['state'] = tk.NORMAL
     if tab_text == 'Line Integrals':
-        global toolbar, LI_coord, LI_total, LI_shape_select
+        global toolbar, LI_coord, LI_total, LI_shape_select, tensor
         x_m = None
         y_m = None
         fig.canvas.draw()
@@ -481,6 +481,10 @@ def tab_selection(event):
         click_opt_int = 5
         # chenage fract to a better one for 1-forms
         fract = 0.05
+        # deal with consistancy if both was initially selected
+        if tensor.get() == 2:
+            tensor.set(0)
+            vect_type_response(tensor.get())
         # return the option to default
         LI_shape_select.set(LI_shape_list[0])
         LI_shape_select_response('Polygon')
@@ -490,6 +494,9 @@ def tab_selection(event):
         main_axis.grid(True)
         # draw it on
         canvas.draw()
+        # enable plot buttons again
+        PLOT_btn['state'] = tk.NORMAL
+        polar_grid_plot_btn['state'] = tk.NORMAL#
     elif tab_text == 'Main':
         LI_restart()
         # by default return to initial 'tools'
@@ -505,6 +512,9 @@ def tab_selection(event):
         main_axis.grid(False)
         # draw it on
         canvas.draw()
+        # enable plot buttons again
+        PLOT_btn['state'] = tk.NORMAL
+        polar_grid_plot_btn['state'] = tk.NORMAL
     elif tab_text == 'Calculus':
         main_axis.clear()
         # get globals form entry boxes
@@ -608,6 +618,11 @@ def tab_selection(event):
             axis_height_txt.configure(text=str(round(eval(hvalue_string), 2)))
             # show warning about that
             tk.messagebox.showwarning('INDEX ERROR', 'you selected a value in slider that might no longer be avalaible, it has been changed avoid errors')
+    # if anything but the main window is selected, change to tools
+    if tab_text != 'Main':
+        # unclick them
+        click_option.set(0)
+        click_option_handler(click_option.get())
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -647,11 +662,11 @@ right_frame_frame = tk.LabelFrame(root, text='Options Frame', padx=5, pady=5)
 right_frame_frame.grid(row=1, column=1)
 
 # bot frame:
-bot_frame_frame = tk.LabelFrame(root, text='Field Input Frame', padx=5, pady=5)
+bot_frame_frame = tk.LabelFrame(root, text='1-Form Input Frame', padx=5, pady=5)
 bot_frame_frame.grid(row=2, column=0)
 
 # plot frame:
-plot_frame = tk.LabelFrame(root, text='Vector Field Frame', padx=5, pady=5)
+plot_frame = tk.LabelFrame(root, text='Plot Frame', padx=5, pady=5)
 plot_frame.grid(row=1, column=0)
 
 # plot characteristics frame and plot button
@@ -727,12 +742,12 @@ v = -xg*np.cos(yg)  # y component
 field_name_list = ['Default: y*sin(x)dx - x*cos(y)dy',
                    'Simple pendulum: ydx  - sin(x)dy',
                    'Harmonic oscillator: ydx -xdy',
-                   'Linear field example 1: (x + 2*y)dx + (3*x - 4*y)dy',
-                   'Linear field example 2: xdx',
-                   'Constant field: 6dx + 3dy',
-                   'Falling cat field (Planar 3 link robot)',
+                   'Linear example 1: (x + 2*y)dx + (3*x - 4*y)dy',
+                   'Linear example 2: xdx',
+                   'Constant: 6dx + 3dy',
+                   'Falling cat (Planar 3 link robot)',
                    'Gravitational/Electric Point Charge: -x/(x**2+y**2)dx + -y/(x**2+y**2)dy',
-                   'Magnetic Field of Current Carrying Wire: -y/(x**2+y**2)dx + x/(x**2+y**2)dy',
+                   'Magnetism of Current Carrying Wire: -y/(x**2+y**2)dx + x/(x**2+y**2)dy',
                    'Flamms paraboloid',
                    'BLACK HOLE!'
                    ]
@@ -918,8 +933,8 @@ vector_ey_str = ''
 # to start with, set as viewing aling z axis onto x-y plane
 axis_view = 'z'
 # set the initial index of height of the viewed plane along viewing axis
-h_index = 11
-hvalue_string = '0.5'
+h_index = 0
+hvalue_string = '-5'
 
 # =============================================================================
 # set up initial plot and canvas
@@ -1309,6 +1324,7 @@ def calc_area(vert_list):
 # define a function that will respond to radio buttons behind choosing vector types:
 # Note, tensor is a local variable. So to get value in other functions, use tensor.get() to extract current radiobutton value
 def vect_type_response(tensor):
+    global click_option
     # clear the plot that is already there:
     main_axis.clear()
     # use the tensor to determine what to plot:
@@ -1324,6 +1340,38 @@ def vect_type_response(tensor):
         stacks = True 
     stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0)
     canvas.draw()
+    # now distinguish clearly between vector fields and 1 forms:
+    # when stacks are selected, disable div and curl, these don't exist
+    # also disable the derivative, it is not the same:
+    # 1 form drrivative is the exterior derivative, not this geometrical one
+    # change the labels of inputs too
+    # when deselcted, return these
+    if tensor == 0 or tensor == 2:
+        # stacks included
+        # unclick them first, by selecting the default, tools
+        click_option.set(0)
+        click_option_handler(click_option.get())
+        #disable spproperiately
+        click_option_Deriv_btn.configure(state=tk.DISABLED)
+        click_option_Div_btn.configure(state=tk.DISABLED)
+        click_option_Curl_btn.configure(state=tk.DISABLED)
+        # change labels to be inputs of 1 forms
+        component_x_entry_label.configure(text='dx component')
+        component_y_entry_label.configure(text='dy component')
+        field_select_drop_label.configure(text='Select Pre-Defined 1-Form:')
+        # change frame name too
+        bot_frame_frame.configure(text='1-Form input frame')
+    elif tensor == 1:
+        # enable approperiately
+        click_option_Deriv_btn.configure(state=tk.NORMAL)
+        click_option_Div_btn.configure(state=tk.NORMAL)
+        click_option_Curl_btn.configure(state=tk.NORMAL)
+        # change labels to be inputs of 1 forms
+        component_x_entry_label.configure(text='x component')
+        component_y_entry_label.configure(text='y component')
+        field_select_drop_label.configure(text='Select Pre-Defined Vector Field:')
+        # change frame name too
+        bot_frame_frame.configure(text='Vector Field input frame')
 
 # define the PLOT button response function
 def PLOT_response():
@@ -1537,7 +1585,6 @@ DIFFERENTIAL CALCULUS FUNCTIONS
 
 # define a function that will calculate the local, geometrical derivative
 def deriv_calc(x_m, y_m):
-    
     # Range and point density of the derivative plot
     d_range = 0.33*L/(zoom_slider.get())
     d_length = d_length_select.get()
@@ -3042,6 +3089,9 @@ click_option_Zoom_btn = tk.Radiobutton(right_frame, text='Zoom', variable=click_
 click_option_Deriv_btn = tk.Radiobutton(right_frame, text='Deriv.', variable=click_option, value=2, command=lambda: click_option_handler(click_option.get()))
 click_option_Div_btn = tk.Radiobutton(right_frame, text='Div.', variable=click_option, value=3, command=lambda: click_option_handler(click_option.get()))
 click_option_Curl_btn = tk.Radiobutton(right_frame, text='Curl', variable=click_option, value=4, command=lambda: click_option_handler(click_option.get()))
+click_option_Deriv_btn.configure(state=tk.DISABLED)
+click_option_Div_btn.configure(state=tk.DISABLED)
+click_option_Curl_btn.configure(state=tk.DISABLED)
 click_option_Tools_btn.grid(row=1, column=0)
 click_option_Zoom_btn.grid(row=1, column=1)
 click_option_Deriv_btn.grid(row=1, column=2)
@@ -3076,18 +3126,6 @@ ascale_label = tk.Label(right_frame, text='Toggle Autoscaling:')
 ascale_label.grid(row=6, column=0)
 ascale_toggle = tk.Button(right_frame, image=toggle_image_off, bd=0, command=scale_toggle_response)
 ascale_toggle.grid(row=6, column=1, pady=5)
-
-# Step function - for singularities
-#def step(a):
-#    rows = len(a[:,0])
-#    columns = len(a[0,:])
-#    for i in range(rows):  
-#        for j in range(columns):
-#            if -1 < a[i,j] < 1:
-#                a[i,j] = 0
-#            else:
-#                a[i,j] = 1
-#    return a
 
 
 '''
@@ -3140,12 +3178,14 @@ set up all in BOTTOM FRAME
 
 
 # define entry boxes for the field equations in x and y
-tk.Label(bot_frame, text='x component').grid(row=1, column=0)
+component_x_entry_label = tk.Label(bot_frame, text='dx component')
+component_x_entry_label.grid(row=1, column=0)
 x_comp_entry = tk.Entry(bot_frame, width=20, borderwidth=2)
 x_comp_entry.grid(row=2, column=0)
 x_comp_entry.insert(0, 'y*sin(x)')
 
-tk.Label(bot_frame, text='y component').grid(row=1, column=1)
+component_y_entry_label = tk.Label(bot_frame, text='dy component')
+component_y_entry_label.grid(row=1, column=1)
 y_comp_entry = tk.Entry(bot_frame, width=20, borderwidth=2)
 y_comp_entry.grid(row=2, column=1)
 y_comp_entry.insert(0, '-x*cos(y)')
@@ -3159,7 +3199,7 @@ string_y = str(y_comp_entry.get())
 field_select = tk.StringVar()
 field_select.set(field_name_list[0])
 
-field_select_drop_label = tk.Label(bot_frame, text='Select Pre-Defined Field:')
+field_select_drop_label = tk.Label(bot_frame, text='Select Pre-Defined 1-Form:')
 field_select_drop_label.grid(row=3, column=0)
 
 field_select_drop = ttk.Combobox(bot_frame, value=field_name_list, width=40)
@@ -3209,6 +3249,11 @@ LI_shape_instruction = tk.Label(LI_frame, text='Select what to draw:')
 LI_shape_instruction.grid(row=4, column=0)
 LI_shape_drop = tk.OptionMenu(LI_frame, LI_shape_select, *LI_shape_list, command=LI_shape_select_response)
 LI_shape_drop.grid(row=4, column=1)
+
+
+# input the radiobuttons for arrows, stacks or both again here
+arrow_btn = tk.Radiobutton(LI_frame, text='arrow', variable=tensor, value=1, command=lambda: vect_type_response(tensor.get())).grid(row=7, column=1)
+stack_btn = tk.Radiobutton(LI_frame, text='stack', variable=tensor, value=0, command=lambda: vect_type_response(tensor.get())).grid(row=7, column=2)
 
 
 
