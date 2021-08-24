@@ -2663,9 +2663,13 @@ def Hodge_1_form_response():
     x_comp_entry.insert(0, H[1])
     y_comp_entry.insert(0, H[2])
     
+    form_2_entry.configure(bg='#FFFFFF')
+    x_comp_entry.configure(bg='#C0F6BB')
+    y_comp_entry.configure(bg='#C0F6BB')
+
     arrows = False
     stacks = True
-    stack_plot(xg, yg, main_axis, v, u, s_max, L, pt_den, 0.05, arrows, stacks, orientation, scale, w_head, h_head, 0) 
+    stack_plot(xg, yg, main_axis, v, u, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0) 
     
     canvas.draw()
     
@@ -2689,6 +2693,10 @@ def Hodge_2_form_response():
     
     CS = main_axis.contour(contour_x_grid, contour_y_grid, zero_form, 15)
     main_axis.clabel(CS, inline=True, fontsize=7)
+    
+    form_2_entry.configure(bg='#FFFFFF')
+    x_comp_entry.configure(bg='#FFFFFF')
+    y_comp_entry.configure(bg='#FFFFFF')
     
     canvas.draw()
 
