@@ -432,7 +432,7 @@ R3_use_track = 0
 
 # define a function to take care of tab changes
 def tab_selection(event):
-    global x_m, y_m, R3_use_track, click_opt_int
+    global x_m, y_m, R3_use_track, click_opt_int, tab_text
     global fract, form_2, notebook_bottom, m
     global expressions, coords, form_2_str, form_2_eq, form_2_sgn
     # get tab that was selected as text
@@ -460,7 +460,7 @@ def tab_selection(event):
         PLOT_btn['state'] = tk.NORMAL
         polar_grid_plot_btn['state'] = tk.NORMAL
     if tab_text == 'Line Integrals':
-        global toolbar, LI_coord, LI_total, LI_shape_select, tensor
+        global toolbar, LI_coord, LI_total, LI_shape_select, tensor, click_opt_int
         x_m = None
         y_m = None
         fig.canvas.draw()
@@ -478,7 +478,8 @@ def tab_selection(event):
         toolbar.children['!button4'].pack_forget()
         toolbar.children['!button5'].pack_forget()
         # set variable for mouse to respond to integrals in new tab
-        click_opt_int = 5
+        #click_opt_int = 5
+        LI_selected = True
         # chenage fract to a better one for 1-forms
         fract = 0.05
         # deal with consistancy if both was initially selected
@@ -984,10 +985,12 @@ def on_key_press(event):
     # respond with only toolbar actions when only tools are to be used
     if click_opt_int == 0:
         key_press_handler(event, canvas, toolbar)
+        
     # when the derivative option is selected, cerry out the derivative when clicked
     elif 0 < click_opt_int < 5:
         deriv_calc(x_m,y_m)
-    elif click_opt_int == 5:
+        
+    if tab_text == 'Line Integrals':
         if LI_shape_select.get() == 'Polygon':
             # Store the coordinates of the click in list
             LI_coord.append([x_m, y_m])
@@ -3337,8 +3340,6 @@ LI_shape_drop.grid(row=4, column=1)
 # input the radiobuttons for arrows, stacks or both again here
 arrow_btn = tk.Radiobutton(LI_frame, text='arrow', variable=tensor, value=1, command=lambda: vect_type_response(tensor.get())).grid(row=7, column=1)
 stack_btn = tk.Radiobutton(LI_frame, text='stack', variable=tensor, value=0, command=lambda: vect_type_response(tensor.get())).grid(row=7, column=2)
-
-
 
 '''
 
