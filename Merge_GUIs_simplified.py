@@ -1,5 +1,5 @@
 # Merging all files with simplifications, no blocks, no splitting options
-# for 2 forms.
+# for 2-forms.
 
 #%% Import Modules
 import timeit
@@ -20,7 +20,7 @@ from matplotlib import patches as patch
 
 # input many numpy functions to deal with user input
 from numpy import sin, cos, tan, sqrt, log, arctan, arcsin, arccos, tanh
-from numpy import sinh, cosh, arcsinh, arccosh, arctanh, exp, pi
+from numpy import sinh, cosh, arcsinh, arccosh, arctanh, exp, pi, e
 
 # %% VFA GUI
 
@@ -88,9 +88,9 @@ def update_variables(r3_check=0):
         zero_field = np.zeros(np.shape(xg))
         # define the unit field
         field_unit = np.ones(np.shape(xg))
-        # get 2 form to update too
+        # get 2-form to update too
         form_2 = eval(form_2_eq)
-        # and get the signs of the 2 form
+        # and get the signs of the 2-form
         form_2_sgn = np.sign(form_2)
     else:
         x = np.linspace(-L, L, pt_den)
@@ -101,9 +101,9 @@ def update_variables(r3_check=0):
         zero_field = np.zeros(np.shape(xg))
         # define the unit field
         field_unit = np.ones(np.shape(xg))
-        # get 2 form to update too
+        # get 2-form to update too
         #form_2 = eval(form_2_eq)
-        # and get the signs of the 2 form
+        # and get the signs of the 2-form
         #form_2_sgn = np.sign(form_2)
 
 
@@ -369,7 +369,6 @@ def format_eq(string, LI=0, singular_ty=0, i=0, j=0):
     # where there are special functions, replace them with library directions
     string = string.replace('^', '**')
     string = string.replace('ln', 'log')
-    string = string.replace('e**', 'exp')
     return string
 
 
@@ -415,7 +414,7 @@ def eq_to_comps(string_x, string_y, xg, yg, check_2_frm=0):
     return u, v
 
 
-# define a function that will take care of constant and zero 2 forms
+# define a function that will take care of constant and zero 2-forms
 def form_2_constant_correction(form_2_eq):
     # want to check if it contains x or y and if not, make the shape correct
     # without using eq_to_comps becuase we do not change it to any components
@@ -451,7 +450,7 @@ def tab_selection(event):
         form_2_eq = format_eq(form_2_str)
         form_2 = eval(form_2_eq)
         form_2_sgn = np.sign(form_2)
-        # 2 form was returned to defualt on R2 so put that in the entry box
+        # 2-form was returned to defualt on R2 so put that in the entry box
         form_2_entry.delete(0, 'end')
         form_2_entry.insert(0, form_2_str)
         # restore the fields input frame
@@ -480,7 +479,7 @@ def tab_selection(event):
         toolbar.children['!button5'].pack_forget()
         # set variable for mouse to respond to integrals in new tab
         click_opt_int = 5
-        # chenage fract to a better one for 1 forms
+        # chenage fract to a better one for 1-forms
         fract = 0.05
         # return the option to default
         LI_shape_select.set(LI_shape_list[0])
@@ -497,7 +496,7 @@ def tab_selection(event):
         click_opt_int = 0
         click_option.set(0)
         click_option_handler(click_option.get())
-        # chenage fract to a better one for 1 forms
+        # chenage fract to a better one for 1-forms
         fract = 0.05
         # define x, y and z values
         # restart the plot, in case calculus code was used last
@@ -510,7 +509,7 @@ def tab_selection(event):
         main_axis.clear()
         # get globals form entry boxes
         update_variables()
-        # from these, establish the new fract, approperiate for 2 forms
+        # from these, establish the new fract, approperiate for 2-forms
         fract = 2/((pt_den-1))
         # put the initial plot onto the canvas
         form_2_components_plot(xg, yg, form_2/2, zero_field, form_2_sgn, s_max, L, fract, colour_str, 2)
@@ -532,7 +531,7 @@ def tab_selection(event):
         main_axis.clear()
         # read inpout variables and change them globally
         update_variables(1)
-        # from these, establish the new fract, approperiate for 2 forms
+        # from these, establish the new fract, approperiate for 2-forms
         fract = 2/((pt_den-1))
         # set dimensionality
         m = 3
@@ -557,7 +556,7 @@ def tab_selection(event):
         expressions = np.array([sympy_expr_x, sympy_expr_y, sympy_expr_z])
         # set 3D coords for sympy
         coords = ['x', 'y', 'z']
-        # from these, use the find_2_form function to get the 2 form
+        # from these, use the find_2_form function to get the 2-form
         form_2 = find_2_form(expressions, coords, pt_den, m)
         # get it's string
         form_2_str_dxdy = str(simplify(str(unformat(result[0][0]))))
@@ -585,7 +584,7 @@ def tab_selection(event):
         form_2_components_plot_3(xg, yg, h_index, axis_view, F_xy_x, zero_field, s_max, L, pt_den, fract, colour_str, 2)
         form_2_components_plot_3(xg, yg, h_index, axis_view, zero_field, F_xy_y, s_max, L, pt_den, fract, colour_str, 2)
         canvas.draw()
-        # into the entry boxes for 2 forms, but the result down
+        # into the entry boxes for 2-forms, but the result down
         Entry_2_form_R3_dxdy.delete(0, 'end')
         Entry_2_form_R3_dxdz.delete(0, 'end')
         Entry_2_form_R3_dydz.delete(0, 'end')
@@ -609,7 +608,6 @@ def tab_selection(event):
             axis_height_txt.configure(text=str(round(eval(hvalue_string), 2)))
             # show warning about that
             tk.messagebox.showwarning('INDEX ERROR', 'you selected a value in slider that might no longer be avalaible, it has been changed avoid errors')
-        
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -839,9 +837,9 @@ ratio1 = 0
 ratio2 = 0
 
 
-''' DEFINE CALCULUS PARAMETERS, 2 forms and R3 stuff '''
+''' DEFINE CALCULUS PARAMETERS, 2-forms and R3 stuff '''
 
-# set up initial strings for 2 forms window to display, for it to save properly after
+# set up initial strings for 2-forms window to display, for it to save properly after
 to_wedge_x_1_str = ''
 to_wedge_y_1_str = ''
 to_wedge_x_2_str = ''
@@ -864,21 +862,21 @@ stacks = True
 # set the dimensionality
 m = 2
 
-# start the tab with a 2 form being supplied and plotted by blocks only
+# start the tab with a 2-form being supplied and plotted by blocks only
 # define intiial variables for these:
-# define the initial 2 form, in terms of a string, equation and numerically
+# define the initial 2-form, in terms of a string, equation and numerically
 form_2_str = 'x*y**2'  # dx^dy component
 form_2_eq = format_eq(form_2_str)
 form_2 = eval(form_2_eq)
 
-# get the signs of the 2 form
+# get the signs of the 2-form
 form_2_sgn = np.sign(form_2)
 
 ''' initial variables for operations completed by the calculus GUI '''
 
 # ##### GENERAL ONES FOR STACKS #######
 
-# define colours to use for 2 form plots with components
+# define colours to use for 2-form plots with components
 # first string defines colour for positive (ccw), second for negative (cw)
 # last one is an in case, for when the magnitude is exactly zero.
 colour_str = ['red', 'blue', 'grey']
@@ -906,7 +904,7 @@ sympy_expr_y = parse_expr(string_y, evaluate=False)
 expressions = np.array([sympy_expr_x, sympy_expr_y])
 # will use sympy partial derrivatives on these, as to get a 2-form on R2:
 # need to differentiate each component w.r.t the coordinates that it's
-# elementary 1 form does not contain.
+# elementary 1-form does not contain.
 
 # set up an array of coordinates that need to be used (in standard order)
 coords = ['x', 'y']
@@ -1072,6 +1070,8 @@ def LI_shape_select_response(selected_shape):
         # restart the plot and the integral values
         LI_restart()
         # get rid of grid specifications also
+        # no need for try and except, frame opens with these, these will
+        # always be there
         grid_LI_poly_label.destroy()
         grid_sep_poly_entry.destroy()
         submit_poly_sep_grid.destroy()
@@ -1111,8 +1111,9 @@ def LI_shape_select_response(selected_shape):
             Radius_LI_label.destroy()
             Radius_LI_circ_entry.destroy()
             orient_int_btn.destroy()
-        except UnboundLocalError:  
+        except (UnboundLocalError, NameError):  
             pass
+
 
 # Compute line integral for circles
 def line_int_circ(cent, R, N, u_str, v_str, orient_int):
@@ -1910,11 +1911,11 @@ def singular_drop_response(var):
     return
 
 
-'''  2 forms on R2 function from the other code '''
+'''  2-forms on R2 function from the other code '''
 
 
 # define a function that will plot stack components, coloured
-# as per the orientation of the 2 form at that grid point
+# as per the orientation of the 2-form at that grid point
 def form_2_components_plot(grid_x, grid_y, u, v, form_2_sgn, s_max, L, fract, colour_str, arrowheads=False, w_head=1/8, h_head=1/4, s_min=2):
     global s_L
     # get axis lengths:
@@ -1944,7 +1945,7 @@ def form_2_components_plot(grid_x, grid_y, u, v, form_2_sgn, s_max, L, fract, co
             # set to zero points that are not defined or inf
             if isnan(mag[i, j]) is True or abs(mag[i, j]) == np.inf  or abs(mag[i, j]) > 1e15:
                 # colour this region as a red dot, not square to
-                # not confuse with nigh mag 2 forms in stacks. or worse, in
+                # not confuse with nigh mag 2-forms in stacks. or worse, in
                 # blocks
                 circ = patch.Circle((grid_x[i, j], grid_y[i, j]), L*fract/3, color='red')
                 main_axis.add_patch(circ)
@@ -2089,7 +2090,7 @@ def form_2_components_plot(grid_x, grid_y, u, v, form_2_sgn, s_max, L, fract, co
                 pass
 
 
-# define a function that will find the 2 form from given expressions
+# define a function that will find the 2-form from given expressions
 # in a given number of dimensions and in terms of given coordinate symbols
 def find_2_form(expressions, coords, pt_den, m=2):
     global ext_ds, result
@@ -2121,12 +2122,12 @@ def find_2_form(expressions, coords, pt_den, m=2):
                 ext_ds[comp_index, coord_index] = ' + ' + str(ext_ds[comp_index, coord_index])
     
     '''
-    merge the results into a 2 form (for 2-form on R^2, the result is a single component (dx^xy))
+    merge the results into a 2-form (for 2-form on R^2, the result is a single component (dx^xy))
     do so by adding opposite elements along the diagonal ( / ) components of ext_ds
     this  includes taking elemets with switched i and j
     '''
     
-    # set up a variable to count pairs (pairs because we are forming 2 forms):
+    # set up a variable to count pairs (pairs because we are forming 2-forms):
     pair = 0
     
     # loop over opposing elements (matching elementary 2-forms)
@@ -2153,7 +2154,7 @@ def find_2_form(expressions, coords, pt_den, m=2):
         # format the result to be 'python understood' to be able to use the eval()
         result[d, 0] = format_eq(result[d, 0])
     
-    # set up a vector to store the 2 form numerically, from xg and yg
+    # set up a vector to store the 2-form numerically, from xg and yg
     # Note - need pt_den m times.
     if m == 2:
         form_2 = np.empty((1, pt_den, pt_den))
@@ -2171,22 +2172,22 @@ Define response functions to GUI interactions
 
 '''
 
-# gets 2 form from entry box and plots it as coloured blocks only
+# gets 2-form from entry box and plots it as coloured blocks only
 def form_2_response():
     global form_2_str, form_2_eq, form_2_sgn, form_2, comp_x, comp_y, u, v, fract
     # get globals
     update_variables()
-    # from these, establish the new fract, approperiate for 2 forms
+    # from these, establish the new fract, approperiate for 2-forms
     fract = 2/((pt_den-1))
-    # get the input 2 form
+    # get the input 2-form
     form_2_str = str(simplify(form_2_entry.get()))
     # format it to be python understood
     form_2_eq = format_eq(form_2_str)
-    # check against constant and zero 2 forms being supplied
+    # check against constant and zero 2-forms being supplied
     form_2_eq = form_2_constant_correction(form_2_eq)
     # get the numerical evaluation of it
     form_2 = eval(form_2_eq)
-    # get the signs of thsi new 2 form
+    # get the signs of thsi new 2-form
     form_2_sgn = np.sign(form_2)
     # clear the current plot
     main_axis.clear()
@@ -2196,10 +2197,10 @@ def form_2_response():
     form_2_components_plot(xg, yg, zero_field, form_2/2, form_2_sgn, s_max, L, fract, colour_str)
     # display the new plot
     canvas.draw()
-    # display a background green on the 2 form entry to show that
+    # display a background green on the 2-form entry to show that
     # this entry is being displayed now.
     form_2_entry.configure(bg='#C0F6BB')
-    # undo it for 1 forms
+    # undo it for 1-forms
     x_comp_entry.configure(bg='#FFFFFF')
     y_comp_entry.configure(bg='#FFFFFF')
     # update the label to remove the zero form if int deriv of both was used
@@ -2208,38 +2209,42 @@ def form_2_response():
 
 # plots the vetor field with stacks only
 def form_1_stacks_response():
-    global u, v
+    global u, v, fract
     # clear the current axis
     main_axis.clear()
-    # get the supplied 1 forms from entry boxes:
+    # get input values
+    update_variables()
+    # get the supplied 1-forms from entry boxes:
     x_comp_str = str(simplify(x_comp_entry.get()))
     y_comp_str = str(simplify(y_comp_entry.get()))
     # take all these values, and the input from field component bnoxes to set up the field:
     u, v = eq_to_comps(x_comp_str, y_comp_str, xg, yg)
+    # redefine better stack size for 1 forms
+    fract = 0.05
     # plot the new field
     stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract)
     # put it onto the screen
     canvas.draw()
-    # display a background green on 1 form components and get rid of the 2 form
+    # display a background green on 1-form components and get rid of the 2-form
     # colour, to show which one is being plotted
     x_comp_entry.configure(bg='#C0F6BB')
     y_comp_entry.configure(bg='#C0F6BB')
-    # get rid of the 2 form colour:
+    # get rid of the 2-form colour:
     form_2_entry.configure(bg='#FFFFFF')
     # update the label to remove the zero form if int deriv of both was used
     Label_zero_form.configure(text='')
 
 
-# performs the interior derivative on supplied 2 form and plots it as stacks
-# for 2 form only, not including the 1 form.
+# performs the interior derivative on supplied 2-form and plots it as stacks
+# for 2-form only, not including the 1-form.
 # if combined, use different fucntion.
 def Int_deriv_2_form():
     global u, v, u_str, v_str, vector_ex_str, vector_ey_str, vector_ex_eq, vector_ey_eq, vector_ex, vector_ey
     global form_2, form_2_eq, form_2_sgn
     # get globals
     update_variables()
-    # from these, establish the new fract, approperiate for 2 forms
-    fract = 2/((pt_den-1))
+    # from these, establish the new fract, approperiate for 1-forms
+    fract = 0.05
     # take the supplied componments and save them globally
     vector_ex_str = str(simplify(int_vect_ex_entry.get()))
     vector_ey_str = str(simplify(int_vect_ey_entry.get()))
@@ -2252,18 +2257,18 @@ def Int_deriv_2_form():
     # find numerical evaluation of it
     vector_ex = eval(vector_ex_eq)
     vector_ey = eval(vector_ey_eq)
-    # get the input 2 form
+    # get the input 2-form
     form_2_str = str(simplify(form_2_entry.get()))
     # format it to be python understood
     form_2_eq = format_eq(form_2_str)
-    # check against constant and zero 2 forms being supplied
+    # check against constant and zero 2-forms being supplied
     form_2_eq = form_2_constant_correction(form_2_eq)
     # get the numerical evaluation of it
     form_2 = eval(form_2_eq)
-    # get the signs of this new 2 form
+    # get the signs of this new 2-form
     form_2_sgn = np.sign(form_2)
     # using interior product, get the u and v (dx and dy) components
-    # of the resulting 1 form
+    # of the resulting 1-form
     u = -form_2 * vector_ey
     v = form_2 * vector_ex
     # to be usable in ext_deriv, define strings of these variables
@@ -2274,7 +2279,7 @@ def Int_deriv_2_form():
     stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, s_min=1)
 
 
-# define a function that will find the interior derivative of a given 1 form
+# define a function that will find the interior derivative of a given 1-form
 def Int_deriv_1_form():
     global zero_form_str, zero_form, vector_ex_str, vector_ey_str, vector_ex_eq
     global vector_ey_eq, vector_ex, vector_ey, x_comp, y_comp, x_comp_eq, y_comp_eq
@@ -2292,7 +2297,7 @@ def Int_deriv_1_form():
     # find numerical evaluation of it
     vector_ex = eval(vector_ex_eq)
     vector_ey = eval(vector_ey_eq)
-    # get the input 1 forms
+    # get the input 1-forms
     x_comp_str = str(simplify(x_comp_entry.get()))
     y_comp_str = str(simplify(y_comp_entry.get()))
     # format them to be python understood
@@ -2327,7 +2332,7 @@ def Int_deriv_1_form():
     zero_form_str = zero_form_str.replace('contour_y_grid', 'y')
 
 
-# define a function that will respond to plotting the 2 form only
+# define a function that will respond to plotting the 2-form only
 def Int_deriv_22_form():
     # clear the axis
     main_axis.clear()
@@ -2337,46 +2342,46 @@ def Int_deriv_22_form():
     canvas.draw()
     # update the label to remove the zero form if int deriv of both was used
     Label_zero_form.configure(text='')
-    # change the entry box 1 form to the calculated ones
+    # change the entry box 1-form to the calculated ones
     x_comp_entry.delete(0, 'end')
     y_comp_entry.delete(0, 'end')
     x_comp_entry.insert(0, u_str)
     y_comp_entry.insert(0, v_str)
-    # display that the 1 form is now being plotted, therefore get rid of
-    # 2 form colour and show 1 form components in green:
+    # display that the 1-form is now being plotted, therefore get rid of
+    # 2-form colour and show 1-form components in green:
     x_comp_entry.configure(bg='#C0F6BB')
     y_comp_entry.configure(bg='#C0F6BB')
     form_2_entry.configure(bg='#FFFFFF')
 
 
-# define a function that will find the interior derivative of both the 2 form
-# and a 1 form, merged.
+# define a function that will find the interior derivative of both the 2-form
+# and a 1-form, merged.
 def Int_deriv_21_form():
     # clear the axis
     main_axis.clear()
-    # first call the function to plot a 2 form and plot it
+    # first call the function to plot a 2-form and plot it
     Int_deriv_2_form()
-    # then call the function that will do this for the 1 form
+    # then call the function that will do this for the 1-form
     # plot these together
     Int_deriv_1_form()
     # draw its result
     canvas.draw()
     # make a label for the found 0 form
     Label_zero_form.configure(text=zero_form_str)
-    # change the entry box 1 form to the calculated ones
+    # change the entry box 1-form to the calculated ones
     x_comp_entry.delete(0, 'end')
     y_comp_entry.delete(0, 'end')
     x_comp_entry.insert(0, u_str)
     y_comp_entry.insert(0, v_str)
-    # display that the 1 form is now being plotted, therefore get rid of
-    # 2 form colour and show 1 form components in green:
+    # display that the 1-form is now being plotted, therefore get rid of
+    # 2-form colour and show 1-form components in green:
     x_comp_entry.configure(bg='#C0F6BB')
     y_comp_entry.configure(bg='#C0F6BB')
     form_2_entry.configure(bg='#FFFFFF')
     return
 
 
-# Interior derivative response for 2 form only
+# Interior derivative response for 2-form only
 # asks to give vectors w.r.t to which perform iota.
 def Int_deriv_2_form_response(type_form):
     global int_vector_window, int_vect_ex_entry, int_vect_ey_entry
@@ -2393,11 +2398,11 @@ def Int_deriv_2_form_response(type_form):
     int_vect_ey_entry.insert(0, vector_ey_str)
     int_vect_ey_entry.grid(row=3, column=0)
     # define a button that will plot these
-    # for a 2 form only
+    # for a 2-form only
     if type_form == 2:
         int_vector_load_btn = tk.Button(int_vector_window, text='PLOT', padx=20, pady=10, command=Int_deriv_22_form)
         int_vector_load_btn.grid(row=4, column=0, pady=10)
-    # for 2 form with 1 form included:
+    # for 2-form with 1-form included:
     elif type_form == 1:
         int_vector_load_btn = tk.Button(int_vector_window, text='PLOT', padx=20, pady=10, command=Int_deriv_21_form)
         int_vector_load_btn.grid(row=4, column=0, pady=10)
@@ -2406,19 +2411,19 @@ def Int_deriv_2_form_response(type_form):
 # define a function that will respond to the made choice reg. int deriv.
 def int_deriv_choice(var):
     if var == 0:
-        # only use 2 form, therefore call previous functions for this
+        # only use 2-form, therefore call previous functions for this
         Int_deriv_2_form_response(2)
     elif var == 1:
-        # call the function, but make it deal with 2 form together with the
-        # 1 form
+        # call the function, but make it deal with 2-form together with the
+        # 1-form
         Int_deriv_2_form_response(1)
     # close the previous window
     int_option_window.destroy()
 
 
 # define response to int deriv button
-# shows window to select if should just use 2 form
-# or a comnination of 2 form and 1 form
+# shows window to select if should just use 2-form
+# or a comnination of 2-form and 1-form
 def Int_deriv_response():
     global int_option_window
     # show new window with label and two options.
@@ -2426,9 +2431,9 @@ def Int_deriv_response():
     int_option_window.title('input a vector for the interior derivative')
     int_option_window.geometry('425x200')
     # define Label
-    tk.Label(int_option_window, text='Perform w.r.t 2 form only or combine given 2 form and 1 form ?').grid(row=0, column=0, columnspan=2)
+    tk.Label(int_option_window, text='Perform w.r.t 2-form only or combine given 2-form and 1-form ?').grid(row=0, column=0, columnspan=2)
     # define response buttons to the stated question
-    form_2_only_btn = tk.Button(int_option_window, text='2 form', padx=30, pady=30, command=lambda: int_deriv_choice(0))
+    form_2_only_btn = tk.Button(int_option_window, text='2-form', padx=30, pady=30, command=lambda: int_deriv_choice(0))
     from_2_and_1_btn = tk.Button(int_option_window, text='Both', padx=30, pady=30, command=lambda: int_deriv_choice(1))
     form_2_only_btn.grid(row=1, column=0, pady=20)
     from_2_and_1_btn.grid(row=1, column=1, pady=20)
@@ -2439,7 +2444,7 @@ def Ext_deriv_response():
     global form_2, form_2_str, form_2_sgn
     # get globals
     update_variables()
-    # from these, establish the new fract, approperiate for 2 forms
+    # from these, establish the new fract, approperiate for 2-forms
     fract = 2/((pt_den-1))
     # celar current axis
     main_axis.clear()
@@ -2453,11 +2458,11 @@ def Ext_deriv_response():
     expressions = np.array([sympy_expr_x, sympy_expr_y])
     # set up an array of coordinates that need to be used (in standard order)
     coords = ['x', 'y']
-    # from these, use the find_2_form function to get the 2 form
+    # from these, use the find_2_form function to get the 2-form
     form_2 = find_2_form(expressions, coords, pt_den, m)[0]
-    # get the signs of the 2 form
+    # get the signs of the 2-form
     form_2_sgn = np.sign(form_2)
-    # get the string of this new 2 form to use it in int deriv
+    # get the string of this new 2-form to use it in int deriv
     # also put it into the entry
     form_2_str = str(simplify(str(unformat(result[0][0]))))
     # unformat it to display in the entry box, this way it does not
@@ -2472,23 +2477,23 @@ def Ext_deriv_response():
     form_2_components_plot(xg, yg, zero_field, form_2/2, form_2_sgn, s_max, L, fract, colour_str)
     # display the new plot
     canvas.draw()
-    # display a background green on the 2 form entry to show that
+    # display a background green on the 2-form entry to show that
     # this entry is being displayed now.
     form_2_entry.configure(bg='#C0F6BB')
-    # undo it for 1 forms
+    # undo it for 1-forms
     x_comp_entry.configure(bg='#FFFFFF')
     y_comp_entry.configure(bg='#FFFFFF')
     # update the label to remove the zero form if int deriv of both was used
     Label_zero_form.configure(text='')
 
 
-# define a function that will wedge two 1 forms and plot them
+# define a function that will wedge two 1-forms and plot them
 def wedge_product_R2():
     global to_wedge_x_1_str, to_wedge_y_1_str, to_wedge_x_2_str, to_wedge_y_2_str
     global form_2_str, form_2_eq, form_2, form_2_sgn
     # get globals
     update_variables()
-    # from these, establish the new fract, approperiate for 2 forms
+    # from these, establish the new fract, approperiate for 2-forms
     fract = 2/((pt_den-1))
     # first, get all entries out, save as string for these to display when
     # window is opened again
@@ -2498,22 +2503,22 @@ def wedge_product_R2():
     to_wedge_y_2_str = str(simplify(str(to_wedge_y_2_entry.get())))
     # clear the axis:
     main_axis.clear()
-    # first, find the result of the 2 form
+    # first, find the result of the 2-form
     # this if, in terms of the above commented fields:
-    # 2 form = f*m - g*h
+    # 2-form = f*m - g*h
     # get it mathematically, as a string
     form_2_str = str(simplify( '(' + to_wedge_x_1_str + ')*(' +  to_wedge_y_2_str + ')' + ' - (' + to_wedge_y_1_str + ')*(' +  to_wedge_x_2_str + ')' ))
-    # put it into the entry box for 2 forms
+    # put it into the entry box for 2-forms
     form_2_entry.delete(0, 'end')
     form_2_entry.insert(0, form_2_str)
     # plot these as stacks, with no arrowheads, on top of one another.
      # format it to be python understood
     form_2_eq = format_eq(form_2_str)
-    # check against constant and zero 2 forms being supplied
+    # check against constant and zero 2-forms being supplied
     form_2_eq = form_2_constant_correction(form_2_eq)
     # get the numerical evaluation of it
     form_2 = eval(form_2_eq)
-    # get the signs of thsi new 2 form
+    # get the signs of thsi new 2-form
     form_2_sgn = np.sign(form_2)
     # use plotting stacks to display these
     # ALWAYS HALF AND HALF SPLITTING NOW
@@ -2521,24 +2526,24 @@ def wedge_product_R2():
     form_2_components_plot(xg, yg, zero_field, form_2/2, form_2_sgn, s_max, L, fract, colour_str)
     # display the new plot
     canvas.draw()
-    # display a background green on the 2 form entry to show that
+    # display a background green on the 2-form entry to show that
     # this entry is being displayed now.
     form_2_entry.configure(bg='#C0F6BB')
-    # undo it for 1 forms
+    # undo it for 1-forms
     x_comp_entry.configure(bg='#FFFFFF')
     y_comp_entry.configure(bg='#FFFFFF')
     # update the label to remove the zero form if int deriv of both was used
     Label_zero_form.configure(text='')
 
 
-# define a reponse function, opens new window where two 1 forms to be wedged can be entered
+# define a reponse function, opens new window where two 1-forms to be wedged can be entered
 def wedge_2_response():
     global wedge_2_window, to_wedge_x_1_entry, to_wedge_y_1_entry, to_wedge_x_2_entry, to_wedge_y_2_entry
     # open a titled new window
     wedge_2_window = tk.Toplevel()
-    wedge_2_window.title('input two 1 forms to wedge')
+    wedge_2_window.title('input two 1-forms to wedge')
     # define all entry boxes
-    tk.Label(wedge_2_window, text='first 1 form x component :').grid(row=0, column=0)
+    tk.Label(wedge_2_window, text='first 1-form x component :').grid(row=0, column=0)
     to_wedge_x_1_entry = tk.Entry(wedge_2_window, width=30, borderwidth=1)
     to_wedge_x_1_entry.insert(0, to_wedge_x_1_str)
     to_wedge_x_1_entry.grid(row=1, column=0)
@@ -2546,11 +2551,11 @@ def wedge_2_response():
     to_wedge_y_1_entry = tk.Entry(wedge_2_window, width=30, borderwidth=1)
     to_wedge_y_1_entry.insert(0, to_wedge_y_1_str)
     to_wedge_y_1_entry.grid(row=3, column=0)
-    tk.Label(wedge_2_window, text='second 1 form x component :').grid(row=4, column=0)
+    tk.Label(wedge_2_window, text='second 1-form x component :').grid(row=4, column=0)
     to_wedge_x_2_entry = tk.Entry(wedge_2_window, width=30, borderwidth=1)
     to_wedge_x_2_entry.insert(0, to_wedge_x_2_str)
     to_wedge_x_2_entry.grid(row=5, column=0)
-    tk.Label(wedge_2_window, text='second 1 form y component :').grid(row=6, column=0)
+    tk.Label(wedge_2_window, text='second 1-form y component :').grid(row=6, column=0)
     to_wedge_y_2_entry = tk.Entry(wedge_2_window, width=30, borderwidth=1)
     to_wedge_y_2_entry.insert(0, to_wedge_y_2_str)
     to_wedge_y_2_entry.grid(row=7, column=0)
@@ -2560,7 +2565,7 @@ def wedge_2_response():
 
 
 # define a fucntion that will respond to finding the Hodge dual of the given froms
-# 1 form or 2 form depending on chosen parameter  - to be implemented later
+# 1-form or 2-form depending on chosen parameter  - to be implemented later
 def Hodge_response():
     tk.messagebox.showwarning('Hodge error', 'This has not yet been implemented, await further updates')
 
@@ -2590,14 +2595,14 @@ def find_global_max(string):
 
 
 # define a function that will plot stack components, coloured
-# as per the orientation of the 2 form at that grid point
+# as per the orientation of the 2-form at that grid point
 def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L, pt_den, fract, colour_str, s_min=0):
     global s_L
     
     # depending on axis_view and h_index, get the planar u and v from the given
     # 3D ones and the grids sorted
     # Also
-    # get the 2 form signs and
+    # get the 2-form signs and
     # change the 2_form signs to just be in terms of the selected plane
     if axis_view == 'z':
         grid_x = grid_x[:, :, h_index]
@@ -2652,7 +2657,7 @@ def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L,
             # set to zero points that are not defined or inf
             if isnan(mag[i, j]) is True or abs(mag[i, j]) == np.inf  or abs(mag[i, j]) > 1e15:
                 # colour this region as a red dot, not square to
-                # not confuse with nigh mag 2 forms in stacks. or worse, in
+                # not confuse with nigh mag 2-forms in stacks. or worse, in
                 # blocks
                 circ = patch.Circle((grid_x[i, j], grid_y[i, j]), L*fract/3, color='red')
                 main_axis.add_patch(circ)
@@ -2806,7 +2811,7 @@ def form_1_to_2onR3():
         axis_height_txt.configure(text=str(round(eval(hvalue_string), 2)))
         # show warning about that
         tk.messagebox.showwarning('INDEX ERROR', 'you selected a value in slider that might no longer be avalaible, it has been changed avoid errors')
-    # from these, establish the new fract, approperiate for 2 forms
+    # from these, establish the new fract, approperiate for 2-forms
     fract = 2/((pt_den-1))
     # take the inputs from user into strings
     string_x = str(simplify(form_1_x_entry.get()))
@@ -2837,14 +2842,14 @@ def form_1_to_2onR3():
     F_yz_y, F_yz_z = eq_to_comps(eq_1_yz, eq_2_yz, xg, yg)
     # call the slide function to easily plot them depending on h and on axis_view
     slide()
-    # into the entry boxes for 2 forms, but the result down
+    # into the entry boxes for 2-forms, but the result down
     Entry_2_form_R3_dxdy.delete(0, 'end')
     Entry_2_form_R3_dxdz.delete(0, 'end')
     Entry_2_form_R3_dydz.delete(0, 'end')
     Entry_2_form_R3_dxdy.insert(0, str(form_2_str_dxdy))
     Entry_2_form_R3_dxdz.insert(0, str(form_2_str_dxdz))
     Entry_2_form_R3_dydz.insert(0, str(form_2_str_dydz))
-    # colour the 2 forms green to show that these display now
+    # colour the 2-forms green to show that these display now
     Entry_2_form_R3_dxdy.configure(bg='#C0F6BB')
     Entry_2_form_R3_dxdz.configure(bg='#C0F6BB')
     Entry_2_form_R3_dydz.configure(bg='#C0F6BB')
@@ -2921,7 +2926,7 @@ def view_response(view_var):
     canvas.draw()
 
 
-# define a fucntion that will plot 2 forms on R3 directly from user input
+# define a fucntion that will plot 2-forms on R3 directly from user input
 def form_2_R3_direct_plot():
     global max_global_dxdy, max_global_dxdz, max_global_dydz, F_xy_x, F_xy_y
     global F_xz_x, F_xz_z, F_yz_y, F_yz_z, form_2, form_2_sgn
@@ -2941,13 +2946,13 @@ def form_2_R3_direct_plot():
         axis_height_txt.configure(text=str(round(eval(hvalue_string), 2)))
         # show warning about that
         tk.messagebox.showwarning('INDEX ERROR', 'you selected a value in slider that might no longer be avalaible, it has been changed avoid errors')
-    # from these, establish the new fract, approperiate for 2 forms
+    # from these, establish the new fract, approperiate for 2-forms
     fract = 2/((pt_den-1))
     # get the strings from entry boxes
     form_2_str_dxdy = str(simplify(Entry_2_form_R3_dxdy.get()))
     form_2_str_dxdz = str(simplify(Entry_2_form_R3_dxdz.get()))
     form_2_str_dydz = str(simplify(Entry_2_form_R3_dydz.get()))
-    # from these, get the signs of the new 2 form for colours
+    # from these, get the signs of the new 2-form for colours
     form_2 = np.empty((3, pt_den, pt_den, pt_den))
     form_2[0, :, :, :] = eval(format_eq(form_2_str_dxdy))
     form_2[1, :, :, :] = eval(format_eq(form_2_str_dxdz))
@@ -2967,7 +2972,7 @@ def form_2_R3_direct_plot():
     F_yz_y, F_yz_z = eq_to_comps(eq_1_yz, eq_2_yz, xg, yg)
     # call the slide function to easily plot them depending on h and on axis_view
     slide()
-    # colour the 2 forms green to show that these display now
+    # colour the 2-forms green to show that these display now
     Entry_2_form_R3_dxdy.configure(bg='#C0F6BB')
     Entry_2_form_R3_dxdz.configure(bg='#C0F6BB')
     Entry_2_form_R3_dydz.configure(bg='#C0F6BB')
@@ -2975,7 +2980,6 @@ def form_2_R3_direct_plot():
     form_1_x_entry.configure(bg='#FFFFFF')
     form_1_y_entry.configure(bg='#FFFFFF')
     form_1_z_entry.configure(bg='#FFFFFF')
-
 
 
 # =============================================================================
@@ -3214,8 +3218,8 @@ DEFINE ALL WINDGETS IN CALCULUS TAB
 
 '''
 
-# define a window to supply the 2 form
-tk.Label(calculus_frame, text='2 form on R2').grid(row=0, column=1)
+# define a window to supply the 2-form
+tk.Label(calculus_frame, text='2-form on R2').grid(row=0, column=1)
 form_2_entry = tk.Entry(calculus_frame, width=20, borderwidth=2)
 form_2_entry.grid(row=0, column=0)
 form_2_entry.insert(0, form_2_str)
@@ -3229,14 +3233,14 @@ form_2_entry.configure(bg='#C0F6BB')
 Label_zero_form = tk.Label(calculus_frame, text='', fg='red')
 Label_zero_form.grid(row=3, column=0)
 
-# define a button to submit the supplied 2 form and plot it as blocks
-form_2_btn = tk.Button(calculus_frame, text='2 form plot', padx=3, pady=5, command=form_2_response)
+# define a button to submit the supplied 2-form and plot it as blocks
+form_2_btn = tk.Button(calculus_frame, text='2-form plot', padx=3, pady=5, command=form_2_response)
 form_2_btn.grid(row=1, column=0)
 
-# define a button that will just plot the 1 form
+# define a button that will just plot the 1-form
 # this will not be needed when its it merged with main GUI
 # as there will already be a plot button there
-form_1_stacks_btn = tk.Button(calculus_frame, text='1 form plot', padx=3, pady=5, command=form_1_stacks_response)
+form_1_stacks_btn = tk.Button(calculus_frame, text='1-form plot', padx=3, pady=5, command=form_1_stacks_response)
 form_1_stacks_btn.grid(row=2, column=0)
 
 # add a button to plot the interior derivative as superposing stack fields
@@ -3244,16 +3248,16 @@ INT_btn = tk.Button(calculus_frame, text='Int Deriv', padx=63, pady=10, command=
 INT_btn.grid(row=8, column=0)
 
 # define a button to plot the exterior derivative from given u and v
-# Note, it will get the 2 form first, then return back down
+# Note, it will get the 2-form first, then return back down
 # to a one form to avoid concellations
 # therefore, it will also just be one possible representation
 # not the only possible one
 EXT_int_btn = tk.Button(calculus_frame, text='Ext Deriv', padx=62, pady=10, command=Ext_deriv_response)
 EXT_int_btn.grid(row=9, column=0)
 
-# define a wedge product button that will let the user input TWO 1 forms
-# in a new window to be wedged to gice a 2 form
-wedge_btn = tk.Button(calculus_frame, text='wedge two 1 forms', padx=27, pady=10, command=wedge_2_response)
+# define a wedge product button that will let the user input TWO 1-forms
+# in a new window to be wedged to gice a 2-form
+wedge_btn = tk.Button(calculus_frame, text='wedge two 1-forms', padx=27, pady=10, command=wedge_2_response)
 wedge_btn.grid(row=10, column=0)
 
 # define ab utton that will Find the Hodge dual
@@ -3301,20 +3305,20 @@ field_input_frame.grid(row=0, column=1)
 
 
 # define a button that will let the user chose the splitting option
-# for 2 forms plotted as stacks.
-# define entry boxes for the three 1 forms that are being plotted
-# define entries for a 1 form
-tk.Label(field_input_frame, text='dx comp. 1 form').grid(row=1, column=0)
+# for 2-forms plotted as stacks.
+# define entry boxes for the three 1-forms that are being plotted
+# define entries for a 1-form
+tk.Label(field_input_frame, text='dx comp. 1-form').grid(row=1, column=0)
 form_1_x_entry = tk.Entry(field_input_frame, width=20, borderwidth=2)
 form_1_x_entry.grid(row=2, column=0, columnspan=2)
 form_1_x_entry.insert(0, string_x)
 
-tk.Label(field_input_frame, text='dy comp. 1 form').grid(row=3, column=0)
+tk.Label(field_input_frame, text='dy comp. 1-form').grid(row=3, column=0)
 form_1_y_entry = tk.Entry(field_input_frame, width=20, borderwidth=2)
 form_1_y_entry.grid(row=4, column=0, columnspan=2)
 form_1_y_entry.insert(0, string_y)
 
-tk.Label(field_input_frame, text='dz comp. 1 form').grid(row=5, column=0)
+tk.Label(field_input_frame, text='dz comp. 1-form').grid(row=5, column=0)
 form_1_z_entry = tk.Entry(field_input_frame, width=20, borderwidth=2)
 form_1_z_entry.grid(row=6, column=0, columnspan=2)
 form_1_z_entry.insert(0, string_z)
@@ -3323,19 +3327,19 @@ form_1_z_entry.insert(0, string_z)
 form_2_from_1_R3_btn = tk.Button(field_input_frame, text='Ext. Deriv. R3', padx=3, pady=5, command=form_1_to_2onR3)
 form_2_from_1_R3_btn.grid(row=7, column=0, columnspan=2)
 
-# define a frame for R3 2 form results and input by the user
+# define a frame for R3 2-form results and input by the user
 # It will be filled when R3 is opened (in tab_selection)
 # as it needs 'result' to fill.
-form_2_frame = tk.LabelFrame(r3_frame, text='2 form frame', padx=32, pady=5)
+form_2_frame = tk.LabelFrame(r3_frame, text='2-form frame', padx=32, pady=5)
 form_2_frame.grid(row=2, column=0, columnspan=2)
  
 
-# set up the elemental 2 form labels there
+# set up the elemental 2-form labels there
 Label_2_form_xy = tk.Label(form_2_frame, text='  dx^dy').grid(row=0, column=1)
 Label_2_form_xz = tk.Label(form_2_frame, text='  dx^dz').grid(row=1, column=1)
 Label_2_form_yz = tk.Label(form_2_frame, text='  dy^dz').grid(row=2, column=1)
 
-# set up entry boxes for 2 forms, keep them empty for now
+# set up entry boxes for 2-forms, keep them empty for now
 # they will fill when R3 is opened (look in tab_selection())
 Entry_2_form_R3_dxdy = tk.Entry(form_2_frame, width=20)
 Entry_2_form_R3_dxdy.grid(row=0, column=0)
@@ -3345,8 +3349,8 @@ Entry_2_form_R3_dydz = tk.Entry(form_2_frame, width=20)
 Entry_2_form_R3_dydz.grid(row=2, column=0)
 
 
-# define a button that will plot the supplied 2 forms directly
-form_2_R3_direct_plot_btn = tk.Button(form_2_frame, text='PLOT 2 form', padx=10, command=form_2_R3_direct_plot)
+# define a button that will plot the supplied 2-forms directly
+form_2_R3_direct_plot_btn = tk.Button(form_2_frame, text='PLOT 2-form', padx=10, command=form_2_R3_direct_plot)
 form_2_R3_direct_plot_btn.grid(row=3, column=0, columnspan=2)
 
 # return time to run
