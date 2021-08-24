@@ -1143,13 +1143,13 @@ def LI_shape_select_response(selected_shape):
         main_axis.grid(True)
         # add an entry so the user can choose what grid they want
         # by choosing grid lines separation
-        grid_LI_poly_label = tk.Label(LI_frame, text='grid separation:')
+        grid_LI_poly_label = tk.Label(LI_frame, text='Grid Separation:')
         grid_LI_poly_label.grid(row=5, column=0)
         grid_sep_poly_entry = tk.Entry(LI_frame, width=10)
         grid_sep_poly_entry.grid(row=5, column=1)
         grid_sep_poly_entry.insert(0, '')
         # define a button to submit these changes
-        submit_poly_sep_grid = tk.Button(LI_frame, text='Submit grid', command=poly_grid_submit)
+        submit_poly_sep_grid = tk.Button(LI_frame, text='Submit Grid', command=poly_grid_submit)
         submit_poly_sep_grid.grid(row=5, column=2)
         # update canvas
         canvas.draw()
@@ -1217,9 +1217,9 @@ def line_int_circ(cent, R, N, u_str, v_str, orient_int):
     LI_total = res
     
     # Update labels
-    LI_total_label.configure(text=str(round(LI_total, 4)))
+    LI_total_label.configure(text=(str(round(LI_total, 4)) + ' (' + str(round((LI_total/np.pi), 4)) + ' pi)' ))
     
-    flux_label.configure(text=str(round(flux, 4)))
+    flux_label.configure(text=(str(round(flux, 4)) + ' (' + str(round((flux/np.pi), 4)) + ' pi)' ))
 
     shape_area = np.pi*R**2
     shape_area_label.configure(text=str(round(shape_area, 4)))
@@ -1298,7 +1298,7 @@ def line_int_poly(N, u_str, v_str):
         flux += flux_inc
         
         # update its label
-        LI_total_label.configure(text=str(round(LI_total, 4)))
+        LI_total_label.configure(text=(str(round(LI_total, 4)) + ' (' + str(round((LI_total/np.pi), 4)) + ' pi)' ))    
         
         if len(LI_verts) > 3:
             shape_area = calc_area(LI_verts)
@@ -1316,7 +1316,7 @@ def line_int_poly(N, u_str, v_str):
             ratio2 = flux/shape_area
             ratio2_label.configure(text=str(round(ratio2, 4)))
             
-            flux_label.configure(text=str(round(flux, 4)))
+            flux_label.configure(text=(str(round(flux, 4)) + ' (' + str(round((flux/np.pi), 4)) + ' pi)' ))
             
             flux = 0
             
@@ -1617,30 +1617,38 @@ DIFFERENTIAL CALCULUS FUNCTIONS
 
 # define a function that will calculate the local, geometrical derivative
 def deriv_calc(x_m, y_m):
+
     # Range and point density of the derivative plot
     d_range = 0.33*L/(zoom_slider.get())
     d_length = d_length_select.get()
     dpd = dpd_select.get()
     d_scale = scale*(zoom_slider.get())
     
+    # Initialise arrays for storing components
+    u_s = np.zeros(shape=(dpd, dpd))
+    v_s = np.zeros(shape=(dpd, dpd))
+    
     # define new axis in the derivative plot
     dx = np.linspace(-d_range+x_m, d_range+x_m, dpd)
     dy = np.linspace(-d_range+y_m, d_range+y_m, dpd)
     dxg, dyg = np.meshgrid(dx, dy)
+    
     # define the vector field in these new axis
-    uzoom, vzoom = eq_to_comps(string_x, string_y, dxg, dyg)
+    u_zoom, v_zoom = eq_to_comps(string_x, string_y, dxg, dyg)
 
     # Define the components of the derivative field
-    V = uzoom - eval(format_eq_div(format_eq(string_x)))
-    W = vzoom - eval(format_eq_div(format_eq(string_y)))
+    V = u_zoom - eval(format_eq_div(format_eq(string_x)))
+    W = v_zoom - eval(format_eq_div(format_eq(string_y)))
     
-    if click_opt_int > 2:
-        # prepare grids to store the components
-        u_div = np.zeros(shape=(dpd, dpd))
-        v_div = np.zeros(shape=(dpd, dpd))
-        u_curl = np.zeros(shape=(dpd, dpd))
-        v_curl = np.zeros(shape=(dpd, dpd))
+    if click_opt_int == 1:
+        u_s = u_zoom
+        v_s = v_zoom
         
+    elif click_opt_int == 2:
+        u_s = V
+        v_s = W
+        
+    if click_opt_int > 2:
         # get corrected dpd (for loops)
         N = dpd - 1
         
@@ -1684,56 +1692,35 @@ def deriv_calc(x_m, y_m):
                 # saving these into their arrays
                 
                 if click_opt_int == 3:    
-                    u_div[i, j] = (V_comm_1*k + W_comm_1*l)*k/A
-                    v_div[i, j] = (V_comm_1*k + W_comm_1*l)*l/A
-                    u_div[j, N-i] = (V_comm_2*l + W_comm_2*(-k))*l/A
-                    v_div[j, N-i] = (V_comm_2*l + W_comm_2*(-k))*(-k)/A
-                    u_div[N-i, N-j] = (V_comm_3*(-k) + W_comm_3*(-l))*(-k)/A
-                    v_div[N-i, N-j] = (V_comm_3*(-k) + W_comm_3*(-l))*(-l)/A
-                    u_div[N-j, i] = (V_comm_4*(-l) + W_comm_4*k)*(-l)/A
-                    v_div[N-j, i] = (V_comm_4*(-l) + W_comm_4*k)*k/A
+                    u_s[i, j] = (V_comm_1*k + W_comm_1*l)*k/A
+                    v_s[i, j] = (V_comm_1*k + W_comm_1*l)*l/A
+                    u_s[j, N-i] = (V_comm_2*l + W_comm_2*(-k))*l/A
+                    v_s[j, N-i] = (V_comm_2*l + W_comm_2*(-k))*(-k)/A
+                    u_s[N-i, N-j] = (V_comm_3*(-k) + W_comm_3*(-l))*(-k)/A
+                    v_s[N-i, N-j] = (V_comm_3*(-k) + W_comm_3*(-l))*(-l)/A
+                    u_s[N-j, i] = (V_comm_4*(-l) + W_comm_4*k)*(-l)/A
+                    v_s[N-j, i] = (V_comm_4*(-l) + W_comm_4*k)*k/A
                     
                 if click_opt_int == 4:        
-                    u_curl[i, j] = (V_comm_1*l + W_comm_1*(-k))*l/A
-                    v_curl[i, j] = (V_comm_1*l + W_comm_1*(-k))*(-k)/A
-                    u_curl[j, N-i] = (V_comm_2*(-k) + W_comm_2*(-l))*(-k)/A
-                    v_curl[j, N-i] = (V_comm_2*(-k) + W_comm_2*(-l))*(-l)/A
-                    u_curl[N-i, N-j] = (V_comm_3*(-l) + W_comm_3*k)*(-l)/A
-                    v_curl[N-i, N-j] = (V_comm_3*(-l) + W_comm_3*k)*k/A
-                    u_curl[N-j, i] = (V_comm_4*k + W_comm_4*l)*k/A
-                    v_curl[N-j, i] = (V_comm_4*k + W_comm_4*l)*l/A
+                    u_s[i, j] = (V_comm_1*l + W_comm_1*(-k))*l/A
+                    v_s[i, j] = (V_comm_1*l + W_comm_1*(-k))*(-k)/A
+                    u_s[j, N-i] = (V_comm_2*(-k) + W_comm_2*(-l))*(-k)/A
+                    v_s[j, N-i] = (V_comm_2*(-k) + W_comm_2*(-l))*(-l)/A
+                    u_s[N-i, N-j] = (V_comm_3*(-l) + W_comm_3*k)*(-l)/A
+                    v_s[N-i, N-j] = (V_comm_3*(-l) + W_comm_3*k)*k/A
+                    u_s[N-j, i] = (V_comm_4*k + W_comm_4*l)*k/A
+                    v_s[N-j, i] = (V_comm_4*k + W_comm_4*l)*l/A
         
         # correct for singular values
         for i in range(dpd):
             for j in range(dpd):
-                if isnan(u_div[i, j]) is True or abs(u_div[i, j]) > 1e15 or  abs(u_div[i, j]) < 1e-10:
-                    u_div[i, j] = 0
-                if isnan(v_div[i, j]) is True or abs(v_div[i, j]) > 1e15 or abs(v_div[i, j]) < 1e-10:
-                    v_div[i, j] = 0
+                if isnan(u_s[i, j]) is True or abs(u_s[i, j]) > 1e15 or  abs(u_s[i, j]) < 1e-10:
+                    u_s[i, j] = 0
+                if isnan(v_s[i, j]) is True or abs(v_s[i, j]) > 1e15 or abs(v_s[i, j]) < 1e-10:
+                    v_s[i, j] = 0
     
     # Create axes at clicked position from supplied position and given axis sizes
     deriv_inset_ax = main_axis.inset_axes([(x_pix-178)/500 - (0.931*d_length/(2*L)), (y_pix-59)/500 - (0.931*d_length/(2*L)), 0.931*d_length/L, 0.931*d_length/L])
-    
-    # Check radiobutton selection
-    if click_opt_int == 1:
-        u_s = uzoom
-        v_s = vzoom
-        scale_s = d_scale
-        
-    elif click_opt_int == 2:
-        u_s = V
-        v_s = W
-        scale_s = d_scale
-        
-    elif click_opt_int == 3:
-        u_s = u_div
-        v_s = v_div
-        scale_s = d_scale
-        
-    elif click_opt_int == 4:
-        u_s = u_curl
-        v_s = v_curl
-        scale_s = d_scale
 
     if tensor.get() == 0:
         arrows = False
@@ -1745,7 +1732,8 @@ def deriv_calc(x_m, y_m):
         arrows = True
         stacks = True            
     
-    stack_plot(dxg, dyg, deriv_inset_ax, u_s, v_s, 5, d_range, dpd, 0.1, arrows, stacks, orientation, scale_s, w_head, h_head, 1) 
+    stack_plot(dxg, dyg, deriv_inset_ax, u_s, v_s, 5, d_range, dpd, 0.1, arrows, stacks, orientation, d_scale, w_head, h_head, 1) 
+    
     # Don't display the x and y axis values
     # if click_opt_int > 2:  
     #     deriv_inset_ax.set_xticks([])
@@ -1755,7 +1743,6 @@ def deriv_calc(x_m, y_m):
     fig.canvas.draw()
     deriv_inset_ax.clear()
     deriv_inset_ax.remove()
-
 
 
 # Calculate the Jacobian matrix of the defined vector field
