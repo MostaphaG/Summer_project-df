@@ -2626,10 +2626,71 @@ def wedge_2_response():
 
 
 # define a fucntion that will respond to finding the Hodge dual of the given froms
-# 1-form or 2-form depending on chosen parameter  - to be implemented later
-def Hodge_response():
-    tk.messagebox.showwarning('Hodge error', 'This has not yet been implemented, await further updates')
+# 1-form or 2-form depending on chosen parameter 
 
+# f is zero form, A is dx component, B is dy component, D is (dx /\ dy) component. Return list of the components and print result
+def Hodge2D(f='0',A='0',B='0',D='0'):
+    f_out = D
+    A_out = '-' + B
+    B_out = A
+    D_out = f
+    
+    H = [f_out, A_out, B_out, D_out]
+    
+    print('Hodge output: ')
+    print(H[0] + ' + ' + H[1] + 'dx' + ' + ' + H[2] + 'dy' + ' + ' + H[3] + 'dx/\dy')
+    
+    return H
+
+
+# define a fucntion that will respond to finding the Hodge dual of the given froms
+# 1-form or 2-form depending on chosen parameter
+def Hodge_1_form_response():
+    main_axis.clear()
+    update_variables()
+    u_str = x_comp_entry.get()
+    v_str = y_comp_entry.get()
+    
+    H = Hodge2D(A = u_str, B = v_str)
+    
+    u, v = eq_to_comps(H[1], H[2], xg, yg)
+    
+    H[1] = simplify((H[1]))
+    H[2] = simplify((H[2]))
+    
+    x_comp_entry.delete(0, 'end')
+    y_comp_entry.delete(0, 'end')
+    x_comp_entry.insert(0, H[1])
+    y_comp_entry.insert(0, H[2])
+    
+    arrows = False
+    stacks = True
+    stack_plot(xg, yg, main_axis, v, u, s_max, L, pt_den, 0.05, arrows, stacks, orientation, scale, w_head, h_head, 0) 
+    
+    canvas.draw()
+    
+# Hodge the two form in the entry box, plotting the scalar function as a contour
+def Hodge_2_form_response():
+    main_axis.clear()
+    update_variables()
+    H = Hodge2D(D = form_2_entry.get())
+    zero_form_str = H[0]
+    
+    contour_x, contour_y = np.linspace(-L, L, pt_den*5), np.linspace(-L, L, pt_den*5)
+    contour_x_grid, contour_y_grid = np.meshgrid(contour_x, contour_y)
+
+    zero_form_str = zero_form_str.replace('x', 'contour_x_grid')
+    zero_form_str = zero_form_str.replace('y', 'contour_y_grid')
+
+    if zero_form_str.find('contour_x_grid') & zero_form_str.find('contour_y_grid') == -1:
+        zero_form = eval(zero_form_str)*np.ones(np.shape(contour_x_grid))
+    else:
+        zero_form = eval(zero_form_str)
+    
+    CS = main_axis.contour(contour_x_grid, contour_y_grid, zero_form, 15)
+    main_axis.clabel(CS, inline=True, fontsize=7)
+    
+    canvas.draw()
 
 ''' DEFINE FUNCTIONS USED IN R3 CODE '''
 
@@ -3320,8 +3381,12 @@ wedge_btn = tk.Button(calculus_frame, text='wedge two 1-forms', padx=27, pady=10
 wedge_btn.grid(row=10, column=0)
 
 # define ab utton that will Find the Hodge dual
-Hodge_btn = tk.Button(calculus_frame, text='Hodge', padx=67, pady=10, command=Hodge_response)
-Hodge_btn.grid(row=11, column=0)
+Hodge_1_form_btn = tk.Button(calculus_frame, text='Hodge 1-Form', padx=67, pady=10, command=Hodge_1_form_response)
+Hodge_1_form_btn.grid(row=11, column=0)
+
+Hodge_2_form_btn = tk.Button(calculus_frame, text='Hodge 2-Form', padx=67, pady=10, command=Hodge_2_form_response)
+Hodge_2_form_btn.grid(row=11, column=1)
+
 
 '''
 
