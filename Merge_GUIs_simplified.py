@@ -530,6 +530,13 @@ def tab_selection(event):
         polar_grid_plot_btn['state'] = tk.DISABLED
         # clear the zero form label as plot comes back to default
         Label_zero_form.configure(text='')
+        # this is now never Vector fields and never arrows therefore
+        # set the labels as such
+        component_x_entry_label.configure(text='dx component')
+        component_y_entry_label.configure(text='dy component')
+        field_select_drop_label.configure(text='Select Pre-Defined 1-Form:')
+        # change frame name too
+        bot_frame_frame.configure(text='1-Form input frame')
     elif tab_text == '\mathbb{R}^{3}':
         global form_2_frame
         global F_xy_x, F_xy_y, F_xz_x, F_xz_z, F_yz_y, F_yz_z
@@ -618,6 +625,13 @@ def tab_selection(event):
             axis_height_txt.configure(text=str(round(eval(hvalue_string), 2)))
             # show warning about that
             tk.messagebox.showwarning('INDEX ERROR', 'you selected a value in slider that might no longer be avalaible, it has been changed avoid errors')
+        # this is now never Vector fields and never arrows therefore
+        # set the labels as such
+        component_x_entry_label.configure(text='dx component')
+        component_y_entry_label.configure(text='dy component')
+        field_select_drop_label.configure(text='Select Pre-Defined 1-Form:')
+        # change frame name too
+        bot_frame_frame.configure(text='1-Form input frame')
     # if anything but the main window is selected, change to tools
     if tab_text != 'Main':
         # unclick them
