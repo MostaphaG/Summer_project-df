@@ -2065,6 +2065,17 @@ def form_2_components_plot(grid_x, grid_y, u, v, form_2_sgn, s_max, L, fract, co
     # find the relative magnitude of vectors to maximum, as an array
     R = mag/max_size
     
+    # globally scale if plotting an iset axis
+    if axis_check == 0:
+        # from globals, get the maximum over the whole 2 form
+        max_form_global2 = np.max(form_2)
+        # find its ratio to the one plotted here:
+        max_form_local2 = np.max(mag)  # use mag as always u or v is zero
+        # find their ratio:
+        ratio2 = max_form_local2/max_form_global2
+        # multiply the relative scaling array approperiately
+        R *= ratio2
+    
     # define tigonometirc shifts
     I_sin = np.sin(theta)
     I_cos = np.cos(theta)
@@ -2261,9 +2272,8 @@ Define response functions to GUI interactions
 def form_2_zoom(x_m, y_m):
     # define axis to be used in the inset
     zoomR2_range = (1/3)*L/(zoom_slider_R2.get())
-    zoomR2_length = 1.5
-    zoomR2pd = 9  # BOTH zoomR2pd and zoomR2_length are temporary
-    # will be able to update these with dropdowns later like in Main tab
+    zoomR2_length = zoomR2_length_select.get()
+    zoomR2pd = zoomR2pd_select.get()
     fract_zoom = 2/(zoomR2pd - 1)
     R2x = np.linspace(-zoomR2_range + x_m, zoomR2_range + x_m, zoomR2pd)
     R2y = np.linspace(-zoomR2_range + y_m, zoomR2_range + y_m, zoomR2pd)
@@ -3506,10 +3516,10 @@ wedge_btn = tk.Button(calculus_frame, text='wedge two 1-forms', padx=27, pady=10
 wedge_btn.grid(row=10, column=0)
 
 # define ab utton that will Find the Hodge dual
-Hodge_1_form_btn = tk.Button(calculus_frame, text='Hodge 1-Form', padx=67, pady=10, command=Hodge_1_form_response)
+Hodge_1_form_btn = tk.Button(calculus_frame, text='Hodge 1-Form', padx=0, pady=10, command=Hodge_1_form_response)
 Hodge_1_form_btn.grid(row=11, column=0)
 
-Hodge_2_form_btn = tk.Button(calculus_frame, text='Hodge 2-Form', padx=67, pady=10, command=Hodge_2_form_response)
+Hodge_2_form_btn = tk.Button(calculus_frame, text='Hodge 2-Form', padx=0, pady=10, command=Hodge_2_form_response)
 Hodge_2_form_btn.grid(row=11, column=1)
 
 # define radiobuttons button to choose zooming with the mouse on 2-forms on R2
@@ -3527,6 +3537,24 @@ zoom_slider_R2 = tk.Scale(calculus_frame, from_=1, to=20, orient=tk.HORIZONTAL)
 zoom_slider_R2.bind("<ButtonRelease-1>", update_2_form_zoom)
 zoom_slider_R2.grid(row=13, column=1)
 zoom_slider_R2.configure(state=tk.DISABLED)
+
+
+# Drop down to select the R2 2 form zoom plot point density
+zoomR2pd_select = tk.IntVar()
+zoomR2pd_select.set(11)
+zoomR2pd_list = [11, 16, 21]
+
+tk.Label(calculus_frame, text='Select Inset Plot Point Density:').grid(row=14, column=0)
+zoomR2pd_drop = tk.OptionMenu(calculus_frame, zoomR2pd_select, *zoomR2pd_list, command=update_2_form_zoom)
+zoomR2pd_drop.grid(row=14, column=1)
+
+# Drop down to select inset axis size for R2 2 forms
+zoomR2_length_select = tk.DoubleVar()
+zoomR2_length_list = [1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0]
+zoomR2_length_select.set(zoomR2_length_list[2])
+tk.Label(calculus_frame, text='Select Inset Plot Size :').grid(row=15, column=0)
+zoomR2_length_drop = tk.OptionMenu(calculus_frame, zoomR2_length_select, *zoomR2_length_list, command=update_2_form_zoom)
+zoomR2_length_drop.grid(row=15, column=1)
 
 
 '''
