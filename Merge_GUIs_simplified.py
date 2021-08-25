@@ -530,6 +530,10 @@ def tab_selection(event):
         # tab
         x_comp_entry.configure(bg='#FFFFFF')
         y_comp_entry.configure(bg='#FFFFFF')
+        # set the tools variable as it should be
+        R2_tools_opt.set(0)
+        # respond to that too
+        R2_tools_handler(R2_tools_opt.get())
     elif tab_text == '\mathbb{R}^{3}':
         global form_2_frame
         global F_xy_x, F_xy_y, F_xz_x, F_xz_z, F_yz_y, F_yz_z
@@ -2318,10 +2322,12 @@ def R2_tools_handler(R2_tools_opt_var):
         zoom_slider_R2.configure(state=tk.NORMAL)
 
 
-
 # upate the zooming tool
 def update_2_form_zoom(self):
-    form_2_zoom(x_m, y_m)
+    if R2_tools_opt_int == 0:
+        pass
+    else:
+        form_2_zoom(x_m, y_m)
 
 
 # gets 2-form from entry box and plots it as coloured blocks only
@@ -3234,34 +3240,6 @@ arrow_btn = tk.Radiobutton(right_frame, text='arrow', variable=tensor, value=1, 
 arrow_stack_btn = tk.Radiobutton(right_frame, text='both', variable=tensor, value=2, command=lambda: vect_type_response(tensor.get())).grid(row=7, column=3)
 stack_btn = tk.Radiobutton(right_frame, text='stack', variable=tensor, value=0, command=lambda: vect_type_response(tensor.get())).grid(row=7, column=2)
 
-# get a button to draw on singularities
-singularity_button = tk.Button(singular_frame, text='search singularities', command=show_singularities)
-singularity_button.grid(row=0, column=0)
-# entry for N
-tk.Label(singular_frame, text='<-- sampling points').grid(row=0, column=2, columnspan=2)
-fine_grid_N_entry = tk.Entry(singular_frame, width=5)
-fine_grid_N_entry.grid(row=0, column=1)
-fine_grid_N_entry.insert(0, 10)
-
-# define an entry where the user can inpu known singularity equation
-# this will be taken and plotted as a red, dotted line
-tk.Label(singular_frame, text='equation of known singularity :').grid(row=1, column=0, columnspan=2)
-
-# define a dropdown to select y= or x=
-singular_var = tk.StringVar()
-singular_list = ['y=', 'x=', 'point']
-singular_var.set(singular_list[0])
-dpd_drop = tk.OptionMenu(singular_frame, singular_var, *singular_list, command=singular_drop_response)
-dpd_drop.grid(row=2, column=0)
-# equation entry box
-known_singularity_entry = tk.Entry(singular_frame, width=20)
-known_singularity_entry.grid(row=2, column=1)
-known_singularity_entry.insert(0, '')
-
-# define asubmit button to that entry
-submit_known_singularity_btn = tk.Button(singular_frame, text='show expression', command=known_singularity_response)
-submit_known_singularity_btn.grid(row=3, column=0)
-
 # DERIVATIVE FUNCTIONS
 
 # Radiobuttons to select what happens when clicking the plot
@@ -3292,7 +3270,7 @@ dpd_select = tk.IntVar()
 dpd_select.set(5)
 dpd_list = [5, 7, 9]
 
-tk.Label(right_frame, text='Select Inset Plot Point Density:').grid(row=4, column=0)
+tk.Label(right_frame, text='Inset Plot Point Density:').grid(row=4, column=0)
 dpd_drop = tk.OptionMenu(right_frame, dpd_select, *dpd_list, command = update_deriv)
 dpd_drop.grid(row=4, column=1)
 
@@ -3300,7 +3278,7 @@ dpd_drop.grid(row=4, column=1)
 d_length_select = tk.DoubleVar()
 d_length_list = [1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0]
 d_length_select.set(d_length_list[2])
-tk.Label(right_frame, text='Select Inset Plot Size :').grid(row=5, column=0)
+tk.Label(right_frame, text='Inset Plot Size :').grid(row=5, column=0)
 d_length_drop = tk.OptionMenu(right_frame, d_length_select, *d_length_list, command = update_deriv)
 d_length_drop.grid(row=5, column=1)
 
@@ -3309,6 +3287,42 @@ ascale_label = tk.Label(right_frame, text='Toggle Autoscaling:')
 ascale_label.grid(row=6, column=0)
 ascale_toggle = tk.Button(right_frame, image=toggle_image_off, bd=0, command=scale_toggle_response)
 ascale_toggle.grid(row=6, column=1, pady=5)
+
+'''
+
+SINGULARITY NOTEBOOK
+
+'''
+
+
+
+# get a button to draw on singularities
+singularity_button = tk.Button(singular_frame, text='search singularities', command=show_singularities)
+singularity_button.grid(row=0, column=0)
+# entry for N
+tk.Label(singular_frame, text='<- sampling points').grid(row=0, column=2, columnspan=2)
+fine_grid_N_entry = tk.Entry(singular_frame, width=5)
+fine_grid_N_entry.grid(row=0, column=1)
+fine_grid_N_entry.insert(0, 10)
+
+# define an entry where the user can inpu known singularity equation
+# this will be taken and plotted as a red, dotted line
+tk.Label(singular_frame, text='singularity equation:').grid(row=1, column=0, columnspan=2)
+
+# define a dropdown to select y= or x=
+singular_var = tk.StringVar()
+singular_list = ['y=', 'x=', 'point']
+singular_var.set(singular_list[0])
+dpd_drop = tk.OptionMenu(singular_frame, singular_var, *singular_list, command=singular_drop_response)
+dpd_drop.grid(row=2, column=0)
+# equation entry box
+known_singularity_entry = tk.Entry(singular_frame, width=15)
+known_singularity_entry.grid(row=2, column=1)
+known_singularity_entry.insert(0, '')
+
+# define asubmit button to that entry
+submit_known_singularity_btn = tk.Button(singular_frame, text='show expression', command=known_singularity_response)
+submit_known_singularity_btn.grid(row=3, column=0)
 
 
 '''
@@ -3319,16 +3333,16 @@ set up all in SMALL FRAME
 
 
 # define the PLOT button
-PLOT_btn = tk.Button(small_frame, text='PLOT', padx=60, pady=30, command=PLOT_response)
+PLOT_btn = tk.Button(small_frame, text='PLOT', padx=32, pady=20, command=PLOT_response)
 PLOT_btn.grid(row=0, column=0, columnspan=2, rowspan=1)
 
 # define a button in small frame that will open new window to adjust arrowheads
 custom_btn = tk.Button(small_frame, text='customise visuals', padx=1, pady=1, command=custom_btn_reponse)
-custom_btn.grid(row=0, column=3)
+custom_btn.grid(row=0, column=2)
 
 # define a button to customise the polar grids
 polar_grid_custom_btn = tk.Button(small_frame, text='customise polar grid', padx=1, pady=1, command=polar_grid_custom_reponse)
-polar_grid_custom_btn.grid(row=1, column=3)
+polar_grid_custom_btn.grid(row=1, column=2)
 
 # define a button that will just plot the given cartesian field
 # on a polar grid
@@ -3339,17 +3353,17 @@ polar_grid_plot_btn.grid(row=1, column=0, columnspan=2)
 # Also input into them the initial values
 tk.Label(small_frame, text='Size').grid(row=2, column=0)
 L_entry = tk.Entry(small_frame, width=11, borderwidth=1)
-L_entry.grid(row=3, column=0, padx = 2)
+L_entry.grid(row=3, column=0, padx=2)
 L_entry.insert(0, L)
 
 tk.Label(small_frame, text='grid').grid(row=2, column=1)
 pt_den_entry = tk.Entry(small_frame, width=11, borderwidth=1)
-pt_den_entry.grid(row=3, column=1, padx = 2)
+pt_den_entry.grid(row=3, column=1, padx=2)
 pt_den_entry.insert(0, pt_den)
 
 tk.Label(small_frame, text='max sheets').grid(row=2, column=2)
 s_max_entry = tk.Entry(small_frame, width=11, borderwidth=1)
-s_max_entry.grid(row=3, column=2, padx = 2)
+s_max_entry.grid(row=3, column=2, padx=2)
 s_max_entry.insert(0, s_max)
 
 
@@ -3428,7 +3442,7 @@ LI_restart_btn.grid(row=3, column=0, columnspan=2)
 LI_shape_select = tk.StringVar()
 LI_shape_list = ['Polygon', 'Circle']
 LI_shape_select.set(LI_shape_list[0])
-LI_shape_instruction = tk.Label(LI_frame, text='Select what to draw:')
+LI_shape_instruction = tk.Label(LI_frame, text='Shape:')
 LI_shape_instruction.grid(row=4, column=0)
 LI_shape_drop = tk.OptionMenu(LI_frame, LI_shape_select, *LI_shape_list, command=LI_shape_select_response)
 LI_shape_drop.grid(row=4, column=1)
@@ -3446,7 +3460,7 @@ DEFINE ALL WINDGETS IN CALCULUS TAB
 
 # define a window to supply the 2-form
 tk.Label(calculus_frame, text='2-form on R2').grid(row=0, column=1)
-form_2_entry = tk.Entry(calculus_frame, width=20, borderwidth=2)
+form_2_entry = tk.Entry(calculus_frame, width=15, borderwidth=2)
 form_2_entry.grid(row=0, column=0)
 form_2_entry.insert(0, form_2_str)
 # begin  displaying it on green colour to show that this is ebing displayed to
@@ -3470,28 +3484,28 @@ form_1_stacks_btn = tk.Button(calculus_frame, text='1-form plot', padx=3, pady=5
 form_1_stacks_btn.grid(row=2, column=0)
 
 # add a button to plot the interior derivative as superposing stack fields
-INT_btn = tk.Button(calculus_frame, text='Int Deriv', padx=63, pady=10, command=Int_deriv_response)
-INT_btn.grid(row=8, column=0)
+INT_btn = tk.Button(calculus_frame, text='Int Deriv', padx=0, pady=2, command=Int_deriv_response)
+INT_btn.grid(row=4, column=0)
 
 # define a button to plot the exterior derivative from given u and v
 # Note, it will get the 2-form first, then return back down
 # to a one form to avoid concellations
 # therefore, it will also just be one possible representation
 # not the only possible one
-EXT_int_btn = tk.Button(calculus_frame, text='Ext Deriv', padx=62, pady=10, command=Ext_deriv_response)
-EXT_int_btn.grid(row=9, column=0)
+EXT_int_btn = tk.Button(calculus_frame, text='Ext Deriv', padx=0, pady=2, command=Ext_deriv_response)
+EXT_int_btn.grid(row=4, column=1)
 
 # define a wedge product button that will let the user input TWO 1-forms
 # in a new window to be wedged to gice a 2-form
-wedge_btn = tk.Button(calculus_frame, text='wedge two 1-forms', padx=27, pady=10, command=wedge_2_response)
-wedge_btn.grid(row=10, column=0)
+wedge_btn = tk.Button(calculus_frame, text='Wedge', padx=0, pady=2, command=wedge_2_response)
+wedge_btn.grid(row=6, column=0)
 
 # define ab utton that will Find the Hodge dual
-Hodge_1_form_btn = tk.Button(calculus_frame, text='Hodge 1-Form', padx=0, pady=10, command=Hodge_1_form_response)
-Hodge_1_form_btn.grid(row=11, column=0)
+Hodge_1_form_btn = tk.Button(calculus_frame, text='Hodge 1-Form', padx=0, pady=2, command=Hodge_1_form_response)
+Hodge_1_form_btn.grid(row=7, column=0)
 
-Hodge_2_form_btn = tk.Button(calculus_frame, text='Hodge 2-Form', padx=0, pady=10, command=Hodge_2_form_response)
-Hodge_2_form_btn.grid(row=11, column=1)
+Hodge_2_form_btn = tk.Button(calculus_frame, text='Hodge 2-Form', padx=0, pady=2, command=Hodge_2_form_response)
+Hodge_2_form_btn.grid(row=7, column=1)
 
 # define radiobuttons button to choose zooming with the mouse on 2-forms on R2
 # and as opposed to tools
@@ -3499,33 +3513,33 @@ R2_tools_opt = tk.IntVar()
 R2_tools_opt.set(0)
 R2_tools_Tools_btn = tk.Radiobutton(calculus_frame, text='Tools', variable=R2_tools_opt, value=0, command=lambda: R2_tools_handler(R2_tools_opt.get()))
 R2_tools_Zoom_btn = tk.Radiobutton(calculus_frame, text='Zoom', variable=R2_tools_opt, value=1, command=lambda: R2_tools_handler(R2_tools_opt.get()))
-R2_tools_Tools_btn.grid(row=12, column=0)
-R2_tools_Zoom_btn.grid(row=12, column=1)
+R2_tools_Tools_btn.grid(row=8, column=0)
+R2_tools_Zoom_btn.grid(row=8, column=1)
 
 # set up a zooming tool for that too
-tk.Label(calculus_frame, text='Zoom').grid(row=13, column=0)
+tk.Label(calculus_frame, text='Zoom').grid(row=9, column=0)
 zoom_slider_R2 = tk.Scale(calculus_frame, from_=1, to=20, orient=tk.HORIZONTAL)
 zoom_slider_R2.bind("<ButtonRelease-1>", update_2_form_zoom)
-zoom_slider_R2.grid(row=13, column=1)
+zoom_slider_R2.grid(row=9, column=1)
 zoom_slider_R2.configure(state=tk.DISABLED)
 
 
 # Drop down to select the R2 2 form zoom plot point density
 zoomR2pd_select = tk.IntVar()
 zoomR2pd_select.set(11)
-zoomR2pd_list = [11, 16, 21]
+zoomR2pd_list = [5, 6, 10, 11, 15, 16, 20, 21]
 
-tk.Label(calculus_frame, text='Select Inset Plot Point Density:').grid(row=14, column=0)
+tk.Label(calculus_frame, text='Inset Plot Point Density:').grid(row=10, column=0)
 zoomR2pd_drop = tk.OptionMenu(calculus_frame, zoomR2pd_select, *zoomR2pd_list, command=update_2_form_zoom)
-zoomR2pd_drop.grid(row=14, column=1)
+zoomR2pd_drop.grid(row=10, column=1)
 
 # Drop down to select inset axis size for R2 2 forms
 zoomR2_length_select = tk.DoubleVar()
-zoomR2_length_list = [1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0]
+zoomR2_length_list = [0.2, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0]
 zoomR2_length_select.set(zoomR2_length_list[2])
-tk.Label(calculus_frame, text='Select Inset Plot Size :').grid(row=15, column=0)
+tk.Label(calculus_frame, text='Inset Plot Size :').grid(row=11, column=0)
 zoomR2_length_drop = tk.OptionMenu(calculus_frame, zoomR2_length_select, *zoomR2_length_list, command=update_2_form_zoom)
-zoomR2_length_drop.grid(row=15, column=1)
+zoomR2_length_drop.grid(row=11, column=1)
 
 
 '''
@@ -3534,7 +3548,7 @@ DEFINE WIDGETS USED IN R3 CODE
 
 '''
 
-height_frame = tk.LabelFrame(r3_frame, text='viewing frame', padx=32, pady=5)
+height_frame = tk.LabelFrame(r3_frame, text='viewing frame', padx=2, pady=2)
 height_frame.grid(row=0, column=0)
 
 # Label to show current axis value
@@ -3550,8 +3564,8 @@ up_height = tk.Button(height_frame, text=' /\ ', command=lambda: label_update(1)
 up_height.grid(row=0, column=0)
 
 # define a button to submit the currently chosen value:
-Submit_h_btn = tk.Button(height_frame, text='SUBMIT', padx=10, pady=50, command=slide)
-Submit_h_btn.grid(row=0, column=1, rowspan=3, padx=20)
+Submit_h_btn = tk.Button(height_frame, text='SUBMIT', padx=2, pady=50, command=slide)
+Submit_h_btn.grid(row=0, column=1, rowspan=3, padx=5)
 
 
 # define rediobuttons to chose from which axis the user is looking:
@@ -3564,7 +3578,7 @@ view_z_btn = tk.Radiobutton(height_frame, text='x', variable=view_tk, value='x',
 
 # NOTE  NOT GREAT I KNOW BUT TEMPORARY:
 # define a new frame for the fields to be input
-field_input_frame = tk.LabelFrame(r3_frame, text='Fields frame', padx=32, pady=5)
+field_input_frame = tk.LabelFrame(r3_frame, text='Fields frame', padx=5, pady=5)
 field_input_frame.grid(row=0, column=1)
 
 
@@ -3594,7 +3608,7 @@ form_2_from_1_R3_btn.grid(row=7, column=0, columnspan=2)
 # define a frame for R3 2-form results and input by the user
 # It will be filled when R3 is opened (in tab_selection)
 # as it needs 'result' to fill.
-form_2_frame = tk.LabelFrame(r3_frame, text='2-form frame', padx=32, pady=5)
+form_2_frame = tk.LabelFrame(r3_frame, text='2-form frame', padx=5, pady=5)
 form_2_frame.grid(row=2, column=0, columnspan=2)
  
 
