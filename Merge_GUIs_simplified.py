@@ -1983,7 +1983,7 @@ def singular_drop_response(var):
 # define a function that will plot stack components, coloured
 # as per the orientation of the 2-form at that grid point
 def form_2_components_plot(grid_x, grid_y, u, v, form_2_sgn, s_max, L, fract, colour_str, arrowheads=False, w_head=1/8, h_head=1/4, s_min=2, ax=main_axis, axis_check=1):
-    global s_L
+    global s_L, mag, R, ratio2, form_2_temp
     # get axis lengths:
     x_len = len(grid_x[:, 0])
     y_len = len(grid_y[:, 0])
@@ -1991,8 +1991,6 @@ def form_2_components_plot(grid_x, grid_y, u, v, form_2_sgn, s_max, L, fract, co
     if axis_check == 1:
         # Scaling of axes and setting equal proportions circles look like circles
         ax.set_aspect('equal')
-        # get L from the gien grids
-        size_L = np.max(grid_x)
         ax_L = L + L/delta_factor
         ax.set_xlim(-ax_L, ax_L)
         ax.set_ylim(-ax_L, ax_L)
@@ -2019,7 +2017,7 @@ def form_2_components_plot(grid_x, grid_y, u, v, form_2_sgn, s_max, L, fract, co
                 # colour this region as a red dot, not square to
                 # not confuse with nigh mag 2-forms in stacks. or worse, in
                 # blocks
-                circ = patch.Circle((grid_x[i, j], grid_y[i, j]), size_L*fract/3, color='red')
+                circ = patch.Circle((grid_x[i, j], grid_y[i, j]), L*fract/3, color='red')
                 ax.add_patch(circ)
                 mag[i, j] = 0
             # ALso, since we got this lop anyway
@@ -2054,8 +2052,15 @@ def form_2_components_plot(grid_x, grid_y, u, v, form_2_sgn, s_max, L, fract, co
     
     # globally scale if plotting an iset axis
     if axis_check == 0:
+        form_2_temp = form_2*1
+        # get rid of singularities in form_2 from globals, locally
+        for i in range(len(form_2_temp[:, 0])):
+            for j in range(len(form_2_temp[0, :])):
+                # set to zero points that are not defined or inf
+                if isnan(form_2_temp[i, j]) is True or abs(form_2_temp[i, j]) == np.inf  or abs(form_2_temp[i, j]) > 1e15:
+                    form_2_temp[i, j] = 0
         # from globals, get the maximum over the whole 2 form
-        max_form_global2 = np.max(form_2)
+        max_form_global2 = np.max(form_2_temp)
         # find its ratio to the one plotted here:
         max_form_local2 = np.max(mag)  # use mag as always u or v is zero
         # find their ratio:
@@ -2257,6 +2262,7 @@ Define response functions to GUI interactions
 
 # define a function that will let the user zoom with a mouse, on R2
 def form_2_zoom(x_m, y_m):
+    global form_2_zoom_values
     # define axis to be used in the inset
     zoomR2_range = (1/3)*L/(zoom_slider_R2.get())
     zoomR2_length = zoomR2_length_select.get()
