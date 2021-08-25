@@ -1869,18 +1869,18 @@ def click_option_handler(click_option):
         toolbar.children['!button4'].pack_forget()
         toolbar.children['!button5'].pack_forget()
         # run deriv calc as per its calling
-        # unless the canvas has not been clicked yet, in that case, make up
-        # values
-        # if str(x_m) == 'None':
-        #     x_m = 3.62101167
-        #     y_m = 1.60383546
-        #     x_pix = 592
-        #     y_pix = 391
-        # Try and except means no inset plot when user hasn't clicked the plot
+        # unless the canvas has not been clicked yet
         try:
             deriv_calc(x_m, y_m)
         except (TypeError):
-            print('No Click Coords')
+            # for now
+        tk.messagebox.showerror('', 'No Click Coordinates given')
+        # other option:
+        # x_m = 3.62101167
+        # y_m = 1.60383546
+        # x_pix = 592
+        # y_pix = 391
+        # deriv_calc(x_m, y_m)
             pass
 
 
@@ -1895,7 +1895,14 @@ def update_deriv(self):
     try:
         deriv_calc(x_m,y_m)
     except (TypeError):
-        print('No Click Coords')
+        # for now
+        tk.messagebox.showerror('', 'No Click Coordinates given')
+        # other option:
+        # x_m = 3.62101167
+        # y_m = 1.60383546
+        # x_pix = 592
+        # y_pix = 391
+        # deriv_calc(x_m, y_m)
         pass       
 
 
@@ -2805,7 +2812,7 @@ def wedge_2_response():
 def Hodge2D(f='0',A='0',B='0',D='0'):
     # switch components as per rules of a Hidge on R2
     f_out = D
-    A_out = '-' + B
+    A_out = '-(' + B + ')'
     B_out = A
     D_out = f
     # put them ito an array
