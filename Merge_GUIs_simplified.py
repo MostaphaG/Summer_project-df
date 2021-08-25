@@ -1623,10 +1623,10 @@ DIFFERENTIAL CALCULUS FUNCTIONS
 
 '''
 
-
 # define a function that will calculate the local, geometrical derivative
 def deriv_calc(x_m, y_m):
-
+    # Make u_s and v_s global for testing
+    global u_s, v_s
     # Range and point density of the derivative plot
     d_range = 0.33*L/(zoom_slider.get())
     d_length = d_length_select.get()
@@ -1700,6 +1700,7 @@ def deriv_calc(x_m, y_m):
                 # find the div and curl field in u and in v
                 # saving these into their arrays
                 
+                # Local divergence field
                 if click_opt_int == 3:    
                     u_s[i, j] = (V_comm_1*k + W_comm_1*l)*k/A
                     v_s[i, j] = (V_comm_1*k + W_comm_1*l)*l/A
@@ -1710,6 +1711,7 @@ def deriv_calc(x_m, y_m):
                     u_s[N-j, i] = (V_comm_4*(-l) + W_comm_4*k)*(-l)/A
                     v_s[N-j, i] = (V_comm_4*(-l) + W_comm_4*k)*k/A
                     
+                # Local curl field
                 if click_opt_int == 4:        
                     u_s[i, j] = (V_comm_1*l + W_comm_1*(-k))*l/A
                     v_s[i, j] = (V_comm_1*l + W_comm_1*(-k))*(-k)/A
@@ -1741,7 +1743,7 @@ def deriv_calc(x_m, y_m):
         arrows = True
         stacks = True            
     
-    stack_plot(dxg, dyg, deriv_inset_ax, u_s, v_s, 5, d_range, dpd, 0.1, arrows, stacks, orientation, d_scale, w_head, h_head, 1) 
+    stack_plot(dxg, dyg, deriv_inset_ax, u_s, v_s, 5, d_range, dpd, 0.1, arrows, stacks, orientation, scale, w_head, h_head, 1) 
     
     # Don't display the x and y axis values
     # if click_opt_int > 2:  
@@ -1812,12 +1814,17 @@ def click_option_handler(click_option):
         # run deriv calc as per its calling
         # unless the canvas has not been clicked yet, in that case, make up
         # values
-        if str(x_m) == 'None':
-            x_m = 3.62101167
-            y_m = 1.60383546
-            x_pix = 592
-            y_pix = 391
-        deriv_calc(x_m, y_m)
+        # if str(x_m) == 'None':
+        #     x_m = 3.62101167
+        #     y_m = 1.60383546
+        #     x_pix = 592
+        #     y_pix = 391
+        # Try and except means no inset plot when user hasn't clicked the plot
+        try:
+            deriv_calc(x_m, y_m)
+        except (TypeError):
+            print('No Click Coords')
+            pass
 
 
 # Additional formatting function used in divergence plots
@@ -1826,9 +1833,13 @@ def format_eq_div(string):
     string = string.replace('yg', 'y_m')
     return string
 
-
+# Function for updating the inset plots when options are changed by the user.
 def update_deriv(self):
-    deriv_calc(x_m,y_m)
+    try:
+        deriv_calc(x_m,y_m)
+    except (TypeError):
+        print('No Click Coords')
+        pass       
 
 
 ''' SINGULARITIES '''
