@@ -1874,7 +1874,7 @@ def click_option_handler(click_option):
             deriv_calc(x_m, y_m)
         except (TypeError):
             # for now
-        tk.messagebox.showerror('', 'No Click Coordinates given')
+            tk.messagebox.showerror('', 'No Click Coordinates given')
         # other option:
         # x_m = 3.62101167
         # y_m = 1.60383546
