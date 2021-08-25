@@ -68,7 +68,7 @@ def singularity_fine(u_str, v_str, dist_points, N=500):
 # and upadte them globally, as well as thier dependant variables
 def update_variables(r3_check=0):
     global L, pt_den, s_max, x, y, z, xg, yg, zg, u, v, string_x, string_y, zero_field, field_unit
-    global ax_L, main_axis, form_2, form_2_sgn
+    global ax_L, main_axis, form_2
     # take the new axis parameters and field definitions out of the boxes
     L = eval(L_entry.get())
     pt_den = int(pt_den_entry.get())
@@ -90,8 +90,6 @@ def update_variables(r3_check=0):
         field_unit = np.ones(np.shape(xg))
         # get 2-form to update too
         form_2 = eval(form_2_eq)
-        # and get the signs of the 2-form
-        form_2_sgn = np.sign(form_2)
     else:
         x = np.linspace(-L, L, pt_den)
         y = np.linspace(-L, L, pt_den)
@@ -101,10 +99,6 @@ def update_variables(r3_check=0):
         zero_field = np.zeros(np.shape(xg))
         # define the unit field
         field_unit = np.ones(np.shape(xg))
-        # get 2-form to update too
-        #form_2 = eval(form_2_eq)
-        # and get the signs of the 2-form
-        #form_2_sgn = np.sign(form_2)
 
 
 # deifne a fucntion to check number parity
@@ -425,7 +419,7 @@ R3_use_track = 0
 def tab_selection(event):
     global x_m, y_m, R3_use_track, click_opt_int, tab_text
     global fract, form_2, notebook_bottom, m
-    global expressions, coords, form_2_str, form_2_eq, form_2_sgn
+    global expressions, coords, form_2_str, form_2_eq
     # get tab that was selected as text
     selected_tab = event.widget.select()
     tab_text = event.widget.tab(selected_tab, "text")
@@ -440,7 +434,6 @@ def tab_selection(event):
         form_2_str = 'x*y**2'  # dx^dy component, (back to R2 default)
         form_2_eq = format_eq(form_2_str)
         form_2 = eval(form_2_eq)
-        form_2_sgn = np.sign(form_2)
         # 2-form was returned to defualt on R2 so put that in the entry box
         form_2_entry.delete(0, 'end')
         form_2_entry.insert(0, form_2_str)
@@ -518,8 +511,8 @@ def tab_selection(event):
         # update variable to track 1 forms and 2 forms in this tab
         calculus_form_tracker = 2
         # put the initial plot onto the canvas
-        form_2_components_plot(xg, yg, form_2/2, zero_field, form_2_sgn, s_max, L, fract, colour_str, 2)
-        form_2_components_plot(xg, yg, zero_field, form_2/2, form_2_sgn, s_max, L, fract, colour_str, 2)
+        form_2_components_plot(xg, yg, form_2/2, np.pi/2, s_max, L, fract, colour_str, 2)
+        form_2_components_plot(xg, yg, form_2/2, 0, s_max, L, fract, colour_str, 2)
         canvas.draw()
         # disable the PLOT button and the ploar grid button
         PLOT_btn['state'] = tk.DISABLED
@@ -533,6 +526,10 @@ def tab_selection(event):
         field_select_drop_label.configure(text='Select Pre-Defined 1-Form:')
         # change frame name too
         bot_frame_frame.configure(text='1-Form input frame')
+        # colour the 1-form inputs white as these are not default plotin this
+        # tab
+        x_comp_entry.configure(bg='#FFFFFF')
+        y_comp_entry.configure(bg='#FFFFFF')
     elif tab_text == '\mathbb{R}^{3}':
         global form_2_frame
         global F_xy_x, F_xy_y, F_xz_x, F_xz_z, F_yz_y, F_yz_z
@@ -604,6 +601,10 @@ def tab_selection(event):
         Entry_2_form_R3_dxdy.insert(0, str(form_2_str_dxdy))
         Entry_2_form_R3_dxdz.insert(0, str(form_2_str_dxdz))
         Entry_2_form_R3_dydz.insert(0, str(form_2_str_dydz))
+        # colour what plots as defualt in this tab
+        Entry_2_form_R3_dxdy.configure(bg='#C0F6BB')
+        Entry_2_form_R3_dxdz.configure(bg='#C0F6BB')
+        Entry_2_form_R3_dydz.configure(bg='#C0F6BB')
         # hide the VFA input frame for now
         notebook_bottom.hide(0)
         # hide singularity notebook
@@ -907,9 +908,6 @@ m = 2
 form_2_str = 'x*y**2'  # dx^dy component
 form_2_eq = format_eq(form_2_str)
 form_2 = eval(form_2_eq)
-
-# get the signs of the 2-form
-form_2_sgn = np.sign(form_2)
 
 ''' initial variables for operations completed by the calculus GUI '''
 
@@ -1431,6 +1429,9 @@ def PLOT_response():
     canvas.draw()
     # recolour pt_den to white, if it was red from polar plots
     pt_den_entry.configure(bg='white')
+    # colour the x and y boxes green to show that these plot
+    x_comp_entry.configure(bg='#C0F6BB')
+    y_comp_entry.configure(bg='#C0F6BB')
 
 
 # define a function that will respons to field selection in the drop down menu
@@ -1447,7 +1448,11 @@ def field_selection_response(event):
     x_comp_entry.insert(0, x_comp_selected)
     y_comp_entry.insert(0, y_comp_selected)
     # now call the plot function to finalise all these onto the plot
-    PLOT_response()
+    # depending on tab ,use correct 1 form plotting fucntion
+    if tab_text == 'Calculus':
+        form_1_stacks_response()
+    else:
+        PLOT_response()
 
 
 ''' CUSTOMISATIONS '''
@@ -1982,8 +1987,8 @@ def singular_drop_response(var):
 
 # define a function that will plot stack components, coloured
 # as per the orientation of the 2-form at that grid point
-def form_2_components_plot(grid_x, grid_y, u, v, form_2_sgn, s_max, L, fract, colour_str, arrowheads=False, w_head=1/8, h_head=1/4, s_min=2, ax=main_axis, axis_check=1):
-    global s_L, mag, R, ratio2, form_2_temp
+def form_2_components_plot(grid_x, grid_y, form_2_loc, angle, s_max, L, fract, colour_str, s_min=2, ax=main_axis, axis_check=1, form_2_glob=None):
+    global ratio2
     # get axis lengths:
     x_len = len(grid_x[:, 0])
     y_len = len(grid_y[:, 0])
@@ -1998,37 +2003,35 @@ def form_2_components_plot(grid_x, grid_y, u, v, form_2_sgn, s_max, L, fract, co
         ax.set_xlim(-L + x_m - L/5, L + x_m + L/5)
         ax.set_ylim(-L + y_m - L/5, L + y_m + L/5)
     
+    # get the signs of the input 2-form
+    form_2_sgn = np.sign(form_2_loc)
+    
     # define an empty array of magnitudes, to then fill with integer rel. mags
     R_int = np.zeros(shape=((x_len), (y_len)))
     
     # #########################################################################
     # get variables needed for the initial, simplified stack plot
     # #########################################################################
-    # find the arrow length corresponding to each point and store in mag array
-    mag = np.sqrt(u**2 + v**2)
+    
     # find direction of each arrow
-    theta = np.arctan2(v, u)   # theta defined from positive x axis ccw
+    theta = angle*np.ones(np.shape(form_2_loc))
     
     # deal with sinularities in mag
     for i in range(x_len):
         for j in range(y_len):
             # set to zero points that are not defined or inf
-            if isnan(mag[i, j]) is True or abs(mag[i, j]) == np.inf  or abs(mag[i, j]) > 1e15:
+            if isnan(form_2_loc[i, j]) is True or abs(form_2_loc[i, j]) == np.inf  or abs(form_2_loc[i, j]) > 1e15:
                 # colour this region as a red dot, not square to
                 # not confuse with nigh mag 2-forms in stacks. or worse, in
                 # blocks
                 circ = patch.Circle((grid_x[i, j], grid_y[i, j]), L*fract/3, color='red')
                 ax.add_patch(circ)
-                mag[i, j] = 0
+                form_2_loc[i, j] = 0
             # ALso, since we got this lop anyway
             # correct for singularities in planar form 2:
             # set to zero points that are not defined or inf
-            if isnan(mag[i, j]) is True:
+            if isnan(form_2_loc[i, j]) is True:
                 form_2_sgn[i, j] = 0
-            if mag[i, j] == np.inf  or mag[i, j] > 1e15:
-                form_2_sgn[i, j] = 1
-            if mag[i, j] == -np.inf  or mag[i, j] < -1e15:
-                form_2_sgn[i, j] = -1
     
     # #########################################################################
     # use the the direction of arrows to define stack properties
@@ -2045,24 +2048,25 @@ def form_2_components_plot(grid_x, grid_y, u, v, form_2_sgn, s_max, L, fract, co
     # of the arrow and with an arrowhead on top.
     # #########################################################################
     # find the maximum magnitude for scaling
-    max_size = np.max(mag)   # careful with singularities, else ---> nan
+    max_size = np.max(form_2_loc)   # careful with singularities, else ---> nan
     
     # find the relative magnitude of vectors to maximum, as an array
-    R = mag/max_size
+    R = abs(form_2_loc)/max_size
     
     # globally scale if plotting an iset axis
     if axis_check == 0:
-        form_2_temp = form_2*1
-        # get rid of singularities in form_2 from globals, locally
-        for i in range(len(form_2_temp[:, 0])):
-            for j in range(len(form_2_temp[0, :])):
+        # not to change the global form 2 here, change it to local
+        form_2_global = form_2_glob*1
+        # clear the global form_2 from singularities first:
+        for i in range(len(form_2_global[:, 0])):
+            for j in range(len(form_2_global[0, :])):
                 # set to zero points that are not defined or inf
-                if isnan(form_2_temp[i, j]) is True or abs(form_2_temp[i, j]) == np.inf  or abs(form_2_temp[i, j]) > 1e15:
-                    form_2_temp[i, j] = 0
+                if isnan(form_2_global[i, j]) is True or abs(form_2_global[i, j]) == np.inf  or abs(form_2_global[i, j]) > 1e15:
+                    form_2_global[i, j] = 0
         # from globals, get the maximum over the whole 2 form
-        max_form_global2 = np.max(form_2_temp)
+        max_form_global2 = np.max(form_2_global)
         # find its ratio to the one plotted here:
-        max_form_local2 = np.max(mag)  # use mag as always u or v is zero
+        max_form_local2 = np.max(form_2_loc)  # use mag as always u or v is zero
         # find their ratio:
         ratio2 = max_form_local2/max_form_global2
         # multiply the relative scaling array approperiately
@@ -2078,38 +2082,24 @@ def form_2_components_plot(grid_x, grid_y, u, v, form_2_sgn, s_max, L, fract, co
     B_x = grid_x - (sheet_L/2)*np.sin(theta)
     B_y = grid_y + (sheet_L/2)*np.cos(theta)
     
-    # define points of stack arrowheads as arrays for all stacks
-    p_sh1x = grid_x + (s_L/2)*I_cos + (sheet_L*w_head)*I_sin
-    p_sh1y = grid_y + (s_L/2)*I_sin - (sheet_L*w_head)*I_cos
-    p_sh2x = grid_x + (s_L/2)*I_cos - (sheet_L*w_head)*I_sin
-    p_sh2y = grid_y + (s_L/2)*I_sin + (sheet_L*w_head)*I_cos
-    p_sh3x = grid_x + (s_L*0.5 + s_L*h_head)*I_cos
-    p_sh3y = grid_y + (s_L*0.5 + s_L*h_head)*I_sin
-    
-    # define these for when there is only 1 line in the stack plot:
-    P_sh1x = grid_x + (sheet_L*w_head)*I_sin
-    P_sh1y = grid_y - (sheet_L*w_head)*I_cos
-    P_sh2x = grid_x - (sheet_L*w_head)*I_sin
-    P_sh2y = grid_y + (sheet_L*w_head)*I_cos
-    P_sh3x = grid_x + (s_L*h_head)*I_cos
-    P_sh3y = grid_y + (s_L*h_head)*I_sin
-    
     # loop over each arrow coordinate in x and y
     for i in range(x_len):
         for j in range(y_len):
             # define it for all magnitudes. Separately for odd and even corr. number of sheets:
-            # Label each element with the number of stacks required: linear scaling
             
+            # Label each element with the number of stacks required: linear scaling
             if form_2_sgn[i, j] == +1:
                 color_index = 0
             elif form_2_sgn[i, j] == -1:
                 color_index = 1
             else:
-                color_index = 2  # just in case
+                color_index = 2
             
+            # linear scaling
             for t in range(s_min, s_max+2):
                 if (t-2)/s_max <= R[i, j] <= (t-1)/s_max:
                     R_int[i, j] = t
+            
             # set a varible for current considered magnitude as it is reused
             # avoids extracting from R many times.
             n = R_int[i, j]
@@ -2165,17 +2155,6 @@ def form_2_components_plot(grid_x, grid_y, u, v, form_2_sgn, s_max, L, fract, co
                     
                     # change the parameter to loop over all changes in displacement for current magnitude
                     s += 1
-            if arrowheads is True:
-                # plot lines of arrowheads from central sheet for n = 1 or on top sheet for n>1 
-                if n > 1:   # for all lines ubt the single sheet one
-                    ax.add_line(Line2D((p_sh1x[i, j], p_sh3x[i, j]), (p_sh1y[i, j], p_sh3y[i, j]), linewidth=1, color=colour_str[color_index]))
-                    ax.add_line(Line2D((p_sh2x[i, j], p_sh3x[i, j]), ((p_sh2y[i, j], p_sh3y[i, j])), linewidth=1, color=colour_str[color_index]))
-                # then define it for the stacks with only 1 sheet:
-                else:
-                    ax.add_line(Line2D((P_sh1x[i, j], P_sh3x[i, j]), (P_sh1y[i, j], P_sh3y[i, j]), linewidth=1, color=colour_str[color_index]))
-                    ax.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color=colour_str[color_index]))
-            else:
-                pass
 
 
 # define a function that will find the 2-form from given expressions
@@ -2292,13 +2271,9 @@ def form_2_zoom(x_m, y_m):
         form_2_zoom_str = form_2_zoom_str.replace('ln', 'log')
         # evalue it numerically
         form_2_zoom_values = eval(form_2_zoom_str)
-        # get its signs
-        form_2_zoom_sgn = np.sign(form_2_zoom_values)
-        # redo zero_field too
-        zero_field_zoom = np.zeros(np.shape(form_2_zoom_values))
         # plot it
-        form_2_components_plot(R2xg, R2yg, form_2_zoom_values/2, zero_field_zoom, form_2_zoom_sgn, s_max, zoomR2_range, fract_zoom, colour_str, ax=zoomR2_inset_ax, axis_check=0)
-        form_2_components_plot(R2xg, R2yg, zero_field_zoom, form_2_zoom_values/2, form_2_zoom_sgn, s_max, zoomR2_range, fract_zoom, colour_str, ax=zoomR2_inset_ax, axis_check=0)
+        form_2_components_plot(R2xg, R2yg, form_2_zoom_values/2, np.pi/2, s_max, zoomR2_range, fract_zoom, colour_str, ax=zoomR2_inset_ax, axis_check=0, form_2_glob=form_2)
+        form_2_components_plot(R2xg, R2yg, form_2_zoom_values/2, 0, s_max, zoomR2_range, fract_zoom, colour_str, ax=zoomR2_inset_ax, axis_check=0, form_2_glob=form_2)
     # Don't display the x and y axis values
     zoomR2_inset_ax.set_xticks([])
     zoomR2_inset_ax.set_yticks([])
@@ -2315,6 +2290,19 @@ def R2_tools_handler(R2_tools_opt_var):
     # get the variable as an integer, make it global not to have to repeat this
     R2_tools_opt_int = R2_tools_opt_var
     if R2_tools_opt_int == 0:
+        # in tools option:
+        fig.canvas.draw()
+        # if the tools is selected again, add the zoom and pan buttons
+        # get rid of the modified toolbar:
+        toolbar.destroy()
+        # put the default matplotlib toolbar, back on:
+        toolbar = NavigationToolbar2Tk(canvas, plot_frame)
+        toolbar.update()
+        canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+        # tools, therefore disable the slider
+        zoom_slider_R2.configure(state=tk.DISABLED)
+    else:
+        # in zoom option:
         fig.canvas.draw()
         toolbar.home()
         # close the selected mouse options
@@ -2326,11 +2314,9 @@ def R2_tools_handler(R2_tools_opt_var):
         # get rid of the 2 buttons we don't want
         toolbar.children['!button4'].pack_forget()
         toolbar.children['!button5'].pack_forget()
-        # tools, therefore disable the slider
-        zoom_slider_R2.configure(state=tk.DISABLED)
-    else:
         # enable it again
         zoom_slider_R2.configure(state=tk.NORMAL)
+
 
 
 # upate the zooming tool
@@ -2341,7 +2327,7 @@ def update_2_form_zoom(self):
 # gets 2-form from entry box and plots it as coloured blocks only
 def form_2_response():
     # get globals
-    global form_2_str, form_2_eq, form_2_sgn, form_2, comp_x, comp_y, u, v, fract
+    global form_2_str, form_2_eq, form_2, comp_x, comp_y, u, v, fract
     global calculus_form_tracker, fract
     # set tracker
     calculus_form_tracker = 2
@@ -2356,14 +2342,12 @@ def form_2_response():
     form_2_eq = form_2_constant_correction(form_2_eq)
     # get the numerical evaluation of it
     form_2 = eval(form_2_eq)
-    # get the signs of thsi new 2-form
-    form_2_sgn = np.sign(form_2)
     # clear the current plot
     main_axis.clear()
     # use plotting stacks to display these
     #ALWAYS HALF AND HALF SPLITTING NOW
-    form_2_components_plot(xg, yg, form_2/2, zero_field, form_2_sgn, s_max, L, fract, colour_str)
-    form_2_components_plot(xg, yg, zero_field, form_2/2, form_2_sgn, s_max, L, fract, colour_str)
+    form_2_components_plot(xg, yg, form_2/2, np.pi/2, s_max, L, fract, colour_str)
+    form_2_components_plot(xg, yg, form_2/2, 0, s_max, L, fract, colour_str)
     # display the new plot
     canvas.draw()
     # display a background green on the 2-form entry to show that
@@ -2411,7 +2395,7 @@ def form_1_stacks_response():
 # if combined, use different fucntion.
 def Int_deriv_2_form():
     global u, v, u_str, v_str, vector_ex_str, vector_ey_str, vector_ex_eq, vector_ey_eq, vector_ex, vector_ey
-    global form_2, form_2_eq, form_2_sgn
+    global form_2, form_2_eq
     # get globals
     update_variables()
     # from these, establish the new fract, approperiate for 1-forms
@@ -2436,8 +2420,6 @@ def Int_deriv_2_form():
     form_2_eq = form_2_constant_correction(form_2_eq)
     # get the numerical evaluation of it
     form_2 = eval(form_2_eq)
-    # get the signs of this new 2-form
-    form_2_sgn = np.sign(form_2)
     # using interior product, get the u and v (dx and dy) components
     # of the resulting 1-form
     u = -form_2 * vector_ey
@@ -2618,7 +2600,7 @@ def Int_deriv_response():
 
 # perform ext deriv on the result of int_deriv and plots it as stacks
 def Ext_deriv_response():
-    global form_2, form_2_str, form_2_sgn
+    global form_2, form_2_str
     global calculus_form_tracker
     # set the tracker
     calculus_form_tracker = 2
@@ -2640,8 +2622,6 @@ def Ext_deriv_response():
     coords = ['x', 'y']
     # from these, use the find_2_form function to get the 2-form
     form_2 = find_2_form(expressions, coords, pt_den, m)[0]
-    # get the signs of the 2-form
-    form_2_sgn = np.sign(form_2)
     # get the string of this new 2-form to use it in int deriv
     # also put it into the entry
     form_2_str = str(simplify(str(unformat(result[0][0]))))
@@ -2653,14 +2633,14 @@ def Ext_deriv_response():
     # clear the current plot
     main_axis.clear()
     # use plotting stacks to display these
-    form_2_components_plot(xg, yg, form_2/2, zero_field, form_2_sgn, s_max, L, fract, colour_str)
-    form_2_components_plot(xg, yg, zero_field, form_2/2, form_2_sgn, s_max, L, fract, colour_str)
+    form_2_components_plot(xg, yg, form_2/2, np.pi/2, s_max, L, fract, colour_str)
+    form_2_components_plot(xg, yg, form_2/2, 0, s_max, L, fract, colour_str)
     # display the new plot
     canvas.draw()
     # display a background green on the 2-form entry to show that
     # this entry is being displayed now.
     form_2_entry.configure(bg='#C0F6BB')
-    # undo it for 1-forms
+    # undo it for 1-forms (even though they are hidden, they are not off)
     x_comp_entry.configure(bg='#FFFFFF')
     y_comp_entry.configure(bg='#FFFFFF')
     # update the label to remove the zero form if int deriv of both was used
@@ -2670,7 +2650,7 @@ def Ext_deriv_response():
 # define a function that will wedge two 1-forms and plot them
 def wedge_product_R2():
     global to_wedge_x_1_str, to_wedge_y_1_str, to_wedge_x_2_str, to_wedge_y_2_str
-    global form_2_str, form_2_eq, form_2, form_2_sgn
+    global form_2_str, form_2_eq, form_2
     global calculus_form_tracker
     # set the tracker
     calculus_form_tracker = 2
@@ -2701,12 +2681,10 @@ def wedge_product_R2():
     form_2_eq = form_2_constant_correction(form_2_eq)
     # get the numerical evaluation of it
     form_2 = eval(form_2_eq)
-    # get the signs of thsi new 2-form
-    form_2_sgn = np.sign(form_2)
     # use plotting stacks to display these
     # ALWAYS HALF AND HALF SPLITTING NOW
-    form_2_components_plot(xg, yg, form_2/2, zero_field, form_2_sgn, s_max, L, fract, colour_str)
-    form_2_components_plot(xg, yg, zero_field, form_2/2, form_2_sgn, s_max, L, fract, colour_str)
+    form_2_components_plot(xg, yg, form_2/2, np.pi/2, s_max, L, fract, colour_str)
+    form_2_components_plot(xg, yg, form_2/2, 0, s_max, L, fract, colour_str)
     # display the new plot
     canvas.draw()
     # display a background green on the 2-form entry to show that
