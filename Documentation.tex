@@ -220,16 +220,16 @@ Might be worth noting that many functions are untouched, because, to avoid issue
 
 \chapter{Differential Forms Calculus}
 
-\section{Mathematically: 2-forms from 1-forms, exterior derivative (on $\mathbb{R}^{m}$)}
-The code includes a script that calculates 2-forms from a given 1-form in a specified number of dimensions.
-It requires input of the 1-form components respectively to their elemental 1-form (in code: string\textunderscore x, string\textunderscore y, etc.), variable arrays (in code: $x$, $y$ etc.) as well as grids (in code: $xg$, $yg$, etc.) of these and a list of symbols for each variable used in the equations (coords).
+\section{Mathematically: $2-$forms from $1-$forms, exterior derivative (on $\mathbb{R}^{m}$)}
+The code includes a script that calculates $2-$forms from a given $1-$form in a specified number of dimensions.
+It requires input of the $1-$form components respectively to their elemental $1-$form (in code: string\textunderscore x, string\textunderscore y, etc.), variable arrays (in code: $x$, $y$ etc.) as well as grids (in code: $xg$, $yg$, etc.) of these and a list of symbols for each variable used in the equations (coords).
 The code, so far, has to be changed manually to include the change of all given components from \textbf{string} type to \textbf{sympy.core.mul.Mul}. The number of used dimensions has to also be input as an integer (`$m$' in the code). The variable, `expressions' has to also be appended with the correct number of components.
 
-\noindent Python cycles over the components and the given symbols for variables, differentiating each. To improve efficiency, the derivatives have not been completed when components are to be differentiated with respect to their corresponding elementary 1-form (these go to zero). The results are saved into an (m $\times$ m) array called `ext\textunderscore ds'. The array is of data type `object', as it must store strings of arbitrary length in each of its components. It stores all the found derivatives, with components changing along the rows, and variables changing along the columns.
+\noindent Python cycles over the components and the given symbols for variables, differentiating each. To improve efficiency, the derivatives have not been completed when components are to be differentiated with respect to their corresponding elementary 1-form (these go to zero). The results are saved into an ($m \times m$) array called `ext\textunderscore ds'. The array is of data type `object', as it must store strings of arbitrary length in each of its components. It stores all the found derivatives, with components changing along the rows, and variables changing along the columns.
 Each derivative expression is also changed into a string, This is done to append needed prefixes onto them and to later use them with the eval() function, such as brackets and negatives. Minus sings (strings) are then appended to the upper right hand-side of the matrix. This is done to correct for the elementary 2-forms being in the wrong order.
 
-\noindent This, completed, array is then taken through loops that extract the components of each elementary 2-form. These components are symmetrical elements, therefore extracting them includes taking elements with the same $i$ and $j$, switched in the coordinates. A `pair' variable is introduced to keep track of how many times the loop extracted a pair of 2-form components and merged them. As only 2-forms are being calculated, there is always 2 components being extracted toward one elementary 2-form (including zeros as components) The number that this variable reaches is the number of components of a 2-form on $\mathbb{R}^{m}$, which was found to be given by triangular numbers. Resulting pairs are stored in an array of 1 column and a number of rows determined  by the triangular number of dimensionality. This array is called `result', and stores objects (it must consist of strings of varying lengths for each element). Each time a new pair is being considered, the element from `result' is cleared to exclude the initial `NoneType' variable present. When appending the components, it is checked that if one or more of them evaluated to zero, they are not appended.
-The result is printed, as a vector, whose rows correspond to different 2-form elements. The order is as follows:
+\noindent This, completed, array is then taken through loops that extract the components of each elementary $2-$form. These components are symmetrical elements, therefore extracting them includes taking elements with the same $i$ and $j$, switched in the coordinates. A `pair' variable is introduced to keep track of how many times the loop extracted a pair of 2-form components and merged them. As only 2-forms are being calculated, there is always 2 components being extracted toward one elementary $2-$form (including zeros as components) The number that this variable reaches is the number of components of a $2-$form on $\mathbb{R}^{m}$, which was found to be given by triangular numbers. Resulting pairs are stored in an array of 1 column and a number of rows determined  by the triangular number of dimensionality. This array is called `result', and stores objects (it must consist of strings of varying lengths for each element). Each time a new pair is being considered, the element from `result' is cleared to exclude the initial `NoneType' variable present. When appending the components, it is checked that if one or more of them evaluated to zero, they are not appended.
+The result is printed, as a vector, whose rows correspond to different $2-$form elements. The order is as follows:
 For m=3:
 \begin{center}
 	\begin{tabular}{c}
@@ -238,7 +238,6 @@ For m=3:
 		$ dy \wedge dz$.
 	\end{tabular}
 \end{center}
-
 For m=4 these become:
 
 \begin{center}
@@ -252,8 +251,7 @@ For m=4 these become:
 		
 	\end{tabular}
 \end{center}
-etc.
-
+etc.\\
 These follow the component pairs as they appear in the lower-right of the matrix (ext\textunderscore ds), in order that follows each line, until the main diagonal.
 It can be clearly visualised on the example of the 2-form on $\mathbb{R}^{4}$ as follows:
 \begin{equation}
@@ -264,7 +262,6 @@ It can be clearly visualised on the example of the 2-form on $\mathbb{R}^{4}$ as
 			dx \wedge dw & dy \wedge dw & dz \wedge dw & 0 \\
 		\end{pmatrix}
 \end{equation}
-
 Each component of the outcome (`result') is then formatted in such a way as to be understood by python's eval() function and the evaluation of each is saved into a variable called `form\textunderscore 2'. This has to be composed of m dimensional arrays, one for each elemental 2-form component (given by the triangular numbers from the used dimensions `m').
 
 \begin{center}
@@ -326,8 +323,8 @@ Upon selecting the 'line integrals' tab, with the polygons drop down selection, 
 
 \begin{itemize}
 	\item Small displacements along the line in the $x$ and $y$ directions are calculated based on the last two entries in LI\textunderscore coord (coords of points $a$ and $b$) and the chosen number of intervals along the line, $N$. $dx = \frac{1}{N} (b_x - a_x)$,  $dy = \frac{1}{N} (b_y - a_y)$
-	\item A 2xN array 'intervals' is created and stores the coordinates of the points along the line which will be used in the final calculation. This is achieved using a for loop; $intervals(x_k) = a_x + k dx$, $intervals(y_k) = a_y + k dy$
-	\item Next the vector field components must be evaluated at each of the interval points along the line. These components are stored in the 2xN array 'uv\textunderscore store'. 
+	\item A $2xN$ array 'intervals' is created and stores the coordinates of the points along the line which will be used in the final calculation. This is achieved using a for loop; $intervals(x_k) = a_x + k dx$, $intervals(y_k) = a_y + k dy$
+	\item Next the vector field components must be evaluated at each of the interval points along the line. These components are stored in the $2xN$ array 'uv\textunderscore store'. 
 	\item The line integral is approximated by summing the products of the small displacements $dx$ and $dy$ with the respective vector field components at each interval point. Since the displacements are the same along the straight line, the sum is simplified to:
 \end{itemize}
 
@@ -391,18 +388,18 @@ Once again however, this was established not to be fully functional. The issue n
 There exists yet another way of defining $2-$forms through stacks that represent $1-$forms. This includes splitting the $2-$form into components, not into $dx\wedge dy$ and $dy\wedge dx$ that are understood to originate from the exterior derivative, but into $f(x, y)dx \wedge g(x, y)dy$, where the $2-$form is $f(x,y)g(x,y) dx\wedge dy$. This yields another issue. Similarly to the last considered method, the splitting of the $2-$form into a wedge product of two $1-$form is not unique. Again, as above for the previous method, it is also possible here to let the user input two $1-$forms to wedge together into a $2-$form, but once again, this may also include cancellations or merges between components, which make the $2-$form not unique.
 
 \subsection{Lessons learnt}
-To conclude, any graphical representation of  $2-$form that is built by superposing two $1-$form stackings will be different for different combinations of $1-$forms (that algebraically produce the same $2-$form). This can be simply put as ''the algebraic and the geometric representations don't commute", that is, \\~\\
+To conclude, any graphical representation of  $2-$form that is built by superposing two $1-$form stackings will be different for different combinations of $1-$forms (that algebraically produce the same $2-$form). This can be simply put as ''the algebraic and the geometric representations don't commute", that is: \\~\\
 let $\alpha$, $\beta$  $\in \wedge^1(\mathbb{R}^2)$, $\omega \in \wedge^2(\mathbb{R}^2)$ such that $\alpha~A~\beta = \omega$, where $A$ represents the algebraic operation (in our examples $A=\wedge$)  and let $G$ be the geometric operation, then 
 
 \begin{eqnarray*}
 \left.
 \begin{array}{c}
 G(\alpha~A~\beta) = G(\omega)\\ 
-\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\, G(\alpha~A~\beta) = (G(\alpha)~G(A)~G(\beta))
+\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\,\; G(\alpha~A~\beta) = (G(\alpha)~G(A)~G(\beta))
 \end{array}
 \right \} \to G(\omega) \ne (G(\alpha)~G(A)~G(\beta)),
 \end{eqnarray*}
-where in the first line, $A$ acted first and the second line $G$ acted first. The one secret here that we probably misinterpret is $G(A)$ or  $G(\wedge)$. What is the geometric analogue of wedging. In the examples mentioned we applied the wedge geometrically as superposition of vertical stacks (say $G(\alpha)$) and horizontal stacks (say $G(\beta)$). If our interpretation is correct, then what was found is fundamental. As clear and intuitive as this method seems to be for graphically representing $2-$forms, it does not provide a unique way of doing so. In fact, given a $2-$form, all the graphical representation that starts from $1-$forms stackings are related by coordinate transformation. To present this idea more clearly, let's look at the more rigorous proof of the above stated non-uniqueness which arises through splitting the $2-$form.
+where in the first line $A$ acted first, and in the second line $G$ acted first. The one secret here that we probably `misunderstood' is $G(A)$ or  $G(\wedge)$. So, what is the geometric analogue of wedging? In the examples mentioned we applied the wedge geometrically as superposition of vertical stacks (say $G(\alpha)$) and horizontal stacks (say $G(\beta)$). If our interpretation is correct, then what was found is fundamental. As clear and intuitive as this method seems to be for graphically representing $2-$forms, it does not provide a unique way of doing so. In fact, given a $2-$form, all the graphical representation that starts from $1-$forms stackings are related by coordinate transformation. To present this idea more clearly, let's look at the more rigorous proof of the above stated non-uniqueness which arises through splitting the $2-$form.
 
 \subsection{Proof of the non-uniqueness of 2-forms}
 

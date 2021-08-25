@@ -7,7 +7,7 @@
 \contentsline {section}{\numberline {1.2}Initial GUI of the quiver and stack plot}{7}{section.1.2}%
 \contentsline {subsection}{\numberline {1.2.1}Explaining user defined functions in the GUI code}{7}{subsection.1.2.1}%
 \contentsline {chapter}{\numberline {2}Differential Forms Calculus}{10}{chapter.2}%
-\contentsline {section}{\numberline {2.1}Mathematically: 2-forms from 1-forms, exterior derivative (on $\mathbb {R}^{m}$)}{10}{section.2.1}%
+\contentsline {section}{\numberline {2.1}Mathematically: $2-$forms from $1-$forms, exterior derivative (on $\mathbb {R}^{m}$)}{10}{section.2.1}%
 \contentsline {chapter}{\numberline {3}$1-$Forms Calculus}{12}{chapter.3}%
 \contentsline {section}{\numberline {3.1}Inset Plots}{12}{section.3.1}%
 \contentsline {subsection}{\numberline {3.1.1}Derivative Window}{12}{subsection.3.1.1}%
