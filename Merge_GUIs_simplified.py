@@ -1037,7 +1037,7 @@ cid = fig.canvas.mpl_connect("button_press_event", on_key_press)
 
 # define a funciton to restart line integral calculation and lines
 def LI_restart():
-    global LI_total, LI_coord, shape_area, swaplistpoly, col_poly
+    global LI_total, LI_coord, shape_area, swaplistpoly, col_poly, flux
     # first, initialise variables again
     LI_coord = []
     LI_total = 0
