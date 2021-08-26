@@ -1046,7 +1046,7 @@ def LI_restart():
     shape_area = 0
     ratio1 = 0
     ratio2 = 0
-    # update the label
+    # update the labels
     LI_total_label.configure(text=LI_total)
     flux_label.configure(text=flux)
     shape_area_label.configure(text=shape_area)
@@ -1414,6 +1414,7 @@ def vect_type_response(tensor):
     main_axis.clear()
     # deal with grids if user is in the LI tab
     if tab_text == 'Line Integrals':
+        LI_restart()
         # plot the grid
         poly_grid_submit()
     # use the tensor to determine what to plot:
@@ -1485,6 +1486,20 @@ def PLOT_response():
     main_axis.clear()
     # deal with grids if user is in the LI tab
     if tab_text == 'Line Integrals':
+        global LI_total, LI_coord, shape_area
+        # first, initialise variables again
+        LI_coord = []
+        LI_total = 0
+        flux = 0
+        shape_area = 0
+        ratio1 = 0
+        ratio2 = 0
+        # update the labels
+        LI_total_label.configure(text=LI_total)
+        flux_label.configure(text=flux)
+        shape_area_label.configure(text=shape_area)
+        ratio1_label.configure(text=ratio1)
+        ratio2_label.configure(text=ratio2)
         # plot the grid
         poly_grid_submit()
     # create a figure and display it
@@ -1617,6 +1632,24 @@ def Polar_grid_plot_response(tensor):
     u, v = eq_to_comps(string_x, string_y, xg, yg)
     # clear the plot that is already there:
     main_axis.clear()
+    # deal with grids if user is in the LI tab
+    if tab_text == 'Line Integrals':
+        global LI_total, LI_coord, shape_area
+        # first, initialise variables again
+        LI_coord = []
+        LI_total = 0
+        flux = 0
+        shape_area = 0
+        ratio1 = 0
+        ratio2 = 0
+        # update the labels
+        LI_total_label.configure(text=LI_total)
+        flux_label.configure(text=flux)
+        shape_area_label.configure(text=shape_area)
+        ratio1_label.configure(text=ratio1)
+        ratio2_label.configure(text=ratio2)
+        # plot the grid
+        poly_grid_submit()
     # use the selected tensor to determine what to plot:
     # 0 is just stacks, 1 is for only arrows and 2 is for both
     if tensor == 0:
