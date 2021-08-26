@@ -1253,8 +1253,8 @@ def line_int_circ(cent, R, N, u_str, v_str, orient_int):
                 exec('main_axis.add_artist(w' + str(a) + ')')
         
         else:
-            color2 = col_in[int(test[3,0])]
-            circle2 = mpl.patches.Circle(cent, R, fill=False, color='color2', linewidth=3)
+            colour2 = col_in[int(test[3,0])]
+            circle2 = mpl.patches.Circle(cent, R, fill=False, color=colour2, linewidth=3)
             main_axis.add_artist(circle2)
             
     else:
