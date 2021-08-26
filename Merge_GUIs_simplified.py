@@ -1037,7 +1037,7 @@ cid = fig.canvas.mpl_connect("button_press_event", on_key_press)
 
 # define a funciton to restart line integral calculation and lines
 def LI_restart():
-    global LI_total, LI_coord, shape_area
+    global LI_total, LI_coord, shape_area, swaplistpoly, col_poly
     # first, initialise variables again
     LI_coord = []
     LI_total = 0
@@ -1045,6 +1045,9 @@ def LI_restart():
     shape_area = 0
     ratio1 = 0
     ratio2 = 0
+    swaplistpoly = []
+    col_poly = []
+    
     # update the labels
     LI_total_label.configure(text=LI_total)
     flux_label.configure(text=flux)
@@ -1123,7 +1126,6 @@ def LI_shape_select_response(selected_shape):
         orient_int_btn = tk.Button(LI_frame, text=orient_int, command=orient_int_response)
         orient_int_btn.grid(row=5, column=2)
         # enable the toggle switch
-        showflux_toggle.configure(state=tk.NORMAL)
     else:
         # restart the plot and the integral values
         LI_restart()
@@ -1137,7 +1139,6 @@ def LI_shape_select_response(selected_shape):
         except (UnboundLocalError, NameError):  
             pass
         # disable the toggle, as it does not work with polygons (at least yet)
-        showflux_toggle.configure(state=tk.DISABLED)
     # update canvas
     canvas.draw()
         
@@ -1271,7 +1272,7 @@ def line_int_circ(cent, R, N, u_str, v_str, orient_int):
 
 # define a function that will complete the line integral
 def line_int_poly(N, u_str, v_str):
-    global LI_total, coord_array, coord_diff, LI_verts, flux
+    global LI_total, coord_array, coord_diff, LI_verts, flux, swaplistpoly, col_poly
     # set up a conuter to know how many time to complete the sum process
     c_count = len(LI_coord)
     
@@ -1326,12 +1327,42 @@ def line_int_poly(N, u_str, v_str):
         res = dx*np.sum(uv_store[0, :]) + dy*np.sum(uv_store[1, :])
         flux_inc = dy*np.sum(uv_store[0, :]) - dx*np.sum(uv_store[1, :])
         
-        # display the drawn on lines
-        canvas.draw()
+        if showflux.get() == 1:
+        
+            test1 = np.zeros(shape=(2,N))
+            
+            # Store flux at each point on line
+            test1[0,:] = dy*uv_store[0, :] - dx*uv_store[1, :]
+            
+            c = 0
+            col_in = ['grey', 'blue', 'red']
+            
+            for i in range(N):
+                if test1[0,i] < 0:
+                    test1[1,i] = 1
+                    
+                elif test1[0,i] > 0:
+                    test1[1,i] = 2
+                    
+                elif test1[0,i] == 0 or test1[0,i] == -0:
+                    test1[1,i] = 0
+                
+                # Assign colour of first segment
+                if i == 0:
+                    swaplistpoly.append([intervals[0,i], intervals[1,i]])
+                    col_poly.append(col_in[int(test1[1,i])])
+                    continue
+                else:
+                    if test1[1,i-1] != test1[1,i]:
+                        swaplistpoly.append([intervals[0,i], intervals[1,i]])
+                        col_poly.append(col_in[int(test1[1,i])])
+                        c += 1
         
         # update the total
         LI_total += res
         flux += flux_inc
+        
+        
         
         # update its label
         LI_total_label.configure(text=(str(round(LI_total, 2)) + ' (' + str(round((LI_total/np.pi), 2)) + ' pi)' ))    
@@ -1343,8 +1374,20 @@ def line_int_poly(N, u_str, v_str):
             if shape_area < 0:
                 shape_area = (-1)*shape_area
                 flux = (-1)*flux
+                
+                if showflux.get() == 1:
+                    for b in range(len(col_poly)):
+                        if col_poly[b] == 'blue':
+                            col_poly[b] = col_poly[b].replace('blue', 'red')
+                        elif col_poly[b] == 'red':
+                            col_poly[b] = col_poly[b].replace('red', 'blue')
             else:
                 pass
+            
+            if showflux.get() == 1:
+                swaplistpoly.append(LI_verts[0])
+                for a in range(len(col_poly)):
+                    main_axis.add_line(Line2D((swaplistpoly[a][0], swaplistpoly[a+1][0]), (swaplistpoly[a][1], swaplistpoly[a+1][1]), linewidth=3, color=col_poly[a]))
             
             ratio1 = LI_total/shape_area
             ratio1_label.configure(text=str(round(ratio1, 2)))
@@ -1354,7 +1397,8 @@ def line_int_poly(N, u_str, v_str):
             
             flux_label.configure(text=(str(round(flux, 2)) + ' (' + str(round((flux/np.pi), 2)) + ' pi)' ))
             
-            flux = 0
+        # display the drawn on lines
+        canvas.draw()
             
         return res
     
@@ -3622,7 +3666,6 @@ stack_btn = tk.Radiobutton(LI_frame, text='stack', variable=tensor, value=0, com
 tk.Label(LI_frame, text='Toggle Show Flux: ').grid(row=8, column=0)
 showflux_toggle = tk.Button(LI_frame, image=toggle_image_off, bd=0, command=showflux_response)
 showflux_toggle.grid(row=8, column=1)
-showflux_toggle.configure(state=tk.DISABLED)
 
 # add an entry so the user can choose what grid they want
 # by choosing grid lines separation
