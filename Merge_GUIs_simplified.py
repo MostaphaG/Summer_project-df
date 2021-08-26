@@ -995,11 +995,10 @@ def on_key_press(event):
     # respond with only toolbar actions when only tools are to be used
     if click_opt_int == 0:
         key_press_handler(event, canvas, toolbar)
-        
     # when the derivative option is selected, cerry out the derivative when clicked
     elif 0 < click_opt_int < 5:
         deriv_calc(x_m, y_m)
-        
+    # separately deal with needed click respponses in LI tab
     if tab_text == 'Line Integrals':
         if LI_shape_select.get() == 'Polygon':
             # Store the coordinates of the click in list
@@ -1016,7 +1015,7 @@ def on_key_press(event):
                 Radius_LI_circ_entry.delete(0, 'end')
                 Radius_LI_circ_entry.insert(0 , str(Radius_LI_circ))
             line_int_circ([x_m,y_m], Radius_LI_circ, 100000, string_x, string_y, orient_int)
-    # when want to use zoom or tools in calculus:
+    # and when want to use zoom or tools in calculus:
     if tab_text == 'Calculus':
         if R2_tools_opt_int == 1:
             form_2_zoom(x_m, y_m)
@@ -1927,6 +1926,23 @@ def format_eq_div(string):
 
 # Function for updating the inset plots when options are changed by the user.
 def update_deriv(self):
+    if 0 < click_opt_int < 5:
+        deriv_calc(x_m, y_m)
+    else:
+        pass
+
+
+# define a function to put in an inset axis at user specified position
+def set_inset_target():
+    global x_m, y_m, x_pix, y_pix
+    # get inputs from the entry boxes
+    x_m = eval(x_m_entry.get())
+    y_m = eval(y_m_entry.get())
+    # Could not figure out how to reliably get pixels from coordinates on plot
+    # got approximate relations based on experimenting
+    x_pix = (x_m/L * 229) + 427
+    y_pix = (y_m/L * 229) + 308
+    # call deriv calc
     if 0 < click_opt_int < 5:
         deriv_calc(x_m, y_m)
     else:
@@ -2929,6 +2945,24 @@ def Hodge_2_form_response():
     canvas.draw()
 
 
+# define a function to put in an inset axis at user specified position
+# for the calculus tab
+def set_inset_target_calc():
+    global x_m, y_m, x_pix, y_pix
+    # get inputs from the entry boxes
+    x_m = eval(x_m_entry.get())
+    y_m = eval(y_m_entry.get())
+    # Could not figure out how to reliably get pixels from coordinates on plot
+    # got approximate relations based on experimenting
+    x_pix = (x_m/L * 229) + 427
+    y_pix = (y_m/L * 229) + 308
+    # call zooming tool
+    if R2_tools_opt_int == 0:
+        pass
+    else:
+        form_2_zoom(x_m, y_m)
+
+
 ''' DEFINE FUNCTIONS USED IN R3 CODE '''
 
 
@@ -3356,12 +3390,12 @@ tensor = tk.IntVar()
 tensor.set(0)
 
 tensor_label = tk.Label(right_frame, text='Arrows/Stacks:')
-tensor_label.grid(row=7, column=0)
+tensor_label.grid(row=8, column=0)
 
 # define each button and put them on the screen, in the right_frame
-arrow_btn = tk.Radiobutton(right_frame, text='arrow', variable=tensor, value=1, command=lambda: vect_type_response(tensor.get())).grid(row=7, column=1)
-arrow_stack_btn = tk.Radiobutton(right_frame, text='both', variable=tensor, value=2, command=lambda: vect_type_response(tensor.get())).grid(row=7, column=3)
-stack_btn = tk.Radiobutton(right_frame, text='stack', variable=tensor, value=0, command=lambda: vect_type_response(tensor.get())).grid(row=7, column=2)
+arrow_btn = tk.Radiobutton(right_frame, text='arrow', variable=tensor, value=1, command=lambda: vect_type_response(tensor.get())).grid(row=8, column=1)
+arrow_stack_btn = tk.Radiobutton(right_frame, text='both', variable=tensor, value=2, command=lambda: vect_type_response(tensor.get())).grid(row=8, column=3)
+stack_btn = tk.Radiobutton(right_frame, text='stack', variable=tensor, value=0, command=lambda: vect_type_response(tensor.get())).grid(row=8, column=2)
 
 # DERIVATIVE FUNCTIONS
 
@@ -3407,9 +3441,20 @@ d_length_drop.grid(row=5, column=1)
 
 # Autoscale Toggle
 ascale_label = tk.Label(right_frame, text='Autoscale arrows:')
-ascale_label.grid(row=6, column=0)
+ascale_label.grid(row=7, column=0)
 ascale_toggle = tk.Button(right_frame, image=toggle_image_off, bd=0, command=scale_toggle_response)
-ascale_toggle.grid(row=6, column=1, pady=5)
+ascale_toggle.grid(row=7, column=1, pady=5)
+
+# define entry boxes to allow user to input x_m and y_m
+x_m_entry = tk.Entry(right_frame, width=12)
+y_m_entry = tk.Entry(right_frame, width=12)
+x_m_entry.grid(row=6, column=0)
+y_m_entry.grid(row=6, column=1)
+# and a button to submit these:
+Set_target_btn = tk.Button(right_frame, text='Set Target', command=set_inset_target)
+Set_target_btn.grid(row=6, column=2, padx=20)
+
+
 
 '''
 
@@ -3683,6 +3728,15 @@ zoomR2_length_select.set(zoomR2_length_list[2])
 tk.Label(calculus_frame, text='Inset Fractional Size:').grid(row=11, column=0)
 zoomR2_length_drop = tk.OptionMenu(calculus_frame, zoomR2_length_select, *zoomR2_length_list, command=update_2_form_zoom)
 zoomR2_length_drop.grid(row=11, column=1)
+
+# define entry boxes to allow user to input x_m and y_m
+x_m_entry = tk.Entry(calculus_frame, width=12)
+y_m_entry = tk.Entry(calculus_frame, width=12)
+x_m_entry.grid(row=12, column=0)
+y_m_entry.grid(row=12, column=1)
+# and a button to submit these:
+Set_target_btn = tk.Button(calculus_frame, text='Set Target', command=set_inset_target_calc)
+Set_target_btn.grid(row=12, column=2, padx=20)
 
 
 '''
