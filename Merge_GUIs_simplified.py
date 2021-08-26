@@ -2950,8 +2950,8 @@ def Hodge_2_form_response():
 def set_inset_target_calc():
     global x_m, y_m, x_pix, y_pix
     # get inputs from the entry boxes
-    x_m = eval(x_m_entry.get())
-    y_m = eval(y_m_entry.get())
+    x_m = eval(x_m_entry_calc.get())
+    y_m = eval(y_m_entry_calc.get())
     # Could not figure out how to reliably get pixels from coordinates on plot
     # got approximate relations based on experimenting
     x_pix = (x_m/L * 229) + 427
@@ -3730,13 +3730,13 @@ zoomR2_length_drop = tk.OptionMenu(calculus_frame, zoomR2_length_select, *zoomR2
 zoomR2_length_drop.grid(row=11, column=1)
 
 # define entry boxes to allow user to input x_m and y_m
-x_m_entry = tk.Entry(calculus_frame, width=12)
-y_m_entry = tk.Entry(calculus_frame, width=12)
-x_m_entry.grid(row=12, column=0)
-y_m_entry.grid(row=12, column=1)
+x_m_entry_calc = tk.Entry(calculus_frame, width=12)
+y_m_entry_calc = tk.Entry(calculus_frame, width=12)
+x_m_entry_calc.grid(row=12, column=0)
+y_m_entry_calc.grid(row=12, column=1)
 # and a button to submit these:
-Set_target_btn = tk.Button(calculus_frame, text='Set Target', command=set_inset_target_calc)
-Set_target_btn.grid(row=12, column=2, padx=20)
+Set_target_btn_calc = tk.Button(calculus_frame, text='Set Target', command=set_inset_target_calc)
+Set_target_btn_calc.grid(row=12, column=2, padx=20)
 
 
 '''
