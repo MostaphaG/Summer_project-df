@@ -446,7 +446,8 @@ def tab_selection(event):
         PLOT_btn['state'] = tk.NORMAL
         polar_grid_plot_btn['state'] = tk.NORMAL
     if tab_text == 'Line Integrals':
-        global toolbar, LI_coord, LI_total, LI_shape_select, tensor, click_opt_int
+        global toolbar, LI_coord, LI_total, tensor, click_opt_int
+        global LI_selected
         x_m = None
         y_m = None
         fig.canvas.draw()
@@ -472,17 +473,12 @@ def tab_selection(event):
             tensor.set(0)
             vect_type_response(tensor.get())
         # return the option to default
-        LI_shape_select.set(LI_shape_list[0])
         LI_shape_select_response('Polygon')
-        # restrat the LI calculations and replot to start from default
-        LI_restart()
-        # set up grid initally as polygon is selected
-        main_axis.grid(True)
         # draw it on
         canvas.draw()
         # enable plot buttons again
         PLOT_btn['state'] = tk.NORMAL
-        polar_grid_plot_btn['state'] = tk.NORMAL#
+        polar_grid_plot_btn['state'] = tk.NORMAL
     elif tab_text == 'Main':
         LI_restart()
         # by default return to initial 'tools'
@@ -1060,12 +1056,6 @@ def LI_restart():
     # call plot-respose to redraw (so lines are deleted)
     # ideally would want a way of deleting lines without restarting the plot
     PLOT_response()
-    # get the grid drawn on as needed
-    if LI_shape_select.get() == 'Polygon':
-        main_axis.grid(True)
-        canvas.draw()
-    else:
-        pass
 
 
 # define a button to change orientation of drawn shape
@@ -1121,12 +1111,8 @@ def LI_shape_select_response(selected_shape):
     if selected_shape == 'Circle':
         # restart the plot and the integral values
         LI_restart()
-        # get rid of grid specifications also
-        # no need for try and except, frame opens with these, these will
-        # always be there
-        grid_LI_poly_label.destroy()
-        grid_sep_poly_entry.destroy()
-        submit_poly_sep_grid.destroy()
+        # set up the grid
+        poly_grid_submit()
         # if circle is selected, display an entry box for the radius of it
         Radius_LI_label = tk.Label(LI_frame, text='Circle Radius:')
         Radius_LI_label.grid(row=5, column=0)
@@ -1137,27 +1123,13 @@ def LI_shape_select_response(selected_shape):
         # define a button that will change circle orientation
         orient_int_btn = tk.Button(LI_frame, text=orient_int, command=orient_int_response)
         orient_int_btn.grid(row=5, column=2)
-        # get rid of grid on plot
-        main_axis.grid(False)
-        # update canvas
-        canvas.draw()
+        # enable the toggle switch
+        showflux_toggle.configure(state=tk.NORMAL)
     else:
         # restart the plot and the integral values
         LI_restart()
-        # set up a grid
-        main_axis.grid(True)
-        # add an entry so the user can choose what grid they want
-        # by choosing grid lines separation
-        grid_LI_poly_label = tk.Label(LI_frame, text='Grid Separation:')
-        grid_LI_poly_label.grid(row=5, column=0)
-        grid_sep_poly_entry = tk.Entry(LI_frame, width=10)
-        grid_sep_poly_entry.grid(row=5, column=1)
-        grid_sep_poly_entry.insert(0, '')
-        # define a button to submit these changes
-        submit_poly_sep_grid = tk.Button(LI_frame, text='Submit Grid', command=poly_grid_submit)
-        submit_poly_sep_grid.grid(row=5, column=2)
-        # update canvas
-        canvas.draw()
+        # set up the grid
+        poly_grid_submit()
         # get rid of circle options
         try:
             Radius_LI_label.destroy()
@@ -1165,7 +1137,11 @@ def LI_shape_select_response(selected_shape):
             orient_int_btn.destroy()
         except (UnboundLocalError, NameError):  
             pass
-
+        # disable the toggle, as it does not work with polygons (at least yet)
+        showflux_toggle.configure(state=tk.DISABLED)
+    # update canvas
+    canvas.draw()
+        
 
 # Compute line integral for circles
 def line_int_circ(cent, R, N, u_str, v_str, orient_int):
@@ -1436,6 +1412,10 @@ def vect_type_response(tensor):
     global click_option
     # clear the plot that is already there:
     main_axis.clear()
+    # deal with grids if user is in the LI tab
+    if tab_text == 'Line Integrals':
+        # plot the grid
+        poly_grid_submit()
     # use the tensor to determine what to plot:
     # 0 is just stacks, 1 is for only arrows and 2 is for both
     if tensor == 0:
@@ -1503,6 +1483,10 @@ def PLOT_response():
         stacks = True
     # clear the current axis
     main_axis.clear()
+    # deal with grids if user is in the LI tab
+    if tab_text == 'Line Integrals':
+        # plot the grid
+        poly_grid_submit()
     # create a figure and display it
     stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0)
     canvas.draw()
@@ -1591,6 +1575,7 @@ def scale_toggle_response():
         # variable to an and the image to on
         ascale.set(1)
         ascale_toggle.configure(image=toggle_image_on)
+        ascale_toggle_LI.configure(image=toggle_image_on)
         # for it to update, reclick whatever radiobutton is selected
         # or, if stacks only is chosen, change it to both, to show some change
         vect_type_response(tensor.get())
@@ -1599,6 +1584,7 @@ def scale_toggle_response():
         # set it to off and change image
         ascale.set(0)
         ascale_toggle.configure(image=toggle_image_off)
+        ascale_toggle_LI.configure(image=toggle_image_off)
         # for it to update, reclick whatever radiobutton is selected
         # or, if stacks only is chosen, change it to both, to show some change
         vect_type_response(tensor.get())
@@ -3397,7 +3383,7 @@ d_length_drop = tk.OptionMenu(right_frame, d_length_select, *d_length_list, comm
 d_length_drop.grid(row=5, column=1)
 
 # Autoscale Toggle
-ascale_label = tk.Label(right_frame, text='Toggle Autoscaling:')
+ascale_label = tk.Label(right_frame, text='Autoscale arrows:')
 ascale_label.grid(row=6, column=0)
 ascale_toggle = tk.Button(right_frame, image=toggle_image_off, bd=0, command=scale_toggle_response)
 ascale_toggle.grid(row=6, column=1, pady=5)
@@ -3568,6 +3554,23 @@ stack_btn = tk.Radiobutton(LI_frame, text='stack', variable=tensor, value=0, com
 tk.Label(LI_frame, text='Toggle Show Flux: ').grid(row=8, column=0)
 showflux_toggle = tk.Button(LI_frame, image=toggle_image_off, bd=0, command=showflux_response)
 showflux_toggle.grid(row=8, column=1)
+showflux_toggle.configure(state=tk.DISABLED)
+
+# add an entry so the user can choose what grid they want
+# by choosing grid lines separation
+grid_LI_poly_label = tk.Label(LI_frame, text='Grid Separation:').grid(row=9, column=0)
+grid_sep_poly_entry = tk.Entry(LI_frame, width=10)
+grid_sep_poly_entry.grid(row=9, column=1)
+grid_sep_poly_entry.insert(0, '2')
+# define a button to submit these changes
+submit_poly_sep_grid = tk.Button(LI_frame, text='Submit Grid', command=poly_grid_submit)
+submit_poly_sep_grid.grid(row=9, column=2)
+
+# Autoscale Arrows Toggle
+tk.Label(LI_frame, text='Autoscale arrows:').grid(row=10, column=0)
+ascale_toggle_LI = tk.Button(LI_frame, image=toggle_image_off, bd=0, command=scale_toggle_response)
+ascale_toggle_LI.grid(row=10, column=1, pady=5)
+
 
 '''
 
