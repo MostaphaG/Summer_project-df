@@ -867,6 +867,9 @@ rg, thetag = np.meshgrid(r, theta)
 # poalr gird without converting to cartesian grid first
 a_polar = 1
 
+showflux = tk.IntVar()
+showflux.set(0)
+
 # set up line intergal enpty variables
 LI_coord = []
 LI_total = 0
@@ -1214,10 +1217,8 @@ def line_int_circ(cent, R, N, u_str, v_str, orient_int):
     test[1,:] = dx[:]*uv_store[0, :] + dy[:]*uv_store[1, :]
     test[2,:] = dx_norm[:]*uv_store[0, :] + dy_norm[:]*uv_store[1, :]
     
-    showflux = True
-    
     # Colouring the circle based on flux
-    if showflux == True:
+    if showflux.get() == 1:
         c = 0
         pstring = ''
         swaplist = []
@@ -1253,18 +1254,17 @@ def line_int_circ(cent, R, N, u_str, v_str, orient_int):
         
         else:
             color2 = col_in[int(test[3,0])]
-            circle2 = mpl.patches.Circle(cent, R, fill=False, color=color2, linewidth=3)
+            circle2 = mpl.patches.Circle(cent, R, fill=False, color='color2', linewidth=3)
             main_axis.add_artist(circle2)
             
     else:
         # Plot the circle
-        circle1 = mpl.patches.Circle(cent, R, fill=False, color='red')
+        circle1 = mpl.patches.Circle(cent, R, fill=False, color='black')
         main_axis.add_artist(circle1)
         
     fig.canvas.draw()
     
-
-    if showflux == True:
+    if showflux.get() == 1:
         # Remove wedges from the plot
         if c > 0:
             for a in range(c):
@@ -1409,6 +1409,22 @@ def calc_area(vert_list):
     # get area from these
     A = 0.5*(S1-S2)
     return A
+
+def showflux_response():
+    global showflux
+    if showflux.get() == 0:
+        # the button is off, and has been clicked therefore change the
+        # variable to an and the image to on
+        showflux.set(1)
+        showflux_toggle.configure(image=toggle_image_on)
+
+    else:
+        # the button is on and has been clicked
+        # set it to off and change image
+        showflux.set(0)
+        showflux_toggle.configure(image=toggle_image_off)
+
+    
 
 
 ''' RESPONSE FUNCTIONS TO PLOT '''
@@ -3392,8 +3408,6 @@ SINGULARITY NOTEBOOK
 
 '''
 
-
-
 # get a button to draw on singularities
 singularity_button = tk.Button(singular_frame, text='search singularities', command=show_singularities)
 singularity_button.grid(row=0, column=0)
@@ -3549,6 +3563,11 @@ LI_shape_drop.grid(row=4, column=1)
 # input the radiobuttons for arrows, stacks or both again here
 arrow_btn = tk.Radiobutton(LI_frame, text='arrow', variable=tensor, value=1, command=lambda: vect_type_response(tensor.get())).grid(row=7, column=1)
 stack_btn = tk.Radiobutton(LI_frame, text='stack', variable=tensor, value=0, command=lambda: vect_type_response(tensor.get())).grid(row=7, column=2)
+
+# Showflux toggle button
+tk.Label(LI_frame, text='Toggle Show Flux: ').grid(row=8, column=0)
+showflux_toggle = tk.Button(LI_frame, image=toggle_image_off, bd=0, command=showflux_response)
+showflux_toggle.grid(row=8, column=1)
 
 '''
 
