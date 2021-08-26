@@ -1214,10 +1214,6 @@ def line_int_circ(cent, R, N, u_str, v_str, orient_int):
     test[1,:] = dx[:]*uv_store[0, :] + dy[:]*uv_store[1, :]
     test[2,:] = dx_norm[:]*uv_store[0, :] + dy_norm[:]*uv_store[1, :]
     
-    # Plot the circle
-    circle1 = mpl.patches.Circle(cent, R, fill=False, color='red')
-    main_axis.add_artist(circle1)
-    
     showflux = True
     
     # Colouring the circle based on flux
@@ -1252,18 +1248,22 @@ def line_int_circ(cent, R, N, u_str, v_str, orient_int):
             fe = np.array([swap_ang[0]])
             swap_ang = np.concatenate((swap_ang, fe))
             for a in range(c):
-                exec('w' + str(a) + '= mpl.patches.Wedge(cent, R, swap_ang[a], swap_ang[a+1], fill=False, color=col_list[a], linewidth=3)')
+                exec('w' + str(a) + '= mpl.patches.Arc(cent, 2*R, 2*R, 0, swap_ang[a], swap_ang[a+1], fill=False, color=col_list[a], linewidth=3)')
                 exec('main_axis.add_artist(w' + str(a) + ')')
         
         else:
             color2 = col_in[int(test[3,0])]
             circle2 = mpl.patches.Circle(cent, R, fill=False, color=color2, linewidth=3)
             main_axis.add_artist(circle2)
-    
+            
+    else:
+        # Plot the circle
+        circle1 = mpl.patches.Circle(cent, R, fill=False, color='red')
+        main_axis.add_artist(circle1)
+        
     fig.canvas.draw()
     
-    circle1.remove()
-    
+
     if showflux == True:
         # Remove wedges from the plot
         if c > 0:
@@ -1271,6 +1271,8 @@ def line_int_circ(cent, R, N, u_str, v_str, orient_int):
                 exec('w' + str(a) + '.remove()')
         else:
             circle2.remove()
+    else:
+        circle1.remove()
     
     # update the total
     LI_total = res
