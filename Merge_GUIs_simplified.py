@@ -1254,18 +1254,18 @@ def line_int_circ(cent, R, N, u_str, v_str, orient_int):
     LI_total = res
     
     # Update labels
-    LI_total_label.configure(text=(str(round(LI_total, 4)) + ' (' + str(round((LI_total/np.pi), 4)) + ' pi)' ))
+    LI_total_label.configure(text=(str(round(LI_total, 2)) + ' (' + str(round((LI_total/np.pi), 2)) + ' pi)' ))
     
-    flux_label.configure(text=(str(round(flux, 4)) + ' (' + str(round((flux/np.pi), 4)) + ' pi)' ))
+    flux_label.configure(text=(str(round(flux, 2)) + ' (' + str(round((flux/np.pi), 2)) + ' pi)' ))
 
     shape_area = np.pi*R**2
-    shape_area_label.configure(text=str(round(shape_area, 4)))
+    shape_area_label.configure(text=str(round(shape_area, 2)))
     
     ratio1 = LI_total/abs(shape_area)
-    ratio1_label.configure(text=str(round(ratio1, 4)))
+    ratio1_label.configure(text=str(round(ratio1, 2)))
     
     ratio2 = flux/shape_area
-    ratio2_label.configure(text=str(round(ratio2, 4)))
+    ratio2_label.configure(text=str(round(ratio2, 2)))
     
     return res
 
@@ -1335,11 +1335,11 @@ def line_int_poly(N, u_str, v_str):
         flux += flux_inc
         
         # update its label
-        LI_total_label.configure(text=(str(round(LI_total, 4)) + ' (' + str(round((LI_total/np.pi), 4)) + ' pi)' ))    
+        LI_total_label.configure(text=(str(round(LI_total, 2)) + ' (' + str(round((LI_total/np.pi), 2)) + ' pi)' ))    
         
         if len(LI_verts) > 3:
             shape_area = calc_area(LI_verts)
-            shape_area_label.configure(text=str(round(abs(shape_area), 4)))
+            shape_area_label.configure(text=str(round(abs(shape_area), 2)))
             
             if shape_area < 0:
                 shape_area = (-1)*shape_area
@@ -1348,12 +1348,12 @@ def line_int_poly(N, u_str, v_str):
                 pass
             
             ratio1 = LI_total/shape_area
-            ratio1_label.configure(text=str(round(ratio1, 4)))
+            ratio1_label.configure(text=str(round(ratio1, 2)))
             
             ratio2 = flux/shape_area
-            ratio2_label.configure(text=str(round(ratio2, 4)))
+            ratio2_label.configure(text=str(round(ratio2, 2)))
             
-            flux_label.configure(text=(str(round(flux, 4)) + ' (' + str(round((flux/np.pi), 4)) + ' pi)' ))
+            flux_label.configure(text=(str(round(flux, 2)) + ' (' + str(round((flux/np.pi), 2)) + ' pi)' ))
             
             flux = 0
             
@@ -1910,15 +1910,12 @@ def click_option_handler(click_option):
         try:
             deriv_calc(x_m, y_m)
         except (TypeError):
-            # for now
-            tk.messagebox.showerror('', 'No Click Coordinates given')
-        # other option:
-        # x_m = 3.62101167
-        # y_m = 1.60383546
-        # x_pix = 592
-        # y_pix = 391
-        # deriv_calc(x_m, y_m)
-            pass
+            # make up coordinates
+            x_m = 0
+            y_m = 0
+            x_pix = 427
+            y_pix = 308
+            deriv_calc(x_m, y_m)
 
 
 # Additional formatting function used in divergence plots
@@ -1927,20 +1924,13 @@ def format_eq_div(string):
     string = string.replace('yg', 'y_m')
     return string
 
+
 # Function for updating the inset plots when options are changed by the user.
 def update_deriv(self):
-    try:
-        deriv_calc(x_m,y_m)
-    except (TypeError):
-        # for now
-        tk.messagebox.showerror('', 'No Click Coordinates given')
-        # other option:
-        # x_m = 3.62101167
-        # y_m = 1.60383546
-        # x_pix = 592
-        # y_pix = 391
-        # deriv_calc(x_m, y_m)
-        pass       
+    if 0 < click_opt_int < 5:
+        deriv_calc(x_m, y_m)
+    else:
+        pass
 
 
 ''' SINGULARITIES '''
