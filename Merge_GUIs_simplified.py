@@ -1299,7 +1299,7 @@ def line_int_poly(N, u_str, v_str):
     c_count = len(LI_coord)
     
     # Tolerance for auto-joining lines together i.e. distance below which lines will join
-    ctol = 0.1
+    ctol = 0.02*L
     
     # array of coordinates
     coord_array = np.array(LI_coord)
