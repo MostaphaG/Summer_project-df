@@ -1723,7 +1723,7 @@ def deriv_calc(x_m, y_m):
     global u_s, v_s
     # Range and point density of the derivative plot
     d_range = 0.33*L/(zoom_slider.get())
-    d_length = d_length_select.get()
+    d_length = d_length_select.get()*L
     dpd = dpd_select.get()
     d_scale = scale*(zoom_slider.get())
     
@@ -2350,7 +2350,7 @@ def form_2_zoom(x_m, y_m):
     global form_2_zoom_values
     # define axis to be used in the inset
     zoomR2_range = (1/3)*L/(zoom_slider_R2.get())
-    zoomR2_length = zoomR2_length_select.get()
+    zoomR2_length = zoomR2_length_select.get()*L
     zoomR2pd = zoomR2pd_select.get()
     fract_zoom = 2/(zoomR2pd - 1)
     R2x = np.linspace(-zoomR2_range + x_m, zoomR2_range + x_m, zoomR2pd)
@@ -3399,10 +3399,10 @@ dpd_drop.grid(row=4, column=1)
 
 # Drop down to select inset axis size (d_length)
 d_length_select = tk.DoubleVar()
-d_length_list = [1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0]
+d_length_list = [0.1, 0.2, 0.3, 0.4, 0.5]
 d_length_select.set(d_length_list[2])
-tk.Label(right_frame, text='Inset Plot Size :').grid(row=5, column=0)
-d_length_drop = tk.OptionMenu(right_frame, d_length_select, *d_length_list, command = update_deriv)
+tk.Label(right_frame, text='Inset Fractional Size:').grid(row=5, column=0)
+d_length_drop = tk.OptionMenu(right_frame, d_length_select, *d_length_list, command=update_deriv)
 d_length_drop.grid(row=5, column=1)
 
 # Autoscale Toggle
@@ -3678,9 +3678,9 @@ zoomR2pd_drop.grid(row=10, column=1)
 
 # Drop down to select inset axis size for R2 2 forms
 zoomR2_length_select = tk.DoubleVar()
-zoomR2_length_list = [0.2, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0]
+zoomR2_length_list = [0.1, 0.2, 0.3, 0.4, 0.5]
 zoomR2_length_select.set(zoomR2_length_list[2])
-tk.Label(calculus_frame, text='Inset Plot Size :').grid(row=11, column=0)
+tk.Label(calculus_frame, text='Inset Fractional Size:').grid(row=11, column=0)
 zoomR2_length_drop = tk.OptionMenu(calculus_frame, zoomR2_length_select, *zoomR2_length_list, command=update_2_form_zoom)
 zoomR2_length_drop.grid(row=11, column=1)
 
