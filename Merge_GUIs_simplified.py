@@ -2694,6 +2694,8 @@ def Int_deriv_22_form():
     x_comp_entry.configure(bg='#C0F6BB')
     y_comp_entry.configure(bg='#C0F6BB')
     form_2_entry.configure(bg='#FFFFFF')
+    # destroy the extra window
+    int_vector_window.destroy()
 
 
 # define a function that will find the interior derivative of both the 2-form
@@ -2725,7 +2727,32 @@ def Int_deriv_21_form():
     x_comp_entry.configure(bg='#C0F6BB')
     y_comp_entry.configure(bg='#C0F6BB')
     form_2_entry.configure(bg='#FFFFFF')
-    return
+    # destroy the extra window
+    int_vector_window.destroy()
+
+
+# define a response function to plot int deriv of 1-form only
+def Int_deriv_11_form():
+    global calculus_form_tracker
+    # set the tracker of forms
+    calculus_form_tracker = 0
+    # clear the axis
+    main_axis.clear()
+    # call the fucntion to complete the 1 form int deriv and plot
+    Int_deriv_1_form()
+    # draw its result
+    canvas.draw()
+    # make a label for the found 0 form
+    form_0_entry.delete(0, 'end')
+    form_0_entry.insert(0, zero_form_str)
+    form_0_entry.configure(bg='#C0F6BB')
+    # display that the 0-form is now being plotted, therefore get rid of
+    # 2 and1-form colours and show 0-form components in green:
+    x_comp_entry.configure(bg='#FFFFFF')
+    y_comp_entry.configure(bg='#FFFFFF')
+    form_2_entry.configure(bg='#FFFFFF')
+    # destroy the extra window
+    int_vector_window.destroy()
 
 
 # Interior derivative response for 2-form only
@@ -2745,25 +2772,29 @@ def Int_deriv_2_form_response(type_form):
     int_vect_ey_entry.insert(0, vector_ey_str)
     int_vect_ey_entry.grid(row=3, column=0)
     # define a button that will plot these
-    # for a 2-form only
-    if type_form == 2:
-        int_vector_load_btn = tk.Button(int_vector_window, text='PLOT', padx=20, pady=10, command=Int_deriv_22_form)
-        int_vector_load_btn.grid(row=4, column=0, pady=10)
-    # for 2-form with 1-form included:
-    elif type_form == 1:
+    # for whatever is being plotted
+    if type_form == 1:
+        if calculus_form_tracker == 2:
+            int_vector_load_btn = tk.Button(int_vector_window, text='PLOT', padx=20, pady=10, command=Int_deriv_22_form)
+            int_vector_load_btn.grid(row=4, column=0, pady=10)
+        if calculus_form_tracker == 1:
+            int_vector_load_btn = tk.Button(int_vector_window, text='PLOT', padx=20, pady=10, command=Int_deriv_11_form)
+            int_vector_load_btn.grid(row=4, column=0, pady=10)
+    # for both 2-form and 1-form
+    elif type_form == 2:
         int_vector_load_btn = tk.Button(int_vector_window, text='PLOT', padx=20, pady=10, command=Int_deriv_21_form)
         int_vector_load_btn.grid(row=4, column=0, pady=10)
 
 
 # define a function that will respond to the made choice reg. int deriv.
 def int_deriv_choice(var):
-    if var == 0:
-        # only use 2-form, therefore call previous functions for this
-        Int_deriv_2_form_response(2)
-    elif var == 1:
+    if var == 1:
+        # deal with whatever is being plotted at the time
+        Int_deriv_2_form_response(1)
+    elif var == 2:
         # call the function, but make it deal with 2-form together with the
         # 1-form
-        Int_deriv_2_form_response(1)
+        Int_deriv_2_form_response(2)
     # close the previous window
     int_option_window.destroy()
 
@@ -2776,14 +2807,14 @@ def Int_deriv_response():
     # show new window with label and two options.
     int_option_window = tk.Toplevel()
     int_option_window.title('input a vector for the interior derivative')
-    int_option_window.geometry('425x200')
+    int_option_window.geometry('460x200')
     # define Label
     tk.Label(int_option_window, text='Perform w.r.t 2-form only or combine given 2-form and 1-form ?').grid(row=0, column=0, columnspan=2)
     # define response buttons to the stated question
-    form_2_only_btn = tk.Button(int_option_window, text='2-form', padx=30, pady=30, command=lambda: int_deriv_choice(0))
-    from_2_and_1_btn = tk.Button(int_option_window, text='Both', padx=30, pady=30, command=lambda: int_deriv_choice(1))
-    form_2_only_btn.grid(row=1, column=0, pady=20)
-    from_2_and_1_btn.grid(row=1, column=1, pady=20)
+    int_plotted_form_btn = tk.Button(int_option_window, text='Plotted form', padx=50, pady=30, command=lambda: int_deriv_choice(1))
+    int_form_2_and_1_btn = tk.Button(int_option_window, text='Both 2-form and 1-form', padx=2, pady=30, command=lambda: int_deriv_choice(2))
+    int_plotted_form_btn.grid(row=1, column=0, pady=20)
+    int_form_2_and_1_btn.grid(row=1, column=1, pady=20)
 
 
 # perform ext deriv on the result of int_deriv and plots it as stacks
