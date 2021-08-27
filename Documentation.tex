@@ -355,6 +355,37 @@ The main difference from the calculation of straight line integrals is that the 
 	\rcirclerightint \vec{F} \cdot \vec{dl} \approx \sum_{k=0}^{N-1} F_x(x_k,y_k)dx_k + \sum_{k=0}^{N-1} F_y(x_k,y_k)dy_k
 \end{equation}
 
+\subsection{Flux}
+
+The flux through a closed surface is given by the expression:
+\begin{equation}
+	\oint \vec{F} \cdot \vec{dA}
+\end{equation}
+In the 2D plane which we are plotting the vector fields and taking integrals, we modify this definition such that the surface normal infinitesimal vectors $\vec{dA}$ are normal to the curve drawn by the user at each interval point, $\vec{dA} = dx_{norm}\vec{i} + dy_{norm}\vec{j}$. For the circular curves, these vectors are radial, pointing away from the centre and are calculated at each interval point by: $dx_{norm} = Acos(kdt)$ , $dy_{norm} = Asin(kdt)$. Apart from this difference, the total flux through the curve is evaluated in the same way as for the line integral and the orientation of the curve (whether it is drawn clockwise or counter-clockwise) is not important. As for the polygon feature, where the user may draw a shape manually, the orientation of the drawn curve is important. The chosen method to ensure that the normal vectors point outward from the enclosed area of the curve is as follows:
+
+\begin{itemize}
+	\item Initially define the normal vectors as the small displacement vectors (see section 3.2.1 'Lines') rotated by $\frac{\pi}{2}$ radians \textbf{clockwise} (cw). For example, if a line is drawn to go vertically upwards, $$\vec{dl} = dx\vec{i} + dy\vec{j} = 0\vec{i} + dy\vec{j}$$ $$\vec{dA} = dx_{norm}\vec{i} + dy_{norm}\vec{j} = dy\vec{i} + 0\vec{j}$$ More generally, the transformation is described by $$dx_{norm} = dy$$ $$dy_{norm} = -dx$$
+	\item Using this, the flux for each line (flux\textunderscore inc in the code) is found by: $$dy \sum_{k=0}^{N-1} F_x(x_k,y_k) - dx \sum_{k=0}^{N-1} F_y(x_k,y_k)$$ and upon each line being drawn, the total 'flux' is updated adding each increment flux\textunderscore inc.
+	\item When the program detects the user has closed the curve they are drawing, the signed area of the curve is calculated using the function 'calc\textunderscore area'. The function uses the 'shoelace formula' which effectively calculates the area of each triangle making up the polygon defined with vertices given by successive user clicks. If the area returned is positive, the polygon was drawn in a ccw direction, and if negative, cw. 
+	\item By rotating $\vec{dl}$ cw at every interval point, the vectors are correctly pointing outwards if the curve is drawn ccw, so no change is needed and flux is a true value. Whereas if the curve was drawn cw, the vectors are pointing in towards the enclosed area and the computed result is negative what it should be. Thus, the result is multiplied by $-1$ in this case. 
+\end{itemize}
+
+\subsection{Stokes Theorem and Divergence Theorem}
+Examining the expression for Stokes theorem (Green's theorem as we are working in 2D),
+\begin{equation}
+	\int_{S} (\nabla \times \vec{F}) \cdot \vec{dA} = \int_{S} (\nabla \times \vec{F}) \cdot \vec{k} dA = \oint_{C} \vec{F} \cdot \vec{dl}
+\end{equation}
+we can see that the scalar curl (z component of the curl) at the centre point of the curve $C$ with enclosed surface $S$ can be approximated for small areas using: 
+\begin{equation}
+	\int_{S} (\nabla \times \vec{F}) \cdot \vec{k} dA \approx (\nabla \times \vec{F}) \cdot \vec{k} \ Area \approx \oint_{C} \vec{F} \cdot \vec{dl}
+\end{equation}
+\begin{equation}
+	(\nabla \times \vec{F}) \cdot \vec{k} \approx \frac{\oint_{C} \vec{F} \cdot \vec{dl}}{Area}
+\end{equation}
+So, an approximation for the local curl can be approximated as 'ratio' in the program by taking a circle line integral centred at the point of interest and decreasing the radius using the entry box until the value converges. Similarly this can be done for the divergence by looking at the flux to area ratio. For linear fields, the respective ratios should always show the curl and divergence, since taking first order derivatives of linear expressions will give constant values (will add more on this later).
+
+\subsection{Showflux}
+
 
 \chapter{$2-$Forms Graphical Representation}
 

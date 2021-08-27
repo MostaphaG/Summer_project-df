@@ -16,19 +16,22 @@
 \contentsline {section}{\numberline {3.2}Line Integrals}{14}{section.3.2}%
 \contentsline {subsection}{\numberline {3.2.1}Lines}{14}{subsection.3.2.1}%
 \contentsline {subsection}{\numberline {3.2.2}Circles}{15}{subsection.3.2.2}%
-\contentsline {chapter}{\numberline {4}$2-$Forms Graphical Representation}{16}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Non-unique graphical representations of $2-$forms on $\mathbb {R}^{2}$}{16}{section.4.1}%
-\contentsline {subsection}{\numberline {4.1.1}Blocks and stacks}{16}{subsection.4.1.1}%
-\contentsline {subsection}{\numberline {4.1.2}$2-$forms on $\mathbb {R}^2$ through the exterior derivative}{17}{subsection.4.1.2}%
-\contentsline {subsection}{\numberline {4.1.3}$2-$forms on $\mathbb {R}^2$ through the wedge product}{17}{subsection.4.1.3}%
-\contentsline {subsection}{\numberline {4.1.4}Lessons learnt}{18}{subsection.4.1.4}%
-\contentsline {subsection}{\numberline {4.1.5}Proof of the non-uniqueness of 2-forms}{18}{subsection.4.1.5}%
-\contentsline {subsection}{\numberline {4.1.6}Initial $2-$form representation as stacks in code}{18}{subsection.4.1.6}%
-\contentsline {subsection}{\numberline {4.1.7}$2-$form representation as blocks in code}{20}{subsection.4.1.7}%
-\contentsline {section}{\numberline {4.2}Correct 2-form on $\mathbb {R}^{2}$ representation}{20}{section.4.2}%
-\contentsline {chapter}{\numberline {5}$2-$Forms Calculus}{22}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Interior derivative acting on 2-forms}{22}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Hodge}{23}{section.5.2}%
-\contentsline {chapter}{\numberline {6}Differential Forms on $\mathbb {R}^{3}$}{24}{chapter.6}%
-\contentsline {section}{\numberline {6.1}Representing 2-forms on $\mathbb {R}^{3}$}{24}{section.6.1}%
-\contentsline {chapter}{\numberline {7}Singularities}{26}{chapter.7}%
+\contentsline {subsection}{\numberline {3.2.3}Flux}{15}{subsection.3.2.3}%
+\contentsline {subsection}{\numberline {3.2.4}Stokes Theorem and Divergence Theorem}{16}{subsection.3.2.4}%
+\contentsline {subsection}{\numberline {3.2.5}Showflux}{17}{subsection.3.2.5}%
+\contentsline {chapter}{\numberline {4}$2-$Forms Graphical Representation}{18}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Non-unique graphical representations of $2-$forms on $\mathbb {R}^{2}$}{18}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Blocks and stacks}{18}{subsection.4.1.1}%
+\contentsline {subsection}{\numberline {4.1.2}$2-$forms on $\mathbb {R}^2$ through the exterior derivative}{19}{subsection.4.1.2}%
+\contentsline {subsection}{\numberline {4.1.3}$2-$forms on $\mathbb {R}^2$ through the wedge product}{19}{subsection.4.1.3}%
+\contentsline {subsection}{\numberline {4.1.4}Lessons learnt}{20}{subsection.4.1.4}%
+\contentsline {subsection}{\numberline {4.1.5}Proof of the non-uniqueness of 2-forms}{20}{subsection.4.1.5}%
+\contentsline {subsection}{\numberline {4.1.6}Initial $2-$form representation as stacks in code}{20}{subsection.4.1.6}%
+\contentsline {subsection}{\numberline {4.1.7}$2-$form representation as blocks in code}{22}{subsection.4.1.7}%
+\contentsline {section}{\numberline {4.2}Correct 2-form on $\mathbb {R}^{2}$ representation}{22}{section.4.2}%
+\contentsline {chapter}{\numberline {5}$2-$Forms Calculus}{24}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Interior derivative acting on 2-forms}{24}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Hodge}{25}{section.5.2}%
+\contentsline {chapter}{\numberline {6}Differential Forms on $\mathbb {R}^{3}$}{26}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Representing 2-forms on $\mathbb {R}^{3}$}{26}{section.6.1}%
+\contentsline {chapter}{\numberline {7}Singularities}{28}{chapter.7}%
