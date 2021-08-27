@@ -514,7 +514,7 @@ def tab_selection(event):
         PLOT_btn['state'] = tk.DISABLED
         polar_grid_plot_btn['state'] = tk.DISABLED
         # clear the zero form label as plot comes back to default
-        Label_zero_form.configure(text='')
+        form_0_entry.configure(bg='#FFFFFF')
         # this is now never Vector fields and never arrows therefore
         # set the labels as such
         component_x_entry_label.configure(text='dx component')
@@ -2543,7 +2543,7 @@ def form_2_response():
     x_comp_entry.configure(bg='#FFFFFF')
     y_comp_entry.configure(bg='#FFFFFF')
     # update the label to remove the zero form if int deriv of both was used
-    Label_zero_form.configure(text='')
+    form_0_entry.configure(bg='#FFFFFF')
 
 
 # plots the vetor field with stacks only
@@ -2573,7 +2573,7 @@ def form_1_stacks_response():
     # get rid of the 2-form colour:
     form_2_entry.configure(bg='#FFFFFF')
     # update the label to remove the zero form if int deriv of both was used
-    Label_zero_form.configure(text='')
+    form_0_entry.configure(bg='#FFFFFF')
 
 
 # performs the interior derivative on supplied 2-form and plots it as stacks
@@ -2683,7 +2683,7 @@ def Int_deriv_22_form():
     # draw its result
     canvas.draw()
     # update the label to remove the zero form if int deriv of both was used
-    Label_zero_form.configure(text='')
+    form_0_entry.configure(bg='#FFFFFF')
     # change the entry box 1-form to the calculated ones
     x_comp_entry.delete(0, 'end')
     y_comp_entry.delete(0, 'end')
@@ -2712,7 +2712,9 @@ def Int_deriv_21_form():
     # draw its result
     canvas.draw()
     # make a label for the found 0 form
-    Label_zero_form.configure(text=zero_form_str)
+    form_0_entry.delete(0, 'end')
+    form_0_entry.insert(0, zero_form_str)
+    form_0_entry.configure(bg='#C0F6BB')
     # change the entry box 1-form to the calculated ones
     x_comp_entry.delete(0, 'end')
     y_comp_entry.delete(0, 'end')
@@ -2788,49 +2790,75 @@ def Int_deriv_response():
 def Ext_deriv_response():
     global form_2, form_2_str
     global calculus_form_tracker
-    # set the tracker
-    calculus_form_tracker = 2
-    # get globals
-    update_variables()
-    # from these, establish the new fract, approperiate for 2-forms
-    fract = 2/((pt_den-1))
-    # celar current axis
+    # clear current axis
     main_axis.clear()
-    # get the inpus from fields of x and u components
-    x_comp_str = str(simplify(x_comp_entry.get()))
-    y_comp_str = str(simplify(y_comp_entry.get()))
-    # from found u and v in the interior derivative, set up sympy components
-    sympy_expr_x = parse_expr(x_comp_str, evaluate=False)
-    sympy_expr_y = parse_expr(y_comp_str, evaluate=False)
-    # combine the 2 into a list:
-    expressions = np.array([sympy_expr_x, sympy_expr_y])
-    # set up an array of coordinates that need to be used (in standard order)
-    coords = ['x', 'y']
-    # from these, use the find_2_form function to get the 2-form
-    form_2 = find_2_form(expressions, coords, pt_den, m)[0]
-    # get the string of this new 2-form to use it in int deriv
-    # also put it into the entry
-    form_2_str = str(simplify(str(unformat(result[0][0]))))
-    # unformat it to display in the entry box, this way it does not
-    # format twice if int deriv runs again
-    form_2_str = unformat(form_2_str)
-    form_2_entry.delete(0, 'end')
-    form_2_entry.insert(0, form_2_str)
-    # clear the current plot
-    main_axis.clear()
-    # use plotting stacks to display these
-    form_2_components_plot(xg, yg, form_2/2, np.pi/2, s_max, L, fract, colour_str)
-    form_2_components_plot(xg, yg, form_2/2, 0, s_max, L, fract, colour_str)
-    # display the new plot
-    canvas.draw()
-    # display a background green on the 2-form entry to show that
-    # this entry is being displayed now.
-    form_2_entry.configure(bg='#C0F6BB')
-    # undo it for 1-forms (even though they are hidden, they are not off)
-    x_comp_entry.configure(bg='#FFFFFF')
-    y_comp_entry.configure(bg='#FFFFFF')
-    # update the label to remove the zero form if int deriv of both was used
-    Label_zero_form.configure(text='')
+    if calculus_form_tracker == 1:
+        # set the tracker
+        calculus_form_tracker = 2
+        # get globals
+        update_variables()
+        # from these, establish the new fract, approperiate for 2-forms
+        fract = 2/((pt_den-1))
+        # get the inpus from fields of x and u components
+        x_comp_str = str(simplify(x_comp_entry.get()))
+        y_comp_str = str(simplify(y_comp_entry.get()))
+        # from found u and v in the interior derivative, set up sympy components
+        sympy_expr_x = parse_expr(x_comp_str, evaluate=False)
+        sympy_expr_y = parse_expr(y_comp_str, evaluate=False)
+        # combine the 2 into a list:
+        expressions = np.array([sympy_expr_x, sympy_expr_y])
+        # set up an array of coordinates that need to be used (in standard order)
+        coords = ['x', 'y']
+        # from these, use the find_2_form function to get the 2-form
+        form_2 = find_2_form(expressions, coords, pt_den, m)[0]
+        # get the string of this new 2-form to use it in int deriv
+        # also put it into the entry
+        form_2_str = str(simplify(str(unformat(result[0][0]))))
+        # unformat it to display in the entry box, this way it does not
+        # format twice if int deriv runs again
+        form_2_str = unformat(form_2_str)
+        form_2_entry.delete(0, 'end')
+        form_2_entry.insert(0, form_2_str)
+        # clear the current plot
+        main_axis.clear()
+        # use plotting stacks to display these
+        form_2_components_plot(xg, yg, form_2/2, np.pi/2, s_max, L, fract, colour_str)
+        form_2_components_plot(xg, yg, form_2/2, 0, s_max, L, fract, colour_str)
+        # display the new plot
+        canvas.draw()
+        # display a background green on the 2-form entry to show that
+        # this entry is being displayed now.
+        form_2_entry.configure(bg='#C0F6BB')
+        # undo it for 1-forms (even though they are hidden, they are not off)
+        x_comp_entry.configure(bg='#FFFFFF')
+        y_comp_entry.configure(bg='#FFFFFF')
+        # update the label to remove the zero form if int deriv of both was used
+        form_0_entry.configure(bg='#FFFFFF')
+    elif calculus_form_tracker == 0:
+        # change the tracker
+        calculus_form_tracker = 1
+        # get globals
+        update_variables()
+        # from these, establish the new fract, approperiate for a 1-form
+        fract = 0.05
+        # get the input from 0-form box
+        form_0_str = str(simplify(form_0_entry.get()))
+        # from this, need derivatives so set it as a SymPy object
+        sympy_expr_form_0 = parse_expr(form_0_str, evaluate=False)
+        # set up an array of coordinates that need to be used (in standard order)
+        coords = ['x', 'y']
+        # from these, find the derivatives
+        form_0_x = str(diff(sympy_expr_form_0, coords[0]))
+        form_0_y = str(diff(sympy_expr_form_0, coords[1]))
+        # put these into their entry boxes
+        x_comp_entry.delete(0, 'end')
+        y_comp_entry.delete(0, 'end')
+        x_comp_entry.insert(0, form_0_x)
+        y_comp_entry.insert(0, form_0_y)
+        # call a fucntion to plot these:
+        form_1_stacks_response()
+    else:
+        tk.messagebox.showerror('', '3-form on R^2 is not defined')
 
 
 # define a function that will wedge two 1-forms and plot them
@@ -2880,7 +2908,7 @@ def wedge_product_R2():
     x_comp_entry.configure(bg='#FFFFFF')
     y_comp_entry.configure(bg='#FFFFFF')
     # update the label to remove the zero form if int deriv of both was used
-    Label_zero_form.configure(text='')
+    form_0_entry.configure(bg='#FFFFFF')
 
 
 # define a reponse function, opens new window where two 1-forms to be wedged can be entered
@@ -2965,7 +2993,7 @@ def Hodge_1_form_response():
     # redraw
     canvas.draw()
     # update the label to remove the zero form if int deriv of both was used
-    Label_zero_form.configure(text='')
+    form_0_entry.configure(bg='#FFFFFF')
 
 
 # Hodge the two form in the entry box, plotting the scalar function as a contour
@@ -3003,7 +3031,9 @@ def Hodge_2_form_response():
     zero_form_str = zero_form_str.replace('contour_x_grid', 'x')
     zero_form_str = zero_form_str.replace('contour_y_grid', 'y')
     # input the 0 form into assigned (hidden) label
-    Label_zero_form.configure(text=zero_form_str)
+    form_0_entry.delete(0, 'end')
+    form_0_entry.insert(0, zero_form_str)
+    form_0_entry.configure(bg='#C0F6BB')
     canvas.draw()
 
 
@@ -3023,6 +3053,39 @@ def set_inset_target_calc():
         pass
     else:
         form_2_zoom(x_m, y_m)
+
+
+# define a fucntion to plot a zero form when button is pressed.
+def form_0_response():
+    global zero_form_str, zero_form, calculus_form_tracker
+    # clear the axis
+    main_axis.clear()
+    # set up the tracker
+    calculus_form_tracker = 0
+    # get the supplied form
+    zero_form_str = str(simplify(form_0_entry.get()))
+    # set up grids for contours
+    contour_x, contour_y = np.linspace(-L, L, pt_den*5), np.linspace(-L, L, pt_den*5)
+    contour_x_grid, contour_y_grid = np.meshgrid(contour_x, contour_y)
+    # format the given ftring
+    zero_form_str = zero_form_str.replace('x', 'contour_x_grid')
+    zero_form_str = zero_form_str.replace('y', 'contour_y_grid')
+    # evaluate bearing in mind zeros
+    if zero_form_str.find('contour_x_grid') & zero_form_str.find('contour_y_grid') == -1:
+        zero_form = eval(zero_form_str)*np.ones(np.shape(contour_x_grid))
+    else:
+        zero_form = eval(zero_form_str)
+    # set up the contour plot
+    CS = main_axis.contour(contour_x_grid, contour_y_grid, zero_form, 15)
+    main_axis.clabel(CS, inline=True, fontsize=7)
+    # colour approperiate boxes
+    form_2_entry.configure(bg='#FFFFFF')
+    x_comp_entry.configure(bg='#FFFFFF')
+    y_comp_entry.configure(bg='#FFFFFF')
+    # colour the 0-form box
+    form_0_entry.configure(bg='#C0F6BB')
+    # draw the plot on
+    canvas.draw()
 
 
 ''' DEFINE FUNCTIONS USED IN R3 CODE '''
@@ -3720,22 +3783,31 @@ form_2_entry.configure(bg='#C0F6BB')
 # extra label for 0 form.
 # for now not an entry box because it doesn't get used anywhere
 # I make it red to remember to come back to it later and use it.
-Label_zero_form = tk.Label(calculus_frame, text='', fg='red')
-Label_zero_form.grid(row=3, column=0)
+Label_zero_form = tk.Label(calculus_frame, text='Zero form:')
+Label_zero_form.grid(row=2, column=0)
+
+# set up an entry for zero forms:
+form_0_entry = tk.Entry(calculus_frame, width=15, borderwidth=2)
+form_0_entry.grid(row=2, column=1)
+form_0_entry.insert(0, '')
+
+# set up a button to plot the 0-form
+fotm_0_btn = tk.Button(calculus_frame, text='0-form plot', padx=3, pady=5, command=form_0_response)
+fotm_0_btn.grid(row=2, column=2)
 
 # define a button to submit the supplied 2-form and plot it as blocks
 form_2_btn = tk.Button(calculus_frame, text='2-form plot', padx=3, pady=5, command=form_2_response)
-form_2_btn.grid(row=1, column=0)
+form_2_btn.grid(row=1, column=1)
 
 # define a button that will just plot the 1-form
 # this will not be needed when its it merged with main GUI
 # as there will already be a plot button there
 form_1_stacks_btn = tk.Button(calculus_frame, text='1-form plot', padx=3, pady=5, command=form_1_stacks_response)
-form_1_stacks_btn.grid(row=2, column=0)
+form_1_stacks_btn.grid(row=1, column=0)
 
 # add a button to plot the interior derivative as superposing stack fields
 INT_btn = tk.Button(calculus_frame, text='Int Deriv', padx=0, pady=2, command=Int_deriv_response)
-INT_btn.grid(row=4, column=0)
+INT_btn.grid(row=3, column=0)
 
 # define a button to plot the exterior derivative from given u and v
 # Note, it will get the 2-form first, then return back down
@@ -3743,19 +3815,19 @@ INT_btn.grid(row=4, column=0)
 # therefore, it will also just be one possible representation
 # not the only possible one
 EXT_int_btn = tk.Button(calculus_frame, text='Ext Deriv', padx=0, pady=2, command=Ext_deriv_response)
-EXT_int_btn.grid(row=4, column=1)
+EXT_int_btn.grid(row=3, column=1)
 
 # define a wedge product button that will let the user input TWO 1-forms
 # in a new window to be wedged to gice a 2-form
 wedge_btn = tk.Button(calculus_frame, text='Wedge', padx=0, pady=2, command=wedge_2_response)
-wedge_btn.grid(row=6, column=0)
+wedge_btn.grid(row=4, column=0)
 
 # define ab utton that will Find the Hodge dual
 Hodge_1_form_btn = tk.Button(calculus_frame, text='Hodge 1-Form', padx=0, pady=2, command=Hodge_1_form_response)
-Hodge_1_form_btn.grid(row=7, column=0)
+Hodge_1_form_btn.grid(row=5, column=0)
 
 Hodge_2_form_btn = tk.Button(calculus_frame, text='Hodge 2-Form', padx=0, pady=2, command=Hodge_2_form_response)
-Hodge_2_form_btn.grid(row=7, column=1)
+Hodge_2_form_btn.grid(row=5, column=1)
 
 # define radiobuttons button to choose zooming with the mouse on 2-forms on R2
 # and as opposed to tools
@@ -3763,14 +3835,14 @@ R2_tools_opt = tk.IntVar()
 R2_tools_opt.set(0)
 R2_tools_Tools_btn = tk.Radiobutton(calculus_frame, text='Tools', variable=R2_tools_opt, value=0, command=lambda: R2_tools_handler(R2_tools_opt.get()))
 R2_tools_Zoom_btn = tk.Radiobutton(calculus_frame, text='Zoom', variable=R2_tools_opt, value=1, command=lambda: R2_tools_handler(R2_tools_opt.get()))
-R2_tools_Tools_btn.grid(row=8, column=0)
-R2_tools_Zoom_btn.grid(row=8, column=1)
+R2_tools_Tools_btn.grid(row=6, column=0)
+R2_tools_Zoom_btn.grid(row=6, column=1)
 
 # set up a zooming tool for that too
-tk.Label(calculus_frame, text='Zoom').grid(row=9, column=0)
+tk.Label(calculus_frame, text='Zoom').grid(row=7, column=0)
 zoom_slider_R2 = tk.Scale(calculus_frame, from_=1, to=20, orient=tk.HORIZONTAL)
 zoom_slider_R2.bind("<ButtonRelease-1>", update_2_form_zoom)
-zoom_slider_R2.grid(row=9, column=1)
+zoom_slider_R2.grid(row=7, column=1)
 zoom_slider_R2.configure(state=tk.DISABLED)
 
 
@@ -3779,26 +3851,26 @@ zoomR2pd_select = tk.IntVar()
 zoomR2pd_select.set(11)
 zoomR2pd_list = [5, 6, 10, 11, 15, 16, 20, 21]
 
-tk.Label(calculus_frame, text='Inset Plot Point Density:').grid(row=10, column=0)
+tk.Label(calculus_frame, text='Inset Plot Point Density:').grid(row=8, column=0)
 zoomR2pd_drop = tk.OptionMenu(calculus_frame, zoomR2pd_select, *zoomR2pd_list, command=update_2_form_zoom)
-zoomR2pd_drop.grid(row=10, column=1)
+zoomR2pd_drop.grid(row=8, column=1)
 
 # Drop down to select inset axis size for R2 2 forms
 zoomR2_length_select = tk.DoubleVar()
 zoomR2_length_list = [0.1, 0.2, 0.3, 0.4, 0.5]
 zoomR2_length_select.set(zoomR2_length_list[2])
-tk.Label(calculus_frame, text='Inset Fractional Size:').grid(row=11, column=0)
+tk.Label(calculus_frame, text='Inset Fractional Size:').grid(row=9, column=0)
 zoomR2_length_drop = tk.OptionMenu(calculus_frame, zoomR2_length_select, *zoomR2_length_list, command=update_2_form_zoom)
-zoomR2_length_drop.grid(row=11, column=1)
+zoomR2_length_drop.grid(row=9, column=1)
 
 # define entry boxes to allow user to input x_m and y_m
 x_m_entry_calc = tk.Entry(calculus_frame, width=12)
 y_m_entry_calc = tk.Entry(calculus_frame, width=12)
-x_m_entry_calc.grid(row=12, column=0)
-y_m_entry_calc.grid(row=12, column=1)
+x_m_entry_calc.grid(row=10, column=0)
+y_m_entry_calc.grid(row=10, column=1)
 # and a button to submit these:
 Set_target_btn_calc = tk.Button(calculus_frame, text='Set Target', command=set_inset_target_calc)
-Set_target_btn_calc.grid(row=12, column=2, padx=20)
+Set_target_btn_calc.grid(row=10, column=2, padx=20)
 
 
 '''
