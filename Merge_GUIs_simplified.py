@@ -2845,6 +2845,11 @@ def Ext_deriv_response():
         # get the string of this new 2-form to use it in int deriv
         # also put it into the entry
         form_2_str = str(simplify(str(unformat(result[0][0]))))
+        # format it
+        form_2_eq = format_eq(form_2_str)
+        # numerically evalue it, careful about constants etc.
+        form_2_eq = form_2_constant_correction(form_2_eq)
+        form_2 = eval(form_2_eq)
         # unformat it to display in the entry box, this way it does not
         # format twice if int deriv runs again
         form_2_str = unformat(form_2_str)
