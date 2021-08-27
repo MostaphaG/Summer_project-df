@@ -632,7 +632,7 @@ def tab_selection(event):
         # change frame name too
         bot_frame_frame.configure(text='1-Form input frame')
     # if anything but the main window is selected, change to tools
-    if tab_text != 'Main':
+    if tab_text != 'Main' and tab_text != 'Line Integrals':
         # unclick them
         click_option.set(0)
         click_option_handler(click_option.get())
@@ -890,6 +890,9 @@ click_opt_int = 0
 # a 1 form or a 2 form
 # starts set to 2 form, as that is the default when opening the tab
 calculus_form_tracker = 2
+
+# polar tracker
+polar_tracker = False
 
 # define initial pixes coordinates for the function to use
 # when mouse is clicked, these are changed to the pressed position
@@ -1482,8 +1485,10 @@ def vect_type_response(tensor):
     if tensor == 0 or tensor == 2:
         # stacks included
         # unclick them first, by selecting the default, tools
-        click_option.set(0)
-        click_option_handler(click_option.get())
+        # or keeping tools
+        if click_opt_int != 0 and click_opt_int != 1:
+            click_option.set(0)
+            click_option_handler(click_option.get())
         #disable spproperiately
         click_option_Deriv_btn.configure(state=tk.DISABLED)
         click_option_Div_btn.configure(state=tk.DISABLED)
@@ -1506,13 +1511,16 @@ def vect_type_response(tensor):
         # change frame name too
         bot_frame_frame.configure(text='Vector Field input frame')
 
+
 # define the PLOT button response function
 def PLOT_response():
     # first, take from entry boxes, wanted parameters and make them global:
     # these must be changed globally for other functions to work with the new field.
-    global u, v, arrows, stacks
+    global u, v, arrows, stacks, polar_tracker
     # take inputs and globally update them
     update_variables()
+    # set radial tracker
+    polar_tracker = False
     # take all these values, and the input from field component bnoxes to set up the field:
     u, v = eq_to_comps(string_x, string_y, xg, yg)
     # plot depending on chosen type of vector
@@ -1557,6 +1565,7 @@ def PLOT_response():
 
 # define a function that will respons to field selection in the drop down menu
 def field_selection_response(event):
+    global u, v, fract, calculus_form_tracker, polar_tracker, arrows, stacks
     # clear the x and y component boxes
     x_comp_entry.delete(0, 'end')
     y_comp_entry.delete(0, 'end')
@@ -1568,6 +1577,9 @@ def field_selection_response(event):
     y_comp_selected = field_y_list[selected_index]
     x_comp_entry.insert(0, x_comp_selected)
     y_comp_entry.insert(0, y_comp_selected)
+    # colour code to be able to distinguish what is being plotted
+    x_comp_entry.configure(bg='#C0F6BB')
+    y_comp_entry.configure(bg='#C0F6BB')
     # now call the plot function to finalise all these onto the plot
     # depending on tab ,use correct 1 form plotting fucntion
     if tab_text == 'Calculus':
@@ -1653,7 +1665,9 @@ def scale_toggle_response():
 # define a function to repond to plotting apolar grid
 # takes the same field, but plots it on a polar grid
 def Polar_grid_plot_response(tensor):
-    global xg, yg, u, v, s_max, pt_den_entry
+    global xg, yg, u, v, s_max, pt_den_entry, polar_tracker
+    # set the polar tracker
+    polar_tracker = True
     # set the number of sheets to use from input box
     s_max = int(s_max_entry.get())
     # the polar grid comes from global already defined
@@ -1710,6 +1724,9 @@ def Polar_grid_plot_response(tensor):
     # colour pt_den red to show that it is not approperiate to use it now
     # need to def # of points along r and theta, in the additional window
     pt_den_entry.configure(bg='red')
+    # colour the x and y boxes green to show that these plot
+    x_comp_entry.configure(bg='#C0F6BB')
+    y_comp_entry.configure(bg='#C0F6BB')
 
 
 # deifne a response to the SAVE button in the polar grid customisation window
@@ -1760,6 +1777,7 @@ DIFFERENTIAL CALCULUS FUNCTIONS
 
 '''
 
+
 # define a function that will calculate the local, geometrical derivative
 def deriv_calc(x_m, y_m):
     # Make u_s and v_s global for testing
@@ -1789,7 +1807,7 @@ def deriv_calc(x_m, y_m):
     if click_opt_int == 1:
         u_s = u_zoom
         v_s = v_zoom
-        
+    
     elif click_opt_int == 2:
         u_s = V
         v_s = W
@@ -1880,7 +1898,7 @@ def deriv_calc(x_m, y_m):
         arrows = True
         stacks = True            
     
-    stack_plot(dxg, dyg, deriv_inset_ax, u_s, v_s, 5, d_range, dpd, 0.1, arrows, stacks, orientation, scale, w_head, h_head, 1) 
+    stack_plot(dxg, dyg, deriv_inset_ax, u_s, v_s, 5, d_range, dpd, 0.1, arrows, stacks, orientation, d_scale, w_head, h_head, 1) 
     
     # Don't display the x and y axis values
     # if click_opt_int > 2:  
@@ -3608,6 +3626,7 @@ field_select.set(field_name_list[0])
 
 field_select_drop_label = tk.Label(bot_frame, text='Select Pre-Defined 1-Form:')
 field_select_drop_label.grid(row=3, column=0)
+
 
 field_select_drop = ttk.Combobox(bot_frame, value=field_name_list, width=40)
 field_select_drop.current(0)
