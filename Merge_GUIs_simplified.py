@@ -2232,7 +2232,7 @@ def form_2_components_plot(grid_x, grid_y, form_2_loc, angle, s_max, L, fract, c
     # of the arrow and with an arrowhead on top.
     # #########################################################################
     # find the maximum magnitude for scaling
-    max_size = np.max(form_2_loc)   # careful with singularities, else ---> nan
+    max_size = abs(np.max(form_2_loc))   # careful with singularities, else ---> nan
     
     # find the relative magnitude of vectors to maximum, as an array
     R = abs(form_2_loc)/max_size
@@ -2759,29 +2759,49 @@ def Int_deriv_11_form():
 # asks to give vectors w.r.t to which perform iota.
 def Int_deriv_2_form_response(type_form):
     global int_vector_window, int_vect_ex_entry, int_vect_ey_entry
-    # open a titled new window
-    int_vector_window = tk.Toplevel()
-    int_vector_window.title('input a vector for the interior derivative')
-    # define entry boxes for e^x and e^y components of desired vector
-    tk.Label(int_vector_window, text='vector component e^x').grid(row=0, column=0)
-    int_vect_ex_entry = tk.Entry(int_vector_window, width=30, borderwidth=1)
-    int_vect_ex_entry.insert(0, vector_ex_str)
-    int_vect_ex_entry.grid(row=1, column=0)
-    tk.Label(int_vector_window, text='vector component e^y').grid(row=2, column=0)
-    int_vect_ey_entry = tk.Entry(int_vector_window, width=30, borderwidth=1)
-    int_vect_ey_entry.insert(0, vector_ey_str)
-    int_vect_ey_entry.grid(row=3, column=0)
-    # define a button that will plot these
-    # for whatever is being plotted
+    # Just in case
     if type_form == 1:
+        if calculus_form_tracker == 0:
+            tk.messagebox.showinfo('', 'Interior derivative of a 0-form is None')
+            main_axis.clear()
+            canvas.draw()
+        else:
+            # open a titled new window
+            int_vector_window = tk.Toplevel()
+            int_vector_window.title('input a vector for the interior derivative')
+            # define entry boxes for e^x and e^y components of desired vector
+            tk.Label(int_vector_window, text='vector component e^x').grid(row=0, column=0)
+            int_vect_ex_entry = tk.Entry(int_vector_window, width=30, borderwidth=1)
+            int_vect_ex_entry.insert(0, vector_ex_str)
+            int_vect_ex_entry.grid(row=1, column=0)
+            tk.Label(int_vector_window, text='vector component e^y').grid(row=2, column=0)
+            int_vect_ey_entry = tk.Entry(int_vector_window, width=30, borderwidth=1)
+            int_vect_ey_entry.insert(0, vector_ey_str)
+            int_vect_ey_entry.grid(row=3, column=0)
+            # define a button that will plot these
+            # for whatever is being plotted
         if calculus_form_tracker == 2:
             int_vector_load_btn = tk.Button(int_vector_window, text='PLOT', padx=20, pady=10, command=Int_deriv_22_form)
             int_vector_load_btn.grid(row=4, column=0, pady=10)
         if calculus_form_tracker == 1:
             int_vector_load_btn = tk.Button(int_vector_window, text='PLOT', padx=20, pady=10, command=Int_deriv_11_form)
             int_vector_load_btn.grid(row=4, column=0, pady=10)
-    # for both 2-form and 1-form
-    elif type_form == 2:
+        # for both 2-form and 1-form
+    if type_form == 2:
+        # open a titled new window
+        int_vector_window = tk.Toplevel()
+        int_vector_window.title('input a vector for the interior derivative')
+        # define entry boxes for e^x and e^y components of desired vector
+        tk.Label(int_vector_window, text='vector component e^x').grid(row=0, column=0)
+        int_vect_ex_entry = tk.Entry(int_vector_window, width=30, borderwidth=1)
+        int_vect_ex_entry.insert(0, vector_ex_str)
+        int_vect_ex_entry.grid(row=1, column=0)
+        tk.Label(int_vector_window, text='vector component e^y').grid(row=2, column=0)
+        int_vect_ey_entry = tk.Entry(int_vector_window, width=30, borderwidth=1)
+        int_vect_ey_entry.insert(0, vector_ey_str)
+        int_vect_ey_entry.grid(row=3, column=0)
+        # define a button that will plot these
+        # for whatever is being plotted
         int_vector_load_btn = tk.Button(int_vector_window, text='PLOT', padx=20, pady=10, command=Int_deriv_21_form)
         int_vector_load_btn.grid(row=4, column=0, pady=10)
 
