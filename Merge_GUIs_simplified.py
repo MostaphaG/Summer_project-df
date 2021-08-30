@@ -2515,6 +2515,7 @@ def form_2_zoom(x_m, y_m):
 # define a funvtion to call to select R2 tools
 def R2_tools_handler(R2_tools_opt_var):
     global R2_tools_opt_int, toolbar
+    global label_AI_area_2, label_AI_result_2, restart_AI_btn
     # get the variable as an integer, make it global not to have to repeat this
     R2_tools_opt_int = R2_tools_opt_var
     if R2_tools_opt_int == 0:
@@ -2529,6 +2530,9 @@ def R2_tools_handler(R2_tools_opt_var):
         canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
         # tools, therefore disable the slider
         zoom_slider_R2.configure(state=tk.DISABLED)
+        # return all options from AREa integral
+        form_0_btn.configure(state=tk.NORMAL)
+        form_1_btn.configure(state=tk.NORMAL)
         # get rid of restart integral button
         try:
             restart_AI_btn.destroy()
@@ -2549,9 +2553,16 @@ def R2_tools_handler(R2_tools_opt_var):
         toolbar.children['!button5'].pack_forget()
         # enable it again
         zoom_slider_R2.configure(state=tk.NORMAL)
+        # return all options from AREa integral
+        form_0_btn.configure(state=tk.NORMAL)
+        form_1_btn.configure(state=tk.NORMAL)
         # get rid of restart integral button
         try:
             restart_AI_btn.destroy()
+            label_AI_area_1.destroy()
+            label_AI_area_2.destroy()
+            label_AI_result_1.destroy()
+            label_AI_result_2.destroy()
         except (UnboundLocalError, NameError):  
             pass
     else:
@@ -2568,13 +2579,25 @@ def R2_tools_handler(R2_tools_opt_var):
         toolbar.children['!button5'].pack_forget()
         # disable the slider too
         zoom_slider_R2.configure(state=tk.DISABLED)
-        # make sure a 2-form is being plotted:
-        form_2_response()
-        # block the other option for the time being:
+        # block the other options for the time being:
+        form_0_btn.configure(state=tk.DISABLED)
+        form_1_btn.configure(state=tk.DISABLED)
         ''' NOT DONE YET '''  # !!!
         # set up a restart button
         restart_AI_btn = tk.Button(calculus_frame, text='Reset Integral', command=AI_restart)
-        restart_AI_btn.grid(row=9, column=2)
+        restart_AI_btn.grid(row=13, column=0)
+        # set up labels for result
+        label_AI_area_1 = tk.Label(calculus_frame, text='Area drawn:')
+        label_AI_area_1.grid(row=14, column=0)
+        label_AI_area_2 = tk.Label(calculus_frame, text='0')
+        label_AI_area_2.grid(row=14, column=1)
+        label_AI_result_1 = tk.Label(calculus_frame, text='Integration result:')
+        label_AI_result_1.grid(row=15, column=0)
+        label_AI_result_2 = tk.Label(calculus_frame, text='0')
+        label_AI_result_2.grid(row=15, column=1)
+        # make sure a 2-form is being plotted:
+        form_2_response()
+        
 
 
 # upate the zooming tool
@@ -2595,6 +2618,11 @@ def form_2_response():
     # set tracker
     calculus_form_tracker = 2
     update_variables()
+    # restart the area calculation if chosen
+    if R2_tools_opt_int == 2:
+        AI_restart(1)
+    else:
+        pass
     # from these, establish the new fract, approperiate for 2-forms
     fract = 2/((pt_den-1))
     # get the input 2-form
@@ -3241,14 +3269,12 @@ def selection_form_2_response(event):
 # define a function that will integrate 2-forms
 # over given regions
 def integration_form_2(AI_verts):
-    global AI_area, coord_verts, x_shape_g, y_shape_g, inside_list, AI_result
-    global form_2_inside_eq
+    global AI_area, AI_result
     # Calculate the area of that shape:
     AI_area = calc_area(AI_verts)
     # check against negative areas:
     if AI_area < 0:
         AI_area *= -1
-    tk.messagebox.showinfo('', 'you have drawn a shape, AREA = ' + str(AI_area))
     # define a grid of points that covers the area the user has input:
     # change the list into an array
     coord_verts = np.array(AI_verts)
@@ -3259,9 +3285,11 @@ def integration_form_2(AI_verts):
     shape_x_max = np.max(AI_verts_x)
     shape_y_min = np.min(AI_verts_y)
     shape_y_max = np.max(AI_verts_y)
+    # set up accuracy
+    points_N = 100
     # based on these, define a superfine grid to integrate over
-    x_shape_points = np.linspace(shape_x_min, shape_x_max, 100)
-    y_shape_points = np.linspace(shape_y_min, shape_y_max, 100)
+    x_shape_points = np.linspace(shape_x_min, shape_x_max, points_N)
+    y_shape_points = np.linspace(shape_y_min, shape_y_max, points_N)
     # mesh these
     x_shape_g, y_shape_g = np.meshgrid(x_shape_points, y_shape_points)
     # CRUCIAL STEP:
@@ -3270,8 +3298,8 @@ def integration_form_2(AI_verts):
     # set up a list to store points coordinates, that are inside
     inside_list = []
     polygon_path = mplPath.Path(coord_verts)
-    for i in range(100):
-        for j in range(100):
+    for i in range(points_N):
+        for j in range(points_N):
             if polygon_path.contains_point((x_shape_g[i, j], y_shape_g[i, j])) is True:
                 # sppend to inside list
                 inside_list.append([x_shape_g[i, j], y_shape_g[i, j]])
@@ -3279,21 +3307,34 @@ def integration_form_2(AI_verts):
     inside_arr = np.array(inside_list)
     points_x = inside_arr[:, 0]
     points_y = inside_arr[:, 1]
+    
+    # Was made for testing but I love it, colour the inside of the drawn shape
+    for i in range(len(inside_arr)):
+        circle =  patch.Circle(inside_arr[i], L*fract/20, color='#DADADA')
+        main_axis.add_patch(circle)
+    canvas.draw()
+    
     # then need to evalue the 2_form at all of these
     form_2_str = str(simplify(form_2_entry.get()))
-    form_2_inside_eq = form_2_str.replace('**', '^')
+    form_2_inside_eq = form_2_str.replace('^', '**')
     form_2_inside_eq = form_2_inside_eq.replace('ln', 'log')
     form_2_inside_eq = form_2_inside_eq.replace('x', 'points_x')
     form_2_inside_eq = form_2_inside_eq.replace('y', 'points_y')
+    # take care of constnts and zeros:
+    if form_2_inside_eq.find('points_x') & form_2_inside_eq.find('points_y') == -1:
+        form_2_inside_eq = str(form_2_inside_eq) + '* np.ones((len(points_x), len(points_y)))'
+    else:
+        pass
     form_2_inside = eval(form_2_inside_eq)
     # then sum over all values in that array
     sum_inside = np.sum(form_2_inside)
-    # then find the areas each point 'covers'
+    # get the elemental area
     dxdy_area = (x_shape_points[1] - x_shape_points[0])*(y_shape_points[1] - y_shape_points[0])
     # then evaluate the total of the integral
-    AI_result = dxdy_area * sum_inside
-    # show it
-    tk.messagebox.showinfo('', 'INTEGRAL = ' + str(round(AI_result, 3)))
+    AI_result = sum_inside * dxdy_area / len(inside_list)
+    # show these results
+    label_AI_result_2.configure(text=str(round(AI_result, 1)))
+    label_AI_area_2.configure(text=str(round(AI_area, 1)))
     
 
 # define a fucntion that will track user clicks in a list, and check if they
@@ -3345,17 +3386,23 @@ def area_finder_form_2_int(x_click, y_click):
 
 
 # define a function that will restart the 2-form integration
-def AI_restart():
+def AI_restart(test=0):
     global AI_coord, AI_result, AI_area, AI_verts
     # first, initialise variables again
     AI_coord = []
     AI_result = 0
     AI_area = 0
     AI_verts = []
+    # update labels
+    label_AI_result_2.configure(text='0')
+    label_AI_area_2.configure(text='0')
     # NOT IDEAL BUT HOPEFULLY TEMPORARY
     # call plot-respose to redraw (so lines are deleted)
     # ideally would want a way of deleting lines without restarting the plot
-    form_2_response()
+    if test == 0:
+        form_2_response()
+    else:
+        pass
 
 
 ''' DEFINE FUNCTIONS USED IN R3 CODE '''
@@ -4066,8 +4113,8 @@ form_0_entry.grid(row=4, column=1)
 form_0_entry.insert(0, '')
 
 # set up a button to plot the 0-form
-fotm_0_btn = tk.Button(calculus_frame, text='0-form plot', padx=3, pady=5, command=form_0_response)
-fotm_0_btn.grid(row=4, column=2)
+form_0_btn = tk.Button(calculus_frame, text='0-form plot', padx=3, pady=5, command=form_0_response)
+form_0_btn.grid(row=4, column=2)
 
 # define a button to submit the supplied 2-form and plot it as blocks
 form_2_btn = tk.Button(calculus_frame, text='2-form plot', padx=3, pady=5, command=form_2_response)
@@ -4076,8 +4123,8 @@ form_2_btn.grid(row=3, column=1)
 # define a button that will just plot the 1-form
 # this will not be needed when its it merged with main GUI
 # as there will already be a plot button there
-form_1_stacks_btn = tk.Button(calculus_frame, text='1-form plot', padx=3, pady=5, command=form_1_stacks_response)
-form_1_stacks_btn.grid(row=3, column=0)
+form_1_btn = tk.Button(calculus_frame, text='1-form plot', padx=3, pady=5, command=form_1_stacks_response)
+form_1_btn.grid(row=3, column=0)
 
 # add a button to plot the interior derivative as superposing stack fields
 INT_btn = tk.Button(calculus_frame, text='Int Deriv', padx=0, pady=2, command=Int_deriv_response)
