@@ -1049,6 +1049,13 @@ def on_key_press(event):
         elif R2_tools_opt_int == 0:
             key_press_handler(event, canvas, toolbar)
         else:
+            if shape_complete_tracker == 0:
+                # if the shape is not complete, just continue normally
+                pass
+            else:
+                # if the shape has already been completed, restart first
+                # then continue
+                AI_restart()
             area_finder_form_2_int(x_m, y_m)
 
 
@@ -3269,7 +3276,7 @@ def selection_form_2_response(event):
 # define a function that will integrate 2-forms
 # over given regions
 def integration_form_2(AI_verts):
-    global AI_area, AI_result, form_2_inside
+    global AI_area, AI_result, shape_complete_tracker, form_2_inside
     # Calculate the area of that shape:
     AI_area = calc_area(AI_verts)
     # check against negative areas:
@@ -3337,6 +3344,8 @@ def integration_form_2(AI_verts):
     # show these results
     label_AI_result_2.configure(text=str(round(AI_result, 1)))
     label_AI_area_2.configure(text=str(round(AI_area, 1)))
+    # set up a variable to establish that a shape has been ompleted now
+    shape_complete_tracker = 1
 
 
 # define a fucntion that will track user clicks in a list, and check if they
@@ -3389,7 +3398,7 @@ def area_finder_form_2_int(x_click, y_click):
 
 # define a function that will restart the 2-form integration
 def AI_restart(test=0):
-    global AI_coord, AI_result, AI_area, AI_verts
+    global AI_coord, AI_result, AI_area, AI_verts, shape_complete_tracker
     # first, initialise variables again
     AI_coord = []
     AI_result = 0
@@ -3405,6 +3414,8 @@ def AI_restart(test=0):
         form_2_response()
     else:
         pass
+    # set up a tracker to account for the shape being undone
+    shape_complete_tracker = 0
 
 
 ''' DEFINE FUNCTIONS USED IN R3 CODE '''
