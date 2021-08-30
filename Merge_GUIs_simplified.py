@@ -17,6 +17,7 @@ from sympy.parsing.sympy_parser import parse_expr
 from PIL import Image, ImageTk
 from math import isnan
 from matplotlib import patches as patch
+import matplotlib.path as mplPath
 
 # input many numpy functions to deal with user input
 from numpy import sin, cos, tan, sqrt, log, arctan, arcsin, arccos, tanh
@@ -2528,6 +2529,11 @@ def R2_tools_handler(R2_tools_opt_var):
         canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
         # tools, therefore disable the slider
         zoom_slider_R2.configure(state=tk.DISABLED)
+        # get rid of restart integral button
+        try:
+            restart_AI_btn.destroy()
+        except (UnboundLocalError, NameError):  
+            pass
     elif R2_tools_opt_int == 1:
         # in zoom option:
         fig.canvas.draw()
@@ -2543,6 +2549,11 @@ def R2_tools_handler(R2_tools_opt_var):
         toolbar.children['!button5'].pack_forget()
         # enable it again
         zoom_slider_R2.configure(state=tk.NORMAL)
+        # get rid of restart integral button
+        try:
+            restart_AI_btn.destroy()
+        except (UnboundLocalError, NameError):  
+            pass
     else:
         # Area Integrals
         # go back to home and disable tools:
@@ -2561,6 +2572,9 @@ def R2_tools_handler(R2_tools_opt_var):
         form_2_response()
         # block the other option for the time being:
         ''' NOT DONE YET '''  # !!!
+        # set up a restart button
+        restart_AI_btn = tk.Button(calculus_frame, text='Reset Integral', command=AI_restart)
+        restart_AI_btn.grid(row=9, column=2)
 
 
 # upate the zooming tool
@@ -3227,7 +3241,8 @@ def selection_form_2_response(event):
 # define a function that will integrate 2-forms
 # over given regions
 def integration_form_2(AI_verts):
-    global AI_area, coord_verts, x_shape_g, y_shape_g
+    global AI_area, coord_verts, x_shape_g, y_shape_g, inside_list, AI_result
+    global form_2_inside_eq
     # Calculate the area of that shape:
     AI_area = calc_area(AI_verts)
     # check against negative areas:
@@ -3252,12 +3267,33 @@ def integration_form_2(AI_verts):
     # CRUCIAL STEP:
     # need to test if points are inside the shape, if not, set them
     # to something to be excluded later
-    
+    # set up a list to store points coordinates, that are inside
+    inside_list = []
+    polygon_path = mplPath.Path(coord_verts)
+    for i in range(100):
+        for j in range(100):
+            if polygon_path.contains_point((x_shape_g[i, j], y_shape_g[i, j])) is True:
+                # sppend to inside list
+                inside_list.append([x_shape_g[i, j], y_shape_g[i, j]])
+    # split the inside list to be now an array of x and y components
+    inside_arr = np.array(inside_list)
+    points_x = inside_arr[:, 0]
+    points_y = inside_arr[:, 1]
     # then need to evalue the 2_form at all of these
+    form_2_str = str(simplify(form_2_entry.get()))
+    form_2_inside_eq = form_2_str.replace('**', '^')
+    form_2_inside_eq = form_2_inside_eq.replace('ln', 'log')
+    form_2_inside_eq = form_2_inside_eq.replace('x', 'points_x')
+    form_2_inside_eq = form_2_inside_eq.replace('y', 'points_y')
+    form_2_inside = eval(form_2_inside_eq)
     # then sum over all values in that array
+    sum_inside = np.sum(form_2_inside)
     # then find the areas each point 'covers'
-    # then evaluateh the total of the integral
-    
+    dxdy_area = (x_shape_points[1] - x_shape_points[0])*(y_shape_points[1] - y_shape_points[0])
+    # then evaluate the total of the integral
+    AI_result = dxdy_area * sum_inside
+    # show it
+    tk.messagebox.showinfo('', 'INTEGRAL = ' + str(round(AI_result, 3)))
     
 
 # define a fucntion that will track user clicks in a list, and check if they
@@ -3306,6 +3342,20 @@ def area_finder_form_2_int(x_click, y_click):
             # a closed shape was drawn, pass it onto the integral calculating
             # function
             integration_form_2(AI_verts)
+
+
+# define a function that will restart the 2-form integration
+def AI_restart():
+    global AI_coord, AI_result, AI_area, AI_verts
+    # first, initialise variables again
+    AI_coord = []
+    AI_result = 0
+    AI_area = 0
+    AI_verts = []
+    # NOT IDEAL BUT HOPEFULLY TEMPORARY
+    # call plot-respose to redraw (so lines are deleted)
+    # ideally would want a way of deleting lines without restarting the plot
+    form_2_response()
 
 
 ''' DEFINE FUNCTIONS USED IN R3 CODE '''
