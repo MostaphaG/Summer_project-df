@@ -534,7 +534,7 @@ def tab_selection(event):
         global form_2_frame
         global F_xy_x, F_xy_y, F_xz_x, F_xz_z, F_yz_y, F_yz_z
         global max_global_dxdy, max_global_dxdz, max_global_dydz
-        global field_select, h_index, hvalue_string
+        global h_index, hvalue_string
         # set the variable that tracks when R3 is used to 1
         R3_use_track = 1
         # clear the axis
@@ -672,19 +672,15 @@ toggle_image_off = ImageTk.PhotoImage(toggle_image_off)
 
 # right frame:
 right_frame_frame = tk.LabelFrame(root, text='Options Frame', padx=5, pady=5)
-right_frame_frame.grid(row=1, column=1)
+right_frame_frame.grid(row=1, column=1, rowspan=2)
 
 # bot frame:
-bot_frame_frame = tk.LabelFrame(root, text='1-Form Input Frame', padx=5, pady=5)
+bot_frame_frame = tk.LabelFrame(root, text='Plotting frame', padx=5, pady=5)
 bot_frame_frame.grid(row=2, column=0)
 
 # plot frame:
-plot_frame = tk.LabelFrame(root, text='Plot Frame', padx=5, pady=5)
+plot_frame = tk.LabelFrame(root, text='Display Frame', padx=5, pady=5)
 plot_frame.grid(row=1, column=0)
-
-# plot characteristics frame and plot button
-small_frame = tk.LabelFrame(root, text='Plot Customisation Frame', padx=5, pady=5)
-small_frame.grid(row=2, column=1)
 
 # define notebook for tabs
 notebook = ttk.Notebook(right_frame_frame)
@@ -692,9 +688,12 @@ notebook.grid(row=0, column=0)
 # notebook for bottom field input, when needed to disappear.
 notebook_bottom = ttk.Notebook(bot_frame_frame)
 notebook_bottom.grid(row=0, column=0)
-#singularities notebook
+# singularities notebook
 notebook_singular = ttk.Notebook(right_frame_frame)
 notebook_singular.grid(row=1, column=0)
+# plotting options notebook
+notebook_small = ttk.Notebook(bot_frame_frame)
+notebook_small.grid(row=0, column=1)
 
 # singularities:
 singular_frame = tk.LabelFrame(notebook_singular)
@@ -714,6 +713,9 @@ calculus_frame.grid(row=0, column=2)
 # R3
 r3_frame = tk.Frame(notebook)
 r3_frame.grid(row=0, column=3)
+# plotting options
+small_frame = tk.Frame(notebook_small)
+small_frame.grid(row=0, column=0)
 
 # finsalise them
 notebook.add(right_frame, text='Main')
@@ -722,6 +724,7 @@ notebook.add(calculus_frame, text='Calculus')
 notebook.add(r3_frame, text='\mathbb{R}^{3}')
 notebook_bottom.add(bot_frame, text='fields')
 notebook_singular.add(singular_frame, text='singularities')
+notebook_small.add(small_frame, text='Plot Options')
 
 # bind the clicks on tabs to a function
 notebook.bind_all('<<NotebookTabChanged>>', tab_selection)
@@ -766,11 +769,12 @@ field_name_list = ['Default: y*sin(x)dx - x*cos(y)dy',
                    'Linear example 2: xdx',
                    'Constant: 6dx + 3dy',
                    'Falling cat (Planar 3 link robot)',
-                   'Gravitational/Electric Point Charge: -x/(x**2+y**2)dx + -y/(x**2+y**2)dy',
-                   'Magnetism of Current Carrying Wire: -y/(x**2+y**2)dx + x/(x**2+y**2)dy',
+                   'Electric Point Charge: -x/(x**2+y**2)dx + -y/(x**2+y**2)dy',
+                   'H field of Current Carrying Wire: -y/(x**2+y**2)dx + x/(x**2+y**2)dy',
                    'Flamms paraboloid',
                    'BLACK HOLE!'
                    ]
+
 # NOTE:
 # Flamm's paraboloid ( https://rreusser.github.io/flamms-paraboloid/, https://en.wikipedia.org/wiki/Schwarzschild_metric")
 # Black hole field analogue "taking the Schwarzchild contraction factor, at \theta = pi/2, g = (1-(r_s/r))^(-1) and defining the one form w = \del(g)/\del(x) dx + \del(g)/\del(y) dy    
@@ -802,6 +806,19 @@ field_y_list = ['- x*cos(y)',
                 'y/(sqrt(x**2 + y**2)*(1-2/(sqrt(x**2 + y**2)))) + x',
                 '-2*y*((x^2+y^2)^(-1.5))*(1-(2/sqrt(x^2+y^2)))^(-2)'
                 ]
+
+
+# define 2-form names and equations for the pre-defined 2-forms dropdown
+# its on R2, therefore all are only dx^dy
+list_form_2_names = ['default: x**2*y',
+                     'constant: 3',                     
+                     ]
+
+# define its equations:
+list_form_2_equations = ['x**2*y',
+                         '3',
+                         ]
+
 
 '''  INITIAL PLOT PARAMETERS and FIGURE '''
 
@@ -1583,8 +1600,26 @@ def field_selection_response(event):
     # now call the plot function to finalise all these onto the plot
     # depending on tab ,use correct 1 form plotting fucntion
     if tab_text == 'Calculus':
+        # this plots 1 form always for these responses
         form_1_stacks_response()
     else:
+        # check if the selected field is stricte a 1-form
+        # if so, change representation.
+        if selected_index == 7 or selected_index == 8 or selected_index == 9 or selected_index == 10:
+            # select stacks to be plotted
+            tensor.set(0)
+            # respons to this by removing options unavaliable to 1-forms in
+            # main tab:
+            if click_opt_int != 0 and click_opt_int != 1:
+                click_option.set(0)
+                click_option_handler(click_option.get())
+            click_option_Deriv_btn.configure(state=tk.DISABLED)
+            click_option_Div_btn.configure(state=tk.DISABLED)
+            click_option_Curl_btn.configure(state=tk.DISABLED)
+            component_x_entry_label.configure(text='dx component')
+            component_y_entry_label.configure(text='dy component')
+            field_select_drop_label.configure(text='Select Pre-Defined 1-Form:')
+        # then, with all these set, call the plot function.
         PLOT_response()
 
 
@@ -3144,6 +3179,23 @@ def form_0_response():
     canvas.draw()
 
 
+# define a fucntion that will respond to dropdown selection of 2-forms
+def selection_form_2_response(event):
+    # clear the 2-form box
+    form_2_entry.delete(0, 'end')
+    # get the index at which this entry is
+    selected_index = list_form_2_names.index(str(select_form_2_drop.get()))
+    # using that index, get the equation its list
+    # and insert into 2-form box
+    selected_form_2 = list_form_2_equations[selected_index]
+    form_2_entry.insert(0, selected_form_2)
+    # colour code to be able to distinguish what is being plotted
+    x_comp_entry.configure(bg='#C0F6BB')
+    y_comp_entry.configure(bg='#C0F6BB')
+    # now call the plot function to finalise all these onto the plot
+    form_2_response()
+
+
 ''' DEFINE FUNCTIONS USED IN R3 CODE '''
 
 
@@ -3674,48 +3726,6 @@ submit_known_singularity_btn.grid(row=3, column=0)
 
 '''
 
-set up all in SMALL FRAME
-
-'''
-
-
-# define the PLOT button
-PLOT_btn = tk.Button(small_frame, text='PLOT', padx=32, pady=20, command=PLOT_response)
-PLOT_btn.grid(row=0, column=0, columnspan=2, rowspan=1)
-
-# define a button in small frame that will open new window to adjust arrowheads
-custom_btn = tk.Button(small_frame, text='customise visuals', padx=1, pady=1, command=custom_btn_reponse)
-custom_btn.grid(row=0, column=2)
-
-# define a button to customise the polar grids
-polar_grid_custom_btn = tk.Button(small_frame, text='customise polar grid', padx=1, pady=1, command=polar_grid_custom_reponse)
-polar_grid_custom_btn.grid(row=1, column=2)
-
-# define a button that will just plot the given cartesian field
-# on a polar grid
-polar_grid_plot_btn = tk.Button(small_frame, text='polar grid plot', command= lambda: Polar_grid_plot_response(tensor.get()))
-polar_grid_plot_btn.grid(row=1, column=0, columnspan=2)
-
-# define entry boxes for each (in order): L, pt_den, s_max and a ; and info txt
-# Also input into them the initial values
-tk.Label(small_frame, text='Size').grid(row=2, column=0)
-L_entry = tk.Entry(small_frame, width=11, borderwidth=1)
-L_entry.grid(row=3, column=0, padx=2)
-L_entry.insert(0, L)
-
-tk.Label(small_frame, text='grid').grid(row=2, column=1)
-pt_den_entry = tk.Entry(small_frame, width=11, borderwidth=1)
-pt_den_entry.grid(row=3, column=1, padx=2)
-pt_den_entry.insert(0, pt_den)
-
-tk.Label(small_frame, text='max sheets').grid(row=2, column=2)
-s_max_entry = tk.Entry(small_frame, width=11, borderwidth=1)
-s_max_entry.grid(row=3, column=2, padx=2)
-s_max_entry.insert(0, s_max)
-
-
-'''
-
 set up all in BOTTOM FRAME
 
 '''
@@ -3723,34 +3733,80 @@ set up all in BOTTOM FRAME
 
 # define entry boxes for the field equations in x and y
 component_x_entry_label = tk.Label(bot_frame, text='dx component')
-component_x_entry_label.grid(row=1, column=0)
+component_x_entry_label.grid(row=0, column=0)
 x_comp_entry = tk.Entry(bot_frame, width=20, borderwidth=2)
-x_comp_entry.grid(row=2, column=0)
+x_comp_entry.grid(row=1, column=0)
 x_comp_entry.insert(0, 'y*sin(x)')
 
 component_y_entry_label = tk.Label(bot_frame, text='dy component')
-component_y_entry_label.grid(row=1, column=1)
+component_y_entry_label.grid(row=0, column=1)
 y_comp_entry = tk.Entry(bot_frame, width=20, borderwidth=2)
-y_comp_entry.grid(row=2, column=1)
+y_comp_entry.grid(row=1, column=1)
 y_comp_entry.insert(0, '-x*cos(y)')
+
 
 # define strings from initial components 
 # these are needed by the derivative function, therefore for the derivative
 # to work on the initial field, need to initially define them
+# THESE ARE HERE TO APPEAR AFTER THE ENTRIES ARE ACTUALLY DEFINED
+# NOT VITAL, BUT EASIER
 string_x = str(x_comp_entry.get())
 string_y = str(y_comp_entry.get())
 
+# set up a dropdown box for 1-forms and VFs
 field_select = tk.StringVar()
 field_select.set(field_name_list[0])
 
 field_select_drop_label = tk.Label(bot_frame, text='Select Pre-Defined 1-Form:')
-field_select_drop_label.grid(row=3, column=0)
+field_select_drop_label.grid(row=2, column=0, columnspan=2)
 
 
 field_select_drop = ttk.Combobox(bot_frame, value=field_name_list, width=40)
 field_select_drop.current(0)
-field_select_drop.grid(row=4, column=0)
+field_select_drop.grid(row=3, column=0, columnspan=2)
 field_select_drop.bind("<<ComboboxSelected>>", field_selection_response)
+
+
+'''
+
+what was in small frame initally, now also in botton notebook
+
+'''
+
+# define the PLOT button
+PLOT_btn = tk.Button(small_frame, text='PLOT', padx=32, pady=20, command=PLOT_response)
+PLOT_btn.grid(row=0, column=2, columnspan=2, rowspan=1)
+
+# define a button in small frame that will open new window to adjust arrowheads
+custom_btn = tk.Button(small_frame, text='customise visuals', padx=1, pady=1, command=custom_btn_reponse)
+custom_btn.grid(row=0, column=4)
+
+# define a button to customise the polar grids
+polar_grid_custom_btn = tk.Button(small_frame, text='customise polar grid', padx=1, pady=1, command=polar_grid_custom_reponse)
+polar_grid_custom_btn.grid(row=1, column=4)
+
+# define a button that will just plot the given cartesian field
+# on a polar grid
+polar_grid_plot_btn = tk.Button(small_frame, text='polar grid plot', command= lambda: Polar_grid_plot_response(tensor.get()))
+polar_grid_plot_btn.grid(row=1, column=2, columnspan=2)
+
+# define entry boxes for each (in order): L, pt_den, s_max and a ; and info txt
+# Also input into them the initial values
+tk.Label(small_frame, text='Size').grid(row=2, column=2)
+L_entry = tk.Entry(small_frame, width=11, borderwidth=1)
+L_entry.grid(row=3, column=2, padx=2)
+L_entry.insert(0, L)
+
+tk.Label(small_frame, text='grid').grid(row=2, column=3)
+pt_den_entry = tk.Entry(small_frame, width=11, borderwidth=1)
+pt_den_entry.grid(row=3, column=3, padx=2)
+pt_den_entry.insert(0, pt_den)
+
+tk.Label(small_frame, text='max sheets').grid(row=2, column=4)
+s_max_entry = tk.Entry(small_frame, width=11, borderwidth=1)
+s_max_entry.grid(row=3, column=4, padx=2)
+s_max_entry.insert(0, s_max)
+
 
 
 '''
@@ -3840,30 +3896,30 @@ form_2_entry.configure(bg='#C0F6BB')
 # for now not an entry box because it doesn't get used anywhere
 # I make it red to remember to come back to it later and use it.
 Label_zero_form = tk.Label(calculus_frame, text='Zero form:')
-Label_zero_form.grid(row=2, column=0)
+Label_zero_form.grid(row=4, column=0)
 
 # set up an entry for zero forms:
 form_0_entry = tk.Entry(calculus_frame, width=15, borderwidth=2)
-form_0_entry.grid(row=2, column=1)
+form_0_entry.grid(row=4, column=1)
 form_0_entry.insert(0, '')
 
 # set up a button to plot the 0-form
 fotm_0_btn = tk.Button(calculus_frame, text='0-form plot', padx=3, pady=5, command=form_0_response)
-fotm_0_btn.grid(row=2, column=2)
+fotm_0_btn.grid(row=4, column=2)
 
 # define a button to submit the supplied 2-form and plot it as blocks
 form_2_btn = tk.Button(calculus_frame, text='2-form plot', padx=3, pady=5, command=form_2_response)
-form_2_btn.grid(row=1, column=1)
+form_2_btn.grid(row=3, column=1)
 
 # define a button that will just plot the 1-form
 # this will not be needed when its it merged with main GUI
 # as there will already be a plot button there
 form_1_stacks_btn = tk.Button(calculus_frame, text='1-form plot', padx=3, pady=5, command=form_1_stacks_response)
-form_1_stacks_btn.grid(row=1, column=0)
+form_1_stacks_btn.grid(row=3, column=0)
 
 # add a button to plot the interior derivative as superposing stack fields
 INT_btn = tk.Button(calculus_frame, text='Int Deriv', padx=0, pady=2, command=Int_deriv_response)
-INT_btn.grid(row=3, column=0)
+INT_btn.grid(row=5, column=0)
 
 # define a button to plot the exterior derivative from given u and v
 # Note, it will get the 2-form first, then return back down
@@ -3871,19 +3927,19 @@ INT_btn.grid(row=3, column=0)
 # therefore, it will also just be one possible representation
 # not the only possible one
 EXT_int_btn = tk.Button(calculus_frame, text='Ext Deriv', padx=0, pady=2, command=Ext_deriv_response)
-EXT_int_btn.grid(row=3, column=1)
+EXT_int_btn.grid(row=5, column=1)
 
 # define a wedge product button that will let the user input TWO 1-forms
 # in a new window to be wedged to gice a 2-form
 wedge_btn = tk.Button(calculus_frame, text='Wedge', padx=0, pady=2, command=wedge_2_response)
-wedge_btn.grid(row=4, column=0)
+wedge_btn.grid(row=6, column=0)
 
 # define ab utton that will Find the Hodge dual
 Hodge_1_form_btn = tk.Button(calculus_frame, text='Hodge 1-Form', padx=0, pady=2, command=Hodge_1_form_response)
-Hodge_1_form_btn.grid(row=5, column=0)
+Hodge_1_form_btn.grid(row=7, column=0)
 
 Hodge_2_form_btn = tk.Button(calculus_frame, text='Hodge 2-Form', padx=0, pady=2, command=Hodge_2_form_response)
-Hodge_2_form_btn.grid(row=5, column=1)
+Hodge_2_form_btn.grid(row=7, column=1)
 
 # define radiobuttons button to choose zooming with the mouse on 2-forms on R2
 # and as opposed to tools
@@ -3891,14 +3947,14 @@ R2_tools_opt = tk.IntVar()
 R2_tools_opt.set(0)
 R2_tools_Tools_btn = tk.Radiobutton(calculus_frame, text='Tools', variable=R2_tools_opt, value=0, command=lambda: R2_tools_handler(R2_tools_opt.get()))
 R2_tools_Zoom_btn = tk.Radiobutton(calculus_frame, text='Zoom', variable=R2_tools_opt, value=1, command=lambda: R2_tools_handler(R2_tools_opt.get()))
-R2_tools_Tools_btn.grid(row=6, column=0)
-R2_tools_Zoom_btn.grid(row=6, column=1)
+R2_tools_Tools_btn.grid(row=8, column=0)
+R2_tools_Zoom_btn.grid(row=8, column=1)
 
 # set up a zooming tool for that too
-tk.Label(calculus_frame, text='Zoom').grid(row=7, column=0)
+tk.Label(calculus_frame, text='Zoom').grid(row=9, column=0)
 zoom_slider_R2 = tk.Scale(calculus_frame, from_=1, to=20, orient=tk.HORIZONTAL)
 zoom_slider_R2.bind("<ButtonRelease-1>", update_2_form_zoom)
-zoom_slider_R2.grid(row=7, column=1)
+zoom_slider_R2.grid(row=9, column=1)
 zoom_slider_R2.configure(state=tk.DISABLED)
 
 
@@ -3907,26 +3963,39 @@ zoomR2pd_select = tk.IntVar()
 zoomR2pd_select.set(11)
 zoomR2pd_list = [5, 6, 10, 11, 15, 16, 20, 21]
 
-tk.Label(calculus_frame, text='Inset Plot Point Density:').grid(row=8, column=0)
+tk.Label(calculus_frame, text='Inset Plot Point Density:').grid(row=10, column=0)
 zoomR2pd_drop = tk.OptionMenu(calculus_frame, zoomR2pd_select, *zoomR2pd_list, command=update_2_form_zoom)
-zoomR2pd_drop.grid(row=8, column=1)
+zoomR2pd_drop.grid(row=10, column=1)
 
 # Drop down to select inset axis size for R2 2 forms
 zoomR2_length_select = tk.DoubleVar()
 zoomR2_length_list = [0.1, 0.2, 0.3, 0.4, 0.5]
 zoomR2_length_select.set(zoomR2_length_list[2])
-tk.Label(calculus_frame, text='Inset Fractional Size:').grid(row=9, column=0)
+tk.Label(calculus_frame, text='Inset Fractional Size:').grid(row=11, column=0)
 zoomR2_length_drop = tk.OptionMenu(calculus_frame, zoomR2_length_select, *zoomR2_length_list, command=update_2_form_zoom)
-zoomR2_length_drop.grid(row=9, column=1)
+zoomR2_length_drop.grid(row=11, column=1)
 
 # define entry boxes to allow user to input x_m and y_m
 x_m_entry_calc = tk.Entry(calculus_frame, width=12)
 y_m_entry_calc = tk.Entry(calculus_frame, width=12)
-x_m_entry_calc.grid(row=10, column=0)
-y_m_entry_calc.grid(row=10, column=1)
+x_m_entry_calc.grid(row=12, column=0)
+y_m_entry_calc.grid(row=12, column=1)
 # and a button to submit these:
 Set_target_btn_calc = tk.Button(calculus_frame, text='Set Target', command=set_inset_target_calc)
-Set_target_btn_calc.grid(row=10, column=2, padx=20)
+Set_target_btn_calc.grid(row=12, column=2, padx=20)
+
+
+# add a dropdown menu for 2-forms, for now at the end of this tab
+select_form_2 = tk.StringVar()
+select_form_2.set(list_form_2_names[0])
+
+select_form_2_drop_label = tk.Label(calculus_frame, text='Select Pre-Defined 2-Form:')
+select_form_2_drop_label.grid(row=1, column=0, columnspan=3)
+
+select_form_2_drop = ttk.Combobox(calculus_frame, value=list_form_2_names, width=40)
+select_form_2_drop.current(0)
+select_form_2_drop.grid(row=2, column=0, columnspan=3)
+select_form_2_drop.bind("<<ComboboxSelected>>", selection_form_2_response)
 
 
 '''
