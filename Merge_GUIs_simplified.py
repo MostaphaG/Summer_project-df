@@ -891,6 +891,12 @@ shape_area = 0
 ratio1 = 0
 ratio2 = 0
 
+# set up initial variables for 2_form integral
+AI_coord = []
+AI_area = 0
+AI_result = 0
+AI_verts = []
+
 
 ''' DEFINE CALCULUS PARAMETERS, 2-forms and R3 stuff '''
 
@@ -1039,8 +1045,10 @@ def on_key_press(event):
     if tab_text == 'Calculus':
         if R2_tools_opt_int == 1:
             form_2_zoom(x_m, y_m)
-        else:
+        elif R2_tools_opt_int == 0:
             key_press_handler(event, canvas, toolbar)
+        else:
+            area_finder_form_2_int(x_m, y_m)
 
 
 # connect figure event to a function that responds to clicks, defined above
@@ -2520,7 +2528,7 @@ def R2_tools_handler(R2_tools_opt_var):
         canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
         # tools, therefore disable the slider
         zoom_slider_R2.configure(state=tk.DISABLED)
-    else:
+    elif R2_tools_opt_int == 1:
         # in zoom option:
         fig.canvas.draw()
         toolbar.home()
@@ -2535,14 +2543,34 @@ def R2_tools_handler(R2_tools_opt_var):
         toolbar.children['!button5'].pack_forget()
         # enable it again
         zoom_slider_R2.configure(state=tk.NORMAL)
+    else:
+        # Area Integrals
+        # go back to home and disable tools:
+        fig.canvas.draw()
+        toolbar.home()
+        state = fig.canvas.toolbar.mode
+        if state == 'zoom rect':
+            toolbar.zoom()
+        if state == 'pan/zoom':
+            toolbar.pan()
+        toolbar.children['!button4'].pack_forget()
+        toolbar.children['!button5'].pack_forget()
+        # disable the slider too
+        zoom_slider_R2.configure(state=tk.DISABLED)
+        # make sure a 2-form is being plotted:
+        form_2_response()
+        # block the other option for the time being:
+        ''' NOT DONE YET '''  # !!!
 
 
 # upate the zooming tool
 def update_2_form_zoom(self):
     if R2_tools_opt_int == 0:
-        pass
+        pass  # tools
+    elif R2_tools_opt_int == 1:
+        form_2_zoom(x_m, y_m)  # zooming
     else:
-        form_2_zoom(x_m, y_m)
+        pass  # area integrals
 
 
 # gets 2-form from entry box and plots it as coloured blocks only
@@ -3194,6 +3222,90 @@ def selection_form_2_response(event):
     y_comp_entry.configure(bg='#C0F6BB')
     # now call the plot function to finalise all these onto the plot
     form_2_response()
+
+
+# define a function that will integrate 2-forms
+# over given regions
+def integration_form_2(AI_verts):
+    global AI_area, coord_verts, x_shape_g, y_shape_g
+    # Calculate the area of that shape:
+    AI_area = calc_area(AI_verts)
+    # check against negative areas:
+    if AI_area < 0:
+        AI_area *= -1
+    tk.messagebox.showinfo('', 'you have drawn a shape, AREA = ' + str(AI_area))
+    # define a grid of points that covers the area the user has input:
+    # change the list into an array
+    coord_verts = np.array(AI_verts)
+    # find the maxima and minima of shape in x and y
+    AI_verts_x = coord_verts[:, 0]
+    AI_verts_y = coord_verts[:, 1]
+    shape_x_min = np.min(AI_verts_x)
+    shape_x_max = np.max(AI_verts_x)
+    shape_y_min = np.min(AI_verts_y)
+    shape_y_max = np.max(AI_verts_y)
+    # based on these, define a superfine grid to integrate over
+    x_shape_points = np.linspace(shape_x_min, shape_x_max, 100)
+    y_shape_points = np.linspace(shape_y_min, shape_y_max, 100)
+    # mesh these
+    x_shape_g, y_shape_g = np.meshgrid(x_shape_points, y_shape_points)
+    # CRUCIAL STEP:
+    # need to test if points are inside the shape, if not, set them
+    # to something to be excluded later
+    
+    # then need to evalue the 2_form at all of these
+    # then sum over all values in that array
+    # then find the areas each point 'covers'
+    # then evaluateh the total of the integral
+    
+    
+
+# define a fucntion that will track user clicks in a list, and check if they
+# form a closed area, if so, will call the above inetgration fucntion
+def area_finder_form_2_int(x_click, y_click):
+    global AI_verts
+    # append the clikck coordinates  to the global AI_coords:
+    AI_coord.append([x_m, y_m])
+    # gte number of clicks
+    N_clicks = len(AI_coord)
+    # set a tolerance to when clicks are considered joined:
+    tolerance = 0.02*L  # same as for LI
+    # get an array from the AI list
+    coord_array = np.array(AI_coord)
+    if N_clicks == 1:
+        # draw a small dot
+        circle = patch.Circle(AI_coord[0], L*fract/18, color='red')
+        main_axis.add_patch(circle)
+        canvas.draw()
+    else:
+        # draw the line:
+        # get coordinates from mouse clicks
+        a = AI_coord[N_clicks - 2]
+        b = AI_coord[N_clicks - 1]
+        # Plot line between points a and b
+        main_axis.add_line(Line2D((a[0], b[0]), (a[1], b[1]), linewidth=2, color='red'))
+        # draw it on
+        canvas.draw()
+        # test if the user closed the area by click onto (very near)
+        # a previously clicked point, if so, autojoin:
+        # get disance between current and all prev. points
+        coord_diff = coord_array - coord_array[N_clicks - 1, :]
+        # cycle over them to check if click is near any
+        for i in range(N_clicks):
+            # check if distance is less than specified:
+            if sqrt((coord_diff[i, 0])**2 + (coord_diff[i, 1])**2) < tolerance:
+                # set the current cordiante to the previous one that was joined
+                # onto:
+                AI_coord[N_clicks-1] = AI_coord[i]
+                # get verticies
+                AI_verts = AI_coord[i:]
+                break
+        # now, if enough of these verticies were extracted, a shape was drawn
+        # check for that:
+        if len(AI_verts) > 3:  # as it included the return point
+            # a closed shape was drawn, pass it onto the integral calculating
+            # function
+            integration_form_2(AI_verts)
 
 
 ''' DEFINE FUNCTIONS USED IN R3 CODE '''
@@ -3947,8 +4059,10 @@ R2_tools_opt = tk.IntVar()
 R2_tools_opt.set(0)
 R2_tools_Tools_btn = tk.Radiobutton(calculus_frame, text='Tools', variable=R2_tools_opt, value=0, command=lambda: R2_tools_handler(R2_tools_opt.get()))
 R2_tools_Zoom_btn = tk.Radiobutton(calculus_frame, text='Zoom', variable=R2_tools_opt, value=1, command=lambda: R2_tools_handler(R2_tools_opt.get()))
+R2_tools_int_btn = tk.Radiobutton(calculus_frame, text='Area Int', variable=R2_tools_opt, value=2, command=lambda: R2_tools_handler(R2_tools_opt.get()))
 R2_tools_Tools_btn.grid(row=8, column=0)
 R2_tools_Zoom_btn.grid(row=8, column=1)
+R2_tools_int_btn.grid(row=8, column=2)
 
 # set up a zooming tool for that too
 tk.Label(calculus_frame, text='Zoom').grid(row=9, column=0)
