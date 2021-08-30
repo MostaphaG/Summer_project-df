@@ -3269,7 +3269,7 @@ def selection_form_2_response(event):
 # define a function that will integrate 2-forms
 # over given regions
 def integration_form_2(AI_verts):
-    global AI_area, AI_result
+    global AI_area, AI_result, form_2_inside
     # Calculate the area of that shape:
     AI_area = calc_area(AI_verts)
     # check against negative areas:
@@ -3307,6 +3307,8 @@ def integration_form_2(AI_verts):
     inside_arr = np.array(inside_list)
     points_x = inside_arr[:, 0]
     points_y = inside_arr[:, 1]
+    # grid these:
+    points_xg, points_yg = np.meshgrid(points_x, points_y)
     
     # Was made for testing but I love it, colour the inside of the drawn shape
     for i in range(len(inside_arr)):
@@ -3318,11 +3320,11 @@ def integration_form_2(AI_verts):
     form_2_str = str(simplify(form_2_entry.get()))
     form_2_inside_eq = form_2_str.replace('^', '**')
     form_2_inside_eq = form_2_inside_eq.replace('ln', 'log')
-    form_2_inside_eq = form_2_inside_eq.replace('x', 'points_x')
-    form_2_inside_eq = form_2_inside_eq.replace('y', 'points_y')
+    form_2_inside_eq = form_2_inside_eq.replace('x', 'points_xg')
+    form_2_inside_eq = form_2_inside_eq.replace('y', 'points_yg')
     # take care of constnts and zeros:
-    if form_2_inside_eq.find('points_x') & form_2_inside_eq.find('points_y') == -1:
-        form_2_inside_eq = str(form_2_inside_eq) + '* np.ones((len(points_x), len(points_y)))'
+    if form_2_inside_eq.find('points_xg') & form_2_inside_eq.find('points_yg') == -1:
+        form_2_inside_eq = '(' + str(form_2_inside_eq) + ')* np.ones((len(points_x), len(points_y)))'
     else:
         pass
     form_2_inside = eval(form_2_inside_eq)
@@ -3335,7 +3337,7 @@ def integration_form_2(AI_verts):
     # show these results
     label_AI_result_2.configure(text=str(round(AI_result, 1)))
     label_AI_area_2.configure(text=str(round(AI_area, 1)))
-    
+
 
 # define a fucntion that will track user clicks in a list, and check if they
 # form a closed area, if so, will call the above inetgration fucntion
