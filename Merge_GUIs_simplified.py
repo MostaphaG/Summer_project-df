@@ -3946,14 +3946,11 @@ def ode1(xy, t):
 
 # response function to matplotlibs animate, supplied next points
 def animate(i):
-<<<<<<< HEAD
     global dyn_point
-=======
     global dyn_point, x_dyn_str, y_dyn_str, poly_str, poly
     
     dyn_poly_select = True
     
->>>>>>> cb4834d19511e3ba0af88edd690d1914d2ccb4fd
     xplot = eval(x_dyn_str)
     yplot = eval(y_dyn_str)
     dyn_point.set_data(xplot, yplot)
@@ -3977,24 +3974,18 @@ def animation_storing_function():
 
 # function to respond to button to begin the animation.
 def animate_response():
-<<<<<<< HEAD
     global dummy_variable_dyn, dyn_time
     global dyn_coord, x_dyn_str, y_dyn_str
-=======
     global dummy_variable_dyn
     global dyn_coord, x_dyn_str, y_dyn_str, poly_str, dyn_N, tmax
->>>>>>> cb4834d19511e3ba0af88edd690d1914d2ccb4fd
     # clear the axis and redraw
     PLOT_response(0)
     x_dyn_str = ''
     y_dyn_str = ''
-<<<<<<< HEAD
-=======
     poly_str = ''
     dyn_N = int(round(dyn_N_slider.get(),0))
->>>>>>> cb4834d19511e3ba0af88edd690d1914d2ccb4fd
     tmax = tmax_slider.get()
-    dyn_N = 1000*tmax/50  # int(round(dyn_N_slider.get(), 0))
+    dyn_N = int(1000*tmax/50)  # int(round(dyn_N_slider.get(), 0))
     dyn_time = np.linspace(0, tmax, dyn_N)
     for a in range(len(dyn_coord)):
         exec('global ' +  'xy' + str(a) + '\n'
