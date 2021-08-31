@@ -1024,8 +1024,11 @@ dyn_coord = []
 # define array of points
 dyn_point, = main_axis.plot([], [], 'ro', markersize=4)
 
-# needed not to scratch animation object after its use
-global anim
+# define initial variables needed by dynamics
+tmax = 1
+dyn_N = 100
+dyn_time = np.linspace(0, tmax, dyn_N)
+
 
 # =============================================================================
 # set up initial plot and canvas
@@ -1592,10 +1595,10 @@ def vect_type_response(tensor):
 
 
 # define the PLOT button response function
-def PLOT_response():
+def PLOT_response(test_for_clearing_dyn=1):
     # first, take from entry boxes, wanted parameters and make them global:
     # these must be changed globally for other functions to work with the new field.
-    global u, v, arrows, stacks, polar_tracker
+    global u, v, arrows, stacks, polar_tracker, dyn_coord
     # take inputs and globally update them
     update_variables()
     # set radial tracker
@@ -1632,6 +1635,12 @@ def PLOT_response():
         ratio2_label.configure(text=ratio2)
         # plot the grid
         poly_grid_submit()
+    if tab_text == 'Dynamics':
+        if test_for_clearing_dyn == 1:
+            for a in range(len(dyn_coord)):
+                exec('global ' + 'xy' + str(a) + '\n' + 'del ' + 'xy' + str(a))
+            # then clear coordinates
+            dyn_coord = []
     # create a figure and display it
     stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0)
     canvas.draw()
@@ -3925,32 +3934,43 @@ def ode1(xy, t):
     # Unpack initial conditions
     x, y = xy
     # List of expressions dx_dt and dy_dt
-    L = [eval(str(x_comp_entry.get())), eval(str(y_comp_entry.get()))]
+    string_x_dyn = str(x_comp_entry.get())
+    string_x_dyn = string_x_dyn.replace('^', '**')
+    string_x_dyn = string_x_dyn.replace('ln', 'log')
+    string_y_dyn = str(y_comp_entry.get())
+    string_y_dyn = string_y_dyn.replace('^', '**')
+    string_y_dyn = string_y_dyn.replace('ln', 'log')
+    L = [eval(string_x_dyn), eval(string_y_dyn)]
     return L
 
+
+# response function to matplotlibs animate, supplied next points
 def animate(i):
-    global dyn_point, x_dyn_str, y_dyn_str
+    global dyn_point
     xplot = eval(x_dyn_str)
     yplot = eval(y_dyn_str)
     dyn_point.set_data(xplot, yplot)
     return dyn_point,
 
 
+# function to carry out the animating
 def animation_storing_function():
+    global dyn_N
     ani = animation.FuncAnimation(fig, animate, dyn_N, interval=50, blit=True, repeat=False)
     return ani
 
+
 # function to respond to button to begin the animation.
 def animate_response():
-    global dummy_variable_dyn
+    global dummy_variable_dyn, dyn_time
     global dyn_coord, x_dyn_str, y_dyn_str
     # clear the axis and redraw
+    PLOT_response(0)
     x_dyn_str = ''
     y_dyn_str = ''
-    dyn_N = int(round(dyn_N_slider.get(),0))
     tmax = tmax_slider.get()
+    dyn_N = 1000*tmax/50  # int(round(dyn_N_slider.get(), 0))
     dyn_time = np.linspace(0, tmax, dyn_N)
-    PLOT_response()
     for a in range(len(dyn_coord)):
         exec('global ' +  'xy' + str(a) + '\n'
              'xy' + str(a) + ' = odeint(ode1, dyn_coord[a], dyn_time)')
@@ -3958,19 +3978,30 @@ def animate_response():
         y_dyn_str += 'xy' + str(a) + '[i,1], '
     dummy_variable_dyn = animation_storing_function()
 
+
+# pauses the animation
 def pause_response():
     global dummy_variable_dyn
     dummy_variable_dyn.event_source.stop()
-    
+
+
+# plays it again if paused
 def play_response():
     global dummy_variable_dyn
     dummy_variable_dyn.event_source.start()
 
+
+# clears the grid and restes variables
 def clear_response():
     global dummy_variable_dyn, dyn_coord
     dummy_variable_dyn.event_source.stop()
-    PLOT_response()
+    PLOT_response(0)
+    # delete the extra created variables:
+    for a in range(len(dyn_coord)):
+        exec('global ' + 'xy' + str(a) + '\n' + 'del ' + 'xy' + str(a))
+    # then clear coordinates
     dyn_coord = []
+
 
 # =============================================================================
 # DEFINE ALL NEEDED WIDGETS
@@ -4478,11 +4509,11 @@ clear_btn = tk.Button(dynamics_frame, text='Clear', command=clear_response)
 clear_btn.grid(row=1, column=3)
 
 tk.Label(dynamics_frame, text='Animation Frames:').grid(row=2, column=0)
-dyn_N_slider = tk.Scale(dynamics_frame, from_=50, to=500, orient=tk.HORIZONTAL)
+dyn_N_slider = tk.Scale(dynamics_frame, from_=dyn_N, to=500, orient=tk.HORIZONTAL)
 dyn_N_slider.grid(row=2, column=1)
 
 tk.Label(dynamics_frame, text='Tmax:').grid(row=3, column=0)
-tmax_slider = tk.Scale(dynamics_frame, from_=1, to=20, orient=tk.HORIZONTAL)
+tmax_slider = tk.Scale(dynamics_frame, from_=tmax, to=20, orient=tk.HORIZONTAL)
 tmax_slider.grid(row=3, column=1)
 
 # return time to run
