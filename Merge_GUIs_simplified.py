@@ -18,6 +18,8 @@ from PIL import Image, ImageTk
 from math import isnan
 from matplotlib import patches as patch
 import matplotlib.path as mplPath
+from matplotlib import animation
+from scipy.integrate import odeint
 
 # input many numpy functions to deal with user input
 from numpy import sin, cos, tan, sqrt, log, arctan, arcsin, arccos, tanh
@@ -420,7 +422,7 @@ R3_use_track = 0
 def tab_selection(event):
     global x_m, y_m, R3_use_track, click_opt_int, tab_text
     global fract, form_2, notebook_bottom, m
-    global expressions, coords, form_2_str, form_2_eq
+    global expressions, coords, form_2_str, form_2_eq, toolbar
     # get tab that was selected as text
     selected_tab = event.widget.select()
     tab_text = event.widget.tab(selected_tab, "text")
@@ -447,7 +449,7 @@ def tab_selection(event):
         PLOT_btn['state'] = tk.NORMAL
         polar_grid_plot_btn['state'] = tk.NORMAL
     if tab_text == 'Line Integrals':
-        global toolbar, LI_coord, LI_total, tensor, click_opt_int
+        global LI_coord, LI_total, tensor, click_opt_int
         global LI_selected
         x_m = None
         y_m = None
@@ -632,8 +634,24 @@ def tab_selection(event):
         field_select_drop_label.configure(text='Select Pre-Defined 1-Form:')
         # change frame name too
         bot_frame_frame.configure(text='1-Form input frame')
+    # if the Dynamics tab is selected:
+    elif tab_text == 'Dynamics':
+        # No need for tools here:
+        toolbar.home()
+        state = fig.canvas.toolbar.mode
+        if state == 'zoom rect':
+            toolbar.zoom()
+        if state == 'pan/zoom':
+            toolbar.pan()
+        toolbar.children['!button4'].pack_forget()
+        toolbar.children['!button5'].pack_forget()
+        # only works for 1-forms on R2:
+        fract = 0.05
+        PLOT_response()
+        PLOT_btn['state'] = tk.NORMAL
+        polar_grid_plot_btn['state'] = tk.NORMAL
     # if anything but the main window is selected, change to tools
-    if tab_text != 'Main' and tab_text != 'Line Integrals':
+    if tab_text != 'Main' and tab_text != 'Line Integrals' and tab_text != 'Dynamics':
         # unclick them
         click_option.set(0)
         click_option_handler(click_option.get())
@@ -714,6 +732,9 @@ calculus_frame.grid(row=0, column=2)
 # R3
 r3_frame = tk.Frame(notebook)
 r3_frame.grid(row=0, column=3)
+# dynamics
+dynamics_frame = tk.Frame(notebook)
+dynamics_frame.grid(row=0, column=4)
 # plotting options
 small_frame = tk.Frame(notebook_small)
 small_frame.grid(row=0, column=0)
@@ -723,6 +744,7 @@ notebook.add(right_frame, text='Main')
 notebook.add(LI_frame, text='Line Integrals')
 notebook.add(calculus_frame, text='Calculus')
 notebook.add(r3_frame, text='\mathbb{R}^{3}')
+notebook.add(dynamics_frame, text='Dynamics')
 notebook_bottom.add(bot_frame, text='fields')
 notebook_singular.add(singular_frame, text='singularities')
 notebook_small.add(small_frame, text='Plot Options')
@@ -993,6 +1015,24 @@ axis_view = 'z'
 h_index = 0
 hvalue_string = '-5'
 
+
+'''  Initialise variables for the Dynamics tab  '''
+
+# stroe click coordinates
+dyn_coord = []
+
+# parameters for the time array used
+dyn_t_max = 10
+dyn_N = 200
+dyn_time = np.linspace(0, dyn_t_max, dyn_N)
+
+# initialise initial condition arrays
+x_dyn_str = ''
+y_dyn_str = ''
+
+# define array of points
+dyn_point, = main_axis.plot([], [], 'ro', markersize=4)
+
 # =============================================================================
 # set up initial plot and canvas
 # =============================================================================
@@ -1062,6 +1102,12 @@ def on_key_press(event):
                 # then continue
                 AI_restart()
             area_finder_form_2_int(x_m, y_m)
+    if tab_text == 'Dynamics':
+        # clicking should only register a new point and plot it:
+        dyn_coord.append([x_m, y_m])
+        dot = patch.Circle(dyn_coord[-1], L*fract/6, color='red')
+        main_axis.add_patch(dot)
+        canvas.draw()
 
 
 # connect figure event to a function that responds to clicks, defined above
@@ -2010,7 +2056,7 @@ def click_option_handler(click_option):
         toolbar.update()
         canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
     # when 'tool' is not selected, disable the pan and zoom:
-    elif 0 < click_opt_int < 5 :
+    elif 0 < click_opt_int < 5:
         fig.canvas.draw()
         toolbar.home()
         # close the selected mouse options
@@ -3872,6 +3918,45 @@ def form_2_R3_direct_plot():
     form_1_z_entry.configure(bg='#FFFFFF')
 
 
+'''
+
+Define function for the dynamics tab
+
+'''
+
+
+# function to get initial conditionsl ist
+def ode1(xy, t):
+    # Unpack initial conditions
+    x, y = xy
+    # List of expressions dx_dt and dy_dt
+    L = [eval(string_x), eval(string_y)]
+    return L
+
+
+# function to respond to button to begin the animation.
+def animate_response():
+    global x_dyn_str, y_dyn_str, string_x, string_y
+    global dyn_point
+    string_x = str(x_comp_entry.get())
+    string_y = str(y_comp_entry.get())
+    for a in range(len(dyn_coord)):
+        exec('global ' +  'xy' + str(a) + '\n'
+             'xy' + str(a) + ' = odeint(ode1, dyn_coord[a], dyn_time)')
+        x_dyn_str += 'xy' + str(a) + '[i,0], '
+        y_dyn_str += 'xy' + str(a) + '[i,1], '
+    
+    
+    # animating function, response to matplotlib animate function
+    def animate(i):
+        xplot = eval(x_dyn_str)
+        yplot = eval(y_dyn_str)
+        dyn_point.set_data(xplot, yplot)
+        return dyn_point
+    
+    
+    ani = animation.FuncAnimation(fig, animate, interval=25, frames=dyn_N)
+
 # =============================================================================
 # DEFINE ALL NEEDED WIDGETS
 # =============================================================================
@@ -4352,6 +4437,22 @@ Entry_2_form_R3_dydz.grid(row=2, column=0)
 # define a button that will plot the supplied 2-forms directly
 form_2_R3_direct_plot_btn = tk.Button(form_2_frame, text='PLOT 2-form', padx=10, command=form_2_R3_direct_plot)
 form_2_R3_direct_plot_btn.grid(row=3, column=0, columnspan=2)
+
+
+'''
+
+Dynamics Frame
+
+'''
+
+arrow_btn = tk.Radiobutton(dynamics_frame, text='arrow', variable=tensor, value=1, command=lambda: vect_type_response(tensor.get())).grid(row=0, column=0)
+stack_btn = tk.Radiobutton(dynamics_frame, text='stack', variable=tensor, value=0, command=lambda: vect_type_response(tensor.get())).grid(row=0, column=1)
+
+
+# add a button that will respond with animating the clikced points
+animate_btn = tk.Button(dynamics_frame, text='Animate', padx=10, pady=10, command=animate_response)
+animate_btn.grid(row=1, column=0, padx=5, pady=5)
+
 
 # return time to run
 stop = timeit.default_timer()
