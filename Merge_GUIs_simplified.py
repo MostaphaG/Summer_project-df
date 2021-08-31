@@ -417,12 +417,20 @@ def form_2_constant_correction(form_2_eq):
 # set a variable thet tracks use of R3 tab
 R3_use_track = 0
 
+# dynamics tracker
+dyn_use_track = 0
 
 # define a function to take care of tab changes
 def tab_selection(event):
     global x_m, y_m, R3_use_track, click_opt_int, tab_text
     global fract, form_2, notebook_bottom, m
     global expressions, coords, form_2_str, form_2_eq, toolbar
+    global dyn_use_track
+    # switching out of dynamics, stop the animation and reset:
+    if dyn_use_track == 1:
+        clear_response()
+    else:
+        pass
     # get tab that was selected as text
     selected_tab = event.widget.select()
     tab_text = event.widget.tab(selected_tab, "text")
@@ -636,6 +644,7 @@ def tab_selection(event):
         bot_frame_frame.configure(text='1-Form input frame')
     # if the Dynamics tab is selected:
     elif tab_text == 'Dynamics':
+        dyn_use_track = 1
         # No need for tools here:
         toolbar.home()
         state = fig.canvas.toolbar.mode
@@ -650,6 +659,8 @@ def tab_selection(event):
         PLOT_response()
         PLOT_btn['state'] = tk.NORMAL
         polar_grid_plot_btn['state'] = tk.NORMAL
+    if tab_text != 'Dynamics':
+        dyn_use_track = 0
     # if anything but the main window is selected, change to tools
     if tab_text != 'Main' and tab_text != 'Line Integrals' and tab_text != 'Dynamics':
         # unclick them
