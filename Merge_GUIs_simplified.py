@@ -1018,17 +1018,8 @@ hvalue_string = '-5'
 
 '''  Initialise variables for the Dynamics tab  '''
 
-# stroe click coordinates
+# store click coordinates
 dyn_coord = []
-
-# parameters for the time array used
-dyn_t_max = 10
-dyn_N = 200
-dyn_time = np.linspace(0, dyn_t_max, dyn_N)
-
-# initialise initial condition arrays
-x_dyn_str = ''
-y_dyn_str = ''
 
 # define array of points
 dyn_point, = main_axis.plot([], [], 'ro', markersize=4)
@@ -1107,6 +1098,7 @@ def on_key_press(event):
             area_finder_form_2_int(x_m, y_m)
     if tab_text == 'Dynamics':
         # clicking should only register a new point and plot it:
+        global dyn_coord
         dyn_coord.append([x_m, y_m])
         dot = patch.Circle(dyn_coord[-1], L*fract/6, color='red')
         main_axis.add_patch(dot)
@@ -3933,12 +3925,11 @@ def ode1(xy, t):
     # Unpack initial conditions
     x, y = xy
     # List of expressions dx_dt and dy_dt
-    L = [eval(string_x), eval(string_y)]
+    L = [eval(str(x_comp_entry.get())), eval(str(y_comp_entry.get()))]
     return L
 
-
 def animate(i):
-    global dyn_point
+    global dyn_point, x_dyn_str, y_dyn_str
     xplot = eval(x_dyn_str)
     yplot = eval(y_dyn_str)
     dyn_point.set_data(xplot, yplot)
@@ -3946,15 +3937,19 @@ def animate(i):
 
 
 def animation_storing_function():
-    ani = animation.FuncAnimation(fig, animate, np.arange(1,200), interval=25, blit=True)
+    ani = animation.FuncAnimation(fig, animate, dyn_N, interval=50, blit=True, repeat=False)
     return ani
-
 
 # function to respond to button to begin the animation.
 def animate_response():
     global dummy_variable_dyn
-    global x_dyn_str, y_dyn_str, string_x, string_y
+    global dyn_coord, x_dyn_str, y_dyn_str
     # clear the axis and redraw
+    x_dyn_str = ''
+    y_dyn_str = ''
+    dyn_N = int(round(dyn_N_slider.get(),0))
+    tmax = tmax_slider.get()
+    dyn_time = np.linspace(0, tmax, dyn_N)
     PLOT_response()
     for a in range(len(dyn_coord)):
         exec('global ' +  'xy' + str(a) + '\n'
@@ -3963,6 +3958,19 @@ def animate_response():
         y_dyn_str += 'xy' + str(a) + '[i,1], '
     dummy_variable_dyn = animation_storing_function()
 
+def pause_response():
+    global dummy_variable_dyn
+    dummy_variable_dyn.event_source.stop()
+    
+def play_response():
+    global dummy_variable_dyn
+    dummy_variable_dyn.event_source.start()
+
+def clear_response():
+    global dummy_variable_dyn, dyn_coord
+    dummy_variable_dyn.event_source.stop()
+    PLOT_response()
+    dyn_coord = []
 
 # =============================================================================
 # DEFINE ALL NEEDED WIDGETS
@@ -4460,6 +4468,22 @@ stack_btn = tk.Radiobutton(dynamics_frame, text='stack', variable=tensor, value=
 animate_btn = tk.Button(dynamics_frame, text='Animate', padx=10, pady=10, command=animate_response)
 animate_btn.grid(row=1, column=0, padx=5, pady=5)
 
+pause_btn = tk.Button(dynamics_frame, text='Stop', command=pause_response)
+pause_btn.grid(row=1, column=1)
+
+play_btn = tk.Button(dynamics_frame, text='Play', command=play_response)
+play_btn.grid(row=1, column=2)
+
+clear_btn = tk.Button(dynamics_frame, text='Clear', command=clear_response)
+clear_btn.grid(row=1, column=3)
+
+tk.Label(dynamics_frame, text='Animation Frames:').grid(row=2, column=0)
+dyn_N_slider = tk.Scale(dynamics_frame, from_=50, to=500, orient=tk.HORIZONTAL)
+dyn_N_slider.grid(row=2, column=1)
+
+tk.Label(dynamics_frame, text='Tmax:').grid(row=3, column=0)
+tmax_slider = tk.Scale(dynamics_frame, from_=1, to=20, orient=tk.HORIZONTAL)
+tmax_slider.grid(row=3, column=1)
 
 # return time to run
 stop = timeit.default_timer()
