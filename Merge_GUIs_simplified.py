@@ -3929,11 +3929,22 @@ def ode1(xy, t):
     return L
 
 def animate(i):
-    global dyn_point, x_dyn_str, y_dyn_str
+    global dyn_point, x_dyn_str, y_dyn_str, poly_str, poly
+    
+    dyn_poly_select = True
+    
     xplot = eval(x_dyn_str)
     yplot = eval(y_dyn_str)
     dyn_point.set_data(xplot, yplot)
-    return dyn_point,
+    
+    poly_plot = eval(poly_str)
+    poly = mpl.patches.Polygon(poly_plot, fill=True, color='blue')
+    main_axis.add_artist(poly)
+    
+    if dyn_poly_select == True:
+        return dyn_point, poly
+    else:
+        return dyn_point,
 
 
 def animation_storing_function():
@@ -3943,19 +3954,21 @@ def animation_storing_function():
 # function to respond to button to begin the animation.
 def animate_response():
     global dummy_variable_dyn
-    global dyn_coord, x_dyn_str, y_dyn_str
+    global dyn_coord, x_dyn_str, y_dyn_str, poly_str, dyn_N, tmax
     # clear the axis and redraw
     x_dyn_str = ''
     y_dyn_str = ''
+    poly_str = ''
     dyn_N = int(round(dyn_N_slider.get(),0))
     tmax = tmax_slider.get()
     dyn_time = np.linspace(0, tmax, dyn_N)
     PLOT_response()
     for a in range(len(dyn_coord)):
         exec('global ' +  'xy' + str(a) + '\n'
-             'xy' + str(a) + ' = odeint(ode1, dyn_coord[a], dyn_time)')
+              'xy' + str(a) + ' = odeint(ode1, dyn_coord[a], dyn_time)')
         x_dyn_str += 'xy' + str(a) + '[i,0], '
         y_dyn_str += 'xy' + str(a) + '[i,1], '
+        poly_str += '[xy'+ str(a) + '[i,0], xy' + str(a) + '[i,1]],'
     dummy_variable_dyn = animation_storing_function()
 
 def pause_response():
