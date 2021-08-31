@@ -887,7 +887,7 @@ showflux.set(0)
 
 # define a variable to track shading areas in Calclulus area inetgrals
 shadearea = tk.IntVar()
-shadearea.set(0)
+shadearea.set(1)
 
 # set up line intergal enpty variables
 LI_coord = []
@@ -2619,7 +2619,7 @@ def R2_tools_handler(R2_tools_opt_var):
         # Shade Area of Area integtral -  toggle button
         label_shade_area = tk.Label(calculus_frame, text='Shade Area:')
         label_shade_area.grid(row=15, column=1)
-        shadearea_toggle = tk.Button(calculus_frame, image=toggle_image_off, bd=0, command=shadearea_response)
+        shadearea_toggle = tk.Button(calculus_frame, image=toggle_image_on, bd=0, command=shadearea_response)
         shadearea_toggle.grid(row=15, column=2)
         # make sure a 2-form is being plotted:
         form_2_response()
