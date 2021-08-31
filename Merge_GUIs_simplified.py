@@ -1033,6 +1033,9 @@ y_dyn_str = ''
 # define array of points
 dyn_point, = main_axis.plot([], [], 'ro', markersize=4)
 
+# needed not to scratch animation object after its use
+global anim
+
 # =============================================================================
 # set up initial plot and canvas
 # =============================================================================
@@ -3934,28 +3937,32 @@ def ode1(xy, t):
     return L
 
 
+def animate(i):
+    global dyn_point
+    xplot = eval(x_dyn_str)
+    yplot = eval(y_dyn_str)
+    dyn_point.set_data(xplot, yplot)
+    return dyn_point,
+
+
+def animation_storing_function():
+    ani = animation.FuncAnimation(fig, animate, np.arange(1,200), interval=25, blit=True)
+    return ani
+
+
 # function to respond to button to begin the animation.
 def animate_response():
+    global dummy_variable_dyn
     global x_dyn_str, y_dyn_str, string_x, string_y
-    global dyn_point
-    string_x = str(x_comp_entry.get())
-    string_y = str(y_comp_entry.get())
+    # clear the axis and redraw
+    PLOT_response()
     for a in range(len(dyn_coord)):
         exec('global ' +  'xy' + str(a) + '\n'
              'xy' + str(a) + ' = odeint(ode1, dyn_coord[a], dyn_time)')
         x_dyn_str += 'xy' + str(a) + '[i,0], '
         y_dyn_str += 'xy' + str(a) + '[i,1], '
-    
-    
-    # animating function, response to matplotlib animate function
-    def animate(i):
-        xplot = eval(x_dyn_str)
-        yplot = eval(y_dyn_str)
-        dyn_point.set_data(xplot, yplot)
-        return dyn_point
-    
-    
-    ani = animation.FuncAnimation(fig, animate, interval=25, frames=dyn_N)
+    dummy_variable_dyn = animation_storing_function()
+
 
 # =============================================================================
 # DEFINE ALL NEEDED WIDGETS
