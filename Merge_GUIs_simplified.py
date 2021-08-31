@@ -881,8 +881,13 @@ rg, thetag = np.meshgrid(r, theta)
 # poalr gird without converting to cartesian grid first
 a_polar = 1
 
+# define a variable to track showflux in LI tab
 showflux = tk.IntVar()
 showflux.set(0)
+
+# define a variable to track shading areas in Calclulus area inetgrals
+shadearea = tk.IntVar()
+shadearea.set(0)
 
 # set up line intergal enpty variables
 LI_coord = []
@@ -2523,6 +2528,7 @@ def form_2_zoom(x_m, y_m):
 def R2_tools_handler(R2_tools_opt_var):
     global R2_tools_opt_int, toolbar
     global label_AI_area_2, label_AI_result_2, restart_AI_btn
+    global shadearea_toggle
     # get the variable as an integer, make it global not to have to repeat this
     R2_tools_opt_int = R2_tools_opt_var
     if R2_tools_opt_int == 0:
@@ -2543,6 +2549,12 @@ def R2_tools_handler(R2_tools_opt_var):
         # get rid of restart integral button
         try:
             restart_AI_btn.destroy()
+            label_AI_area_1.destroy()
+            label_AI_area_2.destroy()
+            label_AI_result_1.destroy()
+            label_AI_result_2.destroy()
+            label_shade_area.destroy()
+            shadearea_toggle.destroy()
         except (UnboundLocalError, NameError):  
             pass
     elif R2_tools_opt_int == 1:
@@ -2570,6 +2582,8 @@ def R2_tools_handler(R2_tools_opt_var):
             label_AI_area_2.destroy()
             label_AI_result_1.destroy()
             label_AI_result_2.destroy()
+            label_shade_area.destroy()
+            shadearea_toggle.destroy()
         except (UnboundLocalError, NameError):  
             pass
     else:
@@ -2592,16 +2606,21 @@ def R2_tools_handler(R2_tools_opt_var):
         ''' NOT DONE YET '''  # !!!
         # set up a restart button
         restart_AI_btn = tk.Button(calculus_frame, text='Reset Integral', command=AI_restart)
-        restart_AI_btn.grid(row=13, column=0)
+        restart_AI_btn.grid(row=15, column=0)
         # set up labels for result
         label_AI_area_1 = tk.Label(calculus_frame, text='Area drawn:')
-        label_AI_area_1.grid(row=14, column=0)
+        label_AI_area_1.grid(row=13, column=0)
         label_AI_area_2 = tk.Label(calculus_frame, text='0')
-        label_AI_area_2.grid(row=14, column=1)
+        label_AI_area_2.grid(row=13, column=1)
         label_AI_result_1 = tk.Label(calculus_frame, text='Integration result:')
-        label_AI_result_1.grid(row=15, column=0)
+        label_AI_result_1.grid(row=14, column=0)
         label_AI_result_2 = tk.Label(calculus_frame, text='0')
-        label_AI_result_2.grid(row=15, column=1)
+        label_AI_result_2.grid(row=14, column=1)
+        # Shade Area of Area integtral -  toggle button
+        label_shade_area = tk.Label(calculus_frame, text='Shade Area:')
+        label_shade_area.grid(row=15, column=1)
+        shadearea_toggle = tk.Button(calculus_frame, image=toggle_image_off, bd=0, command=shadearea_response)
+        shadearea_toggle.grid(row=15, column=2)
         # make sure a 2-form is being plotted:
         form_2_response()
         
@@ -3293,7 +3312,10 @@ def integration_form_2(AI_verts):
     shape_y_min = np.min(AI_verts_y)
     shape_y_max = np.max(AI_verts_y)
     # set up accuracy
-    points_N = 100
+    if shadearea.get() == 0:
+        points_N = 120
+    else:
+        points_N = 100
     # based on these, define a superfine grid to integrate over
     x_shape_points = np.linspace(shape_x_min, shape_x_max, points_N)
     y_shape_points = np.linspace(shape_y_min, shape_y_max, points_N)
@@ -3305,24 +3327,29 @@ def integration_form_2(AI_verts):
     # set up a list to store points coordinates, that are inside
     inside_list = []
     polygon_path = mplPath.Path(coord_verts)
-    for i in range(points_N):
-        for j in range(points_N):
-            if polygon_path.contains_point((x_shape_g[i, j], y_shape_g[i, j])) is True:
-                # sppend to inside list
-                inside_list.append([x_shape_g[i, j], y_shape_g[i, j]])
+    if shadearea.get() == 1:
+        for i in range(points_N):
+            for j in range(points_N):
+                if polygon_path.contains_point((x_shape_g[i, j], y_shape_g[i, j])) is True:
+                    # sppend to inside list
+                    inside_list.append([x_shape_g[i, j], y_shape_g[i, j]])
+                    # Was made for testing but I love it, colour the inside of the drawn shape
+                    circle =  patch.Circle((x_shape_g[i, j], y_shape_g[i, j]), L*fract/20, color='#DADADA')
+                    main_axis.add_patch(circle)
+        # finisise the shading if it was chosen
+        canvas.draw()
+    else:
+        for i in range(points_N):
+            for j in range(points_N):
+                if polygon_path.contains_point((x_shape_g[i, j], y_shape_g[i, j])) is True:
+                    # sppend to inside list
+                    inside_list.append([x_shape_g[i, j], y_shape_g[i, j]])
     # split the inside list to be now an array of x and y components
     inside_arr = np.array(inside_list)
     points_x = inside_arr[:, 0]
     points_y = inside_arr[:, 1]
     # grid these:
     points_xg, points_yg = np.meshgrid(points_x, points_y)
-    
-    # Was made for testing but I love it, colour the inside of the drawn shape
-    for i in range(len(inside_arr)):
-        circle =  patch.Circle(inside_arr[i], L*fract/20, color='#DADADA')
-        main_axis.add_patch(circle)
-    canvas.draw()
-    
     # then need to evalue the 2_form at all of these
     form_2_str = str(simplify(form_2_entry.get()))
     form_2_inside_eq = form_2_str.replace('^', '**')
@@ -3416,6 +3443,21 @@ def AI_restart(test=0):
         pass
     # set up a tracker to account for the shape being undone
     shape_complete_tracker = 0
+
+
+# define a function that will respond to toggle switch, to shade the area
+def shadearea_response():
+    global shadearea
+    if shadearea.get() == 0:
+        # the button is off, and has been clicked therefore change the
+        # variable to an and the image to on
+        shadearea.set(1)
+        shadearea_toggle.configure(image=toggle_image_on)
+    else:
+        # the button is on and has been clicked
+        # set it to off and change image
+        shadearea.set(0)
+        shadearea_toggle.configure(image=toggle_image_off)
 
 
 ''' DEFINE FUNCTIONS USED IN R3 CODE '''
