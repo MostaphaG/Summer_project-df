@@ -1139,10 +1139,62 @@ def on_key_press(event):
     if tab_text == 'Dynamics':
         # clicking should only register a new point and plot it:
         global dyn_coord
-        dyn_coord.append([x_m, y_m])
-        dot = patch.Circle(dyn_coord[-1], L*fract/6, color='red')
-        main_axis.add_patch(dot)
-        canvas.draw()
+        if dyn_shape_select.get() == 'Polygon':
+            dyn_coord.append([x_m, y_m])
+            dot = patch.Circle(dyn_coord[-1], L*fract/6, color='red')
+            main_axis.add_patch(dot)
+            canvas.draw()
+        elif dyn_shape_select.get() == 'Square':
+            # clear
+            clear_response()
+            # get the input size
+            dyn_pre_size = eval(dyn_pre_size_entry.get())
+            if dyn_pre_size < 0:
+                dyn_pre_size *= -1
+                dyn_pre_size_entry.delete(0, 'end')
+                dyn_pre_size_entry.insert(0 , str(Radius_LI_circ))
+            # from that define a square
+            # add these to the axis and draw it
+            dyn_coord.append([x_m - dyn_pre_size, y_m - dyn_pre_size])
+            dyn_coord.append([x_m - dyn_pre_size, y_m + dyn_pre_size])
+            dyn_coord.append([x_m + dyn_pre_size, y_m + dyn_pre_size])
+            dyn_coord.append([x_m + dyn_pre_size, y_m - dyn_pre_size])
+            # draw these on:
+            poly = mpl.patches.Polygon(dyn_coord, fill=True, color='blue')
+            main_axis.add_artist(poly)
+            canvas.draw()
+        elif dyn_shape_select.get() == 'Human':
+            # clear
+            clear_response()
+            # get the input size
+            dyn_pre_size = eval(dyn_pre_size_entry.get())
+            if dyn_pre_size < 0:
+                dyn_pre_size *= -1
+                dyn_pre_size_entry.delete(0, 'end')
+                dyn_pre_size_entry.insert(0 , str(Radius_LI_circ))
+            # from that define a square
+            # add these to the axis and draw it
+            dyn_coord.append([x_m + dyn_pre_size, y_m])
+            dyn_coord.append([x_m, y_m + dyn_pre_size])
+            dyn_coord.append([x_m - dyn_pre_size, y_m])
+            dyn_coord.append([x_m, y_m - dyn_pre_size])
+            dyn_coord.append([x_m, y_m - 2*dyn_pre_size])
+            dyn_coord.append([x_m - 1.5*dyn_pre_size, y_m - dyn_pre_size])
+            dyn_coord.append([x_m, y_m - 2*dyn_pre_size])
+            dyn_coord.append([x_m + 1.5*dyn_pre_size, y_m - dyn_pre_size])
+            dyn_coord.append([x_m, y_m - 2*dyn_pre_size])
+            dyn_coord.append([x_m, y_m - 3*dyn_pre_size])
+            dyn_coord.append([x_m - 1.5*dyn_pre_size, y_m - 4*dyn_pre_size])
+            dyn_coord.append([x_m, y_m - 3*dyn_pre_size])
+            dyn_coord.append([x_m + 1.5*dyn_pre_size, y_m - 4*dyn_pre_size])
+            dyn_coord.append([x_m, y_m - 3*dyn_pre_size])
+            dyn_coord.append([x_m, y_m - dyn_pre_size])
+            # draw these on:
+            poly = mpl.patches.Polygon(dyn_coord, fill=True, color='blue')
+            main_axis.add_artist(poly)
+            canvas.draw()
+        else:
+            tk.messagebox.showerror('', 'Circle is Not Yet Implemented')
 
 
 # connect figure event to a function that responds to clicks, defined above
@@ -1663,8 +1715,11 @@ def PLOT_response(test_for_clearing_dyn=1):
         poly_grid_submit()
     if tab_text == 'Dynamics':
         if test_for_clearing_dyn == 1:
-            for a in range(len(dyn_coord)):
-                exec('global ' + 'xy' + str(a) + '\n' + 'del ' + 'xy' + str(a))
+            try:
+                for a in range(len(dyn_coord)):
+                    exec('global ' + 'xy' + str(a) + '\n' + 'del ' + 'xy' + str(a))
+            except NameError:
+                pass
             # then clear coordinates
             dyn_coord = []
     # create a figure and display it
@@ -4166,11 +4221,17 @@ def play_response():
 # clears the grid and restes variables
 def clear_response():
     global dummy_variable_dyn, dyn_coord
-    dummy_variable_dyn.event_source.stop()
+    try:
+        dummy_variable_dyn.event_source.stop()
+    except (NameError, AttributeError):
+        pass
     PLOT_response(0)
     # delete the extra created variables:
-    for a in range(len(dyn_coord)):
-        exec('global ' + 'xy' + str(a) + '\n' + 'del ' + 'xy' + str(a))
+    try:
+        for a in range(len(dyn_coord)):
+            exec('global ' + 'xy' + str(a) + '\n' + 'del ' + 'xy' + str(a))
+    except NameError:
+        pass
     # then clear coordinates
     dyn_coord = []
 
@@ -4189,6 +4250,37 @@ def dyn_join_response():
         # set it to off and change image
         dyn_join_shapes.set(0)
         dyn_join_toggle.configure(image=toggle_image_off)
+
+
+# funcction to respond to dropdown for dyn shapes
+def dyn_shape_select_response(selected_shape):
+    # deal with lines
+    global dyn_shape_select, size_dyn_shape
+    global dyn_pre_size_label, dyn_pre_size_entry
+    # get the chosen shape
+    dyn_shape_select.set(selected_shape)
+    # depending on that selection, prepare rest of frame:
+    if selected_shape == 'Polygon':
+        # restart the plot and the integral values
+        clear_response()
+        # get rid of size options
+        try:
+            dyn_pre_size_label.destroy()
+            dyn_pre_size_entry.destroy()
+        except (UnboundLocalError, NameError):  
+            pass
+    else:
+        # restart the plot and the integral values
+        clear_response()
+        # if circle is selected, display an entry box for the radius of it
+        dyn_pre_size_label = tk.Label(dynamics_frame, text='Size')
+        dyn_pre_size_label.grid(row=6, column=0)
+        dyn_pre_size_entry = tk.Entry(dynamics_frame, width=10)
+        dyn_pre_size_entry.grid(row=6, column=1)
+        if selected_shape == 'Human':
+            dyn_pre_size_entry.insert(0, '0.4')
+        else:
+            dyn_pre_size_entry.insert(0, '1')
 
 
 # =============================================================================
@@ -4710,6 +4802,14 @@ tmax_slider.grid(row=3, column=1)
 tk.Label(dynamics_frame, text='Join to shapes').grid(row=4, column=0)
 dyn_join_toggle = tk.Button(dynamics_frame, image=toggle_image_on, bd=0, command=dyn_join_response)
 dyn_join_toggle.grid(row=4, column=1)
+
+# define a dropdown menu for predefined shape options
+dyn_shape_select = tk.StringVar()
+dyn_shape_list = ['Polygon', 'Square', 'Human', 'Circle']
+dyn_shape_select.set(dyn_shape_list[0])
+dyn_shape_instruction = tk.Label(dynamics_frame, text='Shape:').grid(row=5, column=0)
+dyn_shape_drop = tk.OptionMenu(dynamics_frame, dyn_shape_select, *dyn_shape_list, command=dyn_shape_select_response)
+dyn_shape_drop.grid(row=5, column=1)
 
 
 # return time to run
