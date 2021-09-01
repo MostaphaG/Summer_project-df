@@ -20,6 +20,7 @@ from matplotlib import patches as patch
 import matplotlib.path as mplPath
 from matplotlib import animation
 from scipy.integrate import odeint
+import matplotlib.path as mPath
 
 # input many numpy functions to deal with user input
 from numpy import sin, cos, tan, sqrt, log, arctan, arcsin, arccos, tanh
@@ -1132,7 +1133,7 @@ def on_key_press(event):
                     Radius_R2_circ *= -1
                     Radius_R2_circ_entry.delete(0, 'end')
                     Radius_R2_circ_entry.insert(0 , str(Radius_LI_circ))
-                    integration_from_2_circle()
+                integration_from_2_circle(x_m, y_m, Radius_R2_circ)
             else:
                 tk.messagebox.showerror('NOT IMPLEMENTED YET', 'Want to implement a mini human')
     if tab_text == 'Dynamics':
@@ -2017,7 +2018,7 @@ def deriv_calc(x_m, y_m):
                     v_s[i, j] = 0
     
     # Create axes at clicked position from supplied position and given axis sizes
-    deriv_inset_ax = main_axis.inset_axes([(x_pix-178)/500 - (0.931*d_length/(2*L)), (y_pix-59)/500 - (0.931*d_length/(2*L)), 0.931*d_length/L, 0.931*d_length/L])
+    deriv_inset_ax = main_axis.inset_axes([(x_pix-116)/500 - (0.931*d_length/(2*L)), (y_pix-59)/500 - (0.931*d_length/(2*L)), 0.931*d_length/L, 0.931*d_length/L])
 
     if tensor.get() == 0:
         arrows = False
@@ -2567,7 +2568,7 @@ def form_2_zoom(x_m, y_m):
     R2xg, R2yg = np.meshgrid(R2x, R2y)
     
     # Create axes at clicked position from supplied position and axis sizes
-    zoomR2_inset_ax = main_axis.inset_axes([(x_pix-178)/500 - (0.931*zoomR2_length/(2*L)), (y_pix-59)/500 - (0.931*zoomR2_length/(2*L)), 0.931*zoomR2_length/L, 0.931*zoomR2_length/L])
+    zoomR2_inset_ax = main_axis.inset_axes([(x_pix-116)/500 - (0.931*zoomR2_length/(2*L)), (y_pix-59)/500 - (0.931*zoomR2_length/(2*L)), 0.931*zoomR2_length/L, 0.931*zoomR2_length/L])
     
     # determine which one is being plotted
     # a 1-form or a 2-form
@@ -3470,10 +3471,92 @@ def integration_form_2(AI_verts):
     shape_complete_tracker = 1
 
 
-
 # define a function to integrate 2-form flux over a circle
-def integration_from_2_circle():
-    pass
+def integration_from_2_circle(x_m, y_m, radius_for_flux):
+    global AI_area, AI_result, shape_complete_tracker, form_2_inside
+    # globals for tests only
+    global inside_arr, circle_for_flux, x_shape_points, y_shape_points
+    global circle_as_polygon
+    # define and draw a circle patch
+    circle_for_flux = patch.Circle((x_m, y_m), radius_for_flux, fill=False, color='red')
+    # get its transformed path (found out this is needed from the 
+    # circle patch object describtion and found a way of doing it
+    # on stackoverflow):
+    # Get path and 2D affine transformation
+    pathC = circle_for_flux.get_path()
+    transformC = circle_for_flux.get_transform()
+    # Apply transformation to the path
+    transPath = transformC.transform_path(pathC)
+    # Get path of transformed circle
+    circle_as_polygon = patch.PathPatch(transPath, fc = 'm', alpha = 0.3)
+    # set up the grid and find points in the circle:
+    shape_x_min = x_m - radius_for_flux
+    shape_x_max = x_m + radius_for_flux
+    shape_y_min = y_m - radius_for_flux
+    shape_y_max = y_m + radius_for_flux
+    # set up accuracy
+    if shadearea.get() == 0:
+        points_N = 120
+    else:
+        points_N = 100
+    # based on these, define a superfine grid to integrate over
+    x_shape_points = np.linspace(shape_x_min, shape_x_max, points_N)
+    y_shape_points = np.linspace(shape_y_min, shape_y_max, points_N)
+    # mesh these
+    x_shape_g, y_shape_g = np.meshgrid(x_shape_points, y_shape_points)
+    # CRUCIAL STEP:
+    # need to test if points are inside the shape, if not, set them
+    # to something to be excluded later
+    # set up a list to store points coordinates, that are inside
+    inside_list = []
+    if shadearea.get() == 1:
+        for i in range(points_N):
+            for j in range(points_N):
+                if circle_as_polygon.contains_point((x_shape_g[i, j], y_shape_g[i, j])) is True:
+                    # append to inside list
+                    inside_list.append([x_shape_g[i, j], y_shape_g[i, j]])
+                    # Was made for testing but I love it, colour the inside of the drawn shape
+                    grey_patching =  patch.Circle((x_shape_g[i, j], y_shape_g[i, j]), L*fract/20, color='#DADADA')
+                    main_axis.add_patch(grey_patching)
+    else:
+        for i in range(points_N):
+            for j in range(points_N):
+                if circle_as_polygon.contains_point((x_shape_g[i, j], y_shape_g[i, j])) is True:
+                    # sppend to inside list
+                    inside_list.append([x_shape_g[i, j], y_shape_g[i, j]])
+    # put the patch on the screen
+    main_axis.add_patch(circle_for_flux)
+    # finilise drawing
+    canvas.draw()
+    # split the inside list to be now an array of x and y components
+    inside_arr = np.array(inside_list)
+    points_x = inside_arr[:, 0]
+    points_y = inside_arr[:, 1]
+    # grid these:
+    points_xg, points_yg = np.meshgrid(points_x, points_y)
+    # then need to evalue the 2_form at all of these
+    form_2_str = str(simplify(form_2_entry.get()))
+    form_2_inside_eq = form_2_str.replace('^', '**')
+    form_2_inside_eq = form_2_inside_eq.replace('ln', 'log')
+    form_2_inside_eq = form_2_inside_eq.replace('x', 'points_xg')
+    form_2_inside_eq = form_2_inside_eq.replace('y', 'points_yg')
+    # take care of constnts and zeros:
+    if form_2_inside_eq.find('points_xg') & form_2_inside_eq.find('points_yg') == -1:
+        form_2_inside_eq = '(' + str(form_2_inside_eq) + ')* np.ones((len(points_x), len(points_y)))'
+    else:
+        pass
+    form_2_inside = eval(form_2_inside_eq)
+    # then sum over all values in that array
+    sum_inside = np.sum(form_2_inside)
+    # get the elemental area
+    dxdy_area = (x_shape_points[1] - x_shape_points[0])*(y_shape_points[1] - y_shape_points[0])
+    # then evaluate the total of the integral
+    AI_result = sum_inside * dxdy_area / len(inside_list)
+    # show these results
+    label_AI_result_2.configure(text=str(round(AI_result, 1)))
+    label_AI_area_2.configure(text=str(round(AI_area, 1)))
+    # set up a variable to establish that a shape has been ompleted now
+    shape_complete_tracker = 1
 
 
 # define a fucntion that will track user clicks in a list, and check if they
