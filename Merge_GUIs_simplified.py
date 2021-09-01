@@ -915,8 +915,11 @@ rg, thetag = np.meshgrid(r, theta)
 a_polar = 1
 
 # define a variable to track showflux in LI tab
-showflux = tk.IntVar()
-showflux.set(0)
+# showflux = tk.IntVar()
+# showflux.set(0)
+
+# showcirc = tk.IntVar()
+# showcirc.set(0)
 
 # define a variable to track shading areas in Calclulus area inetgrals
 shadearea = tk.IntVar()
@@ -1248,8 +1251,6 @@ def line_int_circ(cent, R, N, u_str, v_str, orient_int):
     global dt, LI_total_label, LI_total
     # Parametric increment (theta)
     dt = np.linspace(0, 2*np.pi, N)
-    test = np.zeros(shape=(4,N))
-    test[0,:] = dt
     
     # Centre point
     xc = cent[0]
@@ -1289,36 +1290,41 @@ def line_int_circ(cent, R, N, u_str, v_str, orient_int):
     # res = np.sum(dx[:-1]*uv_store[0, :-1] + dy[:-1]*uv_store[1, :-1])
     res = np.sum(dx[:-1]*uv_store[0, :-1] + dy[:-1]*uv_store[1, :-1])
     flux = np.sum(dx_norm[:-1]*uv_store[0, :-1] + dy_norm[:-1]*uv_store[1, :-1])
-    
-    test[1,:] = dx[:]*uv_store[0, :] + dy[:]*uv_store[1, :]
-    test[2,:] = dx_norm[:]*uv_store[0, :] + dy_norm[:]*uv_store[1, :]
+
     
     # Colouring the circle based on flux
-    if showflux.get() == 1:
+    if showcol.get() > 0:
+        
+        store = np.zeros(shape=(1,N))
+        store_col = np.zeros(shape=(1,N))
         c = 0
         pstring = ''
         swaplist = []
         col_in = ['grey', 'blue', 'red']
         col_list = []
         
+        if showcol.get() == 1:
+            store[0,:] = dx[:]*uv_store[0, :] + dy[:]*uv_store[1, :]
+        elif showcol.get() == 2:
+            store[0,:] = dx_norm[:]*uv_store[0, :] + dy_norm[:]*uv_store[1, :]
+        
         for i in range(N):
-            if test[2,i] < 0:
-                test[3,i] = 1
+            if store[0,i] < 0:
+                store_col[0,i] = 1
                 
-            elif test[2,i] > 0:
-                test[3,i] = 2
+            elif store[0,i] > 0:
+                store_col[0,i] = 2
                 
-            elif test[2,i] == 0 or test[2,i] == -0:
-                test[3,i] = 0
+            elif store[0,i] == 0 or store[0,i] == -0:
+                store_col[0,i] = 0
                 
             if i == 0:
                 continue
             else:
-                if test[3,i-1] != test[3,i]:
+                if store_col[0,i-1] != store_col[0,i]:
                     swaplist.append(dt[i])
-                    col_list.append(col_in[int(test[3,i])])
+                    col_list.append(col_in[int(store_col[0,i])])
                     c += 1
-    
     
         if c > 0: 
             swap_ang = (180/np.pi)*np.array(swaplist)
@@ -1329,19 +1335,19 @@ def line_int_circ(cent, R, N, u_str, v_str, orient_int):
                 exec('main_axis.add_artist(w' + str(a) + ')')
         
         else:
-            colour2 = col_in[int(test[3,0])]
+            colour2 = col_in[int(store_col[0,0])]
             circle2 = mpl.patches.Circle(cent, R, fill=False, color=colour2, linewidth=3)
             main_axis.add_artist(circle2)
             
     else:
         # Plot the circle
-        circle1 = mpl.patches.Circle(cent, R, fill=False, color='black')
+        circle1 = mpl.patches.Circle(cent, R, fill=False, color='black', linewidth=2)
         main_axis.add_artist(circle1)
         
     fig.canvas.draw()
     
-    if showflux.get() == 1:
-        # Remove wedges from the plot
+    if showcol.get() > 0:
+        # Remove arcs from the plot
         if c > 0:
             for a in range(c):
                 exec('w' + str(a) + '.remove()')
@@ -1394,7 +1400,7 @@ def line_int_poly(N, u_str, v_str):
         a = LI_coord[c_count - 2]
         b = LI_coord[c_count - 1]
         # Plot line between points a and b
-        main_axis.add_line(Line2D((a[0], b[0]), (a[1], b[1]), linewidth=2, color='red'))
+        main_axis.add_line(Line2D((a[0], b[0]), (a[1], b[1]), linewidth=2, color='black'))
         
         # linegrad = (b[1]-a[1])/(b[0]-a[0])  # keep as comment for now
         # find line length
@@ -1427,42 +1433,44 @@ def line_int_poly(N, u_str, v_str):
         res = dx*np.sum(uv_store[0, :]) + dy*np.sum(uv_store[1, :])
         flux_inc = dy*np.sum(uv_store[0, :]) - dx*np.sum(uv_store[1, :])
         
-        if showflux.get() == 1:
+        if showcol.get() > 0:
         
-            test1 = np.zeros(shape=(2,N))
+            store = np.zeros(shape=(1,N))
+            store_col = np.zeros(shape=(1,N))
             
             # Store flux at each point on line
-            test1[0,:] = dy*uv_store[0, :] - dx*uv_store[1, :]
-            
+            if showcol.get() == 1:
+                store[0,:] = dx*uv_store[0, :] + dy*uv_store[1, :]
+            elif showcol.get() == 2:
+                store[0,:] = dy*uv_store[0, :] - dx*uv_store[1, :]
+
             c = 0
             col_in = ['grey', 'blue', 'red']
             
             for i in range(N):
-                if test1[0,i] < 0:
-                    test1[1,i] = 1
+                if store[0,i] < 0:
+                    store_col[0,i] = 1
                     
-                elif test1[0,i] > 0:
-                    test1[1,i] = 2
+                elif store[0,i] > 0:
+                    store_col[0,i] = 2
                     
-                elif test1[0,i] == 0 or test1[0,i] == -0:
-                    test1[1,i] = 0
+                elif store[0,i] == 0 or store[0,i] == -0:
+                    store_col[0,i] = 0
                 
                 # Assign colour of first segment
                 if i == 0:
                     swaplistpoly.append([intervals[0,i], intervals[1,i]])
-                    col_poly.append(col_in[int(test1[1,i])])
+                    col_poly.append(col_in[int(store_col[0,i])])
                     continue
                 else:
-                    if test1[1,i-1] != test1[1,i]:
+                    if store_col[0,i-1] != store_col[0,i]:
                         swaplistpoly.append([intervals[0,i], intervals[1,i]])
-                        col_poly.append(col_in[int(test1[1,i])])
+                        col_poly.append(col_in[int(store_col[0,i])])
                         c += 1
         
         # update the total
         LI_total += res
         flux += flux_inc
-        
-        
         
         # update its label
         LI_total_label.configure(text=(str(round(LI_total, 2)) + ' (' + str(round((LI_total/np.pi), 2)) + ' pi)' ))    
@@ -1475,7 +1483,7 @@ def line_int_poly(N, u_str, v_str):
                 shape_area = (-1)*shape_area
                 flux = (-1)*flux
                 
-                if showflux.get() == 1:
+                if showcol.get() == 2:
                     for b in range(len(col_poly)):
                         if col_poly[b] == 'blue':
                             col_poly[b] = col_poly[b].replace('blue', 'red')
@@ -1484,7 +1492,7 @@ def line_int_poly(N, u_str, v_str):
             else:
                 pass
             
-            if showflux.get() == 1:
+            if showcol.get() > 0:
                 swaplistpoly.append(LI_verts[0])
                 for a in range(len(col_poly)):
                     main_axis.add_line(Line2D((swaplistpoly[a][0], swaplistpoly[a+1][0]), (swaplistpoly[a][1], swaplistpoly[a+1][1]), linewidth=3, color=col_poly[a]))
@@ -1543,7 +1551,19 @@ def showflux_response():
         showflux.set(0)
         showflux_toggle.configure(image=toggle_image_off)
 
-    
+def showcirc_response():
+    global showcirc
+    if showcirc.get() == 0:
+        # the button is off, and has been clicked therefore change the
+        # variable to an and the image to on
+        showcirc.set(1)
+        showcirc_toggle.configure(image=toggle_image_on)
+
+    else:
+        # the button is on and has been clicked
+        # set it to off and change image
+        showcirc.set(0)
+        showcirc_toggle.configure(image=toggle_image_off)
 
 
 ''' RESPONSE FUNCTIONS TO PLOT '''
@@ -3979,7 +3999,7 @@ def animate(i):
 # function to carry out the animating
 def animation_storing_function():
     global dyn_N
-    ani = animation.FuncAnimation(fig, animate, dyn_N, interval=50, blit=True, repeat=False)
+    ani = animation.FuncAnimation(fig, animate, dyn_N, interval=25, blit=True, repeat=False)
     return ani
 
 
@@ -4294,9 +4314,21 @@ arrow_btn = tk.Radiobutton(LI_frame, text='arrow', variable=tensor, value=1, com
 stack_btn = tk.Radiobutton(LI_frame, text='stack', variable=tensor, value=0, command=lambda: vect_type_response(tensor.get())).grid(row=7, column=2)
 
 # Showflux toggle button
-tk.Label(LI_frame, text='Show Flux: ').grid(row=8, column=0)
-showflux_toggle = tk.Button(LI_frame, image=toggle_image_off, bd=0, command=showflux_response)
-showflux_toggle.grid(row=8, column=1)
+# tk.Label(LI_frame, text='Show Flux:').grid(row=8, column=0)
+# showflux_toggle = tk.Button(LI_frame, image=toggle_image_off, bd=0, command=showflux_response)
+# showflux_toggle.grid(row=8, column=1)
+
+# tk.Label(LI_frame, text='Show Circ:').grid(row=8, column=2)
+# showcirc_toggle = tk.Button(LI_frame, image=toggle_image_off, bd=0, command=showcirc_response)
+# showcirc_toggle.grid(row=8, column=3)
+
+# Radiobutton for showing flux/circulation
+showcol = tk.IntVar()
+showcol.set(0)
+tk.Label(LI_frame, text='Colour Curve:').grid(row=8, column=0)
+shownone_btn = tk.Radiobutton(LI_frame, text='None', variable=showcol, value=0).grid(row=8, column=1)
+showcirc_btn = tk.Radiobutton(LI_frame, text='Show Circ.', variable=showcol, value=1).grid(row=8, column=2)
+showflux_btn = tk.Radiobutton(LI_frame, text='Show Flux', variable=showcol, value=2).grid(row=8, column=3)
 
 # add an entry so the user can choose what grid they want
 # by choosing grid lines separation
