@@ -16,7 +16,7 @@
 \contentsline {section}{\numberline {3.2}Line Integrals}{14}{section.3.2}%
 \contentsline {subsection}{\numberline {3.2.1}Lines}{14}{subsection.3.2.1}%
 \contentsline {subsection}{\numberline {3.2.2}Circles}{15}{subsection.3.2.2}%
-\contentsline {subsection}{\numberline {3.2.3}Flux}{15}{subsection.3.2.3}%
+\contentsline {subsection}{\numberline {3.2.3}1-D ``Flux''}{15}{subsection.3.2.3}%
 \contentsline {subsection}{\numberline {3.2.4}Stokes Theorem and Divergence Theorem}{16}{subsection.3.2.4}%
 \contentsline {subsection}{\numberline {3.2.5}Showflux}{17}{subsection.3.2.5}%
 \contentsline {chapter}{\numberline {4}$2-$Forms Graphical Representation}{18}{chapter.4}%

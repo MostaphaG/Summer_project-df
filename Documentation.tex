@@ -355,13 +355,13 @@ The main difference from the calculation of straight line integrals is that the 
 	\rcirclerightint \vec{F} \cdot \vec{dl} \approx \sum_{k=0}^{N-1} F_x(x_k,y_k)dx_k + \sum_{k=0}^{N-1} F_y(x_k,y_k)dy_k
 \end{equation}
 
-\subsection{Flux}
+\subsection{1-D ``Flux''}
 
 The flux through a closed surface is given by the expression:
 \begin{equation}
 	\oint \vec{F} \cdot \vec{dA}
 \end{equation}
-In the 2D plane which we are plotting the vector fields and taking integrals, we modify this definition such that the surface normal infinitesimal vectors $\vec{dA}$ are normal to the curve drawn by the user at each interval point, $\vec{dA} = dx_{norm}\vec{i} + dy_{norm}\vec{j}$. For the circular curves, these vectors are radial, pointing away from the centre and are calculated at each interval point by: $dx_{norm} = Acos(kdt)$ , $dy_{norm} = Asin(kdt)$. Apart from this difference, the total flux through the curve is evaluated in the same way as for the line integral and the orientation of the curve (whether it is drawn clockwise or counter-clockwise) is not important. As for the polygon feature, where the user may draw a shape manually, the orientation of the drawn curve is important. The chosen method to ensure that the normal vectors point outward from the enclosed area of the curve is as follows:
+In the 2D plane in which we are plotting the vector fields and taking integrals, we modify this definition such that the surface normal infinitesimal vectors $\vec{dA}$ are normal to the curve drawn by the user at each interval point, $\vec{dA} = dx_{norm}\vec{i} + dy_{norm}\vec{j}$. For the circular curves, these vectors are radial, pointing away from the centre and are calculated at each interval point by: $dx_{norm} = Acos(kdt)$ , $dy_{norm} = Asin(kdt)$. Apart from this difference, the total flux through the curve is evaluated in the same way as for the line integral and the orientation of the curve (whether it is drawn clockwise or counter-clockwise) is not important. As for the polygon feature, where the user may draw a shape manually, the orientation of the drawn curve is important. The chosen method to ensure that the normal vectors point outward from the enclosed area of the curve is as follows:
 
 \begin{itemize}
 	\item Initially define the normal vectors as the small displacement vectors (see section 3.2.1 'Lines') rotated by $\frac{\pi}{2}$ radians \textbf{clockwise} (cw). For example, if a line is drawn to go vertically upwards, $$\vec{dl} = dx\vec{i} + dy\vec{j} = 0\vec{i} + dy\vec{j}$$ $$\vec{dA} = dx_{norm}\vec{i} + dy_{norm}\vec{j} = dy\vec{i} + 0\vec{j}$$ More generally, the transformation is described by $$dx_{norm} = dy$$ $$dy_{norm} = -dx$$
@@ -491,30 +491,30 @@ This has been implemented by simply removing options to plot blocks and to choos
 
 \chapter {$2-$Forms Calculus}
 \section{Interior derivative acting on 2-forms}
-The code includes the option to calculate the interior derivative of a 2-form (and a 1-form) on $\mathbb{R}^{2}$. \textit{Note: it has not yet been generalised to $\mathbb{R}^{3}$}. After pressing the button ('interior derivative'), a new window displays, which asks the user to chose which option to evaluate with. The interior derivative can be applied to a 2-form only, or to a 2-form and 1 from simultaneously. Once the option is chosen, it asks the user for a vector field to do the calculation with respect to in terms of the $x$ and $y$ components. The two windows are then shut.
+The code includes the option to calculate the interior derivative of a $2-$form (and a $1-$form) on $\mathbb{R}^{2}$. \textit{Note: it has not yet been generalised to $\mathbb{R}^{3}$}. After pressing the button ('interior derivative'), a new window displays, which asks the user to chose which option to evaluate with. The interior derivative can be applied to a $2-$form only, or to a $2-$form and $1-$from simultaneously. Once the option is chosen, it asks the user for a vector field to do the calculation with respect to in terms of the $x$ and $y$ components. The two windows are then shut.
 
-\noindent \textbf{To complete the interior derivative of the 2-form}, the code takes given inputs (2-form and 'background' vector field), formats and simplifies them (as before) and calculates the resulting 1-form by the standard procedure (thanks to linearity of the interior derivative):
+\noindent \textbf{To complete the interior derivative of the $2-$form}, the code takes given inputs ($2-$form and 'background' vector field), formats and simplifies them (as before) and calculates the resulting $1-$form by the standard procedure (thanks to linearity of the interior derivative):
 
 \begin{equation}
 	\label{T2} \begin{split}
 		\iota_{\vec{u}}(\omega) = f u_{1} dy - f u_{2} dx
 	\end{split}
 \end{equation}
-where $\omega = f dx\wedge dy$ and $\vec{u} = u_{1}dx + u_{2}dy$.
+where $\omega = f dx\wedge dy$, $\vec{u} = u_{1}dx + u_{2}dy$ and $f$, $u_1$ and $u_2$ are scalar functions on $\mathbb{R}^2$.
 This is found numerically and as a string, to be able to plot it, and to be able to display it to the user.
-This resulting 1-form is put into entries for 1-form components and the boxes are coloured into light green to show that these are currently displayed. The result is plotted using the 'form\textunderscore 2\textunderscore components\textunderscore plot' function with $u$ and $v$ given by the expression as shown above. This function is used as opposed to stack\textunderscore plot, as it also includes colouring of stacks, depending on the sign of the original 2-form at that location.
-This process is specified in the 'Int\textunderscore deriv\textunderscore 2\textunderscore form' function. This is called when the selected option is '2-form only' by the 'Int\textunderscore deriv\textunderscore 22\textunderscore form' function.
+This resulting $1-$form is put into entries for $1-$form components and the boxes are coloured into light green to show that these are currently displayed. The result is plotted using the '\texttt{form\textunderscore 2\textunderscore components\textunderscore plot}' function with $u$ and $v$ given by the expression as shown above. This function is used as opposed to '\texttt{stack\textunderscore plot}', as it also includes colouring of stacks, depending on the sign of the original $2-$form at that location.
+This process is specified in the '\texttt{Int\textunderscore deriv\textunderscore 2\textunderscore form}' function. This is called when the selected option is '2-form only' by the '\texttt{Int\textunderscore deriv\textunderscore 22\textunderscore form}' function.
 
-\noindent \textbf{To complete the interior derivative of the 2-form and the 1-form} a similar process is completed, but the 1-form is also taken into account. The 1-form calculation is completed by a function called 'Int\textunderscore deriv\textunderscore 1\textunderscore form'. The two functions are separate in order to be able to more easily call their combinations when user wished to use both, or each one separately. This function completes a similar process to the above described (for 2 froms) however, it is based on a different equation, as follows:
+\noindent \textbf{To complete the interior derivative of the $2-$form and the $1-$form} a similar process is completed, but the $1-$form is also taken into account. The $1-$form calculation is completed by a function called '\texttt{Int\textunderscore deriv\textunderscore 1\textunderscore form}'. The two functions are separate in order to be able to more easily call their combinations when user wished to use both, or each one separately. This function completes a similar process to the above described (for $2-$forms) however, it is based on a different equation, as follows:
 
 \begin{equation}
 	\label{T2} \begin{split}
 		\iota_{\vec{u}}(\omega) = f_{x} u_{1} + f_{y} u_{2}
 	\end{split}
 \end{equation}
-where $\omega = f_{x} dx + f_{y} dy$ and $\vec{u}$ is as previously. The result is a zero form (scalar function), which can be most easily represented via its contours. Because in the GUI, there exists no entry box for a zero from, the result of that is displayed underneath the 1-form entry box in red, as a Tkinter label.
+where $\omega = f_{x} dx + f_{y} dy$ and $\vec{u}$ is as defined previously. The result is a zero form (scalar function), which can be most easily represented via its contours. Because in the GUI, there exists no entry box for a zero from, the result of that is displayed underneath the $1-$form entry box in red, as a Tkinter label.
 
-When \textbf{the two require being computed together}, both functions are called with appropriate canvas preparation by the function 'Int\textunderscore deriv\textunderscore 21\textunderscore form'. This finds the result of the 2-form, which returns a vector field, which 'sits on top of' the computed 1-form. This can visualised as a vector field lying on a scalar function landscape.
+When \textbf{the two require being computed together}, both functions are called with appropriate canvas preparation by the function '\texttt{Int\textunderscore deriv\textunderscore 21\textunderscore form}'. This finds the result of the 2-form, which returns a vector field, which 'sits on top of' the computed 1-form. This can visualised as a vector field lying on a scalar function landscape.
 
 \noindent These functions are called by a response to the PLOT button in the window where the user defines the background vector field. Depending on which option was selected in the previous window ('2-form only' or 'both'), The plot button binds to different functions and hence responds appropriately.
 
