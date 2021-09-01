@@ -1040,9 +1040,9 @@ tmax = 1
 dyn_N = 100
 dyn_time = np.linspace(0, tmax, dyn_N)
 
-# Initialise polygon drawing as zero (no draw)
-dyn_poly_select = tk.IntVar()
-dyn_poly_select.set(0)
+# bool to det if shapoes are to be drawn
+dyn_join_shapes = tk.IntVar()
+dyn_join_shapes.set(1)  # start by drawing shapes
 
 
 # =============================================================================
@@ -3961,17 +3961,16 @@ def ode1(xy, t):
 
 # response function to matplotlibs animate, supplied next points
 def animate(i):
-    global dyn_point, x_dyn_str, y_dyn_str, poly_str, poly
+    global dyn_point, poly
     
     xplot = eval(x_dyn_str)
     yplot = eval(y_dyn_str)
     dyn_point.set_data(xplot, yplot)
     
-    poly_plot = eval(poly_str)
-    poly = mpl.patches.Polygon(poly_plot, fill=True, color='blue')
-    main_axis.add_artist(poly)
-    
-    if dyn_poly_select.get() == 1:
+    if dyn_join_shapes.get() == 1:
+        poly_plot = eval(poly_str)
+        poly = mpl.patches.Polygon(poly_plot, fill=True, color='blue')
+        main_axis.add_artist(poly)
         return dyn_point, poly
     else:
         return dyn_point,
@@ -4028,20 +4027,22 @@ def clear_response():
         exec('global ' + 'xy' + str(a) + '\n' + 'del ' + 'xy' + str(a))
     # then clear coordinates
     dyn_coord = []
-    
-def dyn_poly_response():
-    global dyn_poly_select
-    if dyn_poly_select.get() == 0:
+
+
+# Button to enable/ disable joining shapes in straight lines
+def dyn_join_response():
+    global dyn_join_shapes
+    if dyn_join_shapes.get() == 0:
         # the button is off, and has been clicked therefore change the
-        # variable to on and the image to on
-        dyn_poly_select.set(1)
-        dyn_poly_toggle.configure(image=toggle_image_on)
+        # variable to an and the image to on
+        dyn_join_shapes.set(1)
+        dyn_join_toggle.configure(image=toggle_image_on)
 
     else:
         # the button is on and has been clicked
         # set it to off and change image
-        dyn_poly_select.set(0)
-        dyn_poly_toggle.configure(image=toggle_image_off)
+        dyn_join_shapes.set(0)
+        dyn_join_toggle.configure(image=toggle_image_off)
 
 
 # =============================================================================
@@ -4293,7 +4294,7 @@ arrow_btn = tk.Radiobutton(LI_frame, text='arrow', variable=tensor, value=1, com
 stack_btn = tk.Radiobutton(LI_frame, text='stack', variable=tensor, value=0, command=lambda: vect_type_response(tensor.get())).grid(row=7, column=2)
 
 # Showflux toggle button
-tk.Label(LI_frame, text='Toggle Show Flux: ').grid(row=8, column=0)
+tk.Label(LI_frame, text='Show Flux: ').grid(row=8, column=0)
 showflux_toggle = tk.Button(LI_frame, image=toggle_image_off, bd=0, command=showflux_response)
 showflux_toggle.grid(row=8, column=1)
 
@@ -4556,10 +4557,10 @@ tk.Label(dynamics_frame, text='Tmax:').grid(row=3, column=0)
 tmax_slider = tk.Scale(dynamics_frame, from_=tmax, to=30, orient=tk.HORIZONTAL)
 tmax_slider.grid(row=3, column=1)
 
-tk.Label(dynamics_frame, text='Toggle Draw Polygon:').grid(row=4, column=0)
-dyn_poly_toggle = tk.Button(dynamics_frame, image=toggle_image_off, bd=0, command=dyn_poly_response)
-dyn_poly_toggle.grid(row=4, column=1)
-
+# Button to enable to disable straight line shape joining
+tk.Label(dynamics_frame, text='Join to shapes').grid(row=4, column=0)
+dyn_join_toggle = tk.Button(dynamics_frame, image=toggle_image_on, bd=0, command=dyn_join_response)
+dyn_join_toggle.grid(row=4, column=1)
 
 # return time to run
 stop = timeit.default_timer()
