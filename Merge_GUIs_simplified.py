@@ -428,7 +428,10 @@ def tab_selection(event):
     global dyn_use_track
     # switching out of dynamics, stop the animation and reset:
     if dyn_use_track == 1:
-        clear_response()
+        try:
+            clear_response()
+        except NameError:
+            pass
     else:
         pass
     # get tab that was selected as text
@@ -2588,7 +2591,8 @@ def form_2_zoom(x_m, y_m):
 def R2_tools_handler(R2_tools_opt_var):
     global R2_tools_opt_int, toolbar
     global label_AI_area_2, label_AI_result_2, restart_AI_btn
-    global shadearea_toggle
+    global label_AI_area_1, label_AI_result_1
+    global shadearea_toggle, label_shade_area
     # get the variable as an integer, make it global not to have to repeat this
     R2_tools_opt_int = R2_tools_opt_var
     if R2_tools_opt_int == 0:
@@ -2681,6 +2685,7 @@ def R2_tools_handler(R2_tools_opt_var):
         label_shade_area.grid(row=15, column=1)
         shadearea_toggle = tk.Button(calculus_frame, image=toggle_image_on, bd=0, command=shadearea_response)
         shadearea_toggle.grid(row=15, column=2)
+        # define a dropdown to select which 
         # make sure a 2-form is being plotted:
         form_2_response()
         
