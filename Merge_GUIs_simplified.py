@@ -1040,6 +1040,10 @@ tmax = 1
 dyn_N = 100
 dyn_time = np.linspace(0, tmax, dyn_N)
 
+# Initialise polygon drawing as zero (no draw)
+dyn_poly_select = tk.IntVar()
+dyn_poly_select.set(0)
+
 
 # =============================================================================
 # set up initial plot and canvas
@@ -3957,10 +3961,7 @@ def ode1(xy, t):
 
 # response function to matplotlibs animate, supplied next points
 def animate(i):
-    global dyn_point
     global dyn_point, x_dyn_str, y_dyn_str, poly_str, poly
-    
-    dyn_poly_select = True
     
     xplot = eval(x_dyn_str)
     yplot = eval(y_dyn_str)
@@ -3970,7 +3971,7 @@ def animate(i):
     poly = mpl.patches.Polygon(poly_plot, fill=True, color='blue')
     main_axis.add_artist(poly)
     
-    if dyn_poly_select == True:
+    if dyn_poly_select.get() == 1:
         return dyn_point, poly
     else:
         return dyn_point,
@@ -3986,8 +3987,6 @@ def animation_storing_function():
 # function to respond to button to begin the animation.
 def animate_response():
     global dummy_variable_dyn, dyn_time
-    global dyn_coord, x_dyn_str, y_dyn_str
-    global dummy_variable_dyn
     global dyn_coord, x_dyn_str, y_dyn_str, poly_str, dyn_N, tmax
     # clear the axis and redraw
     PLOT_response(0)
@@ -4029,6 +4028,20 @@ def clear_response():
         exec('global ' + 'xy' + str(a) + '\n' + 'del ' + 'xy' + str(a))
     # then clear coordinates
     dyn_coord = []
+    
+def dyn_poly_response():
+    global dyn_poly_select
+    if dyn_poly_select.get() == 0:
+        # the button is off, and has been clicked therefore change the
+        # variable to on and the image to on
+        dyn_poly_select.set(1)
+        dyn_poly_toggle.configure(image=toggle_image_on)
+
+    else:
+        # the button is on and has been clicked
+        # set it to off and change image
+        dyn_poly_select.set(0)
+        dyn_poly_toggle.configure(image=toggle_image_off)
 
 
 # =============================================================================
@@ -4522,7 +4535,6 @@ Dynamics Frame
 arrow_btn = tk.Radiobutton(dynamics_frame, text='arrow', variable=tensor, value=1, command=lambda: vect_type_response(tensor.get())).grid(row=0, column=0)
 stack_btn = tk.Radiobutton(dynamics_frame, text='stack', variable=tensor, value=0, command=lambda: vect_type_response(tensor.get())).grid(row=0, column=1)
 
-
 # add a button that will respond with animating the clikced points
 animate_btn = tk.Button(dynamics_frame, text='Animate', padx=10, pady=10, command=animate_response)
 animate_btn.grid(row=1, column=0, padx=5, pady=5)
@@ -4541,8 +4553,13 @@ dyn_N_slider = tk.Scale(dynamics_frame, from_=dyn_N, to=500, orient=tk.HORIZONTA
 dyn_N_slider.grid(row=2, column=1)
 
 tk.Label(dynamics_frame, text='Tmax:').grid(row=3, column=0)
-tmax_slider = tk.Scale(dynamics_frame, from_=tmax, to=20, orient=tk.HORIZONTAL)
+tmax_slider = tk.Scale(dynamics_frame, from_=tmax, to=30, orient=tk.HORIZONTAL)
 tmax_slider.grid(row=3, column=1)
+
+tk.Label(dynamics_frame, text='Toggle Draw Polygon:').grid(row=4, column=0)
+dyn_poly_toggle = tk.Button(dynamics_frame, image=toggle_image_off, bd=0, command=dyn_poly_response)
+dyn_poly_toggle.grid(row=4, column=1)
+
 
 # return time to run
 stop = timeit.default_timer()
