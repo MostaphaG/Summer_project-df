@@ -1122,7 +1122,19 @@ def on_key_press(event):
                 # if the shape has already been completed, restart first
                 # then continue
                 AI_restart()
-            area_finder_form_2_int(x_m, y_m)
+            if R2_flux_shape.get() == 'Polygon':
+                area_finder_form_2_int(x_m, y_m)
+            elif R2_flux_shape.get() == 'Circle':
+                # get the radius and call approperiate function
+                Radius_R2_circ = eval(Radius_R2_circ_entry.get())
+                # if its negative correct and put it into the entry box
+                if Radius_R2_circ < 0:
+                    Radius_R2_circ *= -1
+                    Radius_R2_circ_entry.delete(0, 'end')
+                    Radius_R2_circ_entry.insert(0 , str(Radius_LI_circ))
+                    integration_from_2_circle()
+            else:
+                tk.messagebox.showerror('NOT IMPLEMENTED YET', 'Want to implement a mini human')
     if tab_text == 'Dynamics':
         # clicking should only register a new point and plot it:
         global dyn_coord
@@ -2593,6 +2605,8 @@ def R2_tools_handler(R2_tools_opt_var):
     global label_AI_area_2, label_AI_result_2, restart_AI_btn
     global label_AI_area_1, label_AI_result_1
     global shadearea_toggle, label_shade_area
+    global R2_flux_shape, R2_flux_shape_list
+    global R2_flux_shape_instruction, R2_flux_shape_drop
     # get the variable as an integer, make it global not to have to repeat this
     R2_tools_opt_int = R2_tools_opt_var
     if R2_tools_opt_int == 0:
@@ -2619,6 +2633,10 @@ def R2_tools_handler(R2_tools_opt_var):
             label_AI_result_2.destroy()
             label_shade_area.destroy()
             shadearea_toggle.destroy()
+            R2_flux_shape.destroy()
+            R2_flux_shape_list.destroy()
+            R2_flux_shape_instruction.destroy()
+            R2_flux_shape_drop.destroy()
         except (UnboundLocalError, NameError):  
             pass
     elif R2_tools_opt_int == 1:
@@ -2648,6 +2666,10 @@ def R2_tools_handler(R2_tools_opt_var):
             label_AI_result_2.destroy()
             label_shade_area.destroy()
             shadearea_toggle.destroy()
+            R2_flux_shape.destroy()
+            R2_flux_shape_list.destroy()
+            R2_flux_shape_instruction.destroy()
+            R2_flux_shape_drop.destroy()
         except (UnboundLocalError, NameError):  
             pass
     else:
@@ -2685,6 +2707,14 @@ def R2_tools_handler(R2_tools_opt_var):
         label_shade_area.grid(row=15, column=1)
         shadearea_toggle = tk.Button(calculus_frame, image=toggle_image_on, bd=0, command=shadearea_response)
         shadearea_toggle.grid(row=15, column=2)
+        # dropdown to pick different shapes
+        R2_flux_shape = tk.StringVar()
+        R2_flux_shape_list = ['Polygon', 'Circle']
+        R2_flux_shape.set(R2_flux_shape_list[0])
+        R2_flux_shape_instruction = tk.Label(calculus_frame, text='Shape:')
+        R2_flux_shape_instruction.grid(row=16, column=0)
+        R2_flux_shape_drop = tk.OptionMenu(calculus_frame, R2_flux_shape, *R2_flux_shape_list, command=R2_flux_shape_response)
+        R2_flux_shape_drop.grid(row=16, column=1)
         # define a dropdown to select which 
         # make sure a 2-form is being plotted:
         form_2_response()
@@ -3440,6 +3470,12 @@ def integration_form_2(AI_verts):
     shape_complete_tracker = 1
 
 
+
+# define a function to integrate 2-form flux over a circle
+def integration_from_2_circle():
+    pass
+
+
 # define a fucntion that will track user clicks in a list, and check if they
 # form a closed area, if so, will call the above inetgration fucntion
 def area_finder_form_2_int(x_click, y_click):
@@ -3523,6 +3559,33 @@ def shadearea_response():
         # set it to off and change image
         shadearea.set(0)
         shadearea_toggle.configure(image=toggle_image_off)
+
+
+def R2_flux_shape_response(selected_shape):
+    global R2_flux_shape, Radius_R2_circ_entry, Radius_R2_label
+    # get the chosen shape
+    R2_flux_shape.set(selected_shape)
+    # depending on that selection, prepare rest of frame:
+    if selected_shape == 'Polygon':
+        # restart the plot and the integral values
+        AI_restart()
+        # get rid of circle options
+        try:
+            Radius_R2_label.destroy()
+            Radius_R2_circ_entry.destroy()
+        except (UnboundLocalError, NameError):  
+            pass
+    if selected_shape == 'Circle':
+        # restart the plot and the integral values
+        AI_restart()
+        # if circle is selected, display an entry box for the radius of it
+        Radius_R2_label = tk.Label(calculus_frame, text='Circle Radius:')
+        Radius_R2_label.grid(row=17, column=0)
+        Radius_R2_circ_entry = tk.Entry(calculus_frame, width=10)
+        Radius_R2_circ_entry.grid(row=17, column=1)
+        Radius_R2_circ_entry.insert(0, '1')
+    # update canvas
+    canvas.draw()
 
 
 ''' DEFINE FUNCTIONS USED IN R3 CODE '''
