@@ -1540,34 +1540,6 @@ def calc_area(vert_list):
     A = 0.5*(S1-S2)
     return A
 
-def showflux_response():
-    global showflux
-    if showflux.get() == 0:
-        # the button is off, and has been clicked therefore change the
-        # variable to an and the image to on
-        showflux.set(1)
-        showflux_toggle.configure(image=toggle_image_on)
-
-    else:
-        # the button is on and has been clicked
-        # set it to off and change image
-        showflux.set(0)
-        showflux_toggle.configure(image=toggle_image_off)
-
-def showcirc_response():
-    global showcirc
-    if showcirc.get() == 0:
-        # the button is off, and has been clicked therefore change the
-        # variable to an and the image to on
-        showcirc.set(1)
-        showcirc_toggle.configure(image=toggle_image_on)
-
-    else:
-        # the button is on and has been clicked
-        # set it to off and change image
-        showcirc.set(0)
-        showcirc_toggle.configure(image=toggle_image_off)
-
 
 ''' RESPONSE FUNCTIONS TO PLOT '''
 
@@ -4315,15 +4287,6 @@ LI_shape_drop.grid(row=4, column=1)
 # input the radiobuttons for arrows, stacks or both again here
 arrow_btn = tk.Radiobutton(LI_frame, text='arrow', variable=tensor, value=1, command=lambda: vect_type_response(tensor.get())).grid(row=7, column=1)
 stack_btn = tk.Radiobutton(LI_frame, text='stack', variable=tensor, value=0, command=lambda: vect_type_response(tensor.get())).grid(row=7, column=2)
-
-# Showflux toggle button
-# tk.Label(LI_frame, text='Show Flux:').grid(row=8, column=0)
-# showflux_toggle = tk.Button(LI_frame, image=toggle_image_off, bd=0, command=showflux_response)
-# showflux_toggle.grid(row=8, column=1)
-
-# tk.Label(LI_frame, text='Show Circ:').grid(row=8, column=2)
-# showcirc_toggle = tk.Button(LI_frame, image=toggle_image_off, bd=0, command=showcirc_response)
-# showcirc_toggle.grid(row=8, column=3)
 
 # Radiobutton for showing flux/circulation
 showcol = tk.IntVar()
