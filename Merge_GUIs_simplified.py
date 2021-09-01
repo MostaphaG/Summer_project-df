@@ -490,7 +490,7 @@ def tab_selection(event):
         # enable plot buttons again
         PLOT_btn['state'] = tk.NORMAL
         polar_grid_plot_btn['state'] = tk.NORMAL
-    elif tab_text == 'Main':
+    elif tab_text == 'VF':
         LI_restart()
         # by default return to initial 'tools'
         click_opt_int = 0
@@ -508,7 +508,7 @@ def tab_selection(event):
         # enable plot buttons again
         PLOT_btn['state'] = tk.NORMAL
         polar_grid_plot_btn['state'] = tk.NORMAL
-    elif tab_text == 'Calculus':
+    elif tab_text == 'Ext. Alegebra':
         global calculus_form_tracker, R2_tools_opt
         main_axis.clear()
         # get globals form entry boxes
@@ -541,7 +541,7 @@ def tab_selection(event):
         R2_tools_opt.set(0)
         # respond to that too
         R2_tools_handler(R2_tools_opt.get())
-    elif tab_text == '\mathbb{R}^{3}':
+    elif tab_text == 'R^3':
         global form_2_frame
         global F_xy_x, F_xy_y, F_xz_x, F_xz_z, F_yz_y, F_yz_z
         global max_global_dxdy, max_global_dxdz, max_global_dydz
@@ -662,7 +662,7 @@ def tab_selection(event):
     if tab_text != 'Dynamics':
         dyn_use_track = 0
     # if anything but the main window is selected, change to tools
-    if tab_text != 'Main' and tab_text != 'Line Integrals' and tab_text != 'Dynamics':
+    if tab_text != 'VF' and tab_text != 'Line Integrals' and tab_text != 'Dynamics':
         # unclick them
         click_option.set(0)
         click_option_handler(click_option.get())
@@ -700,16 +700,19 @@ toggle_image_off = ImageTk.PhotoImage(toggle_image_off)
 # bottom side (field, scalings etc) and the right side (with detailed options)
 # and top left for plot
 
+style_notebook = ttk.Style()
+style_notebook.configure('TNotebook.Tab', font=('URW Gothic L','8','bold') )
+
 # right frame:
-right_frame_frame = tk.LabelFrame(root, text='Options Frame', padx=5, pady=5)
-right_frame_frame.grid(row=1, column=1, rowspan=2)
+right_frame_frame = tk.LabelFrame(root, text='', padx=5, pady=5)
+right_frame_frame.grid(row=1, column=1, rowspan=2, sticky='N')
 
 # bot frame:
-bot_frame_frame = tk.LabelFrame(root, text='Plotting frame', padx=5, pady=5)
+bot_frame_frame = tk.LabelFrame(root, text='', padx=5, pady=5)
 bot_frame_frame.grid(row=2, column=0)
 
 # plot frame:
-plot_frame = tk.LabelFrame(root, text='Display Frame', padx=5, pady=5)
+plot_frame = tk.LabelFrame(root, text='', padx=5, pady=5)
 plot_frame.grid(row=1, column=0)
 
 # define notebook for tabs
@@ -730,35 +733,35 @@ singular_frame = tk.LabelFrame(notebook_singular)
 singular_frame.grid(row=0, column=1)
 # main options:
 right_frame = tk.LabelFrame(notebook)
-right_frame.grid(row=0, column=1)
+right_frame.grid(row=0, column=0)
 # field input
 bot_frame = tk.LabelFrame(notebook_bottom)
 bot_frame.grid(row=0, column=0)
 # Line integrals
-LI_frame = tk.Frame(notebook)
-LI_frame.grid(row=0, column=2)
+LI_frame = tk.LabelFrame(notebook)
+LI_frame.grid(row=0, column=1)
 # calculus
-calculus_frame = tk.Frame(notebook)
-calculus_frame.grid(row=0, column=2)
+calculus_frame = tk.LabelFrame(notebook)
+calculus_frame.grid(row=0, column=3)
 # R3
-r3_frame = tk.Frame(notebook)
-r3_frame.grid(row=0, column=3)
+r3_frame = tk.LabelFrame(notebook)
+r3_frame.grid(row=0, column=4)
 # dynamics
-dynamics_frame = tk.Frame(notebook)
-dynamics_frame.grid(row=0, column=4)
+dynamics_frame = tk.LabelFrame(notebook)
+dynamics_frame.grid(row=0, column=2)
 # plotting options
-small_frame = tk.Frame(notebook_small)
+small_frame = tk.LabelFrame(notebook_small)
 small_frame.grid(row=0, column=0)
 
 # finsalise them
-notebook.add(right_frame, text='Main')
+notebook.add(right_frame, text='VF')
 notebook.add(LI_frame, text='Line Integrals')
-notebook.add(calculus_frame, text='Calculus')
-notebook.add(r3_frame, text='\mathbb{R}^{3}')
 notebook.add(dynamics_frame, text='Dynamics')
-notebook_bottom.add(bot_frame, text='fields')
+notebook.add(calculus_frame, text='Ext. Alegebra')
+notebook.add(r3_frame, text='R^3')
+notebook_bottom.add(bot_frame, text='Fields')
 notebook_singular.add(singular_frame, text='singularities')
-notebook_small.add(small_frame, text='Plot Options')
+notebook_small.add(small_frame, text='Plotting')
 
 # bind the clicks on tabs to a function
 notebook.bind_all('<<NotebookTabChanged>>', tab_selection)
@@ -772,7 +775,7 @@ notebook.bind_all('<<NotebookTabChanged>>', tab_selection)
 
 # define scale of the graph
 L = 5
-pt_den = 11 # number of points on each axis
+pt_den = 21 # number of points on each axis
 
 # Initialise auto scaling variable
 ascale = tk.IntVar()
@@ -868,7 +871,7 @@ delta_factor = 10
 fract = 0.05
 
 # define the maximum number of stack to plot, dep. on magnitude (initialy)
-s_max = 4
+s_max = 6
 
 # set screen dpi
 my_dpi = 100
@@ -878,7 +881,7 @@ w_head = 1/8
 h_head = 1/4
 
 # create a figure, use dpi to fit it more precisely to size of the frame
-fig = plt.figure(figsize=(855/my_dpi, 573/my_dpi), dpi=my_dpi)
+fig = plt.figure(figsize=(730/my_dpi, 573/my_dpi), dpi=my_dpi)
 
 # set up axis
 main_axis = fig.gca()
@@ -1100,7 +1103,7 @@ def on_key_press(event):
                 Radius_LI_circ_entry.insert(0 , str(Radius_LI_circ))
             line_int_circ([x_m,y_m], Radius_LI_circ, 100000, string_x, string_y, orient_int)
     # and when want to use zoom or tools in calculus:
-    if tab_text == 'Calculus':
+    if tab_text == 'Ext. Alegebra':
         if R2_tools_opt_int == 1:
             form_2_zoom(x_m, y_m)
         elif R2_tools_opt_int == 0:
@@ -1685,7 +1688,7 @@ def field_selection_response(event):
     y_comp_entry.configure(bg='#C0F6BB')
     # now call the plot function to finalise all these onto the plot
     # depending on tab ,use correct 1 form plotting fucntion
-    if tab_text == 'Calculus':
+    if tab_text == 'Ext. Alegebra':
         # this plots 1 form always for these responses
         form_1_stacks_response()
     else:
@@ -4088,7 +4091,7 @@ click_option_Curl_btn.grid(row=2, column=1)
 
 # Zooming window zoom slider
 tk.Label(right_frame, text='Zoom').grid(row=3, column=0)
-zoom_slider = tk.Scale(right_frame, from_=1, to=200, orient=tk.HORIZONTAL)
+zoom_slider = tk.Scale(right_frame, from_=1, to=100, orient=tk.HORIZONTAL, resolution=1)
 zoom_slider.bind("<ButtonRelease-1>", update_deriv)
 zoom_slider.grid(row=3, column=1)
 
@@ -4211,37 +4214,37 @@ what was in small frame initally, now also in botton notebook
 '''
 
 # define the PLOT button
-PLOT_btn = tk.Button(small_frame, text='PLOT', padx=32, pady=20, command=PLOT_response)
-PLOT_btn.grid(row=0, column=2, columnspan=2, rowspan=1)
-
-# define a button in small frame that will open new window to adjust arrowheads
-custom_btn = tk.Button(small_frame, text='customise visuals', padx=1, pady=1, command=custom_btn_reponse)
-custom_btn.grid(row=0, column=4)
-
-# define a button to customise the polar grids
-polar_grid_custom_btn = tk.Button(small_frame, text='customise polar grid', padx=1, pady=1, command=polar_grid_custom_reponse)
-polar_grid_custom_btn.grid(row=1, column=4)
+PLOT_btn = tk.Button(small_frame, text='PLOT', padx=40, pady=20, command=PLOT_response)
+PLOT_btn.grid(row=0, column=2, rowspan=2)
 
 # define a button that will just plot the given cartesian field
 # on a polar grid
-polar_grid_plot_btn = tk.Button(small_frame, text='polar grid plot', command= lambda: Polar_grid_plot_response(tensor.get()))
-polar_grid_plot_btn.grid(row=1, column=2, columnspan=2)
+polar_grid_plot_btn = tk.Button(small_frame, text='Polar plot', padx=20, command= lambda: Polar_grid_plot_response(tensor.get()))
+polar_grid_plot_btn.grid(row=1, column=1)
+
+# define a button in small frame that will open new window to adjust arrowheads
+custom_btn = tk.Button(small_frame, text='Visuals Customise', padx=1, pady=1, command=custom_btn_reponse)
+custom_btn.grid(row=0, column=0)
+
+# define a button to customise the polar grids
+polar_grid_custom_btn = tk.Button(small_frame, text='Polar customise', padx=7, pady=1, command=polar_grid_custom_reponse)
+polar_grid_custom_btn.grid(row=1, column=0)
 
 # define entry boxes for each (in order): L, pt_den, s_max and a ; and info txt
 # Also input into them the initial values
-tk.Label(small_frame, text='Size').grid(row=2, column=2)
-L_entry = tk.Entry(small_frame, width=11, borderwidth=1)
-L_entry.grid(row=3, column=2, padx=2)
+tk.Label(small_frame, text='Size').grid(row=2, column=0)
+L_entry = tk.Entry(small_frame, width=5, borderwidth=1)
+L_entry.grid(row=3, column=0, padx=2)
 L_entry.insert(0, L)
 
-tk.Label(small_frame, text='grid').grid(row=2, column=3)
-pt_den_entry = tk.Entry(small_frame, width=11, borderwidth=1)
-pt_den_entry.grid(row=3, column=3, padx=2)
+tk.Label(small_frame, text='grid').grid(row=2, column=1)
+pt_den_entry = tk.Entry(small_frame, width=5, borderwidth=1)
+pt_den_entry.grid(row=3, column=1, padx=2)
 pt_den_entry.insert(0, pt_den)
 
-tk.Label(small_frame, text='max sheets').grid(row=2, column=4)
-s_max_entry = tk.Entry(small_frame, width=11, borderwidth=1)
-s_max_entry.grid(row=3, column=4, padx=2)
+tk.Label(small_frame, text='max sheets').grid(row=2, column=2)
+s_max_entry = tk.Entry(small_frame, width=5, borderwidth=1)
+s_max_entry.grid(row=3, column=2, padx=2)
 s_max_entry.insert(0, s_max)
 
 
@@ -4561,6 +4564,7 @@ tmax_slider.grid(row=3, column=1)
 tk.Label(dynamics_frame, text='Join to shapes').grid(row=4, column=0)
 dyn_join_toggle = tk.Button(dynamics_frame, image=toggle_image_on, bd=0, command=dyn_join_response)
 dyn_join_toggle.grid(row=4, column=1)
+
 
 # return time to run
 stop = timeit.default_timer()
