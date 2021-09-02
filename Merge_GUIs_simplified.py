@@ -740,14 +740,6 @@ bot_frame_frame.grid(row=2, column=0)
 plot_frame = tk.LabelFrame(root, text='', padx=5, pady=5)
 plot_frame.grid(row=1, column=0)
 
-# instruction frame
-instruct_frame = tk.LabelFrame(root, text='', padx=5, pady=5)
-instruct_frame.grid(row=3, column=1, sticky='N')
-
-# make an initial label there too
-instruct_frame_label = tk.Label(instruct_frame, text='')
-instruct_frame_label.pack()
-
 # define notebook for tabs
 notebook = ttk.Notebook(right_frame_frame)
 notebook.grid(row=0, column=0)
@@ -760,6 +752,10 @@ notebook_singular.grid(row=1, column=0)
 # plotting options notebook
 notebook_small = ttk.Notebook(bot_frame_frame)
 notebook_small.grid(row=0, column=1)
+# labels for hover over buttons notebook
+notebook_instruct = ttk.Notebook(bot_frame_frame)
+notebook_instruct.grid(row=0, column=2)
+
 
 # singularities:
 singular_frame = tk.LabelFrame(notebook_singular)
@@ -785,6 +781,9 @@ dynamics_frame.grid(row=0, column=2)
 # plotting options
 small_frame = tk.LabelFrame(notebook_small)
 small_frame.grid(row=0, column=0)
+# labels for hovering
+instruct_frame = tk.LabelFrame(notebook_instruct)
+instruct_frame.grid(row=0, column=0)
 
 # finsalise them
 notebook.add(right_frame, text='VF')
@@ -795,6 +794,11 @@ notebook.add(r3_frame, text='R^3')
 notebook_bottom.add(bot_frame, text='Fields')
 notebook_singular.add(singular_frame, text='singularities')
 notebook_small.add(small_frame, text='Plotting')
+notebook_instruct.add(instruct_frame, text='Instructions')
+
+# make an initial in instructions frame too
+instruct_frame_label = tk.Label(instruct_frame, text='')
+instruct_frame_label.pack()
 
 # bind the clicks on tabs to a function
 notebook.bind_all('<<NotebookTabChanged>>', tab_selection)
