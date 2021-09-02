@@ -3553,9 +3553,6 @@ def integration_form_2(AI_verts):
 # define a function to integrate 2-form flux over a circle
 def integration_from_2_circle(x_m, y_m, radius_for_flux, AI_verts):
     global AI_area, AI_result, shape_complete_tracker, form_2_inside
-    # globals for tests only
-    global inside_arr, circle_for_flux, x_shape_points, y_shape_points
-    global circle_as_polygon, points
     # define a circle patch
     circle_for_flux = patch.CirclePolygon((x_m, y_m), radius_for_flux, fill=False, color='red')
     # get its transformed path (found out this is needed from the 
@@ -4216,22 +4213,22 @@ def animate(i):
 # function to carry out the animating
 def animation_storing_function():
     global dyn_N
-    ani = animation.FuncAnimation(fig, animate, dyn_N, interval=25, blit=True, repeat=False)
+    ani = animation.FuncAnimation(fig, animate, dyn_N, interval=interval, blit=True, repeat=False)
     return ani
 
 
 # function to respond to button to begin the animation.
 def animate_response():
     global dummy_variable_dyn, dyn_time
-    global dyn_coord, x_dyn_str, y_dyn_str, poly_str, dyn_N, tmax
+    global dyn_coord, x_dyn_str, y_dyn_str, poly_str, dyn_N, tmax, interval
     # clear the axis and redraw
     PLOT_response(0)
     x_dyn_str = ''
     y_dyn_str = ''
     poly_str = ''
-    dyn_N = int(round(dyn_N_slider.get(),0))
     tmax = tmax_slider.get()
-    dyn_N = int(1000*tmax/50)  # int(round(dyn_N_slider.get(), 0))
+    interval = dyn_speed_slider.get()
+    dyn_N = int(1000*tmax/interval)
     dyn_time = np.linspace(0, tmax, dyn_N)
     for a in range(len(dyn_coord)):
         exec('global ' +  'xy' + str(a) + '\n'
@@ -4826,13 +4823,15 @@ play_btn.grid(row=1, column=2)
 clear_btn = tk.Button(dynamics_frame, text='Clear', command=clear_response)
 clear_btn.grid(row=1, column=3)
 
-tk.Label(dynamics_frame, text='Animation Frames:').grid(row=2, column=0)
-dyn_N_slider = tk.Scale(dynamics_frame, from_=dyn_N, to=500, orient=tk.HORIZONTAL)
-dyn_N_slider.grid(row=2, column=1)
+tk.Label(dynamics_frame, text='Relative speed:').grid(row=2, column=0)
+dyn_speed_slider = tk.Scale(dynamics_frame, from_=0.1, to=40, orient=tk.HORIZONTAL, resolution=0.1)
+dyn_speed_slider.grid(row=2, column=1)
+dyn_speed_slider.set(5)
 
-tk.Label(dynamics_frame, text='Tmax:').grid(row=3, column=0)
-tmax_slider = tk.Scale(dynamics_frame, from_=tmax, to=30, orient=tk.HORIZONTAL)
+tk.Label(dynamics_frame, text='time (unit):').grid(row=3, column=0)
+tmax_slider = tk.Scale(dynamics_frame, from_=tmax, to=10, orient=tk.HORIZONTAL)
 tmax_slider.grid(row=3, column=1)
+tmax_slider.set(5)
 
 # Button to enable to disable straight line shape joining
 tk.Label(dynamics_frame, text='Join to shapes').grid(row=4, column=0)
