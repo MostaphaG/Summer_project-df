@@ -349,9 +349,8 @@ def stack_plot(xg, yg, axis, F_x, F_y, s_max, L, pt_den, fract, arrows=False, st
 
     plt.close()
 
-
 # define a function to replace input string to be 'python understood'
-def format_eq(string, LI=0, singular_ty=0, i=0, j=0):
+def format_eq(string, LI=0, singular_ty=0, x_to_x_m =0, i=0, j=0):
     # replace all the x and y with xg and yg:
     if LI == 1 :
         string = string.replace('x', 'intervals[0,:]')
@@ -359,6 +358,9 @@ def format_eq(string, LI=0, singular_ty=0, i=0, j=0):
     elif singular_ty == 1:
         string = string.replace('x', 'points[' + str(0) + ', ' + str(i) + ']')
         string = string.replace('y', 'points[' + str(1) + ', ' + str(j) + ']')
+    elif x_to_x_m == 1:
+        string = string.replace('x', 'x_m')
+        string = string.replace('y', 'y_m')
     else:
         string = string.replace('x', 'xg')
         string = string.replace('y', 'yg')
@@ -381,7 +383,6 @@ def unformat(string):
     string = string.replace('exp', 'e**')
     string = string.replace('field_unit', '1')
     return string
-
 
 # define a function that takes input string that is python understood and turn into vector components:
 def eq_to_comps(string_x, string_y, xg, yg, check_2_frm=0):
@@ -787,7 +788,7 @@ notebook.bind_all('<<NotebookTabChanged>>', tab_selection)
 
 # define scale of the graph
 L = 5
-pt_den = 21 # number of points on each axis
+pt_den = 11 # number of points on each axis
 
 # Initialise auto scaling variable
 ascale = tk.IntVar()
@@ -885,7 +886,7 @@ delta_factor = 10
 fract = 0.05
 
 # define the maximum number of stack to plot, dep. on magnitude (initialy)
-s_max = 6
+s_max = 2
 
 # set screen dpi
 my_dpi = 100
@@ -1647,6 +1648,19 @@ def calc_area(vert_list):
     A = 0.5*(S1-S2)
     return A
 
+def showcol_response(showcol):        
+    if LI_shape_select.get() == 'Circle':
+        Radius_LI_circ = eval(Radius_LI_circ_entry.get())
+            # if its negative correct and put it into the entry box
+        if Radius_LI_circ < 0:
+            Radius_LI_circ *= -1
+            Radius_LI_circ_entry.delete(0, 'end')
+            Radius_LI_circ_entry.insert(0 , str(Radius_LI_circ))
+        line_int_circ([x_m,y_m], Radius_LI_circ, 100000, string_x, string_y, orient_int)
+    elif LI_shape_select.get() == 'Polygon':
+        #line_int_poly(100000, string_x, string_y)
+        pass
+    
 
 ''' RESPONSE FUNCTIONS TO PLOT '''
 
@@ -2032,6 +2046,18 @@ def deriv_calc(x_m, y_m):
     dpd = dpd_select.get()
     d_scale = scale*(zoom_slider.get())
     
+     # Calc the MOD at the click location
+    lab_colours = ['red', 'blue', 'grey']
+    J = jacobian(string_x, string_y)
+    
+    Ja = eval(format_eq(J[0,0], x_to_x_m=1))
+    Jb = eval(format_eq(J[0,1], x_to_x_m=1))
+    Jc = eval(format_eq(J[1,0], x_to_x_m=1))
+    Jd = eval(format_eq(J[1,1], x_to_x_m=1))
+    
+    div = round(Ja + Jd, 3)
+    curl = round(Jc - Jb, 3)
+    
     # Initialise arrays for storing components
     u_s = np.zeros(shape=(dpd, dpd))
     v_s = np.zeros(shape=(dpd, dpd))
@@ -2044,9 +2070,9 @@ def deriv_calc(x_m, y_m):
     # define the vector field in these new axis
     u_zoom, v_zoom = eq_to_comps(string_x, string_y, dxg, dyg)
 
-    # Define the components of the derivative field
-    V = u_zoom - eval(format_eq_div(format_eq(string_x)))
-    W = v_zoom - eval(format_eq_div(format_eq(string_y)))
+    # Define the components of the derivative field (i.e. subtract background field)
+    V = u_zoom - eval(format_eq(string_x, x_to_x_m = 1))
+    W = v_zoom - eval(format_eq(string_y, x_to_x_m = 1))
     
     if click_opt_int == 1:
         u_s = u_zoom
@@ -2110,6 +2136,14 @@ def deriv_calc(x_m, y_m):
                     u_s[N-j, i] = (V_comm_4*(-l) + W_comm_4*k)*(-l)/A
                     v_s[N-j, i] = (V_comm_4*(-l) + W_comm_4*k)*k/A
                     
+                    zoom_lab_text = ('Div=' + str(div))
+                    if div > 0 :
+                        col_ind = 0
+                    elif div < 0:
+                        col_ind = 1
+                    elif div == 0 or div == -0:
+                        col_ind = 2
+                    
                 # Local curl field
                 if click_opt_int == 4:        
                     u_s[i, j] = (V_comm_1*l + W_comm_1*(-k))*l/A
@@ -2120,6 +2154,15 @@ def deriv_calc(x_m, y_m):
                     v_s[N-i, N-j] = (V_comm_3*(-l) + W_comm_3*k)*k/A
                     u_s[N-j, i] = (V_comm_4*k + W_comm_4*l)*k/A
                     v_s[N-j, i] = (V_comm_4*k + W_comm_4*l)*l/A
+                    
+                    zoom_lab_text = ('Curl=' + str(curl))
+                    
+                    if curl > 0 :
+                        col_ind = 0
+                    elif curl < 0:
+                        col_ind = 1
+                    elif curl == 0 or curl == -0:
+                        col_ind = 2
         
         # correct for singular values
         for i in range(dpd):
@@ -2132,6 +2175,11 @@ def deriv_calc(x_m, y_m):
     # Create axes at clicked position from supplied position and given axis sizes
     deriv_inset_ax = main_axis.inset_axes([(x_pix-116)/500 - (0.931*d_length/(2*L)), (y_pix-59)/500 - (0.931*d_length/(2*L)), 0.931*d_length/L, 0.931*d_length/L])
 
+    try:
+        deriv_inset_ax.text(x_m, y_m, zoom_lab_text, color=lab_colours[col_ind])
+    except (UnboundLocalError):
+        pass
+    
     if tensor.get() == 0:
         arrows = False
         stacks = True
@@ -2156,7 +2204,7 @@ def deriv_calc(x_m, y_m):
 
 
 # Calculate the Jacobian matrix of the defined vector field
-def jacobian(m, u_str, v_str):
+def jacobian(u_str, v_str):
     # take the input strings and turn them into sympy expressions to be able to
     # use sympy's partial differentiation
     u_str = u_str.replace('^','**')
@@ -2169,7 +2217,7 @@ def jacobian(m, u_str, v_str):
     # combine the 2 into a list:
     expressions = np.array([sympy_expr_x, sympy_expr_y])
     # set up an array to store derrivatives.
-    J = np.empty((m, m), dtype='object')
+    J = np.empty((2,2), dtype='object')
     # loop over differentiating each, when differentiating w.r.t its coord, set to 0
     for coord_index in range(len(coords)):
         # loop over differentiating each component:
@@ -2221,13 +2269,6 @@ def click_option_handler(click_option):
             x_pix = 427
             y_pix = 308
             deriv_calc(x_m, y_m)
-
-
-# Additional formatting function used in divergence plots
-def format_eq_div(string):
-    string = string.replace('xg', 'x_m')
-    string = string.replace('yg', 'y_m')
-    return string
 
 
 # Function for updating the inset plots when options are changed by the user.
@@ -4622,9 +4663,9 @@ stack_btn = tk.Radiobutton(LI_frame, text='stack', variable=tensor, value=0, com
 showcol = tk.IntVar()
 showcol.set(0)
 tk.Label(LI_frame, text='Colour Curve:').grid(row=8, column=0)
-shownone_btn = tk.Radiobutton(LI_frame, text='None', variable=showcol, value=0).grid(row=8, column=1)
-showcirc_btn = tk.Radiobutton(LI_frame, text='Show Circ.', variable=showcol, value=1).grid(row=8, column=2)
-showflux_btn = tk.Radiobutton(LI_frame, text='Show Flux', variable=showcol, value=2).grid(row=8, column=3)
+shownone_btn = tk.Radiobutton(LI_frame, text='None', variable=showcol, value=0, command= lambda: showcol_response(showcol.get())).grid(row=8, column=1)
+showcirc_btn = tk.Radiobutton(LI_frame, text='Show Circ.', variable=showcol, value=1, command= lambda: showcol_response(showcol.get())).grid(row=8, column=2)
+showflux_btn = tk.Radiobutton(LI_frame, text='Show Flux', variable=showcol, value=2, command= lambda: showcol_response(showcol.get())).grid(row=8, column=3)
 
 # add an entry so the user can choose what grid they want
 # by choosing grid lines separation
