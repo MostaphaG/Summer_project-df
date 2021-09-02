@@ -1116,16 +1116,20 @@ def on_key_press(event):
         elif R2_tools_opt_int == 0:
             key_press_handler(event, canvas, toolbar)
         else:
-            if shape_complete_tracker == 0:
-                # if the shape is not complete, just continue normally
-                pass
-            else:
-                # if the shape has already been completed, restart first
-                # then continue
-                AI_restart()
             if R2_flux_shape.get() == 'Polygon':
+                # only restart if shape has already been completed
+                if shape_complete_tracker == 0:
+                    # if the shape is not complete, just continue normally
+                    pass
+                else:
+                    # if the shape has already been completed, restart first
+                    # then continue
+                    AI_restart()
+                # call function to calculate
                 area_finder_form_2_int(x_m, y_m)
             elif R2_flux_shape.get() == 'Circle':
+                # restart
+                AI_restart()
                 # get the radius and call approperiate function
                 Radius_R2_circ = eval(Radius_R2_circ_entry.get())
                 # if its negative correct and put it into the entry box
@@ -1133,9 +1137,9 @@ def on_key_press(event):
                     Radius_R2_circ *= -1
                     Radius_R2_circ_entry.delete(0, 'end')
                     Radius_R2_circ_entry.insert(0 , str(Radius_LI_circ))
-                integration_from_2_circle(x_m, y_m, Radius_R2_circ)
+                integration_from_2_circle(x_m, y_m, Radius_R2_circ, AI_verts)
             else:
-                tk.messagebox.showerror('NOT IMPLEMENTED YET', 'Want to implement a mini human')
+                pass
     if tab_text == 'Dynamics':
         # clicking should only register a new point and plot it:
         global dyn_coord
@@ -1193,8 +1197,28 @@ def on_key_press(event):
             poly = mpl.patches.Polygon(dyn_coord, fill=True, color='blue')
             main_axis.add_artist(poly)
             canvas.draw()
+        elif dyn_shape_select.get() == 'Circle':
+            # clear
+            clear_response()
+            # get the input size
+            dyn_pre_size = eval(dyn_pre_size_entry.get())
+            if dyn_pre_size < 0:
+                dyn_pre_size *= -1
+                dyn_pre_size_entry.delete(0, 'end')
+                dyn_pre_size_entry.insert(0 , str(Radius_LI_circ))
+            # from that define a Circle as a patch
+            cirlce_dyn_patch = patch.CirclePolygon((x_m, y_m), dyn_pre_size, fill=False, color='red')
+            # draw it on
+            main_axis.add_artist(cirlce_dyn_patch)
+            canvas.draw()
+            # from that patch, extract points and add them to dyn_coord
+            verts = cirlce_dyn_patch.get_path().vertices
+            trans = cirlce_dyn_patch.get_patch_transform()
+            points = trans.transform(verts)
+            for i in range(len(points)):
+                dyn_coord.append([points[i, 0], points[i, 1]])
         else:
-            tk.messagebox.showerror('', 'Circle is Not Yet Implemented')
+            pass
 
 
 # connect figure event to a function that responds to clicks, defined above
@@ -3527,23 +3551,34 @@ def integration_form_2(AI_verts):
 
 
 # define a function to integrate 2-form flux over a circle
-def integration_from_2_circle(x_m, y_m, radius_for_flux):
+def integration_from_2_circle(x_m, y_m, radius_for_flux, AI_verts):
     global AI_area, AI_result, shape_complete_tracker, form_2_inside
     # globals for tests only
     global inside_arr, circle_for_flux, x_shape_points, y_shape_points
-    global circle_as_polygon
-    # define and draw a circle patch
-    circle_for_flux = patch.Circle((x_m, y_m), radius_for_flux, fill=False, color='red')
+    global circle_as_polygon, points
+    # define a circle patch
+    circle_for_flux = patch.CirclePolygon((x_m, y_m), radius_for_flux, fill=False, color='red')
     # get its transformed path (found out this is needed from the 
     # circle patch object describtion and found a way of doing it
     # on stackoverflow):
-    # Get path and 2D affine transformation
-    pathC = circle_for_flux.get_path()
-    transformC = circle_for_flux.get_transform()
-    # Apply transformation to the path
-    transPath = transformC.transform_path(pathC)
-    # Get path of transformed circle
-    circle_as_polygon = patch.PathPatch(transPath, fc = 'm', alpha = 0.3)
+    verts = circle_for_flux.get_path().vertices
+    trans = circle_for_flux.get_patch_transform()
+    points = trans.transform(verts)
+    # set up an array these are to be sotred in
+    coord_verts = np.zeros(shape=(len(points), 2))
+    # get the points into an array
+    for i in range(len(points)):
+        row_to_append = np.array([[points[i, 0], points[i, 1]]])
+        coord_verts[i, :] = row_to_append
+    # get a list of these, put it into AI_verts
+    AI_verts = coord_verts.tolist()
+    # Calculate the area of that shape:
+    AI_area = calc_area(AI_verts)
+    # check against negative areas:
+    if AI_area < 0:
+        AI_area *= -1
+    # add the array to a patch path
+    polygon_path = mplPath.Path(coord_verts)
     # set up the grid and find points in the circle:
     shape_x_min = x_m - radius_for_flux
     shape_x_max = x_m + radius_for_flux
@@ -3551,9 +3586,9 @@ def integration_from_2_circle(x_m, y_m, radius_for_flux):
     shape_y_max = y_m + radius_for_flux
     # set up accuracy
     if shadearea.get() == 0:
-        points_N = 120
-    else:
         points_N = 100
+    else:
+        points_N = 80
     # based on these, define a superfine grid to integrate over
     x_shape_points = np.linspace(shape_x_min, shape_x_max, points_N)
     y_shape_points = np.linspace(shape_y_min, shape_y_max, points_N)
@@ -3567,7 +3602,7 @@ def integration_from_2_circle(x_m, y_m, radius_for_flux):
     if shadearea.get() == 1:
         for i in range(points_N):
             for j in range(points_N):
-                if circle_as_polygon.contains_point((x_shape_g[i, j], y_shape_g[i, j])) is True:
+                if polygon_path.contains_point((x_shape_g[i, j], y_shape_g[i, j])) is True:
                     # append to inside list
                     inside_list.append([x_shape_g[i, j], y_shape_g[i, j]])
                     # Was made for testing but I love it, colour the inside of the drawn shape
@@ -3576,10 +3611,11 @@ def integration_from_2_circle(x_m, y_m, radius_for_flux):
     else:
         for i in range(points_N):
             for j in range(points_N):
-                if circle_as_polygon.contains_point((x_shape_g[i, j], y_shape_g[i, j])) is True:
+                if polygon_path.contains_point((x_shape_g[i, j], y_shape_g[i, j])) is True:
                     # sppend to inside list
                     inside_list.append([x_shape_g[i, j], y_shape_g[i, j]])
-    # put the patch on the screen
+    # put the patch for the perimeter on the screen
+    # after for this to not get covered
     main_axis.add_patch(circle_for_flux)
     # finilise drawing
     canvas.draw()
