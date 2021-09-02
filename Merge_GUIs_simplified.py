@@ -4295,7 +4295,7 @@ def animate(i):
         poly_plot = eval(poly_str)
         poly = mpl.patches.Polygon(poly_plot, fill=True, color='blue')
         main_axis.add_artist(poly)
-        return dyn_point, poly
+        return poly,
     else:
         return dyn_point,
 
@@ -4305,7 +4305,6 @@ def animation_storing_function():
     global dyn_N
     ani = animation.FuncAnimation(fig, animate, dyn_N, interval=interval, blit=True, repeat=False)
     return ani
-
 
 # function to respond to button to begin the animation.
 def animate_response():
