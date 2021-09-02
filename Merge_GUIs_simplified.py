@@ -2175,10 +2175,11 @@ def deriv_calc(x_m, y_m):
     # Create axes at clicked position from supplied position and given axis sizes
     deriv_inset_ax = main_axis.inset_axes([(x_pix-116)/500 - (0.931*d_length/(2*L)), (y_pix-59)/500 - (0.931*d_length/(2*L)), 0.931*d_length/L, 0.931*d_length/L])
 
-    try:
-        deriv_inset_ax.text(x_m, y_m, zoom_lab_text, color=lab_colours[col_ind])
-    except (UnboundLocalError):
-        pass
+    if analytic_select.get() == 1:  
+        try:
+            deriv_inset_ax.text(x_m-(0.9*d_range), y_m+(0.9*d_range), zoom_lab_text, color=lab_colours[col_ind])
+        except (UnboundLocalError):
+            pass
     
     if tensor.get() == 0:
         arrows = False
@@ -2201,6 +2202,20 @@ def deriv_calc(x_m, y_m):
     fig.canvas.draw()
     deriv_inset_ax.clear()
     deriv_inset_ax.remove()
+    
+    
+def analytic_toggle_response():
+    if analytic_select.get() == 0:
+        # the burron is off, and has been clicked therefore change the
+        # variable to an and the image to on
+        analytic_select.set(1)
+        analytic_toggle.configure(image=toggle_image_on)
+    else:
+        # the button is on and has been clicked
+        # set it to off and change image
+        analytic_select.set(0)
+        analytic_toggle.configure(image=toggle_image_off)
+    deriv_calc(x_m,y_m)
 
 
 # Calculate the Jacobian matrix of the defined vector field
@@ -4299,7 +4314,6 @@ def animate(i):
     else:
         return dyn_point,
 
-
 # function to carry out the animating
 def animation_storing_function():
     global dyn_N
@@ -4484,7 +4498,11 @@ y_m_entry.grid(row=6, column=1)
 Set_target_btn = tk.Button(right_frame, text='Set Target', command=set_inset_target)
 Set_target_btn.grid(row=6, column=2, padx=20)
 
-
+analytic_select = tk.IntVar()
+analytic_select.set(0)
+tk.Label(right_frame, text= 'Toggle Analytic Label:').grid(row=9, column=0)
+analytic_toggle = tk.Button(right_frame, image=toggle_image_off, bd=0, command=analytic_toggle_response)
+analytic_toggle.grid(row=9, column=1)
 
 '''
 
