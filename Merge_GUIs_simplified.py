@@ -31,6 +31,18 @@ from numpy import sinh, cosh, arcsinh, arccosh, arctanh, exp, pi, e
 # start the timer
 start = timeit.default_timer()
 
+
+
+# functions for hovering over undescribed buttons
+def logartmic_scale_toggle_hover(var):
+    if var == 1:
+        instruct_frame_label.configure(text='Logarithmic Autoscale \n ' + 
+                                       'Scales the plotting of stcaks in 1-forms and 2-forms via \n' + 
+                                       'ln(a*magnitude)/ln(a) for a = 1000000 \n' + 
+                                       'Brings high values closer together')
+    elif var == 0:
+        instruct_frame_label.configure(text='')
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # define needed functions for the initial plot
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -728,6 +740,14 @@ bot_frame_frame.grid(row=2, column=0)
 plot_frame = tk.LabelFrame(root, text='', padx=5, pady=5)
 plot_frame.grid(row=1, column=0)
 
+# instruction frame
+instruct_frame = tk.LabelFrame(root, text='', padx=5, pady=5)
+instruct_frame.grid(row=3, column=1, sticky='N')
+
+# make an initial label there too
+instruct_frame_label = tk.Label(instruct_frame, text='')
+instruct_frame_label.pack()
+
 # define notebook for tabs
 notebook = ttk.Notebook(right_frame_frame)
 notebook.grid(row=0, column=0)
@@ -1064,7 +1084,7 @@ dyn_point, = main_axis.plot([], [], 'ro', markersize=4)
 # define initial variables needed by dynamics
 tmax = 1
 dyn_N = 100
-dyn_time = np.linspace(0, tmax, dyn_N)
+# dyn_time = np.linspace(0, tmax, dyn_N)
 
 # bool to det if shapoes are to be drawn
 dyn_join_shapes = tk.IntVar()
@@ -4356,7 +4376,7 @@ def animation_storing_function():
 
 # function to respond to button to begin the animation.
 def animate_response():
-    global dummy_variable_dyn, dyn_time
+    global dummy_variable_dyn
     global dyn_coord, x_dyn_str, y_dyn_str, poly_str, dyn_N, tmax, interval
     # clear the axis and redraw
     PLOT_response(0)
@@ -4366,7 +4386,6 @@ def animate_response():
     tmax = tmax_slider.get()
     interval = dyn_speed_slider.get()
     dyn_N = int(1000*tmax/interval)
-    dyn_time = np.linspace(0, tmax, dyn_N)
     dyn_coord = np.array(dyn_coord)
     for a in range(len(dyn_coord[:,0])):
         exec('global ' +  'xy' + str(a) + '\n'
@@ -4735,6 +4754,8 @@ logartmic_scale_bool.set(0)
 logartmic_scale_toggle = tk.Button(small_frame, image=toggle_image_off, bd=0, command=log_scale_toggle_response)
 logartmic_scale_toggle.grid(row=0, column=1)
 
+logartmic_scale_toggle.bind('<Enter>', lambda x: logartmic_scale_toggle_hover(1))
+logartmic_scale_toggle.bind('<Leave>', lambda x: logartmic_scale_toggle_hover(0))
 
 '''
 
@@ -5067,9 +5088,11 @@ dyn_shape_drop.grid(row=5, column=1)
 
 torus = tk.IntVar()
 torus.set(0)
-tk.Label(dynamics_frame, text='Torus').grid(row=6, column=0)
+tk.Label(dynamics_frame, text='Torus').grid(row=7, column=0)
 torus_toggle = tk.Button(dynamics_frame, image=toggle_image_off, bd=0, command=torus_response)
-torus_toggle.grid(row=6, column=1) 
+torus_toggle.grid(row=7, column=1)
+
+
 
 # return time to run
 stop = timeit.default_timer()
