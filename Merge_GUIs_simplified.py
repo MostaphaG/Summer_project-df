@@ -129,7 +129,7 @@ def G(s, n, c):
 
 
 # define a function that will complete all stack plotting:
-def stack_plot(xg, yg, axis, F_x, F_y, s_max, L, pt_den, fract, arrows=False, stacks=True, orientation='mid', scale=1, w_head=1/8, h_head=1/4, axis_check=0, arrowheads=True, colour='green', check_2_frm=0, s_min=2):
+def stack_plot(xg, yg, axis, F_x, F_y, s_max, L, pt_den, fract, arrows=False, stacks=True, orientation='mid', scale=1, w_head=1/8, h_head=1/4, axis_check=0, arrowheads=True, colour='green', check_2_frm=0, s_min=2, logartmic_scale_bool=0):
     global s_L
     # get the lengths of x and y from their grids
     
@@ -205,6 +205,14 @@ def stack_plot(xg, yg, axis, F_x, F_y, s_max, L, pt_den, fract, arrows=False, st
 
     # find the relative magnitude of vectors to maximum, as an array
     R = mag/max_size    
+    
+    # logarithmic attempt
+    if logartmic_scale_bool == 1:
+        log_a = 1000000
+        R = np.where(R<=1/log_a, 1/log_a, R)  # Remove the values less than critical for log
+        R = log(log_a*R)/log(log_a)
+    else:
+        pass
     
     if ascale.get() == 0:
         ScaleFactor = scale
@@ -522,8 +530,8 @@ def tab_selection(event):
         # update variable to track 1 forms and 2 forms in this tab
         calculus_form_tracker = 2
         # put the initial plot onto the canvas
-        form_2_components_plot(xg, yg, form_2/2, np.pi/2, s_max, L, fract, colour_str, 2)
-        form_2_components_plot(xg, yg, form_2/2, 0, s_max, L, fract, colour_str, 2)
+        form_2_components_plot(xg, yg, form_2/2, np.pi/2, s_max, L, fract, colour_str, 2, logartmic_scale_bool=logartmic_scale_bool)
+        form_2_components_plot(xg, yg, form_2/2, 0, s_max, L, fract, colour_str, 2, logartmic_scale_bool=logartmic_scale_bool)
         canvas.draw()
         # disable the PLOT button and the ploar grid button
         PLOT_btn['state'] = tk.DISABLED
@@ -606,8 +614,8 @@ def tab_selection(event):
         # plot the starting field with desired parameters as specidfied above
         # arrow params not needed as arrows arent plotted
         # starting with viewing axis ='z' therefore xy plane
-        form_2_components_plot_3(xg, yg, h_index, axis_view, F_xy_x, zero_field, s_max, L, pt_den, fract, colour_str, 2)
-        form_2_components_plot_3(xg, yg, h_index, axis_view, zero_field, F_xy_y, s_max, L, pt_den, fract, colour_str, 2)
+        form_2_components_plot_3(xg, yg, h_index, axis_view, F_xy_x, zero_field, s_max, L, pt_den, fract, colour_str, 2, logartmic_scale_bool=logartmic_scale_bool)
+        form_2_components_plot_3(xg, yg, h_index, axis_view, zero_field, F_xy_y, s_max, L, pt_den, fract, colour_str, 2, logartmic_scale_bool=logartmic_scale_bool)
         canvas.draw()
         # into the entry boxes for 2-forms, but the result down
         Entry_2_form_R3_dxdy.delete(0, 'end')
@@ -852,12 +860,14 @@ field_y_list = ['- x*cos(y)',
 # define 2-form names and equations for the pre-defined 2-forms dropdown
 # its on R2, therefore all are only dx^dy
 list_form_2_names = ['default: x**2*y',
-                     'constant: 3',                     
+                     'constant: 3',   
+                     'Gaussian'
                      ]
 
 # define its equations:
 list_form_2_equations = ['x**2*y',
                          '3',
+                         'e**(-x**2-y**2)'
                          ]
 
 
@@ -899,6 +909,11 @@ main_axis.set_aspect('equal')
 ax_L = L + L/delta_factor
 main_axis.set_xlim(-ax_L, ax_L)
 main_axis.set_ylim(-ax_L, ax_L)
+
+# logatirthmic scale toggle variable
+logartmic_scale_tk = tk.IntVar()
+logartmic_scale_tk.set(0)
+logartmic_scale_bool = logartmic_scale_tk.get()
 
 
 ''' define the initial polar plot also '''
@@ -1060,7 +1075,7 @@ dyn_join_shapes.set(1)  # start by drawing shapes
 # =============================================================================
 
 # plot the cartessian field with desired parameters as specidfied above
-plottedfield = stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0)
+plottedfield = stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0, logartmic_scale_bool=logartmic_scale_bool)
 
 # reduce white space from the figure in the plot frame
 fig.tight_layout()
@@ -1303,7 +1318,7 @@ def poly_grid_submit():
 # define LI shape selection response to dropdown
 def LI_shape_select_response(selected_shape):
     # deal with lines
-    global LI_shape_selected, Radius_LI_circ_entry, Radius_LI_label, orient_int_btn
+    global Radius_LI_circ_entry, Radius_LI_label, orient_int_btn, Li_shape_select
     global grid_sep_poly_entry, grid_LI_poly_label, submit_poly_sep_grid
     # get the chosen shape
     LI_shape_select.set(selected_shape)
@@ -1658,7 +1673,7 @@ def vect_type_response(tensor):
     elif tensor == 2:
         arrows = True
         stacks = True 
-    stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0)
+    stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0, logartmic_scale_bool=logartmic_scale_bool)
     canvas.draw()
     # now distinguish clearly between vector fields and 1 forms:
     # when stacks are selected, disable div and curl, these don't exist
@@ -1747,7 +1762,7 @@ def PLOT_response(test_for_clearing_dyn=1):
             # then clear coordinates
             dyn_coord = []
     # create a figure and display it
-    stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0)
+    stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0, logartmic_scale_bool=logartmic_scale_bool)
     canvas.draw()
     # recolour pt_den to white, if it was red from polar plots
     pt_den_entry.configure(bg='white')
@@ -1871,7 +1886,25 @@ def scale_toggle_response():
         vect_type_response(tensor.get())
 
 
+# define a function to respond to toggle for log scaling
+def log_scale_toggle_response():
+    global logartmic_scale_bool
+    if logartmic_scale_tk.get() == 0:
+        # the burron is off, and has been clicked therefore change the
+        # variable to an and the image to on
+        logartmic_scale_tk.set(1)
+        logartmic_scale_bool = 1
+        logartmic_scale_toggle.configure(image=toggle_image_on)
+    else:
+        # the button is on and has been clicked
+        # set it to off and change image
+        logartmic_scale_tk.set(0)
+        logartmic_scale_bool = 0
+        logartmic_scale_toggle.configure(image=toggle_image_off)
+
+
 ''' POLAR PLOTS '''
+
 
 # define a function to repond to plotting apolar grid
 # takes the same field, but plots it on a polar grid
@@ -1930,7 +1963,7 @@ def Polar_grid_plot_response(tensor):
         arrows = True
         stacks = True
     # using those, create the plot and display it
-    stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0)
+    stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0, logartmic_scale_bool=logartmic_scale_bool)
     canvas.draw()
     # colour pt_den red to show that it is not approperiate to use it now
     # need to def # of points along r and theta, in the additional window
@@ -2109,7 +2142,7 @@ def deriv_calc(x_m, y_m):
         arrows = True
         stacks = True            
     
-    stack_plot(dxg, dyg, deriv_inset_ax, u_s, v_s, 5, d_range, dpd, 0.1, arrows, stacks, orientation, d_scale, w_head, h_head, 1) 
+    stack_plot(dxg, dyg, deriv_inset_ax, u_s, v_s, 5, d_range, dpd, 0.1, arrows, stacks, orientation, d_scale, w_head, h_head, 1, logartmic_scale_bool=logartmic_scale_bool) 
     
     # Don't display the x and y axis values
     # if click_opt_int > 2:  
@@ -2382,8 +2415,8 @@ def singular_drop_response(var):
 
 # define a function that will plot stack components, coloured
 # as per the orientation of the 2-form at that grid point
-def form_2_components_plot(grid_x, grid_y, form_2_loc, angle, s_max, L, fract, colour_str, s_min=2, ax=main_axis, axis_check=1, form_2_glob=None):
-    global ratio2
+def form_2_components_plot(grid_x, grid_y, form_2_loc, angle, s_max, L, fract, colour_str, s_min=2, ax=main_axis, axis_check=1, form_2_glob=None, logartmic_scale_bool=0):
+    global ratio2, R
     # get axis lengths:
     x_len = len(grid_x[:, 0])
     y_len = len(grid_y[:, 0])
@@ -2447,6 +2480,14 @@ def form_2_components_plot(grid_x, grid_y, form_2_loc, angle, s_max, L, fract, c
     
     # find the relative magnitude of vectors to maximum, as an array
     R = abs(form_2_loc)/max_size
+    
+    # logarithmic attempt on 2-forms:
+    if logartmic_scale_bool == 1:
+        log_a = 1000000
+        R = np.where(R<=1/log_a, 1/log_a, R)  # Remove the values less than critical for log
+        R = log(log_a*R)/log(log_a)
+    else:
+        pass
     
     # globally scale if plotting an iset axis
     if axis_check == 0:
@@ -2656,7 +2697,7 @@ def form_2_zoom(x_m, y_m):
         # define the vector field in these new axis
         uzoomR2, vzoomR2 = eq_to_comps(string_x, string_y, R2xg, R2yg)
         # plot as stacks
-        stack_plot(R2xg, R2yg, zoomR2_inset_ax, uzoomR2, vzoomR2, s_max, zoomR2_range, zoomR2pd, 0.1, False, True, 'mid', 1, w_head, h_head, 1)
+        stack_plot(R2xg, R2yg, zoomR2_inset_ax, uzoomR2, vzoomR2, s_max, zoomR2_range, zoomR2pd, 0.1, False, True, 'mid', 1, w_head, h_head, 1, logartmic_scale_bool=logartmic_scale_bool)
     # complete the process for when 2 form is to be zoomed
     elif calculus_form_tracker == 2:
         # define the 2 form over this region, on these axis
@@ -2667,8 +2708,8 @@ def form_2_zoom(x_m, y_m):
         # evalue it numerically
         form_2_zoom_values = eval(form_2_zoom_str)
         # plot it
-        form_2_components_plot(R2xg, R2yg, form_2_zoom_values/2, np.pi/2, s_max, zoomR2_range, fract_zoom, colour_str, ax=zoomR2_inset_ax, axis_check=0, form_2_glob=form_2)
-        form_2_components_plot(R2xg, R2yg, form_2_zoom_values/2, 0, s_max, zoomR2_range, fract_zoom, colour_str, ax=zoomR2_inset_ax, axis_check=0, form_2_glob=form_2)
+        form_2_components_plot(R2xg, R2yg, form_2_zoom_values/2, np.pi/2, s_max, zoomR2_range, fract_zoom, colour_str, ax=zoomR2_inset_ax, axis_check=0, form_2_glob=form_2, logartmic_scale_bool=logartmic_scale_bool)
+        form_2_components_plot(R2xg, R2yg, form_2_zoom_values/2, 0, s_max, zoomR2_range, fract_zoom, colour_str, ax=zoomR2_inset_ax, axis_check=0, form_2_glob=form_2, logartmic_scale_bool=logartmic_scale_bool)
     # Don't display the x and y axis values
     zoomR2_inset_ax.set_xticks([])
     zoomR2_inset_ax.set_yticks([])
@@ -2838,8 +2879,8 @@ def form_2_response():
     main_axis.clear()
     # use plotting stacks to display these
     #ALWAYS HALF AND HALF SPLITTING NOW
-    form_2_components_plot(xg, yg, form_2/2, np.pi/2, s_max, L, fract, colour_str)
-    form_2_components_plot(xg, yg, form_2/2, 0, s_max, L, fract, colour_str)
+    form_2_components_plot(xg, yg, form_2/2, np.pi/2, s_max, L, fract, colour_str, logartmic_scale_bool=logartmic_scale_bool)
+    form_2_components_plot(xg, yg, form_2/2, 0, s_max, L, fract, colour_str, logartmic_scale_bool=logartmic_scale_bool)
     # display the new plot
     canvas.draw()
     # display a background green on the 2-form entry to show that
@@ -2869,7 +2910,7 @@ def form_1_stacks_response():
     # redefine better stack size for 1 forms
     fract = 0.05
     # plot the new field
-    stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract)
+    stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, logartmic_scale_bool=logartmic_scale_bool)
     # put it onto the screen
     canvas.draw()
     # display a background green on 1-form components and get rid of the 2-form
@@ -2921,7 +2962,7 @@ def Int_deriv_2_form():
     u_str = str(simplify('-(' + form_2_str + ')*(' + vector_ey_str + ')' ))
     v_str = str(simplify( '(' + form_2_str + ')*(' + vector_ex_str + ')' ))
     # use the stacks plotter to present this
-    stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, s_min=1)
+    stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, s_min=1, logartmic_scale_bool=logartmic_scale_bool)
 
 
 # define a function that will find the interior derivative of a given 1-form
@@ -3184,8 +3225,8 @@ def Ext_deriv_response():
         # clear the current plot
         main_axis.clear()
         # use plotting stacks to display these
-        form_2_components_plot(xg, yg, form_2/2, np.pi/2, s_max, L, fract, colour_str)
-        form_2_components_plot(xg, yg, form_2/2, 0, s_max, L, fract, colour_str)
+        form_2_components_plot(xg, yg, form_2/2, np.pi/2, s_max, L, fract, colour_str, logartmic_scale_bool=logartmic_scale_bool)
+        form_2_components_plot(xg, yg, form_2/2, 0, s_max, L, fract, colour_str, logartmic_scale_bool=logartmic_scale_bool)
         # display the new plot
         canvas.draw()
         # display a background green on the 2-form entry to show that
@@ -3259,8 +3300,8 @@ def wedge_product_R2():
     form_2 = eval(form_2_eq)
     # use plotting stacks to display these
     # ALWAYS HALF AND HALF SPLITTING NOW
-    form_2_components_plot(xg, yg, form_2/2, np.pi/2, s_max, L, fract, colour_str)
-    form_2_components_plot(xg, yg, form_2/2, 0, s_max, L, fract, colour_str)
+    form_2_components_plot(xg, yg, form_2/2, np.pi/2, s_max, L, fract, colour_str, logartmic_scale_bool=logartmic_scale_bool)
+    form_2_components_plot(xg, yg, form_2/2, 0, s_max, L, fract, colour_str, logartmic_scale_bool=logartmic_scale_bool)
     # display the new plot
     canvas.draw()
     # display a background green on the 2-form entry to show that
@@ -3351,7 +3392,7 @@ def Hodge_1_form_response():
     # plot, always as a 1 form:
     arrows = False
     stacks = True
-    stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0) 
+    stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0, logartmic_scale_bool=logartmic_scale_bool) 
     # redraw
     canvas.draw()
     # update the label to remove the zero form if int deriv of both was used
@@ -3785,7 +3826,7 @@ def find_global_max(string):
 
 # define a function that will plot stack components, coloured
 # as per the orientation of the 2-form at that grid point
-def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L, pt_den, fract, colour_str, s_min=0):
+def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L, pt_den, fract, colour_str, s_min=0, logartmic_scale_bool=0):
     global s_L
     
     # depending on axis_view and h_index, get the planar u and v from the given
@@ -3880,6 +3921,14 @@ def form_2_components_plot_3(grid_x, grid_y, h_index, axis_view, u, v, s_max, L,
     
     # find the relative magnitude of vectors to maximum, as an array
     R = mag/max_size
+    
+    # logarithmic attempt on 2-forms:
+    if logartmic_scale_bool == 1:
+        log_a = 1000000
+        R = np.where(R<=1/log_a, 1/log_a, R)  # Remove the values less than critical for log
+        R = log(log_a*R)/log(log_a)
+    else:
+        pass
     
     # to get tubing right, scale with respect to
     # approperiate global max value
@@ -4062,18 +4111,18 @@ def slide():
     # replot the graph with that new h_index
     # and change the label under the slider to be the value of the chosen axis at that h_index
     if axis_view == 'z':
-        form_2_components_plot_3(xg, yg, h_index, axis_view, F_xy_x, zero_field, s_max, L, pt_den, fract, colour_str, 2)
-        form_2_components_plot_3(xg, yg, h_index, axis_view, zero_field, F_xy_y, s_max, L, pt_den, fract, colour_str, 2)
+        form_2_components_plot_3(xg, yg, h_index, axis_view, F_xy_x, zero_field, s_max, L, pt_den, fract, colour_str, 2, logartmic_scale_bool=logartmic_scale_bool)
+        form_2_components_plot_3(xg, yg, h_index, axis_view, zero_field, F_xy_y, s_max, L, pt_den, fract, colour_str, 2, logartmic_scale_bool=logartmic_scale_bool)
         main_axis.set_xlabel('$x$')
         main_axis.set_ylabel('$y$')
     elif axis_view == 'y':
-        form_2_components_plot_3(xg, zg, h_index, axis_view, F_xz_x, zero_field, s_max, L, pt_den, fract, colour_str, 2)
-        form_2_components_plot_3(xg, zg, h_index, axis_view, zero_field, F_xz_z, s_max, L, pt_den, fract, colour_str, 2)
+        form_2_components_plot_3(xg, zg, h_index, axis_view, F_xz_x, zero_field, s_max, L, pt_den, fract, colour_str, 2, logartmic_scale_bool=logartmic_scale_bool)
+        form_2_components_plot_3(xg, zg, h_index, axis_view, zero_field, F_xz_z, s_max, L, pt_den, fract, colour_str, 2, logartmic_scale_bool=logartmic_scale_bool)
         main_axis.set_xlabel('$x$')
         main_axis.set_ylabel('$z$')
     elif axis_view == 'x':
-        form_2_components_plot_3(yg, zg, h_index, axis_view, F_yz_y, zero_field, s_max, L, pt_den, fract, colour_str, 2)
-        form_2_components_plot_3(yg, zg, h_index, axis_view, zero_field, F_yz_z, s_max, L, pt_den, fract, colour_str, 2)
+        form_2_components_plot_3(yg, zg, h_index, axis_view, F_yz_y, zero_field, s_max, L, pt_den, fract, colour_str, 2, logartmic_scale_bool=logartmic_scale_bool)
+        form_2_components_plot_3(yg, zg, h_index, axis_view, zero_field, F_yz_z, s_max, L, pt_den, fract, colour_str, 2, logartmic_scale_bool=logartmic_scale_bool)
         main_axis.set_xlabel('$y$')
         main_axis.set_ylabel('$z$')
     # draw that onto the screen
@@ -4515,6 +4564,11 @@ s_max_entry = tk.Entry(small_frame, width=5, borderwidth=1)
 s_max_entry.grid(row=3, column=2, padx=2)
 s_max_entry.insert(0, s_max)
 
+# logarithmic scaling button:
+logartmic_scale_bool = tk.IntVar()
+logartmic_scale_bool.set(0)
+logartmic_scale_toggle = tk.Button(small_frame, image=toggle_image_off, bd=0, command=log_scale_toggle_response)
+logartmic_scale_toggle.grid(row=0, column=1)
 
 
 '''
