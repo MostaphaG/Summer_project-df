@@ -701,7 +701,7 @@ def tab_selection(event):
 root = tk.Tk()
 
 # set its title
-root.title('Vector field analyser - differential forms')
+root.title('Differential forms analyser')
 
 # set a window size for it all to initially appear in
 # do so by extracting the size of user's screen
@@ -753,8 +753,8 @@ notebook_singular.grid(row=1, column=0)
 notebook_small = ttk.Notebook(bot_frame_frame)
 notebook_small.grid(row=0, column=1)
 # labels for hover over buttons notebook
-notebook_instruct = ttk.Notebook(bot_frame_frame)
-notebook_instruct.grid(row=0, column=2)
+notebook_instruct = ttk.Notebook(right_frame_frame)
+notebook_instruct.grid(row=2, column=0)
 
 
 # singularities:
@@ -783,7 +783,7 @@ small_frame = tk.LabelFrame(notebook_small)
 small_frame.grid(row=0, column=0)
 # labels for hovering
 instruct_frame = tk.LabelFrame(notebook_instruct)
-instruct_frame.grid(row=0, column=0)
+instruct_frame.grid(row=0, column=2)
 
 # finsalise them
 notebook.add(right_frame, text='VF')
