@@ -788,7 +788,7 @@ notebook.bind_all('<<NotebookTabChanged>>', tab_selection)
 
 # define scale of the graph
 L = 5
-pt_den = 11 # number of points on each axis
+pt_den = 21 # number of points on each axis
 
 # Initialise auto scaling variable
 ascale = tk.IntVar()
@@ -886,7 +886,7 @@ delta_factor = 10
 fract = 0.05
 
 # define the maximum number of stack to plot, dep. on magnitude (initialy)
-s_max = 2
+s_max = 5
 
 # set screen dpi
 my_dpi = 100
@@ -2202,7 +2202,6 @@ def deriv_calc(x_m, y_m):
     fig.canvas.draw()
     deriv_inset_ax.clear()
     deriv_inset_ax.remove()
-    
     
 def analytic_toggle_response():
     if analytic_select.get() == 0:
@@ -4282,11 +4281,15 @@ Define function for the dynamics tab
 
 '''
 
+# =============================================================================
+# RK4 with torus
+# =============================================================================
 
-# function to get initial conditionsl ist
-def ode1(xy, t):
+# function to get initial conditions list
+def ode1(xy): #,t):
     # Unpack initial conditions
-    x, y = xy
+    x = xy[0]
+    y = xy[1]
     # List of expressions dx_dt and dy_dt
     string_x_dyn = str(x_comp_entry.get())
     string_x_dyn = string_x_dyn.replace('^', '**')
@@ -4294,9 +4297,40 @@ def ode1(xy, t):
     string_y_dyn = str(y_comp_entry.get())
     string_y_dyn = string_y_dyn.replace('^', '**')
     string_y_dyn = string_y_dyn.replace('ln', 'log')
-    L = [eval(string_x_dyn), eval(string_y_dyn)]
+    L = np.array([eval(string_x_dyn), eval(string_y_dyn)])
     return L
 
+def RK4calc(xy, N, dt):
+    # Convert so dt is in ms (interval time)
+    dt = dt/1000
+    t = 0
+
+    xy_store = np.zeros(shape=(N,2))
+    t_store = np.zeros(shape=(N,1))
+    
+    for i in range(N): 
+        xy_store[i,0] = xy[0]
+        xy_store[i,1] = xy[1]
+        t_store[i] = t
+        
+        # These are arrays storing both x and y
+        k1 = dt*ode1(xy)
+        k2 = dt*ode1(xy + 0.5*dt*k1)
+        k3 = dt*ode1(xy + 0.5*dt*k2)
+        k4 = dt*ode1(xy + dt*k3)
+        
+        dxy = (1/6)*(k1 +2*k2 + 2*k3 + k4)
+        
+        xy = xy + dxy
+        t = t + dt
+        
+        if torus.get() == 1:
+            if xy[0] > L:
+                xy[0] -= 2*L
+            elif xy[0] < -L:
+                xy[0] += 2*L
+        
+    return xy_store
 
 # response function to matplotlibs animate, supplied next points
 def animate(i):
@@ -4333,13 +4367,77 @@ def animate_response():
     interval = dyn_speed_slider.get()
     dyn_N = int(1000*tmax/interval)
     dyn_time = np.linspace(0, tmax, dyn_N)
-    for a in range(len(dyn_coord)):
+    dyn_coord = np.array(dyn_coord)
+    for a in range(len(dyn_coord[:,0])):
         exec('global ' +  'xy' + str(a) + '\n'
-              'xy' + str(a) + ' = odeint(ode1, dyn_coord[a], dyn_time)')
+              'xy' + str(a) + ' = RK4calc(dyn_coord[a,:], dyn_N, interval)')
         x_dyn_str += 'xy' + str(a) + '[i,0], '
         y_dyn_str += 'xy' + str(a) + '[i,1], '
         poly_str += '[xy'+ str(a) + '[i,0], xy' + str(a) + '[i,1]],'
     dummy_variable_dyn = animation_storing_function()
+    dyn_coord = dyn_coord.tolist()
+
+# =============================================================================
+# ODEINT (no torus)
+# =============================================================================
+
+# # function to get initial conditionsl ist
+# def ode1(xy, t):
+#     # Unpack initial conditions
+#     x, y = xy
+#     # List of expressions dx_dt and dy_dt
+#     string_x_dyn = str(x_comp_entry.get())
+#     string_x_dyn = string_x_dyn.replace('^', '**')
+#     string_x_dyn = string_x_dyn.replace('ln', 'log')
+#     string_y_dyn = str(y_comp_entry.get())
+#     string_y_dyn = string_y_dyn.replace('^', '**')
+#     string_y_dyn = string_y_dyn.replace('ln', 'log')
+#     L = [eval(string_x_dyn), eval(string_y_dyn)]
+#     return L
+
+
+# # response function to matplotlibs animate, supplied next points
+# def animate(i):
+#     global dyn_point, poly
+    
+#     xplot = eval(x_dyn_str)
+#     yplot = eval(y_dyn_str)
+#     dyn_point.set_data(xplot, yplot)
+    
+#     if dyn_join_shapes.get() == 1:
+#         poly_plot = eval(poly_str)
+#         poly = mpl.patches.Polygon(poly_plot, fill=True, color='blue')
+#         main_axis.add_artist(poly)
+#         return poly,
+#     else:
+#         return dyn_point,
+
+# # function to carry out the animating
+# def animation_storing_function():
+#     global dyn_N
+#     ani = animation.FuncAnimation(fig, animate, dyn_N, interval=interval, blit=True, repeat=False)
+#     return ani
+
+# # function to respond to button to begin the animation.
+# def animate_response():
+#     global dummy_variable_dyn, dyn_time
+#     global dyn_coord, x_dyn_str, y_dyn_str, poly_str, dyn_N, tmax, interval
+#     # clear the axis and redraw
+#     PLOT_response(0)
+#     x_dyn_str = ''
+#     y_dyn_str = ''
+#     poly_str = ''
+#     tmax = tmax_slider.get()
+#     interval = dyn_speed_slider.get()
+#     dyn_N = int(1000*tmax/interval)
+#     dyn_time = np.linspace(0, tmax, dyn_N)
+#     for a in range(len(dyn_coord)):
+#         exec('global ' +  'xy' + str(a) + '\n'
+#               'xy' + str(a) + ' = odeint(ode1, dyn_coord[a], dyn_time)')
+#         x_dyn_str += 'xy' + str(a) + '[i,0], '
+#         y_dyn_str += 'xy' + str(a) + '[i,1], '
+#         poly_str += '[xy'+ str(a) + '[i,0], xy' + str(a) + '[i,1]],'
+#     dummy_variable_dyn = animation_storing_function()
 
 
 # pauses the animation
@@ -4386,6 +4484,15 @@ def dyn_join_response():
         # set it to off and change image
         dyn_join_shapes.set(0)
         dyn_join_toggle.configure(image=toggle_image_off)
+        
+def torus_response():
+    if torus.get() == 0:
+        torus.set(1)
+        torus_toggle.configure(image=toggle_image_on)
+    else:
+        torus.set(0)
+        torus_toggle.configure(image=toggle_image_off)
+    
 
 
 # funcction to respond to dropdown for dyn shapes
@@ -4940,13 +5047,13 @@ dyn_speed_slider = tk.Scale(dynamics_frame, from_=0.1, to=40, orient=tk.HORIZONT
 dyn_speed_slider.grid(row=2, column=1)
 dyn_speed_slider.set(5)
 
-tk.Label(dynamics_frame, text='time (unit):').grid(row=3, column=0)
+tk.Label(dynamics_frame, text='Time (unit):').grid(row=3, column=0)
 tmax_slider = tk.Scale(dynamics_frame, from_=tmax, to=10, orient=tk.HORIZONTAL)
 tmax_slider.grid(row=3, column=1)
 tmax_slider.set(5)
 
 # Button to enable to disable straight line shape joining
-tk.Label(dynamics_frame, text='Join to shapes').grid(row=4, column=0)
+tk.Label(dynamics_frame, text='Join to shapes:').grid(row=4, column=0)
 dyn_join_toggle = tk.Button(dynamics_frame, image=toggle_image_on, bd=0, command=dyn_join_response)
 dyn_join_toggle.grid(row=4, column=1)
 
@@ -4958,6 +5065,11 @@ dyn_shape_instruction = tk.Label(dynamics_frame, text='Shape:').grid(row=5, colu
 dyn_shape_drop = tk.OptionMenu(dynamics_frame, dyn_shape_select, *dyn_shape_list, command=dyn_shape_select_response)
 dyn_shape_drop.grid(row=5, column=1)
 
+torus = tk.IntVar()
+torus.set(0)
+tk.Label(dynamics_frame, text='Torus').grid(row=6, column=0)
+torus_toggle = tk.Button(dynamics_frame, image=toggle_image_off, bd=0, command=torus_response)
+torus_toggle.grid(row=6, column=1) 
 
 # return time to run
 stop = timeit.default_timer()
