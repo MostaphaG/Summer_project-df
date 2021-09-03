@@ -219,8 +219,10 @@ def stack_plot(xg, yg, axis, F_x, F_y, s_max, L, pt_den, fract, arrows=False, st
     # Define scaling factor
     ScaleFactor = max_size/(0.9*(2*L/pt_den))
 
+    
+    
     # find the relative magnitude of vectors to maximum, as an array
-    R = mag/max_size    
+    R = mag/max_size
     
     # logarithmic attempt
     if logartmic_scale_bool == 1:
@@ -2126,15 +2128,6 @@ def deriv_calc(x_m, y_m):
     
      # Calc the MOD at the click location
     lab_colours = ['red', 'blue', 'grey']
-    J = jacobian(string_x, string_y)
-    
-    Ja = eval(format_eq(J[0,0], x_to_x_m=1))
-    Jb = eval(format_eq(J[0,1], x_to_x_m=1))
-    Jc = eval(format_eq(J[1,0], x_to_x_m=1))
-    Jd = eval(format_eq(J[1,1], x_to_x_m=1))
-    
-    div = round(Ja + Jd, 3)
-    curl = round(Jc - Jb, 3)
     
     # Initialise arrays for storing components
     u_s = np.zeros(shape=(dpd, dpd))
@@ -2161,6 +2154,17 @@ def deriv_calc(x_m, y_m):
         v_s = W
         
     if click_opt_int > 2:
+        # Analytically calculate the divergence and curl at click location
+        J = jacobian(string_x, string_y)
+    
+        Ja = eval(format_eq(J[0,0], x_to_x_m=1))
+        Jb = eval(format_eq(J[0,1], x_to_x_m=1))
+        Jc = eval(format_eq(J[1,0], x_to_x_m=1))
+        Jd = eval(format_eq(J[1,1], x_to_x_m=1))
+        
+        div = round(Ja + Jd, 3)
+        curl = round(Jc - Jb, 3)
+        
         # get corrected dpd (for loops)
         N = dpd - 1
         
@@ -4670,6 +4674,21 @@ click_option_Deriv_btn.grid(row=1, column=2)
 click_option_Div_btn.grid(row=2, column=0)
 click_option_Curl_btn.grid(row=2, column=1)
 
+click_option_Tools_btn.bind('<Enter>', lambda x: hover_instruction_response(5, 1))
+click_option_Tools_btn.bind('<Leave>', lambda x: hover_instruction_response(5, 0))
+
+click_option_Zoom_btn.bind('<Enter>', lambda x: hover_instruction_response(6, 1))
+click_option_Zoom_btn.bind('<Leave>', lambda x: hover_instruction_response(6, 0))
+
+click_option_Deriv_btn.bind('<Enter>', lambda x: hover_instruction_response(7, 1))
+click_option_Deriv_btn.bind('<Leave>', lambda x: hover_instruction_response(7, 0))
+
+click_option_Div_btn.bind('<Enter>', lambda x: hover_instruction_response(8, 1))
+click_option_Div_btn.bind('<Leave>', lambda x: hover_instruction_response(8, 0))
+
+click_option_Curl_btn.bind('<Enter>', lambda x: hover_instruction_response(9, 1))
+click_option_Curl_btn.bind('<Leave>', lambda x: hover_instruction_response(9, 0))
+
 # Zooming window zoom slider
 tk.Label(right_frame, text='Zoom').grid(row=3, column=0)
 zoom_slider = tk.Scale(right_frame, from_=1, to=100, orient=tk.HORIZONTAL, resolution=1)
@@ -4719,6 +4738,9 @@ analytic_select.set(0)
 tk.Label(right_frame, text= 'Toggle Analytic Label:').grid(row=9, column=0)
 analytic_toggle = tk.Button(right_frame, image=toggle_image_off, bd=0, command=analytic_toggle_response)
 analytic_toggle.grid(row=9, column=1)
+
+analytic_toggle.bind('<Enter>', lambda x: hover_instruction_response(4, 1))
+analytic_toggle.bind('<Leave>', lambda x: hover_instruction_response(4, 0))
 
 '''
 

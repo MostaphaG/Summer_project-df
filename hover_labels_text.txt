@@ -1,4 +1,10 @@
 Logarithmic Autoscale Scales the plotting of stcaks in 1-forms and 2-forms via ln(a*magnitude)/ln(a) for a = 1000000 Brings high values closer together
-Autoscaling arrows Scales arrows based on the highest value in the considered array Careful when using it on fields that should be zero (or very near zero) it will then show random variations about zero. Careful with linear field derivatives here!
+Autoscaling plots vector field such that the largest arrow in the plot has a displayed length of 0.9 x (grid unit). Recommended for zooming windows. Scale can be manually adjusted in 'Visuals Customise' settings. (Note: Arrows have length divided by scale value i.e. bigger scale, smaller arrows.)
 Set target for the inset widnow of the selected option (zoom, deriv, curl or div). This will place the middle of the new grid on the input point. Should be accurate to within a pixelsize.
 Annihilate the Vector field and the 1-form. These two are dual to each other. A 1-form can act on a vector field to return a number. This therefore gives a scalar field. It is generally true that the 1-form and VF don't need to be equal for this, that is the interior derivative (look in ext. A. tab)
+Analytically calculate the divergence/scalar curl at the click location and plot as label in the div/curl zoom windows. Colour convention: Red +ve, Blue -ve, Grey 0.
+Tools
+Show zoomed field at click location. 
+Show derivative field at click location. DF(x,y) = F(x,y) - F(x0,y0), where (x0,y0) is click location.
+Show local divergence at click location (tendency to expand area element). 
+Show local scalar curl (z-component) at click location (tendency to rotate area element).
