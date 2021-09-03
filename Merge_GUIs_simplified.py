@@ -31,19 +31,21 @@ from numpy import sinh, cosh, arcsinh, arccosh, arctanh, exp, pi, e
 # start the timer
 start = timeit.default_timer()
 
+# import instructions for button hovering
+hover_labels_txt_file = []
+with open('hover_labels_text.txt') as txt_file:
+    hover_labels_txt_file = txt_file.readlines()
 
 
-# functions for hovering over undescribed buttons
-def logartmic_scale_toggle_hover(var):
-    if var == 1:
+# function for hovering instructions when over buttons
+def hover_instruction_response(index, inout):
+    if inout == 1:
         # later want this to get the describtion from a text file of all
         # of them, using an index supplied from the binding.
-        instruct_frame_label.configure(text='Logarithmic Autoscale \n ' + 
-                                       'Scales the plotting of stcaks in 1-forms and 2-forms via \n' + 
-                                       'ln(a*magnitude)/ln(a) for a = 1000000 \n' + 
-                                       'Brings high values closer together')
-    elif var == 0:
+        instruct_frame_label.configure(text=hover_labels_txt_file[index])
+    elif inout == 0:
         instruct_frame_label.configure(text='')
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # define needed functions for the initial plot
@@ -728,18 +730,18 @@ toggle_image_off = ImageTk.PhotoImage(toggle_image_off)
 # and top left for plot
 
 style_notebook = ttk.Style()
-style_notebook.configure('TNotebook.Tab', font=('URW Gothic L','8','bold') )
+style_notebook.configure('TNotebook.Tab', font=('URW Gothic L','9','bold') )
 
 # right frame:
-right_frame_frame = tk.LabelFrame(root, text='', padx=5, pady=5)
+right_frame_frame = tk.LabelFrame(root, text='', padx=0, pady=0, bd=0)
 right_frame_frame.grid(row=1, column=1, rowspan=2, sticky='N')
 
 # bot frame:
-bot_frame_frame = tk.LabelFrame(root, text='', padx=5, pady=5)
+bot_frame_frame = tk.LabelFrame(root, text='', padx=0, pady=0, bd=0)
 bot_frame_frame.grid(row=2, column=0)
 
 # plot frame:
-plot_frame = tk.LabelFrame(root, text='', padx=5, pady=5)
+plot_frame = tk.LabelFrame(root, text='', padx=0, pady=0, bd=0)
 plot_frame.grid(row=1, column=0)
 
 # define notebook for tabs
@@ -799,7 +801,7 @@ notebook_small.add(small_frame, text='Plotting')
 notebook_instruct.add(instruct_frame, text='Instructions')
 
 # make an initial in instructions frame too
-instruct_frame_label = tk.Label(instruct_frame, text='')
+instruct_frame_label = tk.Label(instruct_frame, text='', wraplength=400)
 instruct_frame_label.pack()
 
 # bind the clicks on tabs to a function
@@ -4621,6 +4623,9 @@ ascale_label.grid(row=7, column=0)
 ascale_toggle = tk.Button(right_frame, image=toggle_image_off, bd=0, command=scale_toggle_response)
 ascale_toggle.grid(row=7, column=1, pady=5)
 
+ascale_toggle.bind('<Enter>', lambda x: hover_instruction_response(1, 1))
+ascale_toggle.bind('<Leave>', lambda x: hover_instruction_response(1, 0))
+
 # define entry boxes to allow user to input x_m and y_m
 x_m_entry = tk.Entry(right_frame, width=12)
 y_m_entry = tk.Entry(right_frame, width=12)
@@ -4760,8 +4765,8 @@ logartmic_scale_bool.set(0)
 logartmic_scale_toggle = tk.Button(small_frame, image=toggle_image_off, bd=0, command=log_scale_toggle_response)
 logartmic_scale_toggle.grid(row=0, column=1)
 
-logartmic_scale_toggle.bind('<Enter>', lambda x: logartmic_scale_toggle_hover(1))
-logartmic_scale_toggle.bind('<Leave>', lambda x: logartmic_scale_toggle_hover(0))
+logartmic_scale_toggle.bind('<Enter>', lambda x: hover_instruction_response(0, 1))
+logartmic_scale_toggle.bind('<Leave>', lambda x: hover_instruction_response(0, 0))
 
 '''
 
@@ -5094,7 +5099,7 @@ dyn_shape_drop.grid(row=5, column=1)
 
 torus = tk.IntVar()
 torus.set(0)
-tk.Label(dynamics_frame, text='Torus').grid(row=7, column=0)
+tk.Label(dynamics_frame, text='PAC-MAN grid').grid(row=7, column=0)
 torus_toggle = tk.Button(dynamics_frame, image=toggle_image_off, bd=0, command=torus_response)
 torus_toggle.grid(row=7, column=1)
 
