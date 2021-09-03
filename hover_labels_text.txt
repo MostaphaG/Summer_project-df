@@ -1,2 +1,3 @@
 Logarithmic Autoscale Scales the plotting of stcaks in 1-forms and 2-forms via ln(a*magnitude)/ln(a) for a = 1000000 Brings high values closer together
 Autoscaling arrows Scales arrows based on the highest value in the considered array Careful when using it on fields that should be zero (or very near zero) it will then show random variations about zero. Careful with linear field derivatives here!
+Set target for the inset widnow of the selected option (zoom, deriv, curl or div). This will place the middle of the new grid on the input point. Should be accurate to within a pixelsize.

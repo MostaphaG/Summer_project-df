@@ -2329,7 +2329,7 @@ def set_inset_target():
     y_m = eval(y_m_entry.get())
     # Could not figure out how to reliably get pixels from coordinates on plot
     # got approximate relations based on experimenting
-    x_pix = (x_m/L * 229) + 427
+    x_pix = (x_m/L * 229) + 367
     y_pix = (y_m/L * 229) + 308
     # call deriv calc
     if 0 < click_opt_int < 5:
@@ -3532,7 +3532,7 @@ def set_inset_target_calc():
     y_m = eval(y_m_entry_calc.get())
     # Could not figure out how to reliably get pixels from coordinates on plot
     # got approximate relations based on experimenting
-    x_pix = (x_m/L * 229) + 427
+    x_pix = (x_m/L * 229) + 367
     y_pix = (y_m/L * 229) + 308
     # call zooming tool
     if R2_tools_opt_int == 0:
@@ -4634,6 +4634,9 @@ y_m_entry.grid(row=6, column=1)
 # and a button to submit these:
 Set_target_btn = tk.Button(right_frame, text='Set Target', command=set_inset_target)
 Set_target_btn.grid(row=6, column=2, padx=20)
+
+Set_target_btn.bind('<Enter>', lambda x: hover_instruction_response(2, 1))
+Set_target_btn.bind('<Leave>', lambda x: hover_instruction_response(2, 0))
 
 analytic_select = tk.IntVar()
 analytic_select.set(0)
