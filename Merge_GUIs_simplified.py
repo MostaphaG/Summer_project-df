@@ -36,6 +36,8 @@ start = timeit.default_timer()
 # functions for hovering over undescribed buttons
 def logartmic_scale_toggle_hover(var):
     if var == 1:
+        # later want this to get the describtion from a text file of all
+        # of them, using an index supplied from the binding.
         instruct_frame_label.configure(text='Logarithmic Autoscale \n ' + 
                                        'Scales the plotting of stcaks in 1-forms and 2-forms via \n' + 
                                        'ln(a*magnitude)/ln(a) for a = 1000000 \n' + 
@@ -1792,11 +1794,11 @@ def PLOT_response(test_for_clearing_dyn=1):
         poly_grid_submit()
     if tab_text == 'Dynamics':
         if test_for_clearing_dyn == 1:
-            try:
-                for a in range(len(dyn_coord)):
+            for a in range(len(dyn_coord)):
+                try:
                     exec('global ' + 'xy' + str(a) + '\n' + 'del ' + 'xy' + str(a))
-            except NameError:
-                pass
+                except NameError:
+                    pass
             # then clear coordinates
             dyn_coord = []
     # create a figure and display it
@@ -4484,11 +4486,11 @@ def clear_response():
         pass
     PLOT_response(0)
     # delete the extra created variables:
-    try:
-        for a in range(len(dyn_coord)):
+    for a in range(len(dyn_coord)):
+        try:
             exec('global ' + 'xy' + str(a) + '\n' + 'del ' + 'xy' + str(a))
-    except NameError:
-        pass
+        except NameError:
+            pass
     # then clear coordinates
     dyn_coord = []
 
