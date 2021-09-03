@@ -690,6 +690,8 @@ def tab_selection(event):
         polar_grid_plot_btn['state'] = tk.NORMAL
     if tab_text != 'Dynamics':
         dyn_use_track = 0
+        # Stop the animation and delete its variables:
+        # !!!
     # if anything but the main window is selected, change to tools
     if tab_text != 'VF' and tab_text != 'Line Integrals' and tab_text != 'Dynamics':
         # unclick them
