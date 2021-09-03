@@ -1693,10 +1693,43 @@ def showcol_response(showcol):
 ''' RESPONSE FUNCTIONS TO PLOT '''
 
 
+# define a function to annihilate the 1 form and VF to show duality
+def annihilate_VFand1form():
+    global polar_tracker
+    # take inputs and globally update them
+    update_variables()
+    # set radial tracker
+    polar_tracker = False
+    # clear the axis
+    main_axis.clear()
+    # because here, the two are equal, just do |f|
+    f_scalar_str = str(simplify('sqrt( (' + string_x + ')**2 + (' + string_y + ')**2)'))
+    # set up grids for contours
+    contour_x, contour_y = np.linspace(-L, L, pt_den*5), np.linspace(-L, L, pt_den*5)
+    contour_x_grid, contour_y_grid = np.meshgrid(contour_x, contour_y)
+    # format the given ftring
+    f_scalar_str = f_scalar_str.replace('x', 'contour_x_grid')
+    f_scalar_str = f_scalar_str.replace('y', 'contour_y_grid')
+    # evaluate bearing in mind zeros
+    if f_scalar_str.find('contour_x_grid') & f_scalar_str.find('contour_y_grid') == -1:
+        f_scalar = eval(f_scalar_str)*np.ones(np.shape(contour_x_grid))
+    else:
+        f_scalar = eval(f_scalar_str)
+    # set up the contour plot
+    CS = main_axis.contour(contour_x_grid, contour_y_grid, f_scalar, 15)
+    main_axis.clabel(CS, inline=True, fontsize=7)
+    # draw it on
+    canvas.draw()
+    # colour approperiate boxes - there is no box for a scalar field here:
+    pt_den_entry.configure(bg='white')
+    x_comp_entry.configure(bg='#FFFFFF')
+    y_comp_entry.configure(bg='#FFFFFF')
+
+
 # define a function that will respond to radio buttons behind choosing vector types:
 # Note, tensor is a local variable. So to get value in other functions, use tensor.get() to extract current radiobutton value
 def vect_type_response(tensor):
-    global click_option
+    global click_option, annihilate_btn
     # clear the plot that is already there:
     main_axis.clear()
     # deal with grids if user is in the LI tab
@@ -1709,12 +1742,25 @@ def vect_type_response(tensor):
     if tensor == 0:
         arrows = False
         stacks = True
+        try:
+            annihilate_btn.destroy()
+        except (NameError, UnboundLocalError):
+            pass
     elif tensor == 1:
         arrows = True
         stacks = False
+        try:
+            annihilate_btn.destroy()
+        except (NameError, UnboundLocalError):
+            pass
     elif tensor == 2:
         arrows = True
-        stacks = True 
+        stacks = True
+        # to display the duality, get a new button to annihilate
+        annihilate_btn = tk.Button(right_frame, text='Annihilate', command=annihilate_VFand1form)
+        annihilate_btn.grid(row=10, column=0)
+        annihilate_btn.bind('<Enter>', lambda x: hover_instruction_response(3, 1))
+        annihilate_btn.bind('<Leave>', lambda x: hover_instruction_response(3, 0))
     stack_plot(xg, yg, main_axis, u, v, s_max, L, pt_den, fract, arrows, stacks, orientation, scale, w_head, h_head, 0, logartmic_scale_bool=logartmic_scale_bool)
     canvas.draw()
     # now distinguish clearly between vector fields and 1 forms:
@@ -1841,6 +1887,8 @@ def field_selection_response(event):
         if selected_index == 7 or selected_index == 8 or selected_index == 9 or selected_index == 10:
             # select stacks to be plotted
             tensor.set(0)
+            # call a function to deal with this change too:
+            vect_type_response(tensor.get())
             # respons to this by removing options unavaliable to 1-forms in
             # main tab:
             if click_opt_int != 0 and click_opt_int != 1:
