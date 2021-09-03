@@ -4378,49 +4378,74 @@ def ode1(xy): #,t):
     L = np.array([eval(string_x_dyn), eval(string_y_dyn)])
     return L
 
-def RK4calc(xy, N, dt):
+# Single step of RK$ algorithm
+def RK4calc(xy, dt):
     # Convert so dt is in ms (interval time)
     dt = dt/1000
-    t = 0
 
-    xy_store = np.zeros(shape=(N,2))
-    t_store = np.zeros(shape=(N,1))
+    # xy_store = np.zeros(shape=(N,2))
+    # t_store = np.zeros(shape=(N,1))
     
-    for i in range(N): 
-        xy_store[i,0] = xy[0]
-        xy_store[i,1] = xy[1]
-        t_store[i] = t
-        
-        # These are arrays storing both x and y
-        k1 = dt*ode1(xy)
-        k2 = dt*ode1(xy + 0.5*dt*k1)
-        k3 = dt*ode1(xy + 0.5*dt*k2)
-        k4 = dt*ode1(xy + dt*k3)
-        
-        dxy = (1/6)*(k1 +2*k2 + 2*k3 + k4)
-        
-        xy = xy + dxy
-        t = t + dt
-        
-        if torus.get() == 1:
-            if xy[0] > L:
-                xy[0] -= 2*L
-            elif xy[0] < -L:
-                xy[0] += 2*L
-        
-    return xy_store
+    # for i in range(N): 
+    # xy_store[i,0] = xy[0]
+    # xy_store[i,1] = xy[1]
+    # t_store[i] = t
+    
+    # These are arrays storing both x and y
+    k1 = dt*ode1(xy)
+    k2 = dt*ode1(xy + 0.5*dt*k1)
+    k3 = dt*ode1(xy + 0.5*dt*k2)
+    k4 = dt*ode1(xy + dt*k3)
+    
+    dxy = (1/6)*(k1 +2*k2 + 2*k3 + k4)
+    
+    xy = xy + dxy
+    #t = t + dt
+    
+    # if torus.get() == 1:
+    #     if xy[0] > L:
+    #         xy[0] -= 2*L
+    #     elif xy[0] < -L:
+    #         xy[0] += 2*L
+    #     if xy[1] > L:
+    #         xy[1] -= 2*L
+    #     elif xy[1] < -L:
+    #         xy[1] += 2*L
+
+    return xy
 
 # response function to matplotlibs animate, supplied next points
 def animate(i):
-    global dyn_point, poly
+    global dyn_point, poly, xplot, yplot, dyn_coord
     
-    xplot = eval(x_dyn_str)
-    yplot = eval(y_dyn_str)
+    # No of particles
+    pts = int(len(dyn_coord))
+    
+    # Calc positions one interval on
+    for a in range(pts):
+        dyn_coord[a,:] = RK4calc(dyn_coord[a,:], interval)
+    
+    xplot = dyn_coord[:,0]
+    yplot = dyn_coord[:,1]
+    
+    if torus.get() == 1:
+        if all(a > L for a in xplot) == True:
+            xplot = xplot - 2.2*L
+        if all(a < -L for a in xplot) == True:
+            xplot = xplot + 2.2*L       
+        if all(a > L for a in yplot) == True:
+            yplot = yplot - 2.2*L
+        if all(a < -L for a in yplot) == True:
+            yplot = yplot + 2.2*L
+            
     dyn_point.set_data(xplot, yplot)
     
+    dyn_coord[:,0] = xplot
+    dyn_coord[:,1] = yplot
+    
     if dyn_join_shapes.get() == 1:
-        poly_plot = eval(poly_str)
-        poly = mpl.patches.Polygon(poly_plot, fill=True, color='blue')
+        # poly_plot = eval(poly_str)
+        poly = mpl.patches.Polygon(dyn_coord, fill=True, color='blue')
         main_axis.add_artist(poly)
         return poly,
     else:
@@ -4444,15 +4469,16 @@ def animate_response():
     tmax = tmax_slider.get()
     interval = dyn_speed_slider.get()
     dyn_N = int(1000*tmax/interval)
+    # Initial conditions
     dyn_coord = np.array(dyn_coord)
-    for a in range(len(dyn_coord[:,0])):
-        exec('global ' +  'xy' + str(a) + '\n'
-              'xy' + str(a) + ' = RK4calc(dyn_coord[a,:], dyn_N, interval)')
-        x_dyn_str += 'xy' + str(a) + '[i,0], '
-        y_dyn_str += 'xy' + str(a) + '[i,1], '
-        poly_str += '[xy'+ str(a) + '[i,0], xy' + str(a) + '[i,1]],'
+    # for a in range(len(dyn_coord[:,0])):
+    #     exec('global ' +  'xy' + str(a) + '\n'
+    #           'xy' + str(a) + ' = RK4calc(dyn_coord[a,:], dyn_N, interval)')
+    #     x_dyn_str += 'xy' + str(a) + '[i,0], '
+    #     y_dyn_str += 'xy' + str(a) + '[i,1], '
+    #     poly_str += '[xy'+ str(a) + '[i,0], xy' + str(a) + '[i,1]],'
     dummy_variable_dyn = animation_storing_function()
-    dyn_coord = dyn_coord.tolist()
+    #dyn_coord = dyn_coord.tolist()
 
 # =============================================================================
 # ODEINT (no torus)
