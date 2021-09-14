@@ -453,7 +453,7 @@ def tab_selection(event):
     global x_m, y_m, R3_use_track, click_opt_int, tab_text
     global fract, form_2, notebook_bottom, m
     global expressions, coords, form_2_str, form_2_eq, toolbar
-    global dyn_use_track
+    global dyn_use_track, tensor
     # switching out of dynamics, stop the animation and reset:
     if dyn_use_track == 1:
         try:
@@ -531,7 +531,7 @@ def tab_selection(event):
         fract = 0.05
         # define x, y and z values
         # restart the plot, in case calculus code was used last
-        PLOT_response()
+        vect_type_response(tensor.get())
         # get rid of the grid
         main_axis.grid(False)
         # draw it on
@@ -563,7 +563,7 @@ def tab_selection(event):
         component_y_entry_label.configure(text='dy component')
         field_select_drop_label.configure(text='Select Pre-Defined 1-Form:')
         # change frame name too
-        bot_frame_frame.configure(text='1-Form input frame')
+        notebook_bottom.tab(0, text='1-Forms')
         # colour the 1-form inputs white as these are not default plotin this
         # tab
         x_comp_entry.configure(bg='#FFFFFF')
@@ -572,6 +572,8 @@ def tab_selection(event):
         R2_tools_opt.set(0)
         # respond to that too
         R2_tools_handler(R2_tools_opt.get())
+        # change the tensor to match the displayed 1-form options
+        tensor.set(0)
     elif tab_text == 'R^3':
         global form_2_frame
         global F_xy_x, F_xy_y, F_xz_x, F_xz_z, F_yz_y, F_yz_z
@@ -672,7 +674,7 @@ def tab_selection(event):
         component_y_entry_label.configure(text='dy component')
         field_select_drop_label.configure(text='Select Pre-Defined 1-Form:')
         # change frame name too
-        bot_frame_frame.configure(text='1-Form input frame')
+        notebook_bottom.tab(0, text='1-Forms')
     # if the Dynamics tab is selected:
     elif tab_text == 'Dynamics':
         dyn_use_track = 1
@@ -734,11 +736,11 @@ toggle_image_off = ImageTk.PhotoImage(toggle_image_off)
 # and top left for plot
 
 style_notebook = ttk.Style()
-style_notebook.configure('TNotebook.Tab', font=('URW Gothic L','9','bold') )
+style_notebook.configure('TNotebook.Tab', font=('URW Gothic L','11','bold') )
 
 # right frame:
 right_frame_frame = tk.LabelFrame(root, text='', padx=0, pady=0, bd=0)
-right_frame_frame.grid(row=1, column=1, rowspan=2, sticky='N')
+right_frame_frame.grid(row=1, column=1, rowspan=100, sticky='N')
 
 # bot frame:
 bot_frame_frame = tk.LabelFrame(root, text='', padx=0, pady=0, bd=0)
@@ -799,7 +801,7 @@ notebook.add(LI_frame, text='Line Integrals')
 notebook.add(dynamics_frame, text='Dynamics')
 notebook.add(calculus_frame, text='Ext. Alegebra')
 notebook.add(r3_frame, text='R^3')
-notebook_bottom.add(bot_frame, text='Fields')
+notebook_bottom.add(bot_frame, text='1-Forms')
 notebook_singular.add(singular_frame, text='singularities')
 notebook_small.add(small_frame, text='Plotting')
 notebook_instruct.add(instruct_frame, text='Instructions')
@@ -1303,7 +1305,7 @@ def LI_restart():
     # NOT IDEAL BUT HOPEFULLY TEMPORARY
     # call plot-respose to redraw (so lines are deleted)
     # ideally would want a way of deleting lines without restarting the plot
-    PLOT_response()
+    vect_type_response(tensor.get())
 
 
 # define a button to change orientation of drawn shape
@@ -1738,7 +1740,23 @@ def vect_type_response(tensor):
     main_axis.clear()
     # deal with grids if user is in the LI tab
     if tab_text == 'Line Integrals':
-        LI_restart()
+        global LI_total, LI_coord, shape_area, swaplistpoly, col_poly, flux
+        # first, initialise variables again
+        LI_coord = []
+        LI_total = 0
+        flux = 0
+        shape_area = 0
+        ratio1 = 0
+        ratio2 = 0
+        swaplistpoly = []
+        col_poly = []
+        
+        # update the labels
+        LI_total_label.configure(text=LI_total)
+        flux_label.configure(text=flux)
+        shape_area_label.configure(text=shape_area)
+        ratio1_label.configure(text=ratio1)
+        ratio2_label.configure(text=ratio2)
         # plot the grid
         poly_grid_submit()
     # use the tensor to determine what to plot:
@@ -1748,14 +1766,14 @@ def vect_type_response(tensor):
         stacks = True
         try:
             annihilate_btn.destroy()
-        except (NameError, UnboundLocalError):
+        except (NameError, UnboundLocalError, tk.TclError):
             pass
     elif tensor == 1:
         arrows = True
         stacks = False
         try:
             annihilate_btn.destroy()
-        except (NameError, UnboundLocalError):
+        except (NameError, UnboundLocalError, tk.TclError):
             pass
     elif tensor == 2:
         arrows = True
@@ -1789,7 +1807,7 @@ def vect_type_response(tensor):
         component_y_entry_label.configure(text='dy component')
         field_select_drop_label.configure(text='Select Pre-Defined 1-Form:')
         # change frame name too
-        bot_frame_frame.configure(text='1-Form input frame')
+        notebook_bottom.tab(0, text='1-Forms')
     elif tensor == 1:
         # enable approperiately
         click_option_Deriv_btn.configure(state=tk.NORMAL)
@@ -1800,7 +1818,7 @@ def vect_type_response(tensor):
         component_y_entry_label.configure(text='y component')
         field_select_drop_label.configure(text='Select Pre-Defined Vector Field:')
         # change frame name too
-        bot_frame_frame.configure(text='Vector Field input frame')
+        notebook_bottom.tab(0, text='Fields')
 
 
 # define the PLOT button response function
@@ -2296,7 +2314,10 @@ def analytic_toggle_response():
         # set it to off and change image
         analytic_select.set(0)
         analytic_toggle.configure(image=toggle_image_off)
-    deriv_calc(x_m,y_m)
+    if click_opt_int != 0:
+        deriv_calc(x_m, y_m)
+    else:
+        pass
 
 
 # Calculate the Jacobian matrix of the defined vector field
@@ -2331,8 +2352,8 @@ def click_option_handler(click_option):
     click_opt_int = click_option
     # tools being selected
     if click_opt_int == 0:
-        x_m = None
-        y_m = None
+        x_m = 0
+        y_m = 0
         fig.canvas.draw()
         # if the tools is selected again, add the zoom and pan buttons
         # get rid of the modified toolbar:
@@ -2891,7 +2912,6 @@ def R2_tools_handler(R2_tools_opt_var):
             label_AI_result_2.destroy()
             label_shade_area.destroy()
             shadearea_toggle.destroy()
-            R2_flux_shape.destroy()
             R2_flux_shape_list.destroy()
             R2_flux_shape_instruction.destroy()
             R2_flux_shape_drop.destroy()
@@ -2924,7 +2944,6 @@ def R2_tools_handler(R2_tools_opt_var):
             label_AI_result_2.destroy()
             label_shade_area.destroy()
             shadearea_toggle.destroy()
-            R2_flux_shape.destroy()
             R2_flux_shape_list.destroy()
             R2_flux_shape_instruction.destroy()
             R2_flux_shape_drop.destroy()
