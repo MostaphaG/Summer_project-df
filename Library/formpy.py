@@ -46,8 +46,6 @@ def G(s, n, c):
         return (s/(n-1))
 
 
-# %%
-
 # define a function taht will deal with plotting 1-forms:
 def form_1_plot(xg, yg, F_x, F_y):
     # define the object that will call stackplot
@@ -335,22 +333,22 @@ def form_1_plot(xg, yg, F_x, F_y):
                         
 # ###################### example use ##########################
 
-# set up needed parameters
-v = np.linspace(-5, 5, 21)
-xg, yg = np.meshgrid(v, v)
-F_x = yg*np.sin(xg)
-F_y = xg*np.cos(yg)
-
-# PLOT, note, it will create a figure for user
-# we probably don't want that, otherwise we would have to make this
-# a method to the matplotlib object, which might mean we need to play with
-# their library, which I suppose we can't.
-form_obj = form_1_plot(xg, yg, F_x, F_y)
-
-form_obj.axis.set_xlabel('x')
-form_obj.axis.set_ylabel('y')
-
-form_obj.stack_plot()
+## set up needed parameters
+#v = np.linspace(-5, 5, 21)
+#xg, yg = np.meshgrid(v, v)
+#F_x = yg*np.sin(xg)
+#F_y = xg*np.cos(yg)
+#
+## PLOT, note, it will create a figure for user
+## we probably don't want that, otherwise we would have to make this
+## a method to the matplotlib object, which might mean we need to play with
+## their library, which I suppose we can't.
+#form_obj = form_1_plot(xg, yg, F_x, F_y)
+#
+#form_obj.axis.set_xlabel('x')
+#form_obj.axis.set_ylabel('y')
+#
+#form_obj.stack_plot()
 
 
 
