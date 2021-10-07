@@ -97,12 +97,12 @@ def form_1_plot(xg, yg, F_x, F_y):
             self.orientation = str(string)
         
         # plot stacks boolean
-        def stacks(self, boolean):
-            self.stacks = boolean
+        def stacks_onoff(self):
+            self.stacks = not self.stacks
         
         # plot arrows boolean
-        def arrows(self, boolean):
-            self.arrows = boolean
+        def arrows_onoff(self):
+            self.arrows = not self.arrows
         
         # change boolean that det. if to sclae logarithmically
         def log_scaling(self, boolean):
@@ -347,6 +347,7 @@ def form_1_plot(xg, yg, F_x, F_y):
 #
 #form_obj.axis.set_xlabel('x')
 #form_obj.axis.set_ylabel('y')
+#form_obj.arrows_onoff()
 #
 #form_obj.stack_plot()
 
