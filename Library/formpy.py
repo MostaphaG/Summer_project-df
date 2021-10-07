@@ -51,12 +51,14 @@ def form_1_plot(xg, yg, F_x, F_y):
     # define the object that will call stackplot
     class form_1():
         # set up all variables
-        def __init__(self, xg, yg, F_x, F_y, s_max=6, s_min=2, pt_den=21, fract=0.05, deltafactor=10):
+        def __init__(self, xg, yg, F_x, F_y, s_max=6, s_min=2, pt_den=21, fract=0.05, deltafactor=10, fig_size=[7, 7]):
             self.xg = xg
             self.yg = yg
             self.F_x = F_x
             self.F_y = F_y
-            self.axis = plt.figure().gca()
+            self.fig_size = fig_size
+            self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
+            self.axis = self.figure.gca()
             self.s_max = s_max
             self.s_min = s_min
             self.pt_den = pt_den
@@ -70,11 +72,16 @@ def form_1_plot(xg, yg, F_x, F_y):
             self.arrowheads = True
             self.colour = 'green'
             self.logarithmic_scale_bool = 0
-            self.scale_bool = False
+            self.scale_bool = True
             self.delta_factor = deltafactor
         
         # write some functions that will allow the user to chenge some of the above
         # variables
+        
+        # define a method to change figure size
+        def fig_size_change(self, n, m):
+            self.figure.set_size_inches(n, m)
+            # then change figure
         
         # change colour
         def colour(self, color):
@@ -329,8 +336,8 @@ def form_1_plot(xg, yg, F_x, F_y):
     #return it to user
     return form_1_object
 
+
 # %%
-                        
 # ###################### example use ##########################
 
 ## set up needed parameters
@@ -348,6 +355,7 @@ def form_1_plot(xg, yg, F_x, F_y):
 #form_obj.axis.set_xlabel('x')
 #form_obj.axis.set_ylabel('y')
 #form_obj.arrows_onoff()
+#form_obj.fig_size_change(8, 3)
 #
 #form_obj.stack_plot()
 
