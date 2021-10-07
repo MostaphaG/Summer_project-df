@@ -81,8 +81,8 @@ def form_1_plot(xg, yg, F_x, F_y):
             self.colour = str(color)
         
         # change arrowsheads
-        def arrow_heads(self, boolean):
-            self.arrowheads = boolean
+        def arrow_heads(self):
+            self.arrowheads = not self.arrowheads
         
         # change w_head
         def head_width(self, wide):
@@ -105,12 +105,12 @@ def form_1_plot(xg, yg, F_x, F_y):
             self.arrows = not self.arrows
         
         # change boolean that det. if to sclae logarithmically
-        def log_scaling(self, boolean):
-            self.logarithmic_scale_bool = boolean
+        def log_scaling(self):
+            self.logarithmic_scale_bool = not self.logarithmic_scale_bool
         
         # define a method to be able to change bool that det. if arrows autoscale
-        def autoscale(self, boolean):
-            self.scale_bool = boolean
+        def autoscale(self):
+            self.scale_bool = not self.scale_bool
         
         # stcakplot: but it takes the above defined variables:
         def stack_plot(self):
