@@ -51,26 +51,25 @@ def form_1_plot(xg, yg, F_x, F_y):
     # define the object that will call stackplot
     class form_1():
         # set up all variables
-        def __init__(self, xg, yg, F_x, F_y, s_max=6, s_min=2, pt_den=21, fract=0.05, deltafactor=10, fig_size=[7, 7]):
+        def __init__(self, xg, yg, F_x, F_y, s_max=6, s_min=2, fract=0.05, deltafactor=10, fig_size=[7, 7]):
             self.xg = xg
             self.yg = yg
             self.F_x = F_x
             self.F_y = F_y
-            self.fig_size = fig_size
             self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
             self.axis = self.figure.gca()
             self.s_max = s_max
             self.s_min = s_min
-            self.pt_den = pt_den
+            self.pt_den = len(xg[:, 0]) + 1  # assume square grids
             self.fract = fract
-            self.arrows = False
-            self.stacks = True
+            self.arrow_bool = False
+            self.stack_bool = True
             self.orientation = 'mid'
             self.scale = 1
             self.w_head = 1/8
             self.h_head = 1/4
             self.arrowheads = True
-            self.colour = 'green'
+            self.color = 'green'
             self.logarithmic_scale_bool = 0
             self.scale_bool = True
             self.delta_factor = deltafactor
@@ -79,13 +78,13 @@ def form_1_plot(xg, yg, F_x, F_y):
         # variables
         
         # define a method to change figure size
-        def fig_size_change(self, n, m):
+        def fig_size(self, n, m):
             self.figure.set_size_inches(n, m)
             # then change figure
         
         # change colour
         def colour(self, color):
-            self.colour = str(color)
+            self.color = str(color)
         
         # change arrowsheads
         def arrow_heads(self):
@@ -104,12 +103,12 @@ def form_1_plot(xg, yg, F_x, F_y):
             self.orientation = str(string)
         
         # plot stacks boolean
-        def stacks_onoff(self):
-            self.stacks = not self.stacks
+        def stacks(self):
+            self.stack_bool = not self.stack_bool
         
         # plot arrows boolean
-        def arrows_onoff(self):
-            self.arrows = not self.arrows
+        def arrows(self):
+            self.arrow_bool = not self.arrow_bool
         
         # change boolean that det. if to sclae logarithmically
         def log_scaling(self):
@@ -119,8 +118,20 @@ def form_1_plot(xg, yg, F_x, F_y):
         def autoscale(self):
             self.scale_bool = not self.scale_bool
         
+        # define methods to change s_max and s_min
+        def max_sheets(self, maximum):
+            self.s_max = maximum
+        
+        # define method to change fraction of sheetsize w.r.t graoh size:
+        def sheet_size(self, fraction):
+            self.fract = fraction
+        
+        #define a method to change spare spacing around figure
+        def surround_space(self, delta_denominator):
+            self.delta_factor = delta_denominator
+        
         # stcakplot: but it takes the above defined variables:
-        def stack_plot(self):
+        def plot(self):
             
             # from self, get axis
             axis = self.axis
@@ -215,7 +226,7 @@ def form_1_plot(xg, yg, F_x, F_y):
             F_y_local = self.F_y * 1
             
             # plot the quiver plot on grid points if chosen in original function
-            if self.arrows is True:
+            if self.arrow_bool is True:
                 # prevent any magnitudes from being inf or nan
                 # only here, need to do it to u and v not just mag
                 for i in range(x_len):
@@ -226,7 +237,7 @@ def form_1_plot(xg, yg, F_x, F_y):
             else:
                 pass
             
-            if self.stacks is True:
+            if self.stack_bool is True:
                 # define tigonometirc shifts
                 I_sin = np.sin(angles)
                 I_cos = np.cos(angles)
@@ -289,15 +300,15 @@ def form_1_plot(xg, yg, F_x, F_y):
                                 By2 = B_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
                                 
                                 # from these, define the 2 lines, for this run
-                                axis.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=1, color=self.colour))
-                                axis.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=1, color=self.colour))
+                                axis.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=1, color=self.color))
+                                axis.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=1, color=self.color))
                                 
                                 # update parameter to reapet and draw all needed arrows
                                 s += 1
                         # deal with the odd number of stacks:
                         elif parity(n) is False:
                             # Add the centre line for odd numbers of stacks
-                            axis.add_line(Line2D((A_x[i, j], B_x[i, j]), (A_y[i, j], B_y[i, j]), linewidth=1, color=self.colour))
+                            axis.add_line(Line2D((A_x[i, j], B_x[i, j]), (A_y[i, j], B_y[i, j]), linewidth=1, color=self.color))
                             
                             # then loop over the remaining lines as per the recursion formula:
                             s = 1  # change the looping parametr to exclude already completed 0 (corr. to middle sheet here)
@@ -315,20 +326,20 @@ def form_1_plot(xg, yg, F_x, F_y):
                                 By2 = B_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
                                 
                                 # from these, define the 2 displaced lines
-                                axis.add_line(Line2D((Ax1,Bx1),(Ay1,By1), linewidth=1, color=self.colour))
-                                axis.add_line(Line2D((Ax2,Bx2),(Ay2,By2), linewidth=1, color=self.colour))
+                                axis.add_line(Line2D((Ax1,Bx1),(Ay1,By1), linewidth=1, color=self.color))
+                                axis.add_line(Line2D((Ax2,Bx2),(Ay2,By2), linewidth=1, color=self.color))
                                 
                                 # change the parameter to loop over all changes in displacement for current magnitude
                                 s += 1
                         if self.arrowheads == True:
                             # plot lines of arrowheads from central sheet for n = 1 or on top sheet for n>1 
                             if n > 1:   # for all lines ubt the single sheet one
-                                axis.add_line(Line2D((p_sh1x[i, j],p_sh3x[i, j]),(p_sh1y[i, j],p_sh3y[i, j]), linewidth=1, color = self.colour))
-                                axis.add_line(Line2D((p_sh2x[i, j],p_sh3x[i, j]),((p_sh2y[i, j],p_sh3y[i, j])), linewidth=1, color = self.colour))
+                                axis.add_line(Line2D((p_sh1x[i, j],p_sh3x[i, j]),(p_sh1y[i, j],p_sh3y[i, j]), linewidth=1, color = self.color))
+                                axis.add_line(Line2D((p_sh2x[i, j],p_sh3x[i, j]),((p_sh2y[i, j],p_sh3y[i, j])), linewidth=1, color = self.color))
                             # then define it for the stacks with only 1 sheet:
                             else:
-                                axis.add_line(Line2D((P_sh1x[i, j], P_sh3x[i, j]), (P_sh1y[i, j], P_sh3y[i, j]), linewidth=1, color = self.colour))
-                                axis.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color = self.colour))
+                                axis.add_line(Line2D((P_sh1x[i, j], P_sh3x[i, j]), (P_sh1y[i, j], P_sh3y[i, j]), linewidth=1, color = self.color))
+                                axis.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color = self.color))
                         else:
                             pass
     # now call that object to create it:
@@ -354,10 +365,16 @@ def form_1_plot(xg, yg, F_x, F_y):
 #
 #form_obj.axis.set_xlabel('x')
 #form_obj.axis.set_ylabel('y')
-#form_obj.arrows_onoff()
-#form_obj.fig_size_change(8, 3)
+#form_obj.arrows()
+#form_obj.colour('black')
+#form_obj.fig_size(8, 9)
+#form_obj.head_width(0.3)
+#form_obj.orient('tail')
+#form_obj.max_sheets(8)
+#form_obj.sheet_size(0.07)
+#form_obj.surround_space(6)
 #
-#form_obj.stack_plot()
+#form_obj.plot()
 
 
 
