@@ -4523,14 +4523,38 @@ def animate(i):
     yplot = dyn_coord[:,1]
     
     if torus.get() == 1:
-        if all(a > L for a in xplot) == True:
-            xplot = xplot - 2.2*L
-        if all(a < -L for a in xplot) == True:
-            xplot = xplot + 2.2*L       
-        if all(a > L for a in yplot) == True:
-            yplot = yplot - 2.2*L
-        if all(a < -L for a in yplot) == True:
-            yplot = yplot + 2.2*L
+        for a in range(pts):
+            if xplot[a] > 1.1*L:
+                xplot[a] -= 2.2*L
+            elif xplot[a] < -1.1*L:
+                xplot[a] += 2.2*L
+            if yplot[a] > 1.1*L:
+                yplot[a] -= 2.2*L
+            elif yplot[a] < -1.1*L:
+                yplot[a] += 2.2*L
+        
+        # for a in xplot:
+        #     if a > L:
+        #         a -= 2*L
+        #     if a < L:
+        #         a += 2*L
+        # for b in yplot:
+        #     if b > L:
+        #         b -= 2*L
+        #     if b < L:
+        #         b += 2*L
+                
+        # if all(a > L for a in xplot) == True:
+        #     xplot = xplot - 2.2*L
+        # if all(a < -L for a in xplot) == True:
+        #     xplot = xplot + 2.2*L       
+        # if all(a > L for a in yplot) == True:
+        #     yplot = yplot - 2.2*L
+        # if all(a < -L for a in yplot) == True:
+        #     yplot = yplot + 2.2*L
+    
+    # If x-cord > L, x-cord = x-cord - 2L
+            
             
     dyn_point.set_data(xplot, yplot)
     
