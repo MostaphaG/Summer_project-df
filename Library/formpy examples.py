@@ -16,7 +16,7 @@ F_y = xg*np.cos(yg)
 # we probably don't want that, otherwise we would have to make this
 # a method to the matplotlib object, which might mean we need to play with
 # their library, which I suppose we can't.
-form_obj = fp.form_1_plot(xg, yg, F_x, F_y)
+form_obj = fp.form_1(xg, yg, F_x, F_y)
 
 form_obj.axis.set_xlabel('x')
 form_obj.axis.set_ylabel('y')
@@ -32,3 +32,14 @@ form_obj.surround_space(6)
 form_obj.plot()
 
 # %%
+
+# plotting a 2-form
+
+v = np.linspace(-6, 6, 31)
+xg, yg = np.meshgrid(v, v)
+
+form_2 = xg*yg
+
+
+form_obj = fp.form_2(xg, yg, form_2)
+form_obj.plot()
