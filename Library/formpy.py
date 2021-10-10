@@ -271,9 +271,12 @@ def form_1(xg, yg, F_x, F_y):
             # use the the direction of arrows to define stack properties
             # #########################################################################
             
+            # s_L and sheet_L are defined the same? 
+            
             # define length of sheet as a fraction of total graph scale
-            sheet_L = L * self.fract
+            # sheet_L = L * self.fract
             # set up the max, total height of stack (along arrow)
+            
             s_L = self.fract * L
             
             # #########################################################################
@@ -328,24 +331,24 @@ def form_1(xg, yg, F_x, F_y):
                 I_cos = np.cos(angles)
                 
                 # define the points that set out a line of the stack sheet (middle line)
-                A_x = self.xg + (sheet_L/2)*I_sin
-                A_y = self.yg - (sheet_L/2)*I_cos
-                B_x = self.xg - (sheet_L/2)*I_sin
-                B_y = self.yg + (sheet_L/2)*I_cos
+                A_x = self.xg + (s_L/2)*I_sin
+                A_y = self.yg - (s_L/2)*I_cos
+                B_x = self.xg - (s_L/2)*I_sin
+                B_y = self.yg + (s_L/2)*I_cos
                 
                 # define points of stack arrowheads as arrays for all stacks
-                p_sh1x = self.xg + (s_L/2)*I_cos + (sheet_L*self.w_head)*I_sin
-                p_sh1y = self.yg + (s_L/2)*I_sin - (sheet_L*self.w_head)*I_cos
-                p_sh2x = self.xg + (s_L/2)*I_cos - (sheet_L*self.w_head)*I_sin
-                p_sh2y = self.yg + (s_L/2)*I_sin + (sheet_L*self.w_head)*I_cos
+                p_sh1x = self.xg + (s_L/2)*I_cos + (s_L*self.w_head)*I_sin
+                p_sh1y = self.yg + (s_L/2)*I_sin - (s_L*self.w_head)*I_cos
+                p_sh2x = self.xg + (s_L/2)*I_cos - (s_L*self.w_head)*I_sin
+                p_sh2y = self.yg + (s_L/2)*I_sin + (s_L*self.w_head)*I_cos
                 p_sh3x = self.xg + (s_L*0.5 + s_L*self.h_head)*I_cos
                 p_sh3y = self.yg + (s_L*0.5 + s_L*self.h_head)*I_sin
                 
                 # define these for when there is only 1 line in the stack plot:
-                P_sh1x = self.xg + (sheet_L*self.w_head)*I_sin
-                P_sh1y = self.yg - (sheet_L*self.w_head)*I_cos
-                P_sh2x = self.xg - (sheet_L*self.w_head)*I_sin
-                P_sh2y = self.yg + (sheet_L*self.w_head)*I_cos
+                P_sh1x = self.xg + (s_L*self.w_head)*I_sin
+                P_sh1y = self.yg - (s_L*self.w_head)*I_cos
+                P_sh2x = self.xg - (s_L*self.w_head)*I_sin
+                P_sh2y = self.yg + (s_L*self.w_head)*I_cos
                 P_sh3x = self.xg + (s_L*self.h_head)*I_cos
                 P_sh3y = self.yg + (s_L*self.h_head)*I_sin
                 
@@ -539,7 +542,7 @@ def form_2(xg, yg, form_2):
             # #########################################################################
             
             # define length of sheet as a fraction of total graph scale
-            sheet_L = L*self.fract
+            s_L = L*self.fract
             # set up the max, total height of stack (along arrow)
             s_L = self.fract*L
             
@@ -570,10 +573,10 @@ def form_2(xg, yg, form_2):
                 I_cos = np.cos(theta)
                 
                 # define the points that set out a line of the stack sheet (middle line)
-                A_x = self.xg + (sheet_L/2)*np.sin(theta)
-                A_y = self.yg - (sheet_L/2)*np.cos(theta)
-                B_x = self.xg - (sheet_L/2)*np.sin(theta)
-                B_y = self.yg + (sheet_L/2)*np.cos(theta)
+                A_x = self.xg + (s_L/2)*np.sin(theta)
+                A_y = self.yg - (s_L/2)*np.cos(theta)
+                B_x = self.xg - (s_L/2)*np.sin(theta)
+                B_y = self.yg + (s_L/2)*np.cos(theta)
                 
                 # loop over each arrow coordinate in x and y
                 for i in range(x_len):
