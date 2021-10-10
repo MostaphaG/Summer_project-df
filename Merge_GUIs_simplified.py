@@ -3557,8 +3557,12 @@ def Hodge_1_form_response():
 
 # Hodge the two form in the entry box, plotting the scalar function as a contour
 def Hodge_2_form_response():
+    global calculus_form_tracker
     # Note: can't approperiately set variable for zooming here
     # no zooming of contours is implemented, nor needed
+    
+    # update tracker for ext. deriv and Hodge to keep working correctly
+    calculus_form_tracker = 0
     
     # prepare variables
     main_axis.clear()
@@ -3594,6 +3598,73 @@ def Hodge_2_form_response():
     form_0_entry.insert(0, zero_form_str)
     form_0_entry.configure(bg='#C0F6BB')
     canvas.draw()
+
+
+# define a fucntion to compute Hodge of a 0-form
+def Hodge_0_form_response():
+    global calculus_form_tracker, form_2_str, form_2_eq, form_2
+    # update tracker for ext. deriv and Hodge to keep working correctly
+    calculus_form_tracker = 2
+    
+    # update fract to best suit 2-forms
+    fract = 2/((pt_den-1))
+    
+    # prepare variables
+    main_axis.clear()
+    update_variables()
+    
+    # get the 2 form from the 0 form using prev. def. function
+    form_0_to_hodge = form_0_entry.get()
+    form_0_to_hodge = form_0_to_hodge.replace('ln', 'log')
+    form_0_to_hodge = form_0_to_hodge.replace('^', '**')
+    # get 2- form string from that (not needed here, it will not change)
+    H = Hodge2D(f=form_0_to_hodge)
+    form_2_str = H[3]
+    
+    print('I got my string')
+    
+    # put it into the entry box for 2-forms
+    form_2_entry.delete(0, 'end')
+    form_2_entry.insert(0, form_2_str)
+    # plot these as stacks, with no arrowheads, on top of one another.
+    # format it to be python understood
+    form_2_eq = format_eq(form_2_str)
+    # check against constant and zero 2-forms being supplied
+    form_2_eq = form_2_constant_correction(form_2_eq)
+    # get the numerical evaluation of it
+    form_2 = eval(form_2_eq)
+    # use plotting stacks to display these
+    # ALWAYS HALF AND HALF SPLITTING NOW
+    form_2_components_plot(xg, yg, form_2/2, np.pi/2, s_max, L, fract, colour_str, logartmic_scale_bool=logartmic_scale_bool)
+    form_2_components_plot(xg, yg, form_2/2, 0, s_max, L, fract, colour_str, logartmic_scale_bool=logartmic_scale_bool)
+    # display the new plot
+    canvas.draw()
+    # display a background green on the 2-form entry to show that
+    # this entry is being displayed now.
+    form_2_entry.configure(bg='#C0F6BB')
+    # undo it for 1-forms
+    x_comp_entry.configure(bg='#FFFFFF')
+    y_comp_entry.configure(bg='#FFFFFF')
+    # update the label to remove the zero form if int deriv of both was used
+    form_0_entry.configure(bg='#FFFFFF')
+
+
+# Function to compute and plot the Hodge based on what is currently
+# being plotted
+def Hodge_full():
+    # depending on what form is being plotted, complete the Hodge:
+    if calculus_form_tracker == 2:
+        # Hodge of 2-form
+        Hodge_2_form_response()
+    elif calculus_form_tracker == 1:
+        # Hodge of 1-form
+        Hodge_1_form_response()
+    elif calculus_form_tracker == 0:
+        # Hodge of 0-form
+        Hodge_0_form_response()
+    else:
+        tk.messagebox.showerror('Error', 'Hodging invalid form')
+        
 
 
 # define a function to put in an inset axis at user specified position
@@ -5017,11 +5088,8 @@ wedge_btn = tk.Button(calculus_frame, text='Wedge', padx=0, pady=2, command=wedg
 wedge_btn.grid(row=6, column=0)
 
 # define ab utton that will Find the Hodge dual
-Hodge_1_form_btn = tk.Button(calculus_frame, text='Hodge 1-Form', padx=0, pady=2, command=Hodge_1_form_response)
-Hodge_1_form_btn.grid(row=7, column=0)
-
-Hodge_2_form_btn = tk.Button(calculus_frame, text='Hodge 2-Form', padx=0, pady=2, command=Hodge_2_form_response)
-Hodge_2_form_btn.grid(row=7, column=1)
+Hodge_btn = tk.Button(calculus_frame, text='Hodge', padx=5, pady=2, command=Hodge_full)
+Hodge_btn.grid(row=7, column=0)
 
 # define radiobuttons button to choose zooming with the mouse on 2-forms on R2
 # and as opposed to tools
