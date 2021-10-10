@@ -64,7 +64,7 @@ def form_1(xg, yg, F_x, F_y):
             self.axis = self.figure.gca()
             self.s_max = s_max
             self.s_min = s_min
-            self.pt_den = len(xg[:, 0]) + 1  # assume square grids
+            self.pt_den = len(xg[:, 0])# + 1  # assume square grids
             self.fract = fract
             self.arrow_bool = False
             self.stack_bool = True
@@ -289,7 +289,7 @@ def form_1(xg, yg, F_x, F_y):
             max_size = np.max(mag)   # careful with singularities, else ---> nan
             
             # Define scaling factor
-            ScaleFactor = max_size/(0.9*(2*L/self.pt_den))
+            #ScaleFactor = max_size/(0.9*(2*L/self.pt_den))
             
             # find the relative magnitude of vectors to maximum, as an array
             R = mag/max_size
