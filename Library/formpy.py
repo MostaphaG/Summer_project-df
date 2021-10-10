@@ -439,7 +439,6 @@ def form_1(xg, yg, F_x, F_y):
 
 # %%
 
-
 # define a function taht will set up a 2-form object that can be customised and
 # plotted
 def form_2(xg, yg, form_2):
@@ -541,8 +540,6 @@ def form_2(xg, yg, form_2):
             # use the the direction of arrows to define stack properties
             # #########################################################################
             
-            # define length of sheet as a fraction of total graph scale
-            s_L = L*self.fract
             # set up the max, total height of stack (along arrow)
             s_L = self.fract*L
             
@@ -573,10 +570,10 @@ def form_2(xg, yg, form_2):
                 I_cos = np.cos(theta)
                 
                 # define the points that set out a line of the stack sheet (middle line)
-                A_x = self.xg + (s_L/2)*np.sin(theta)
-                A_y = self.yg - (s_L/2)*np.cos(theta)
-                B_x = self.xg - (s_L/2)*np.sin(theta)
-                B_y = self.yg + (s_L/2)*np.cos(theta)
+                A_x = self.xg + (s_L/2)*I_sin
+                A_y = self.yg - (s_L/2)*I_cos
+                B_x = self.xg - (s_L/2)*I_sin
+                B_y = self.yg + (s_L/2)*I_cos
                 
                 # loop over each arrow coordinate in x and y
                 for i in range(x_len):
@@ -656,7 +653,5 @@ def form_2(xg, yg, form_2):
     form_2_object = form_set_up(xg, yg, form_2)
     # return it to user to store
     return form_2_object
-
-
 
 
