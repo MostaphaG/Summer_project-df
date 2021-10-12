@@ -40,6 +40,13 @@ def parity(x):
 # pre-define the displacements from mid point needed
 # c is the Truth value from parity (odd or even number n)
 def G(s, n, c):
+    '''
+    Takes in 3 arguments:
+    2 numbers: det number of sheets to draw, and which one is to be drawn now
+    1: int bool, as 0 or 1, defines parity.
+    defines coefficints needed to displace stack sheets along direction perp.
+    to form, depending  on how many are to be plotted
+    '''
     if c == 0:
         return ((2*s + 1)/(2*(n-1)))
     else:
@@ -48,10 +55,22 @@ def G(s, n, c):
 
 # %%
 
+'''
+
+function to create a 1-form object and define methods for it
+
+'''
+
 
 # define a function taht will set up a 1-form object that can be customised and
 # plotted
 def form_1(xg, yg, F_x, F_y):
+    '''
+    defines a 1-form object and returns it to user
+    Takes 4 arguments, these are the 2 grids in 2D, which muse be square
+    and of equal sizes. Then 2 arguments for the dx component and dy component
+    bbased on the same grids
+    '''
     # define the 1-form object and all its methods
     class form_set_up():
         # set up all variables
@@ -78,8 +97,10 @@ def form_1(xg, yg, F_x, F_y):
             self.scale_bool = True
             self.delta_factor = deltafactor
         
-        # write some functions that will allow the user to chenge some of the
+        # #####################################################################
+        # write some methods that will allow the user to chenge some of the
         # above variables
+        # #####################################################################
         
         # define a method to change figure size
         def fig_size(self, n, m):
@@ -208,16 +229,19 @@ def form_1(xg, yg, F_x, F_y):
             '''
             self.delta_factor = delta_denominator
         
+        # #####################################################################
+        # Write more complicated methods. That will use this form object
+        # eg. plot, exterior derivative, Hodge etc.
+        # #####################################################################
+        
         # define a fucntion that will use the set up 1-form and plot it
         # stcakplot: but it takes the above defined variables:
         def plot(self):
-            
             '''
             Finilises the plotting
             Uses the attribues of the object as set originally and as customised
             with methods to create a plot of the 1-form
             '''
-            
             # from self, get axis
             axis = self.axis
             
@@ -439,9 +463,21 @@ def form_1(xg, yg, F_x, F_y):
 
 # %%
 
-# define a function taht will set up a 2-form object that can be customised and
+'''
+
+function to create a 2-form object and define methods for it
+
+'''
+
+# define a function that will set up a 2-form object that can be customised and
 # plotted
 def form_2(xg, yg, form_2):
+    '''
+    defines a 2-form object and returns it to user
+    Takes 3 arguments basic, these are the 2 grids in 2D, which muse be square
+    and of equal sizes. Then 1 argument for the dx^dy component
+    based on the same grids.
+    '''
     # define the 1-form object and all its methods
     class form_set_up():
         # set up all variables
@@ -453,46 +489,96 @@ def form_2(xg, yg, form_2):
             self.axis = self.figure.gca()
             self.s_max = s_max
             self.s_min = s_min
-            self.pt_den = len(xg[:, 0]) + 1  # assume square grids
+            self.pt_den = len(xg[:, 0])  # + 1  # assume square grids
             self.fract = 2/((self.pt_den - 1))
             self.colour_list = ['red', 'blue', 'grey']
             self.logarithmic_scale_bool = 0
             self.delta_factor = deltafactor
         
-        
-        # define methods to customise the 2-form object before it is plotted
-        # !!!
+        # #####################################################################
+        # Define basic methods to customise this object
+        # #####################################################################
         
         # define a method to change figure size
         def fig_size(self, n, m):
+            '''
+            Takes two inputs, float or int numbers, sets the figure
+            size to these dimensions in inches. Uses set_size_inches from
+            matploitlib so can just use that on
+            the atribute figure, this function is here just for
+            easier nameing
+            '''
             self.figure.set_size_inches(n, m)
         
         # change colour list
         def colour(self, colours):
+            '''
+            Takes input of a single string. String must be formatted
+            as to be accepted by maplotlib colors
+            changes the colour of plotted stacks.
+            '''
             self.colour_list = str(colours)
         
         # change boolean that det. if to sclae logarithmically
         def log_scaling(self):
+            '''
+            Takes no arguments
+            Changes the boolean that determines if scaling is logarithmic
+            Whenever it is called, it changes that boolean to opposite
+            The form object is initialised with this as False (as 0)
+            '''
             self.logarithmic_scale_bool = not self.logarithmic_scale_bool
         
         # define methods to change s_max
         def max_sheets(self, maximum):
+            '''
+            Takes one argument, must be int
+            Changes maximum number of sheets to draw on a stack.
+            These still scale relative to max magnitude.
+            '''
             self.s_max = maximum
         
         # define method to change fraction of sheetsize w.r.t graoh size:
         def sheet_size(self, fraction):
+            '''
+            Takes a single argument, float
+            Changes the size of stack in direction perp. to form
+            it is done in in terms of the fraction of graph size
+            the graph size is extracted form maximum values of grid
+            Grids are assumed to be square and origin centered.
+            Note, for 2-forms, the size in directions parall. and perp.
+            are always set to be the same.
+            '''
             self.fract = fraction
         
         #define a method to change spare spacing around figure
         def surround_space(self, delta_denominator):
+            '''
+            Takes in one argument, float or int
+            Sets the extra blank space around the domain of grids in axis
+            The input number defines the denominator or fraction to use
+            eg. supplying 3 will make the white space 1/3 of the width
+            of the domain of the grid.
+            '''
             self.delta_factor = delta_denominator
+        
+        # #####################################################################
+        # Write more complicated methods. That will use this form object
+        # eg. plot, exterior derivative, Hodge etc.
+        # #####################################################################
         
         # define a function to plot the set up 2-form
         # originally form_2_components_plot
         def plot(self):
+            '''
+            Finilises the plotting
+            Uses the attribues of the object as set originally and as customised
+            with methods to create a plot of the 2-form
+            '''
             
-            # from self, get axis
-            axis = self.axis
+            # for ease of later writting:
+            axis = self.axis  # from self, get axis
+            form_2 = self.form_2  # from self, get 2-form
             
             # get the lengths of x and y from their grids
             x_len = len(self.xg[:, 0])
@@ -655,3 +741,186 @@ def form_2(xg, yg, form_2):
     return form_2_object
 
 
+# %%
+
+'''
+
+function to create a 0-form object and define methods for it
+
+'''
+
+
+# define a function that will set up a 2-form object that can be customised and
+# plotted
+def form_0(xg, yg, form_0):
+    '''
+    defines a 0-form object and returns it to user
+    Takes 3 arguments basic, these are the 2 grids in 2D, which muse be square
+    and of equal sizes. Then 1 argument 0-form based on the same grids.
+    '''
+    # define the 1-form object and all its methods
+    class form_set_up():
+        # set up all initial, defualt variables
+        def __init__(self, xg, yg, form_0, fig_size=[7, 7], deltafactor=10):
+            self.xg = xg
+            self.yg = yg
+            self.form_0 = form_0
+            self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
+            self.axis = self.figure.gca()
+            self.pt_den = len(xg[:, 0])  # + 1  # assume square grids
+            self.fract = 2/((self.pt_den - 1))
+            self.logarithmic_scale_bool = 0
+            self.delta_factor = deltafactor
+            self.denser = 1
+            self.lines = 15
+            self.fontsize = 7
+            self.inline_bool = True
+            self.form_0_str = None  # to start with, use rmust change to access some methods
+            # Note, the string must be given with x and y as variables
+            self.form_0_contour = None  # Initialise with that, will be changed, if user
+            # gets contour plot with new density.
+        
+        # #####################################################################
+        # Define basic methods to customise this object
+        # #####################################################################
+        
+        # define a mehtod to allow user to supply the string equation
+        # of the 0-form
+        def form_0_give_eqn(self, equation_str):
+            '''
+            Takes in 1-argument, string
+            This must be the equation of the supplied numerical 0-form
+            It must be in terms of x and y.
+            Has to be given, for some methods to be calculatable.
+            '''
+            self.form_0_str = equation_str
+        
+        # define a method to change figure size
+        def fig_size(self, n, m):
+            '''
+            Takes two inputs, float or int numbers, sets the figure
+            size to these dimensions in inches. Uses set_size_inches from
+            matploitlib so can just use that on
+            the atribute figure, this function is here just for
+            easier nameing
+            '''
+            self.figure.set_size_inches(n, m)
+        
+        #define a method to change spare spacing around figure
+        def surround_space(self, delta_denominator):
+            '''
+            Takes in one argument, float or int
+            Sets the extra blank space around the domain of grids in axis
+            The input number defines the denominator or fraction to use
+            eg. supplying 3 will make the white space 1/3 of the width
+            of the domain of the grid.
+            '''
+            self.delta_factor = delta_denominator
+        
+        
+        def density_increase(self, factor):
+            '''
+            Takes 1 float/int argument
+            sets increase in density between form grids and contour grids
+            needed if this was accessed by other forms via ext.alg methods
+            Note, This cannot be set to anything but 1, if the 0-form
+            equation as string is not also supplied correctly.
+            '''
+            self.denser = factor
+        
+        def lines_number(self, number):
+            '''
+            Takes 1 int argument
+            changes number of contour lines that get drawn
+            supplied to contour plot from matplotlib via levels
+            '''
+            self.lines = number
+        
+        def fonts_size(self, size):
+            '''
+            Takes 1 float/int argument
+            Changes fontsize for contour labels
+            '''
+            self.fontsize = size
+        
+        def labels(self):
+            '''
+            Takes no arguments
+            determines if hight labels are put on contours
+            Starts off as True, calling changes it each time
+            '''
+            self.inline_bool = not self.inline_bool
+        
+        
+        # #####################################################################
+        # Write more complicated methods. That will use this form object
+        # eg. plot, exterior derivative, Hodge etc.
+        # #####################################################################
+        
+        
+        # define a fucntion to plot a zero form when button is pressed.
+        def plot(self, keep=True):
+            '''
+            Finilises the plotting
+            Uses the attribues of the object as set originally and as customised
+            with methods to create a plot of the 2-form.
+            Can take one parameter: bool. Default is True
+            determines if axis should be cleared before plotting.
+            '''
+            
+            # check if user wants to clear first:
+            if keep is True:
+                pass
+            else:
+                self.axis.clear()
+            
+            # for ease of later writting:
+            axis = self.axis  # from self, get axis
+            form_0 = self.form_0  # from self, get 2-form
+            
+            # get L from largest entry in the array, assume they are square:
+            L = self.xg[0, -1]
+            
+            # define axis limits based on supplied arrays
+            ax_L = L + L/self.delta_factor
+            axis.set_xlim(-ax_L, ax_L)
+            axis.set_ylim(-ax_L, ax_L)
+            
+            if self.denser != 1:
+                if self.form_0_str == None:
+                    # This cannot be done if a string has not been supplied
+                    # ERROR
+                    print('Error: You need to supply the 0-form equation to do this, look at form_0_give_eqn method')
+                
+                # Now taht error has been expalined, put the resut into try/except
+                try:
+                    # get the supplied form as a string
+                    zero_form_str = str(simplify(self.form_0_str))
+                    # set up grids for contours
+                    contour_x, contour_y = np.linspace(-L, L, self.pt_den*self.denser), np.linspace(-L, L, self.pt_den*self.denser)
+                    contour_x_grid, contour_y_grid = np.meshgrid(contour_x, contour_y)
+                    # format the given ftring
+                    zero_form_str = zero_form_str.replace('x', 'contour_x_grid')
+                    zero_form_str = zero_form_str.replace('y', 'contour_y_grid')
+                    # evaluate bearing in mind zeros
+                    if zero_form_str.find('contour_x_grid') & zero_form_str.find('contour_y_grid') == -1:
+                        form_0_contour = eval(zero_form_str)*np.ones(np.shape(contour_x_grid))
+                    else:
+                        form_0_contour = eval(zero_form_str)
+                    # set up the contour plot
+                    CS = axis.contour(contour_x_grid, contour_y_grid, form_0_contour, levels=self.lines)
+                    axis.clabel(CS, inline=self.inline_bool, fontsize=self.fontsize)
+                except TypeError:
+                    pass
+            else:
+                # set up grids for contours
+                contour_x, contour_y = np.linspace(-L, L, self.pt_den*self.denser), np.linspace(-L, L, self.pt_den*self.denser)
+                contour_x_grid, contour_y_grid = np.meshgrid(contour_x, contour_y)
+                # set up the contour plot
+                CS = axis.contour(contour_x_grid, contour_y_grid, form_0, levels=self.lines)
+                axis.clabel(CS, inline=self.inline_bool, fontsize=self.fontsize)
+        
+    # now call that object to create it:
+    form_0_object = form_set_up(xg, yg, form_0)
+    # return it to user to store
+    return form_0_object

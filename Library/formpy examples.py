@@ -1,6 +1,7 @@
 # formpy examples
 import formpy as fp
 import numpy as np
+import matplotlib.pyplot as plt
 
 # %%
 
@@ -43,3 +44,32 @@ form_2 = xg*yg
 
 form_obj = fp.form_2(xg, yg, form_2)
 form_obj.plot()
+
+
+# %%
+
+# plotting a 0-form
+
+v = np.linspace(-4.5, 4.5, 11)
+xg, yg = np.meshgrid(v, v)
+
+
+form_0 = np.cos(xg*yg)
+
+form_obj = fp.form_0(xg, yg, form_0)
+form_obj.lines_number(4)
+# form_obj.density_increase(20)  # demonstation of an error
+form_obj.plot()
+
+plt.pause(5)
+
+# customising grids with an equation:
+
+form_obj.form_0_give_eqn('cos(x*y)')
+
+# change the density:
+form_obj.density_increase(20)
+form_obj.lines_number(15)
+form_obj.plot(keep=False)
+
+
