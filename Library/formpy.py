@@ -64,7 +64,7 @@ function to create a 1-form object and define methods for it
 
 # define a function taht will set up a 1-form object that can be customised and
 # plotted
-def form_1(xg, yg, F_x, F_y):
+def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
     '''
     defines a 1-form object and returns it to user
     Takes 4 arguments, these are the 2 grids in 2D, which muse be square
@@ -96,11 +96,35 @@ def form_1(xg, yg, F_x, F_y):
             self.logarithmic_scale_bool = 0
             self.scale_bool = True
             self.delta_factor = deltafactor
+            self.form_1_str_x = F_x_eqn  # to start with, use rmust change to access some methods
+            # Note, the string must be given with x and y as variables
+            self.form_1_str_y = F_y_eqn
         
         # #####################################################################
         # write some methods that will allow the user to chenge some of the
         # above variables
         # #####################################################################
+        
+        # define a mehtod to allow user to supply the string equation
+        # of the 0-form
+        def give_eqn(self, equation_str_x, equation_str_y):
+            '''
+            Takes in 1-argument, string
+            This must be the equation of the supplied numerical 0-form
+            It must be in terms of x and y.
+            Has to be given, for some methods to be calculatable.
+            '''
+            self.form_1_str_x = equation_str_x
+            self.form_1_str_y = equation_str_y
+        
+        # deifne a function to return the string equations to the user
+        def return_string(self):
+            '''
+            Takes in no arguments, returns the unformatted strings back to user
+            This is done in case user wants to access strings
+            that got here not by input but by ext. alg.
+            '''
+            return self.form_1_str_x, self.form_1_str_x
         
         # define a method to change figure size
         def fig_size(self, n, m):
@@ -218,7 +242,7 @@ def form_1(xg, yg, F_x, F_y):
             '''
             self.fract = fraction
         
-        #define a method to change spare spacing around figure
+        # define a method to change spare spacing around figure
         def surround_space(self, delta_denominator):
             '''
             Takes in one argument, float or int
@@ -229,6 +253,35 @@ def form_1(xg, yg, F_x, F_y):
             '''
             self.delta_factor = delta_denominator
         
+        # define a method to change the density of grids in same range
+        # requires string input of 1-form:
+        def same_range_density(self, points_number):
+            '''
+            takes in one argument, requires the string equation to be
+            supplied
+            Changes the desnity of points in the same range to the input value
+            '''
+            if self.form_1_str_x == None or self.form_1_str_y == None:
+                # Error
+                print('Error: You need to supply the 1-form equation to do this, look at \'give_eqn\' method')
+            else:
+                # redefine the grids
+                v = np.linspace(-self.xg[0, -1], self.xg[0, -1], points_number)
+                self.xg, self.yg = np.meshgrid(v, v)
+                # based on these change other, dependant variables
+                self.pt_den = len(self.xg[:, 0])
+                # substitute these into the equation:
+                # but keep it local
+                str_x = self.form_1_str_x + ''
+                str_y = self.form_1_str_y + ''
+                str_x = str_x.replace('x', '(self.xg)')
+                str_x = str_x.replace('y', '(self.yg)')
+                str_y = str_y.replace('x', '(self.xg)')
+                str_y = str_y.replace('y', '(self.yg)')
+                # re-evaluate the 2-form numerically
+                self.F_x = eval(str_x)
+                self.F_y = eval(str_y)
+        
         # #####################################################################
         # Write more complicated methods. That will use this form object
         # eg. plot, exterior derivative, Hodge etc.
@@ -236,7 +289,7 @@ def form_1(xg, yg, F_x, F_y):
         
         # define a fucntion that will use the set up 1-form and plot it
         # stcakplot: but it takes the above defined variables:
-        def plot(self):
+        def plot(self, keep=True):
             '''
             Finilises the plotting
             Uses the attribues of the object as set originally and as customised
@@ -244,6 +297,12 @@ def form_1(xg, yg, F_x, F_y):
             '''
             # from self, get axis
             axis = self.axis
+            
+            # depending on input, clear the axis or don't
+            if keep is True:
+                pass
+            else:
+                axis.clear()
             
             # get the lengths of x and y from their grids
             x_len = len(self.xg[:, 0])
@@ -471,7 +530,7 @@ function to create a 2-form object and define methods for it
 
 # define a function that will set up a 2-form object that can be customised and
 # plotted
-def form_2(xg, yg, form_2):
+def form_2(xg, yg, form_2, form_2_eq=None):
     '''
     defines a 2-form object and returns it to user
     Takes 3 arguments basic, these are the 2 grids in 2D, which muse be square
@@ -494,10 +553,23 @@ def form_2(xg, yg, form_2):
             self.colour_list = ['red', 'blue', 'grey']
             self.logarithmic_scale_bool = 0
             self.delta_factor = deltafactor
+            self.form_2_str = form_2_eq  # to start with, use rmust change to access some methods
+            # Note, the string must be given with x and y as variables
         
         # #####################################################################
         # Define basic methods to customise this object
         # #####################################################################
+        
+        # define a mehtod to allow user to supply the string equation
+        # of the 2-form
+        def give_eqn(self, equation_str):
+            '''
+            Takes in 1-argument, string
+            This must be the equation of the supplied numerical 0-form
+            It must be in terms of x and y.
+            Has to be given, for some methods to be calculatable.
+            '''
+            self.form_2_str = equation_str
         
         # define a method to change figure size
         def fig_size(self, n, m):
@@ -562,6 +634,32 @@ def form_2(xg, yg, form_2):
             '''
             self.delta_factor = delta_denominator
         
+        # define a method to change the density of grids in same range
+        # requires string input of 1-form:
+        def same_range_density(self, points_number):
+            '''
+            takes in one argument, requires the string equation to be
+            supplied
+            Changes the desnity of points in the same range to the input value
+            '''
+            if self.form_2_str == None:
+                # Error
+                print('Error: You need to supply the 2-form equation to do this, look at \'give_eqn\' method')
+            else:
+                # redefine the grids
+                v = np.linspace(-self.xg[0, -1], self.xg[0, -1], points_number)
+                self.xg, self.yg = np.meshgrid(v, v)
+                # based on these change other, dependant variables
+                self.pt_den = len(self.xg[:, 0])
+                self.fract = 2/(self.pt_den - 1)
+                # substitute these into the equation:
+                # but keep it local
+                str_2 = self.form_2_str + ''
+                str_2 = str_2.replace('x', 'self.xg')
+                str_2 = str_2.replace('y', 'self.yg')
+                # re-evaluate the 2-form numerically
+                self.form_2 = eval(str_2)
+        
         # #####################################################################
         # Write more complicated methods. That will use this form object
         # eg. plot, exterior derivative, Hodge etc.
@@ -569,9 +667,11 @@ def form_2(xg, yg, form_2):
         
         # define a function to plot the set up 2-form
         # originally form_2_components_plot
-        def plot(self):
+        def plot(self, keep=True):
             '''
             Finilises the plotting
+            Takes in 1 input, that determines if axis should be cleared before
+            default is True
             Uses the attribues of the object as set originally and as customised
             with methods to create a plot of the 2-form
             '''
@@ -579,6 +679,12 @@ def form_2(xg, yg, form_2):
             # for ease of later writting:
             axis = self.axis  # from self, get axis
             form_2 = self.form_2  # from self, get 2-form
+            
+            # depending on input, clear the axis or don't
+            if keep is True:
+                pass
+            else:
+                axis.clear()
             
             # get the lengths of x and y from their grids
             x_len = len(self.xg[:, 0])
@@ -768,7 +874,6 @@ def form_0(xg, yg, form_0):
             self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
             self.axis = self.figure.gca()
             self.pt_den = len(xg[:, 0])  # + 1  # assume square grids
-            self.fract = 2/((self.pt_den - 1))
             self.logarithmic_scale_bool = 0
             self.delta_factor = deltafactor
             self.denser = 1
@@ -786,7 +891,7 @@ def form_0(xg, yg, form_0):
         
         # define a mehtod to allow user to supply the string equation
         # of the 0-form
-        def form_0_give_eqn(self, equation_str):
+        def give_eqn(self, equation_str):
             '''
             Takes in 1-argument, string
             This must be the equation of the supplied numerical 0-form
@@ -851,6 +956,33 @@ def form_0(xg, yg, form_0):
             '''
             self.inline_bool = not self.inline_bool
         
+        # define a method to change the density of grids in same range
+        # requires string input of 1-form:
+        # technically not so needed here as all plotting is done with denser
+        # which is similar enough. But it might be useful to change
+        # the grids as stored and not just locally for a plot
+        def same_range_density(self, points_number):
+            '''
+            takes in one argument, requires the string equation to be
+            supplied
+            Changes the desnity of points in the same range to the input value
+            '''
+            if self.form_0_str == None:
+                # Error
+                print('Error: You need to supply the 0-form equation to do this, look at \'give_eqn\' method')
+            else:
+                # redefine the grids
+                v = np.linspace(-self.xg[0, -1], self.xg[0, -1], points_number)
+                self.xg, self.yg = np.meshgrid(v, v)
+                # based on these change other, dependant variables
+                self.pt_den = len(self.xg[:, 0])
+                # substitute these into the equation:
+                # but keep it local
+                str_0 = self.form_0_str + ''
+                str_0 = str_0.replace('x', 'self.xg')
+                str_0 = str_0.replace('y', 'self.yg')
+                # re-evaluate the 2-form numerically
+                self.form_0 = eval(str_0)
         
         # #####################################################################
         # Write more complicated methods. That will use this form object
@@ -890,10 +1022,8 @@ def form_0(xg, yg, form_0):
                 if self.form_0_str == None:
                     # This cannot be done if a string has not been supplied
                     # ERROR
-                    print('Error: You need to supply the 0-form equation to do this, look at form_0_give_eqn method')
-                
-                # Now taht error has been expalined, put the resut into try/except
-                try:
+                    print('Error: You need to supply the 0-form equation to do this, look at \'give_eqn\' method')
+                else:
                     # get the supplied form as a string
                     zero_form_str = str(simplify(self.form_0_str))
                     # set up grids for contours
@@ -910,16 +1040,46 @@ def form_0(xg, yg, form_0):
                     # set up the contour plot
                     CS = axis.contour(contour_x_grid, contour_y_grid, form_0_contour, levels=self.lines)
                     axis.clabel(CS, inline=self.inline_bool, fontsize=self.fontsize)
-                except TypeError:
-                    pass
             else:
-                # set up grids for contours
-                contour_x, contour_y = np.linspace(-L, L, self.pt_den*self.denser), np.linspace(-L, L, self.pt_den*self.denser)
-                contour_x_grid, contour_y_grid = np.meshgrid(contour_x, contour_y)
-                # set up the contour plot
-                CS = axis.contour(contour_x_grid, contour_y_grid, form_0, levels=self.lines)
+                # set up the contour plot with given grids
+                CS = axis.contour(self.xg, self.yg, form_0, levels=self.lines)
                 axis.clabel(CS, inline=self.inline_bool, fontsize=self.fontsize)
         
+        # define a method to compute the exterior derivative
+        def ext_d(self):
+            '''
+            Takes in no argument
+            Returns 1 form object and the strings of its x comp. and y-comp.
+            computes the exterior derivative and returns it as the 1-form object
+            '''
+            
+            # first make sure that the string has been supplied
+            if self.form_0_str == None:
+                    # ERROR
+                    print('Error: You need to supply the 0-form equation to do this, look at \'give_eqn\' method')
+            else:
+                # can compute the exterior derivative:
+                form_0_str = str(simplify(self.form_0_str))
+                # from this, need derivatives so set it as a SymPy object
+                sympy_expr_form_0 = parse_expr(form_0_str, evaluate=False)
+                # set up an array of coordinates that need to be used (in standard order)
+                coords = ['x', 'y']
+                # from these, find the derivatives
+                form_1_x_str = str(diff(sympy_expr_form_0, coords[0]))
+                form_1_y_str = str(diff(sympy_expr_form_0, coords[1]))
+                # need to uspply these unformatted, so save those:
+                form_1_x_unformated, form_1_y_unformated = form_1_x_str*1, form_1_y_str*1
+                # from these strings, get the numerical 1-form:
+                form_1_x_str = form_1_x_str.replace('x', 'self.xg')
+                form_1_x_str = form_1_x_str.replace('y', 'self.yg')
+                form_1_y_str = form_1_y_str.replace('x', 'self.xg')
+                form_1_y_str = form_1_y_str.replace('y', 'self.yg')
+                form_0_x = eval(form_1_x_str)
+                form_0_y = eval(form_1_y_str)
+                # supply these to the 1-form object function
+                result_1_form = form_1(self.xg, self.yg, form_0_x, form_0_y, form_1_x_unformated, form_1_y_unformated)
+                return result_1_form
+    
     # now call that object to create it:
     form_0_object = form_set_up(xg, yg, form_0)
     # return it to user to store

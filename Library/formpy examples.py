@@ -32,11 +32,40 @@ form_obj.surround_space(6)
 
 form_obj.plot()
 
+
+# %%
+
+# 1 -form density change example
+
+# set up params.
+v = np.linspace(-6, 6, 31)
+xg, yg = np.meshgrid(v, v)
+F_x = yg*np.sin(xg)
+F_y = xg*np.cos(yg)
+
+# create object
+form_obj = fp.form_1(xg, yg, F_x, F_y)
+
+# plot
+form_obj.plot()
+
+# pause
+plt.pause(3)
+
+# supply equation
+form_obj.give_eqn('y*sin(x)', 'x*cos(y)')
+
+# change density
+form_obj.same_range_density(11)
+
+# replot
+form_obj.plot(False)
+
 # %%
 
 # plotting a 2-form
 
-v = np.linspace(-6, 6, 31)
+v = np.linspace(-6, 6, 21)
 xg, yg = np.meshgrid(v, v)
 
 form_2 = xg*yg
@@ -44,6 +73,14 @@ form_2 = xg*yg
 
 form_obj = fp.form_2(xg, yg, form_2)
 form_obj.plot()
+
+plt.pause(3)
+
+# redo this with some 'customisations' (bad ones for an example)
+form_obj.give_eqn('x*y')
+form_obj.same_range_density(18)
+# form_obj.sheet_size(0.466)
+form_obj.plot(False)
 
 
 # %%
@@ -65,11 +102,43 @@ plt.pause(5)
 
 # customising grids with an equation:
 
-form_obj.form_0_give_eqn('cos(x*y)')
+form_obj.give_eqn('cos(x*y)')
 
 # change the density:
-form_obj.density_increase(20)
+form_obj.density_increase(25)
 form_obj.lines_number(15)
 form_obj.plot(keep=False)
 
+# %%
+
+# testing 0-form exterior derivative
+
+# set up grids
+v = np.linspace(-4.5, 4.5, 11)
+xg, yg = np.meshgrid(v, v)
+
+# set up the 0 form object and plot it
+form_0 = np.cos(xg*yg)
+form_0_obj = fp.form_0(xg, yg, form_0)
+form_0_obj.plot()
+
+# try exterior derivative without having first given an equation in
+# throws an error
+form_1_obj = form_0_obj.ext_d()
+
+# supply equation and complete ext. deriv.
+form_0_obj.give_eqn('cos(x*y)')
+form_1_obj = form_0_obj.ext_d()  # this supplies the 1-form with equations too
+
+# plot that 1-form object
+form_1_obj.plot()
+
+plt.pause(2)
+
+# change its density and replot
+form_1_obj.same_range_density(26)
+form_1_obj.sheet_size(0.04)
+form_1_obj.plot(False)
+
+print(form_1_obj.return_string())
 
