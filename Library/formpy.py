@@ -53,6 +53,94 @@ def G(s, n, c):
         return (s/(n-1))
 
 
+# define a function that will find the 2-form from given expressions
+# in a given number of dimensions and in terms of given coordinate symbols
+def find_2_form(expressions, coords, xg, yg, zg=None, m=2):
+    
+    # from the grids, find pt_den
+    # again, assume that they are square
+    pt_den = len(xg[:, 0])
+    
+    # define a sympy expression for string 0
+    sympy_expr_zero = parse_expr('0*x', evaluate=False)
+    
+    # set up an array to store derrivatives.
+    ext_ds = np.empty((m, m), dtype='object')
+    
+    # set up an array to store the results
+    # in 2D only dx^dy, in 3D (m=3) (in order): dx^dy, dx^dz, dy^dz
+    result = np.empty((int((m-1)*m/2), 1), dtype='object')
+    for i in range(int((m-1)*m/2)):
+        result[i] = str(result[i])
+    
+    # loop over differentiating each, when differentiating w.r.t its coord, set to 0
+    for coord_index in range(len(coords)):
+        # loop over differentiating each component:
+        for comp_index in range(len(expressions)):
+            # when equal set to 0, when not-differentiate:
+            if comp_index == coord_index:
+                ext_ds[comp_index, coord_index] = str(sympy_expr_zero)
+            elif comp_index != coord_index:
+                ext_ds[comp_index, coord_index] = str(diff(expressions[comp_index], coords[coord_index]))
+            # change the signs for wedges in wrong order
+            if comp_index < coord_index:
+                ext_ds[comp_index, coord_index] = ' - (' + str(ext_ds[comp_index, coord_index]) + ')'
+            elif comp_index > coord_index:
+                ext_ds[comp_index, coord_index] = ' + ' + str(ext_ds[comp_index, coord_index])
+    
+    
+    # merge the results into a 2-form (for 2-form on R^2, the result is a single component (dx^xy))
+    # do so by adding opposite elements along the diagonal ( / ) components of ext_ds
+    # this  includes taking elemets with switched i and j
+    
+    
+    # set up a variable to count pairs (pairs because we are forming 2-forms):
+    pair = 0
+    
+    # loop over opposing elements (matching elementary 2-forms)
+    for i in range(1, m):
+        for j in range(i):
+            # initially clear the element from its Nonetype placeholder
+            result[pair, 0] = ''
+            # extract opposing elements
+            temp = ext_ds[i, j]
+            temp1 = ext_ds[j, i]
+            # check these against zero entries:
+            if (temp == '0') or (temp == '-(0)') or (temp == '0*x'):
+                pass
+            else:
+                result[pair, 0] += temp
+            if (temp1 == '0') or (temp1 == '-(0)') or (temp1 == '0*x'):
+                pass
+            else:
+                result[pair, 0] += temp1
+            # update the result row counter
+            pair += 1
+    
+    # create a local result, that will be used to evaluate the resulting string
+    loc_res = result + ''
+    
+    # format string in each result row
+    for d in range(pair):
+        # format the result to be 'python understood' to be able to use the eval()
+        loc_res[d, 0] = loc_res[d, 0].replace('x', 'xg')
+        loc_res[d, 0] = loc_res[d, 0].replace('y', 'yg')
+        loc_res[d, 0] = loc_res[d, 0].replace('z', 'zg')
+    
+    # set up a vector to store the 2-form numerically, from xg and yg
+    # Note - need pt_den m times.
+    if m == 2:
+        form_2 = np.empty((1, pt_den, pt_den))
+        form_2[0, :, :] = eval(loc_res[0, 0])
+    elif m == 3:
+        form_2 = np.empty((3, pt_den, pt_den, pt_den))
+        for d in range(3):
+            form_2[d, :, :, :] = eval(loc_res[d, 0])
+    
+    # return useful findings to the user
+    return form_2, result, ext_ds
+
+
 # %%
 
 '''
@@ -124,7 +212,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             This is done in case user wants to access strings
             that got here not by input but by ext. alg.
             '''
-            return self.form_1_str_x, self.form_1_str_x
+            return self.form_1_str_x, self.form_1_str_y
         
         # define a method to change figure size
         def fig_size(self, n, m):
@@ -513,6 +601,121 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                                 axis.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color = self.color))
                         else:
                             pass
+        
+        # define a method to find its exterior derivative
+        def ext_d(self):
+            '''
+            Takes in no argument
+            Returns 2 form object.
+            Computes the exterior derivative and returns it
+            as the 2-form object
+            '''
+            # first make sure that the string has been supplied
+            if self.form_1_str_x == None or self.form_1_str_y == None:
+                    # ERROR
+                    print('Error: You need to supply the 0-form equation to do this, look at \'give_eqn\' method')
+            else:
+                # the strings have been correctly given, compute the
+                # exterior derivative
+                # get the inpus from fields of x and u components
+                x_comp_str = str(simplify(self.form_1_str_x))
+                y_comp_str = str(simplify(self.form_1_str_y))
+                # from found u and v in the interior derivative, set up sympy components
+                sympy_expr_x = parse_expr(x_comp_str, evaluate=False)
+                sympy_expr_y = parse_expr(y_comp_str, evaluate=False)
+                # combine the 2 into a list:
+                expressions = np.array([sympy_expr_x, sympy_expr_y])
+                # set up an array of coordinates that need to be used (in standard order)
+                coords = ['x', 'y']
+                # set up dimensionality
+                m = 2
+                
+                
+                # ################## from these get the 2-form ################
+                
+                
+                # define a sympy expression for string 0
+                sympy_expr_zero = parse_expr('0*x', evaluate=False)
+                
+                # set up an array to store derrivatives.
+                ext_ds = np.empty((m, m), dtype='object')
+                
+                # set up an array to store the results
+                # in 2D only dx^dy, in 3D (m=3) (in order): dx^dy, dx^dz, dy^dz
+                result = np.empty((int((m-1)*m/2), 1), dtype='object')
+                for i in range(int((m-1)*m/2)):
+                    result[i] = str(result[i])
+                
+                # loop over differentiating each, when differentiating w.r.t its coord, set to 0
+                for coord_index in range(len(coords)):
+                    # loop over differentiating each component:
+                    for comp_index in range(len(expressions)):
+                        # when equal set to 0, when not-differentiate:
+                        if comp_index == coord_index:
+                            ext_ds[comp_index, coord_index] = str(sympy_expr_zero)
+                        elif comp_index != coord_index:
+                            ext_ds[comp_index, coord_index] = str(diff(expressions[comp_index], coords[coord_index]))
+                        # change the signs for wedges in wrong order
+                        if comp_index < coord_index:
+                            ext_ds[comp_index, coord_index] = ' - (' + str(ext_ds[comp_index, coord_index]) + ')'
+                        elif comp_index > coord_index:
+                            ext_ds[comp_index, coord_index] = ' + ' + str(ext_ds[comp_index, coord_index])
+                
+                
+                # merge the results into a 2-form (for 2-form on R^2, the result is a single component (dx^xy))
+                # do so by adding opposite elements along the diagonal ( / ) components of ext_ds
+                # this  includes taking elemets with switched i and j
+                
+                
+                # set up a variable to count pairs (pairs because we are forming 2-forms):
+                pair = 0
+                
+                # loop over opposing elements (matching elementary 2-forms)
+                for i in range(1, m):
+                    for j in range(i):
+                        # initially clear the element from its Nonetype placeholder
+                        result[pair, 0] = ''
+                        # extract opposing elements
+                        temp = ext_ds[i, j]
+                        temp1 = ext_ds[j, i]
+                        # check these against zero entries:
+                        if (temp == '0') or (temp == '-(0)') or (temp == '0*x'):
+                            pass
+                        else:
+                            result[pair, 0] += temp
+                        if (temp1 == '0') or (temp1 == '-(0)') or (temp1 == '0*x'):
+                            pass
+                        else:
+                            result[pair, 0] += temp1
+                        # update the result row counter
+                        pair += 1                
+                
+                
+                # ################### done dinfding 2-form ####################
+                
+                # get the string of this new 2-form
+                form_2_str = str(simplify(result[0][0]))
+                
+                # keep a local, unformatted version of this
+                # to supply to form_2
+                form_2_str_loc = form_2_str*1
+                
+                # numerically evalue it, careful about constants
+                # to evaliuate it, make sure to use grids
+                form_2_str = form_2_str.replace('x', 'self.xg')
+                form_2_str = form_2_str.replace('y', 'self.yg')
+                if form_2_str.find('xg') & form_2_str.find('yg') == -1:
+                    form_2_str = '(' + str(form_2_str) + ')* np.ones(np.shape(self.xg))'
+                else:
+                    pass
+                
+                form_2_result = eval(form_2_str)
+                
+                # supply these to the 2-form object creator
+                result_form = form_2(self.xg, self.yg, form_2_result, form_2_str_loc)
+                
+                # return it to the user
+                return result_form
     
     # now call that object to create it:
     form_1_object = form_set_up(xg, yg, F_x, F_y)
@@ -570,6 +773,15 @@ def form_2(xg, yg, form_2, form_2_eq=None):
             Has to be given, for some methods to be calculatable.
             '''
             self.form_2_str = equation_str
+        
+        # deifne a function to return the string equation to the user
+        def return_string(self):
+            '''
+            Takes in no arguments, returns the unformatted string back to user
+            This is done in case user wants to access strings
+            that got here not by input but by ext. alg.
+            '''
+            return self.form_2_str
         
         # define a method to change figure size
         def fig_size(self, n, m):
@@ -900,6 +1112,15 @@ def form_0(xg, yg, form_0):
             '''
             self.form_0_str = equation_str
         
+        # deifne a function to return the string equation to the user
+        def return_string(self):
+            '''
+            Takes in no arguments, returns the unformatted string back to user
+            This is done in case user wants to access strings
+            that got here not by input but by ext. alg.
+            '''
+            return self.form_0_str
+        
         # define a method to change figure size
         def fig_size(self, n, m):
             '''
@@ -1049,7 +1270,7 @@ def form_0(xg, yg, form_0):
         def ext_d(self):
             '''
             Takes in no argument
-            Returns 1 form object and the strings of its x comp. and y-comp.
+            Returns 1 form object
             computes the exterior derivative and returns it as the 1-form object
             '''
             

@@ -141,3 +141,38 @@ form_1_obj.sheet_size(0.04)
 form_1_obj.plot(False)
 
 print(form_1_obj.return_string())
+
+
+# %%
+
+# Testing ext deriv of 1-form
+
+# set up grids
+v = np.linspace(-4.5, 4.5, 21)
+xg, yg = np.meshgrid(v, v)
+
+# set up the 1 form object and plot it
+form_1_x = xg*np.cos(yg)
+form_1_y = yg*np.sin(xg)
+
+form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y)
+form_1_obj.plot()
+
+# supply equation and complete ext. deriv.
+form_1_obj.give_eqn('x*cos(y)', 'y*sin(x)')
+
+# compute the exterior derivative
+form_2_obj = form_1_obj.ext_d()  # this supplies the 2-form with equations too
+
+# plot that 2-form object
+form_2_obj.plot()
+
+plt.pause(2)
+
+# change its density and replot
+form_2_obj.same_range_density(26)
+form_2_obj.max_sheets(10)
+form_2_obj.plot(False)
+
+print(form_2_obj.return_string())
+
