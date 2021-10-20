@@ -142,6 +142,26 @@ form_1_obj.plot(False)
 
 print(form_1_obj.return_string())
 
+# %%
+
+# test of 0-form ext deriv with constant resulting 1-form
+
+
+# set up grids
+v = np.linspace(-4.5, 4.5, 11)
+xg, yg = np.meshgrid(v, v)
+
+# set up the 0 form object and plot it
+form_0 = xg**2 + 3*yg
+form_0_obj = fp.form_0(xg, yg, form_0)
+form_0_obj.plot()
+
+# supply equation and complete ext. deriv.
+form_0_obj.give_eqn('x**2 + 3*y')
+form_1_obj = form_0_obj.ext_d()  # this supplies the 1-form with equations too
+
+# plot that 1-form object
+form_1_obj.plot()
 
 # %%
 
@@ -175,4 +195,43 @@ form_2_obj.max_sheets(10)
 form_2_obj.plot(False)
 
 print(form_2_obj.return_string())
+
+
+# %%
+
+# Testing the Hodge of a 1-form
+
+# set up grids
+v = np.linspace(-4.5, 4.5, 21)
+xg, yg = np.meshgrid(v, v)
+
+# set up the 1 form object and plot it
+form_1_x = yg
+form_1_y = -xg
+
+form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y)
+form_1_obj.plot()
+
+# wait
+plt.pause(2)
+
+# supply equation and complete ext. deriv.
+form_1_obj.give_eqn('y', '-x')
+
+# compute the Hodge and replot
+form_1_obj.Hodge(numerical_only=False, keep_object=True)
+
+# replot and wait
+form_1_obj.plot(keep=False)
+plt.pause(2)
+
+# compute the Hodge again, now set to a new form
+form_1_obj_2H = form_1_obj.Hodge(numerical_only=False, keep_object=False)
+
+form_1_obj_2H.plot(False)
+
+
+
+
+
 

@@ -152,12 +152,15 @@ function to create a 1-form object and define methods for it
 
 # define a function taht will set up a 1-form object that can be customised and
 # plotted
-def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
+def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None):
     '''
     defines a 1-form object and returns it to user
-    Takes 4 arguments, these are the 2 grids in 2D, which muse be square
+    Takes 7 arguments, these are the 2 grids in 2D, which muse be square
     and of equal sizes. Then 2 arguments for the dx component and dy component
-    bbased on the same grids
+    based on the same grids
+    Then 2 equations, for x and y (not always needed)
+    Then, can supply a figure if user doesn't wat this object
+    to create a new one for itself
     '''
     # define the 1-form object and all its methods
     class form_set_up():
@@ -167,8 +170,13 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             self.yg = yg
             self.F_x = F_x
             self.F_y = F_y
-            self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
-            self.axis = self.figure.gca()
+            # set up a figure if one was not given:
+            if fig == None:
+                self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
+                self.axis = self.figure.gca()
+            else:
+                self.figure = fig
+                self.axis  = self.figure.gca()
             self.s_max = s_max
             self.s_min = s_min
             self.pt_den = len(xg[:, 0])# + 1  # assume square grids
@@ -613,7 +621,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             # first make sure that the string has been supplied
             if self.form_1_str_x == None or self.form_1_str_y == None:
                     # ERROR
-                    print('Error: You need to supply the 0-form equation to do this, look at \'give_eqn\' method')
+                    print('Error: You need to supply the 1-form equations to do this, look at \'give_eqn\' method')
             else:
                 # the strings have been correctly given, compute the
                 # exterior derivative
@@ -717,10 +725,102 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                 # return it to the user
                 return result_form
     
+        # define a method to Hodge it
+        def Hodge(self, numerical_only=True, keep_object=True):
+            '''
+            Takes in two bool arguments:
+            1) determines if the calculation should be numerical or analytic
+            True if numerical, False if analytic and numerical. Default is True
+            For the analytic one, the equations as string must be supplied to
+            the object
+            Note, choosing analytical, changes the equations AND the numerical answers
+            2) determines if the result should be returned as a new 1-form or
+                if the current one need to be changed. Default is True
+            It calulates the Hodge on R^2 by the standard definition:
+            dx -> dy and dy -> -dx
+            return nothing 1-form if keep_object is False, else returns nothing
+            '''
+            # distinguish between doing it numerically and alaytically
+            if numerical_only is True:
+                # check if equations have been given:
+                # if they have, doing it only numerically would create
+                # a mismatch, avoid that
+                if self.form_1_str_x == None or self.form_1_str_y == None:
+                    pass
+                else:
+                    # equations have been given, a mismatch may occur
+                    # warn the user
+                    print('Warning: You supplied equations, doing it numerically only will result in a mismacth between numerical values and equations')
+                # now complete the process numerically:
+                new_form_1_x = -self.F_y
+                new_form_1_y = self.F_x
+                # check keep_object:
+                if keep_object is True:
+                    # change the object self properties accoridnly
+                    self.F_x = new_form_1_x
+                    self.F_y = new_form_1_y
+                elif keep_object is False:
+                    # pass these in to the object to create a new one:
+                    new_object = form_1(self.xg, self.yg, new_form_1_x, new_form_1_y)  # N.B no equations to supply
+                    # return the new one to the user:
+                    return new_object
+                else:
+                    print('Error, Invalid input for \'keep_object\'')
+            
+            elif numerical_only is False:
+                # can only be done if equations have been given, check:
+                if self.form_1_str_x == None or self.form_1_str_y == None:
+                    # ERROR
+                    print('Error: You need to supply the 1-form equation to do this, look at \'give_eqn\' method')
+                else:
+                    # some equations are there, compute the Hodge on these:
+                    # Note: Upto user to make sure their equations match their
+                    # numerical input
+                    new_str_x = '-(' + self.form_1_str_y + ')'
+                    new_str_y = self.form_1_str_x
+                    # from these, get numerical solutions, evaulated on local
+                    # strings changed to relate to the self grids
+                    # need to uspply these unformatted, so save those:
+                    form_1_x_unformated, form_1_y_unformated = new_str_x*1, new_str_y*1
+                    # from these strings, get the numerical 1-form:
+                    new_str_x = new_str_x.replace('x', 'self.xg')
+                    new_str_x = new_str_x.replace('y', 'self.yg')
+                    new_str_y = new_str_y.replace('x', 'self.xg')
+                    new_str_y = new_str_y.replace('y', 'self.yg')
+                    
+                    if new_str_x.find('xg') & new_str_x.find('yg') == -1:
+                        new_str_x = '(' + str(new_str_x) + ')* np.ones(np.shape(self.xg))'
+                    if new_str_y.find('xg') & new_str_y.find('yg') == -1:
+                        new_str_y = '(' + str(new_str_y) + ')* np.ones(np.shape(self.yg))'
+                    
+                    form_1_x = eval(new_str_x)
+                    form_1_y = eval(new_str_y)
+                    
+                    # depending on keep_object, return:
+                    if keep_object is True:
+                        self.F_x = form_1_x
+                        self.F_y = form_1_y
+                        self.form_1_str_x = form_1_x_unformated
+                        self.form_1_str_y = form_1_y_unformated
+                    elif keep_object is False:
+                        # pass these in to the object to create a new one:
+                        new_object = form_1(self.xg, self.yg, form_1_x, form_1_y, F_x_eqn=form_1_x_unformated, F_y_eqn=form_1_y_unformated, fig=self.figure)
+                        # return the new one to the user:
+                        return new_object
+                    else:
+                        print('Error, Invalid input for \'keep_object\'')
+            else:
+                # Error
+                print('ERROR: Invalid input for \'numerical_only\'')
+        
+    
     # now call that object to create it:
     form_1_object = form_set_up(xg, yg, F_x, F_y)
     # return it to user to store
     return form_1_object
+
+
+
 
 
 # %%
@@ -733,7 +833,7 @@ function to create a 2-form object and define methods for it
 
 # define a function that will set up a 2-form object that can be customised and
 # plotted
-def form_2(xg, yg, form_2, form_2_eq=None):
+def form_2(xg, yg, form_2, form_2_eq=None, fig=None):
     '''
     defines a 2-form object and returns it to user
     Takes 3 arguments basic, these are the 2 grids in 2D, which muse be square
@@ -747,8 +847,12 @@ def form_2(xg, yg, form_2, form_2_eq=None):
             self.xg = xg
             self.yg = yg
             self.form_2 = form_2
-            self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
-            self.axis = self.figure.gca()
+            if fig == None:
+                self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
+                self.axis = self.figure.gca()
+            else:
+                self.figure = fig
+                self.axis  = self.figure.gca()
             self.s_max = s_max
             self.s_min = s_min
             self.pt_den = len(xg[:, 0])  # + 1  # assume square grids
@@ -1070,7 +1174,7 @@ function to create a 0-form object and define methods for it
 
 # define a function that will set up a 2-form object that can be customised and
 # plotted
-def form_0(xg, yg, form_0):
+def form_0(xg, yg, form_0, fig=None):
     '''
     defines a 0-form object and returns it to user
     Takes 3 arguments basic, these are the 2 grids in 2D, which muse be square
@@ -1083,8 +1187,12 @@ def form_0(xg, yg, form_0):
             self.xg = xg
             self.yg = yg
             self.form_0 = form_0
-            self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
-            self.axis = self.figure.gca()
+            if fig == None:
+                self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
+                self.axis = self.figure.gca()
+            else:
+                self.figure = fig
+                self.axis  = self.figure.gca()
             self.pt_den = len(xg[:, 0])  # + 1  # assume square grids
             self.logarithmic_scale_bool = 0
             self.delta_factor = deltafactor
@@ -1295,10 +1403,14 @@ def form_0(xg, yg, form_0):
                 form_1_x_str = form_1_x_str.replace('y', 'self.yg')
                 form_1_y_str = form_1_y_str.replace('x', 'self.xg')
                 form_1_y_str = form_1_y_str.replace('y', 'self.yg')
-                form_0_x = eval(form_1_x_str)
-                form_0_y = eval(form_1_y_str)
+                if form_1_x_str.find('xg') & form_1_x_str.find('yg') == -1:
+                    form_1_x_str = '(' + str(form_1_x_str) + ')* np.ones(np.shape(self.xg))'
+                if form_1_y_str.find('xg') & form_1_y_str.find('yg') == -1:
+                    form_1_y_str = '(' + str(form_1_y_str) + ')* np.ones(np.shape(self.yg))'
+                form_1_x = eval(form_1_x_str)
+                form_1_y = eval(form_1_y_str)
                 # supply these to the 1-form object function
-                result_1_form = form_1(self.xg, self.yg, form_0_x, form_0_y, form_1_x_unformated, form_1_y_unformated)
+                result_1_form = form_1(self.xg, self.yg, form_1_x, form_1_y, form_1_x_unformated, form_1_y_unformated)
                 return result_1_form
     
     # now call that object to create it:
