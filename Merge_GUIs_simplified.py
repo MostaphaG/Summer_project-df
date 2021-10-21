@@ -2634,7 +2634,7 @@ def form_2_components_plot(grid_x, grid_y, form_2_loc, angle, s_max, L, fract, c
     # of the arrow and with an arrowhead on top.
     # #########################################################################
     # find the maximum magnitude for scaling
-    max_size = abs(np.max(form_2_loc))   # careful with singularities, else ---> nan
+    max_size = np.max(abs(form_2_loc))   # careful with singularities, else ---> nan
     
     # find the relative magnitude of vectors to maximum, as an array
     R = abs(form_2_loc)/max_size

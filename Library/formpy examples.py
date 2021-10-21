@@ -230,8 +230,111 @@ form_1_obj_2H = form_1_obj.Hodge(numerical_only=False, keep_object=False)
 
 form_1_obj_2H.plot(False)
 
+# %%
+
+# example of using subplots
+
+# set up grids
+v = np.linspace(-4.5, 4.5, 21)
+xg, yg = np.meshgrid(v, v)
+
+# set up the 1 form object and plot it
+form_1_x = yg
+form_1_y = -xg
+
+# set up a figure
+fig = plt.figure(figsize=(14, 7))
+
+# create a form object using these
+form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y, fig=fig, subplots=True)
+
+form_1_obj.add_subplot(121)
+form_1_obj.add_subplot(122)
+
+form_1_obj.plot(keep=False, subplot_index=0)
+
+form_1_obj.Hodge(numerical_only=True, keep_object=True)
+form_1_obj.plot(keep=True, subplot_index=1)
+
+# %%
+
+# try it with 2-forms
 
 
+# set up grids
+v = np.linspace(-4.5, 4.5, 21)
+xg, yg = np.meshgrid(v, v)
+
+fig = plt.figure(figsize=(14, 7))
+
+# set up the 1 form object and plot it
+form_1_x = yg
+form_1_y = -xg
+form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y, fig=fig, subplots=True)
+
+form_2 = xg*yg
+form_2_obj = fp.form_2(xg, yg, form_2, fig=fig, subplots=True)
+
+form_1_obj.add_subplot(121)
+form_2_obj.add_subplot(121)
+form_2_obj.add_subplot(122)
+
+form_1_obj.plot(keep=False, subplot_index=0)
+form_2_obj.plot(keep=True, subplot_index=1)
 
 
+# %%
 
+
+# Do the same but with exterior derivative to show that it can pass form
+# function to function
+
+# set up grids
+v = np.linspace(-4.5, 4.5, 21)
+xg, yg = np.meshgrid(v, v)
+
+fig = plt.figure(figsize=(14, 7))
+
+# set up the 1 form object and plot it
+form_1_x = yg*np.cos(xg)
+form_1_y = -xg
+form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y, fig=fig, subplots=True)
+
+# supply eqautions into the 1-form
+form_1_obj.give_eqn('y*cos(x)', '-x')
+
+form_2_obj = form_1_obj.ext_d(pass_on_figure=True)
+
+form_1_obj.add_subplot(121)
+form_2_obj.add_subplot(121)  # form_2 did not have the first one given, so indexes will be wrong if we don't supply it a dummy one
+form_2_obj.add_subplot(122)
+
+form_1_obj.plot(keep=False, subplot_index=0)
+form_2_obj.plot(keep=True, subplot_index=1)
+
+# %%
+
+# testing proividing subplot axis straight in:
+
+
+# set up grids
+v = np.linspace(-4.5, 4.5, 11)
+xg, yg = np.meshgrid(v, v)
+
+fig = plt.figure()
+ax1 = fig.add_subplot(121)
+ax2 = fig.add_subplot(122)
+
+# set up the 0 form object and plot it
+form_0 = xg**2 + 3*yg
+form_0_obj = fp.form_0(xg, yg, form_0, fig=fig, subplots=True, sub_axis_list=[ax1, ax2])
+
+form_0_obj.plot(keep=False, subplot_index=0)
+
+# supply equation and change its density
+form_0_obj.give_eqn('x**2 + 3*y')
+form_0_obj.same_range_density(31)
+form_0_obj.lines_number(20)
+
+# plot that changed 0-form object
+form_0_obj.plot(keep=True, subplot_index=1)

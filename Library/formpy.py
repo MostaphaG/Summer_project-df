@@ -152,15 +152,19 @@ function to create a 1-form object and define methods for it
 
 # define a function taht will set up a 1-form object that can be customised and
 # plotted
-def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None):
+def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=False, sub_axis_list=[]):
     '''
     defines a 1-form object and returns it to user
-    Takes 7 arguments, these are the 2 grids in 2D, which muse be square
+    Takes 9 arguments, these are the 2 grids in 2D, which muse be square
     and of equal sizes. Then 2 arguments for the dx component and dy component
     based on the same grids
     Then 2 equations, for x and y (not always needed)
     Then, can supply a figure if user doesn't wat this object
     to create a new one for itself
+    Can also supply a bool input to define if subplots are to be allowed
+    these can be added using a method (add_subplot)
+    also, user can supply sub_axis_list, to provide the axis they have set
+    these only work if a figure has been supplied and if subplots is True
     '''
     # define the 1-form object and all its methods
     class form_set_up():
@@ -175,8 +179,19 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None):
                 self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
                 self.axis = self.figure.gca()
             else:
-                self.figure = fig
-                self.axis  = self.figure.gca()
+                if subplots is False:
+                    self.figure = fig
+                    self.axis  = self.figure.gca()
+                elif subplots is True:
+                    if len(sub_axis_list) == 0:
+                        self.figure = fig
+                        self.axis = []
+                    else:
+                        self.figure = fig
+                        self.axis = sub_axis_list
+                else:
+                    print('Error, incorrect input for \'subplots\'')
+            self.subplots = subplots
             self.s_max = s_max
             self.s_min = s_min
             self.pt_den = len(xg[:, 0])# + 1  # assume square grids
@@ -212,6 +227,18 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None):
             '''
             self.form_1_str_x = equation_str_x
             self.form_1_str_y = equation_str_y
+            # make the values match automatically to limit how often mismatch occurs
+            # substitute these into the equation:
+            # but keep it local
+            str_x = self.form_1_str_x + ''
+            str_y = self.form_1_str_y + ''
+            str_x = str_x.replace('x', '(self.xg)')
+            str_x = str_x.replace('y', '(self.yg)')
+            str_y = str_y.replace('x', '(self.xg)')
+            str_y = str_y.replace('y', '(self.yg)')
+            # re-evaluate the 2-form numerically
+            self.F_x = eval(str_x)
+            self.F_y = eval(str_y)
         
         # deifne a function to return the string equations to the user
         def return_string(self):
@@ -221,6 +248,23 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None):
             that got here not by input but by ext. alg.
             '''
             return self.form_1_str_x, self.form_1_str_y
+        
+        # define a method to add a subplot
+        def add_subplot(self, order):
+            '''
+            Takes in one argument, as as matplotlib add_subplot
+            It determines the shape of the subplot structure and which axis is
+            being set (eg. 231 gives a set of plots 2 rows by 3 columns
+            and this sets the first axis in that configuration)
+            Adds a subplot to the figure that this form occupies
+            Returns nothing, saves the subplot axis to the axis self param.
+            '''
+            # chck if the correct option was chosen to allow for this:
+            if type(self.axis) != list:
+                print('Error, set up the object allowing for subplots')
+            else:
+                sub_axis = self.figure.add_subplot(order)
+                self.axis.append(sub_axis)
         
         # define a method to change figure size
         def fig_size(self, n, m):
@@ -385,14 +429,27 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None):
         
         # define a fucntion that will use the set up 1-form and plot it
         # stcakplot: but it takes the above defined variables:
-        def plot(self, keep=True):
+        def plot(self, keep=True, subplot_index=None):
             '''
             Finilises the plotting
             Uses the attribues of the object as set originally and as customised
             with methods to create a plot of the 1-form
+            Takes in 2 arguments:
+            --- \'keep\', which allows the user to plot
+            on top of the previous pltos they created without clearing axis
+            When its set to False, the axis are cleared first
+            Default is True.
+            --- \' subplot_index \', default set to None, can be input if
+            the user has selected subplots to be allowed when creating the
+            object. Determines which aixs to draw on, indecies are in order
+            that they were added to the object
             '''
             # from self, get axis
-            axis = self.axis
+            # depending on if subplots are wanted:
+            if type(self.axis) != list:
+                axis = self.axis
+            else:
+                axis = self.axis[subplot_index]
             
             # depending on input, clear the axis or don't
             if keep is True:
@@ -611,7 +668,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None):
                             pass
         
         # define a method to find its exterior derivative
-        def ext_d(self):
+        def ext_d(self, pass_on_figure=False):
             '''
             Takes in no argument
             Returns 2 form object.
@@ -719,8 +776,17 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None):
                 
                 form_2_result = eval(form_2_str)
                 
-                # supply these to the 2-form object creator
-                result_form = form_2(self.xg, self.yg, form_2_result, form_2_str_loc)
+                if pass_on_figure is False:
+                    # supply these to the 2-form object creator
+                    result_form = form_2(self.xg, self.yg, form_2_result, form_2_str_loc, subplots=self.subplots)
+                elif pass_on_figure is True:
+                    if self.subplots is False:
+                        result_form = form_2(self.xg, self.yg, form_2_result, form_2_str_loc, fig=self.figure, subplots=False)
+                    elif self.subplots is True:
+                        result_form = form_2(self.xg, self.yg, form_2_result, form_2_str_loc, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+                else:
+                    print('Error, Incorrect input for \' pass_on_figure \'')
+                    
                 
                 # return it to the user
                 return result_form
@@ -804,7 +870,10 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None):
                         self.form_1_str_y = form_1_y_unformated
                     elif keep_object is False:
                         # pass these in to the object to create a new one:
-                        new_object = form_1(self.xg, self.yg, form_1_x, form_1_y, F_x_eqn=form_1_x_unformated, F_y_eqn=form_1_y_unformated, fig=self.figure)
+                        if self.subplots is False:
+                            new_object = form_1(self.xg, self.yg, form_1_x, form_1_y, F_x_eqn=form_1_x_unformated, F_y_eqn=form_1_y_unformated, fig=self.figure, subplots=False)
+                        if self.subplots is True:
+                            new_object = form_1(self.xg, self.yg, form_1_x, form_1_y, F_x_eqn=form_1_x_unformated, F_y_eqn=form_1_y_unformated, fig=self.figure, subplots=True, sub_axis_list=self.axis)
                         # return the new one to the user:
                         return new_object
                     else:
@@ -833,12 +902,15 @@ function to create a 2-form object and define methods for it
 
 # define a function that will set up a 2-form object that can be customised and
 # plotted
-def form_2(xg, yg, form_2, form_2_eq=None, fig=None):
+def form_2(xg, yg, form_2, form_2_eq=None, fig=None, subplots=False, sub_axis_list=[]):
     '''
     defines a 2-form object and returns it to user
     Takes 3 arguments basic, these are the 2 grids in 2D, which muse be square
     and of equal sizes. Then 1 argument for the dx^dy component
-    based on the same grids.
+    based on the same grids. Also takes in an equation which is needed for some
+    operaions
+    Takes in a figure if one is to be supplied. Can take axis for subplots in
+    The subplots only occur if subplots input is set to True, default is False
     '''
     # define the 1-form object and all its methods
     class form_set_up():
@@ -847,12 +919,24 @@ def form_2(xg, yg, form_2, form_2_eq=None, fig=None):
             self.xg = xg
             self.yg = yg
             self.form_2 = form_2
+            # set up a figure if one was not given:
             if fig == None:
                 self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
                 self.axis = self.figure.gca()
             else:
-                self.figure = fig
-                self.axis  = self.figure.gca()
+                if subplots is False:
+                    self.figure = fig
+                    self.axis  = self.figure.gca()
+                elif subplots is True:
+                    if len(sub_axis_list) == 0:
+                        self.figure = fig
+                        self.axis = []
+                    else:
+                        self.figure = fig
+                        self.axis = sub_axis_list
+                else:
+                    print('Error, incorrect input for \'subplots\'')
+            self.subplots = subplots
             self.s_max = s_max
             self.s_min = s_min
             self.pt_den = len(xg[:, 0])  # + 1  # assume square grids
@@ -877,6 +961,13 @@ def form_2(xg, yg, form_2, form_2_eq=None, fig=None):
             Has to be given, for some methods to be calculatable.
             '''
             self.form_2_str = equation_str
+            
+            # update the numerical values to always match
+            string = self.form_2_str + ''
+            string = string.replace('x', '(self.xg)')
+            string = string.replace('y', '(self.yg)')
+            # re-evaluate the 2-form numerically
+            self.form_2 = eval(string)
         
         # deifne a function to return the string equation to the user
         def return_string(self):
@@ -886,6 +977,23 @@ def form_2(xg, yg, form_2, form_2_eq=None, fig=None):
             that got here not by input but by ext. alg.
             '''
             return self.form_2_str
+        
+        # define a method to add a subplot
+        def add_subplot(self, order):
+            '''
+            Takes in one argument, as as matplotlib add_subplot
+            It determines the shape of the subplot structure and which axis is
+            being set (eg. 231 gives a set of plots 2 rows by 3 columns
+            and this sets the first axis in that configuration)
+            Adds a subplot to the figure that this form occupies
+            Returns nothing, saves the subplot axis to the axis self param.
+            '''
+            # chck if the correct option was chosen to allow for this:
+            if type(self.axis) != list:
+                print('Error, set up the object allowing for subplots')
+            else:
+                sub_axis = self.figure.add_subplot(order)
+                self.axis.append(sub_axis)
         
         # define a method to change figure size
         def fig_size(self, n, m):
@@ -983,18 +1091,30 @@ def form_2(xg, yg, form_2, form_2_eq=None, fig=None):
         
         # define a function to plot the set up 2-form
         # originally form_2_components_plot
-        def plot(self, keep=True):
+        def plot(self, keep=True, subplot_index=None):
             '''
             Finilises the plotting
-            Takes in 1 input, that determines if axis should be cleared before
-            default is True
+            Takes in 2 inputs:
+            1) \'keep\'determines if axis should be cleared before.
+                Default is True
+            2) \' subplot_index \', default set to None, can be input if
+            the user has selected subplots to be allowed when creating the
+            object. Determines which aixs to draw on, indecies are in order
+            that they were added to the object.
+            
             Uses the attribues of the object as set originally and as customised
             with methods to create a plot of the 2-form
             '''
-            
             # for ease of later writting:
-            axis = self.axis  # from self, get axis
-            form_2 = self.form_2  # from self, get 2-form
+            # from self, get axis
+            # depending on if subplots are wanted:
+            if type(self.axis) != list:
+                axis = self.axis
+            else:
+                axis = self.axis[subplot_index]
+            
+            
+            form_2 = self.form_2  # from self, get 2-form too
             
             # depending on input, clear the axis or don't
             if keep is True:
@@ -1057,7 +1177,7 @@ def form_2(xg, yg, form_2, form_2_eq=None, fig=None):
             # of the arrow and with an arrowhead on top.
             # #########################################################################
             # find the maximum magnitude for scaling
-            max_size = abs(np.max(form_2))   # careful with singularities, else ---> nan
+            max_size = np.max(abs(form_2))   # careful with singularities, else ---> nan
             
             # find the relative magnitude of vectors to maximum, as an array
             R = abs(form_2)/max_size
@@ -1174,7 +1294,7 @@ function to create a 0-form object and define methods for it
 
 # define a function that will set up a 2-form object that can be customised and
 # plotted
-def form_0(xg, yg, form_0, fig=None):
+def form_0(xg, yg, form_0, fig=None, subplots=False, sub_axis_list=[]):
     '''
     defines a 0-form object and returns it to user
     Takes 3 arguments basic, these are the 2 grids in 2D, which muse be square
@@ -1187,12 +1307,25 @@ def form_0(xg, yg, form_0, fig=None):
             self.xg = xg
             self.yg = yg
             self.form_0 = form_0
+            # set up a figure if one was not given:
             if fig == None:
                 self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
                 self.axis = self.figure.gca()
             else:
-                self.figure = fig
-                self.axis  = self.figure.gca()
+                if subplots is False:
+                    self.figure = fig
+                    self.axis  = self.figure.gca()
+                elif subplots is True:
+                    if len(sub_axis_list) == 0:
+                        self.figure = fig
+                        self.axis = []
+                    else:
+                        self.figure = fig
+                        self.axis = sub_axis_list
+                else:
+                    print('Error, incorrect input for \'subplots\'')
+            
+            self.subplots = subplots
             self.pt_den = len(xg[:, 0])  # + 1  # assume square grids
             self.logarithmic_scale_bool = 0
             self.delta_factor = deltafactor
@@ -1228,6 +1361,23 @@ def form_0(xg, yg, form_0, fig=None):
             that got here not by input but by ext. alg.
             '''
             return self.form_0_str
+        
+        # define a method to add a subplot
+        def add_subplot(self, order):
+            '''
+            Takes in one argument, as as matplotlib add_subplot
+            It determines the shape of the subplot structure and which axis is
+            being set (eg. 231 gives a set of plots 2 rows by 3 columns
+            and this sets the first axis in that configuration)
+            Adds a subplot to the figure that this form occupies
+            Returns nothing, saves the subplot axis to the axis self param.
+            '''
+            # chck if the correct option was chosen to allow for this:
+            if type(self.axis) != list:
+                print('Error, set up the object allowing for subplots')
+            else:
+                sub_axis = self.figure.add_subplot(order)
+                self.axis.append(sub_axis)
         
         # define a method to change figure size
         def fig_size(self, n, m):
@@ -1320,23 +1470,32 @@ def form_0(xg, yg, form_0, fig=None):
         
         
         # define a fucntion to plot a zero form when button is pressed.
-        def plot(self, keep=True):
+        def plot(self, keep=True, subplot_index=None):
             '''
             Finilises the plotting
             Uses the attribues of the object as set originally and as customised
             with methods to create a plot of the 2-form.
             Can take one parameter: bool. Default is True
             determines if axis should be cleared before plotting.
+            Another parameter it takes:
+                index of subplot on which to plot it, if object was set up with
+                axis
             '''
+            
+            # for ease of later writting:
+            # from self, get axis
+            # depending on if subplots are wanted:
+            if type(self.axis) != list:
+                axis = self.axis
+            else:
+                axis = self.axis[subplot_index]
             
             # check if user wants to clear first:
             if keep is True:
                 pass
             else:
-                self.axis.clear()
+                axis.clear()
             
-            # for ease of later writting:
-            axis = self.axis  # from self, get axis
             form_0 = self.form_0  # from self, get 2-form
             
             # get L from largest entry in the array, assume they are square:
@@ -1410,7 +1569,10 @@ def form_0(xg, yg, form_0, fig=None):
                 form_1_x = eval(form_1_x_str)
                 form_1_y = eval(form_1_y_str)
                 # supply these to the 1-form object function
-                result_1_form = form_1(self.xg, self.yg, form_1_x, form_1_y, form_1_x_unformated, form_1_y_unformated)
+                if self.subplots is False:
+                    result_1_form = form_1(self.xg, self.yg, form_1_x, form_1_y, form_1_x_unformated, form_1_y_unformated)
+                elif self.subplots is True:
+                    result_1_form = form_1(self.xg, self.yg, form_1_x, form_1_y, form_1_x_unformated, form_1_y_unformated)
                 return result_1_form
     
     # now call that object to create it:
