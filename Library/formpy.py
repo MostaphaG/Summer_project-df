@@ -190,7 +190,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                         self.figure = fig
                         self.axis = sub_axis_list
                 else:
-                    print('Error, incorrect input for \'subplots\'')
+                    raise TypeError('Error, incorrect input for \'subplots\'')
             self.subplots = subplots
             self.s_max = s_max
             self.s_min = s_min
@@ -261,7 +261,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             '''
             # chck if the correct option was chosen to allow for this:
             if type(self.axis) != list:
-                print('Error, set up the object allowing for subplots')
+                raise ValueError('Error, set up the object allowing for subplots')
             else:
                 sub_axis = self.figure.add_subplot(order)
                 self.axis.append(sub_axis)
@@ -403,7 +403,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             '''
             if self.form_1_str_x == None or self.form_1_str_y == None:
                 # Error
-                print('Error: You need to supply the 1-form equation to do this, look at \'give_eqn\' method')
+                raise ValueError('Error: You need to supply the 1-form equation to do this, look at \'give_eqn\' method')
             else:
                 # redefine the grids
                 v = np.linspace(-self.xg[0, -1], self.xg[0, -1], points_number)
@@ -670,15 +670,16 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
         # define a method to find its exterior derivative
         def ext_d(self, pass_on_figure=False):
             '''
-            Takes in no argument
+            Takes in 1 argument:
+            determines if the figure should be passed onto the 2-form
+               object that is returned, or if it should create one of its own
             Returns 2 form object.
             Computes the exterior derivative and returns it
             as the 2-form object
             '''
-            # first make sure that the string has been supplied
             if self.form_1_str_x == None or self.form_1_str_y == None:
                     # ERROR
-                    print('Error: You need to supply the 1-form equations to do this, look at \'give_eqn\' method')
+                    raise ValueError('Error: You need to supply the 1-form equations to do this, look at \'give_eqn\' method')
             else:
                 # the strings have been correctly given, compute the
                 # exterior derivative
@@ -785,12 +786,11 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                     elif self.subplots is True:
                         result_form = form_2(self.xg, self.yg, form_2_result, form_2_str_loc, fig=self.figure, subplots=True, sub_axis_list=self.axis)
                 else:
-                    print('Error, Incorrect input for \' pass_on_figure \'')
-                    
+                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
                 
                 # return it to the user
                 return result_form
-    
+                
         # define a method to Hodge it
         def Hodge(self, numerical_only=True, keep_object=True):
             '''
@@ -831,13 +831,13 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                     # return the new one to the user:
                     return new_object
                 else:
-                    print('Error, Invalid input for \'keep_object\'')
+                    raise ValueError('Error, Invalid input for \'keep_object\'')
             
             elif numerical_only is False:
                 # can only be done if equations have been given, check:
                 if self.form_1_str_x == None or self.form_1_str_y == None:
                     # ERROR
-                    print('Error: You need to supply the 1-form equation to do this, look at \'give_eqn\' method')
+                    raise TypeError('Error: You need to supply the 1-form equation to do this, look at \'give_eqn\' method')
                 else:
                     # some equations are there, compute the Hodge on these:
                     # Note: Upto user to make sure their equations match their
@@ -877,10 +877,10 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                         # return the new one to the user:
                         return new_object
                     else:
-                        print('Error, Invalid input for \'keep_object\'')
+                        raise ValueError('Error, Invalid input for \'keep_object\'')
             else:
                 # Error
-                print('ERROR: Invalid input for \'numerical_only\'')
+                raise ValueError('ERROR: Invalid input for \'numerical_only\'')
         
     
     # now call that object to create it:
@@ -935,7 +935,7 @@ def form_2(xg, yg, form_2, form_2_eq=None, fig=None, subplots=False, sub_axis_li
                         self.figure = fig
                         self.axis = sub_axis_list
                 else:
-                    print('Error, incorrect input for \'subplots\'')
+                    raise ValueError('Error, incorrect input for \'subplots\'')
             self.subplots = subplots
             self.s_max = s_max
             self.s_min = s_min
@@ -990,7 +990,7 @@ def form_2(xg, yg, form_2, form_2_eq=None, fig=None, subplots=False, sub_axis_li
             '''
             # chck if the correct option was chosen to allow for this:
             if type(self.axis) != list:
-                print('Error, set up the object allowing for subplots')
+                raise TypeError('Error, set up the object allowing for subplots')
             else:
                 sub_axis = self.figure.add_subplot(order)
                 self.axis.append(sub_axis)
@@ -1068,7 +1068,7 @@ def form_2(xg, yg, form_2, form_2_eq=None, fig=None, subplots=False, sub_axis_li
             '''
             if self.form_2_str == None:
                 # Error
-                print('Error: You need to supply the 2-form equation to do this, look at \'give_eqn\' method')
+                raise TypeError('Error: You need to supply the 2-form equation to do this, look at \'give_eqn\' method')
             else:
                 # redefine the grids
                 v = np.linspace(-self.xg[0, -1], self.xg[0, -1], points_number)
@@ -1323,7 +1323,7 @@ def form_0(xg, yg, form_0, fig=None, subplots=False, sub_axis_list=[]):
                         self.figure = fig
                         self.axis = sub_axis_list
                 else:
-                    print('Error, incorrect input for \'subplots\'')
+                    raise ValueError('Error, incorrect input for \'subplots\'')
             
             self.subplots = subplots
             self.pt_den = len(xg[:, 0])  # + 1  # assume square grids
@@ -1374,7 +1374,7 @@ def form_0(xg, yg, form_0, fig=None, subplots=False, sub_axis_list=[]):
             '''
             # chck if the correct option was chosen to allow for this:
             if type(self.axis) != list:
-                print('Error, set up the object allowing for subplots')
+                raise ValueError('Error, set up the object allowing for subplots')
             else:
                 sub_axis = self.figure.add_subplot(order)
                 self.axis.append(sub_axis)
@@ -1448,7 +1448,7 @@ def form_0(xg, yg, form_0, fig=None, subplots=False, sub_axis_list=[]):
             '''
             if self.form_0_str == None:
                 # Error
-                print('Error: You need to supply the 0-form equation to do this, look at \'give_eqn\' method')
+                raise TypeError('Error: You need to supply the 0-form equation to do this, look at \'give_eqn\' method')
             else:
                 # redefine the grids
                 v = np.linspace(-self.xg[0, -1], self.xg[0, -1], points_number)
@@ -1510,7 +1510,7 @@ def form_0(xg, yg, form_0, fig=None, subplots=False, sub_axis_list=[]):
                 if self.form_0_str == None:
                     # This cannot be done if a string has not been supplied
                     # ERROR
-                    print('Error: You need to supply the 0-form equation to do this, look at \'give_eqn\' method')
+                    raise TypeError('Error: You need to supply the 0-form equation to do this, look at \'give_eqn\' method')
                 else:
                     # get the supplied form as a string
                     zero_form_str = str(simplify(self.form_0_str))
@@ -1544,7 +1544,7 @@ def form_0(xg, yg, form_0, fig=None, subplots=False, sub_axis_list=[]):
             # first make sure that the string has been supplied
             if self.form_0_str == None:
                     # ERROR
-                    print('Error: You need to supply the 0-form equation to do this, look at \'give_eqn\' method')
+                    raise TypeError('Error: You need to supply the 0-form equation to do this, look at \'give_eqn\' method')
             else:
                 # can compute the exterior derivative:
                 form_0_str = str(simplify(self.form_0_str))
