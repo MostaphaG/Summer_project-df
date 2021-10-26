@@ -1512,7 +1512,14 @@ def form_0(xg, yg, form_0, form_0_eqn=None, fig=None, subplots=False, sub_axis_l
             Has to be given, for some methods to be calculatable.
             '''
             self.form_0_str = equation_str
-        
+            
+            # update the numerical values to always match
+            string = self.form_0_str + ''
+            string = string.replace('x', '(self.xg)')
+            string = string.replace('y', '(self.yg)')
+            # re-evaluate the 2-form numerically, preventing mismatch
+            self.form_0 = eval(string)
+            
         # deifne a function to return the string equation to the user
         def return_string(self):
             '''
