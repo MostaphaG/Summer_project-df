@@ -98,7 +98,7 @@ form_obj.lines_number(4)
 # form_obj.density_increase(20)  # demonstation of an error
 form_obj.plot()
 
-plt.pause(5)
+plt.pause(2)
 
 # customising grids with an equation:
 
@@ -124,7 +124,7 @@ form_0_obj.plot()
 
 # try exterior derivative without having first given an equation in
 # throws an error
-form_1_obj = form_0_obj.ext_d()
+# form_1_obj = form_0_obj.ext_d()
 
 # supply equation and complete ext. deriv.
 form_0_obj.give_eqn('cos(x*y)')
@@ -369,3 +369,29 @@ form_wedged_2.plot()
 
 # return string
 print(form_wedged_2.return_string())
+
+# %%
+
+# Example of 2-form Hodge
+
+v = np.linspace(-6, 6, 21)
+xg, yg = np.meshgrid(v, v)
+
+form_2 = xg*yg
+
+fig = plt.figure()
+ax1 = fig.add_subplot(121)
+ax2 = fig.add_subplot(122)
+
+form_obj = fp.form_2(xg, yg, form_2, fig=fig, subplots=True, sub_axis_list=[ax1, ax2])
+
+form_obj.plot(subplot_index=0)
+
+# supply equations
+form_obj.give_eqn('x*y')
+
+# complete Hodge
+form_0 = form_obj.Hodge(numerical_only=False, pass_on_figure=True)
+
+form_0.plot(subplot_index=1)
+

@@ -207,10 +207,17 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             self.logarithmic_scale_bool = 0
             self.scale_bool = True
             self.delta_factor = deltafactor
-            self.form_1_str_x = str(simplify(F_x_eqn))  # to start with, use rmust change to access some methods
-            # Note, the string must be given with x and y as variables
-            self.form_1_str_y = str(simplify(F_y_eqn))
-        
+            if F_x_eqn is not None:
+                self.form_1_str_x = str(simplify(F_x_eqn))  # to start with, use rmust change to access some methods
+                # Note, the string must be given with x and y as variables
+            else:
+                self.form_1_str_x = None
+            
+            if F_y_eqn is not None:
+                self.form_1_str_y = str(simplify(F_y_eqn))
+            else:
+                self.form_1_str_x = None
+            
         # #####################################################################
         # write some methods that will allow the user to chenge some of the
         # above variables
@@ -823,21 +830,23 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                 # now complete the process numerically save as instructed
                 # check keep_object:
                 if keep_object is True:
-                    # change the object self properties accoridnly
-                    self.F_x = -self.F_y
-                    self.F_y = self.F_x
+                    # change the object self properties accoringly
+                    new_x = -self.F_y
+                    new_y = self.F_x
+                    self.F_x = new_x
+                    self.F_y = new_y
                 elif keep_object is False:
                     # pass these in to the object to create a new one:
                     # DEPENDING ON FIGURES AND SUBPLOTS:
                     # N.B no equations to supply
                     if pass_on_figure is False:
-                    # supply these to the 2-form object creator
-                    result_form = form_1(self.xg, self.yg, -self.F_y, self.F_x)
+                        # supply these to the 2-form object creator
+                        new_object = form_1(self.xg, self.yg, -self.F_y, self.F_x)
                     elif pass_on_figure is True:
                         if self.subplots is False:
-                            result_form = form_1(self.xg, self.yg, -self.F_y, self.F_x, fig=self.figure, subplots=False)
+                            new_object = form_1(self.xg, self.yg, -self.F_y, self.F_x, fig=self.figure, subplots=False)
                         elif self.subplots is True:
-                            result_form = form_1(self.xg, self.yg, -self.F_y, self.F_x, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+                            new_object = form_1(self.xg, self.yg, -self.F_y, self.F_x, fig=self.figure, subplots=True, sub_axis_list=self.axis)
                     else:
                         raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
                 
@@ -889,7 +898,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                             elif self.subplots is True:
                                 new_object = form_1(self.xg, self.yg, form_1_x, form_1_y, F_x_eqn=form_1_x_unformated, F_y_eqn=form_1_y_unformated, fig=self.figure, subplots=True, sub_axis_list=self.axis)
                         elif pass_on_figure is False:
-                            result_form = form_1(self.xg, self.yg, -self.F_y, self.F_x)
+                            new_object = form_1(self.xg, self.yg, -self.F_y, self.F_x)
                         else:
                             raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
                         # return the new one to the user:
@@ -1383,7 +1392,7 @@ def form_2(xg, yg, form_2, form_2_eq=None, fig=None, subplots=False, sub_axis_li
             
             elif numerical_only is False:
                 # can only be done if equations have been given, check:
-                if self.form_1_str_x == None or self.form_1_str_y == None:
+                if self.form_2_str == None:
                     # ERROR
                     raise TypeError('Error: You need to supply the 2-form equation to do this, look at \'give_eqn\' method')
                 else:
@@ -1413,7 +1422,7 @@ def form_2(xg, yg, form_2, form_2_eq=None, fig=None, subplots=False, sub_axis_li
                         if self.subplots is False:
                             new_object = form_0(self.xg, self.yg, form_0_result, form_0_eqn=form_0_str_unformated, fig=self.figure, subplots=False)
                         if self.subplots is True:
-                            new_object = form_0(self.xg, self.yg, form_1_x, form_1_y, F_x_eqn=form_1_x_unformated, F_y_eqn=form_1_y_unformated, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+                            new_object = form_0(self.xg, self.yg, form_0_result, form_0_eqn=form_0_str_unformated, fig=self.figure, subplots=True, sub_axis_list=self.axis)
                     elif pass_on_figure is False:
                         new_object = form_0(self.xg, self.yg, form_0_result, form_0_eqn=form_0_str_unformated)
                     else:
@@ -1442,7 +1451,7 @@ function to create a 0-form object and define methods for it
 
 # define a function that will set up a 2-form object that can be customised and
 # plotted
-def form_0(xg, yg, form_0, form_0_eqn=None fig=None, subplots=False, sub_axis_list=[]):
+def form_0(xg, yg, form_0, form_0_eqn=None, fig=None, subplots=False, sub_axis_list=[]):
     '''
     defines a 0-form object and returns it to user
     Takes 3 arguments basic, these are the 2 grids in 2D, which muse be square
@@ -1481,7 +1490,10 @@ def form_0(xg, yg, form_0, form_0_eqn=None fig=None, subplots=False, sub_axis_li
             self.lines = 15
             self.fontsize = 7
             self.inline_bool = True
-            self.form_0_str = str(simplify(form_0_eqn))  # to start with, use rmust change to access some methods
+            if form_0_eqn is not None:
+                self.form_0_str = str(simplify(form_0_eqn))  # to start with, use rmust change to access some methods
+            else:
+                self.form_0_str = None
             # Note, the string must be given with x and y as variables
             self.form_0_contour = None  # Initialise with that, will be changed, if user
             # gets contour plot with new density.
