@@ -338,3 +338,34 @@ form_0_obj.lines_number(20)
 
 # plot that changed 0-form object
 form_0_obj.plot(keep=True, subplot_index=1)
+
+# %%
+
+# example use of Wedge of two 1-forms, analytically
+
+# set up grids
+v = np.linspace(-4.5, 4.5, 26)
+xg, yg = np.meshgrid(v, v)
+
+# set up the 1 form object
+form_1_x = yg*np.cos(xg)
+form_1_y = -xg
+form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y)
+
+# change the stack sizes
+form_1_obj.sheet_size(0.04)
+
+# supply equations
+form_1_obj.give_eqn('y*cos(x)', '-x')
+
+# plot it
+form_1_obj.plot()
+
+# now find wedge of it with a different form
+form_wedged_2 = form_1_obj.wedge_analytical('x*y', '2*y')
+
+# plot it
+form_wedged_2.plot()
+
+# return string
+print(form_wedged_2.return_string())

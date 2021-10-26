@@ -207,9 +207,9 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             self.logarithmic_scale_bool = 0
             self.scale_bool = True
             self.delta_factor = deltafactor
-            self.form_1_str_x = F_x_eqn  # to start with, use rmust change to access some methods
+            self.form_1_str_x = str(simplify(F_x_eqn))  # to start with, use rmust change to access some methods
             # Note, the string must be given with x and y as variables
-            self.form_1_str_y = F_y_eqn
+            self.form_1_str_y = str(simplify(F_y_eqn))
         
         # #####################################################################
         # write some methods that will allow the user to chenge some of the
@@ -225,8 +225,9 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             It must be in terms of x and y.
             Has to be given, for some methods to be calculatable.
             '''
-            self.form_1_str_x = equation_str_x
-            self.form_1_str_y = equation_str_y
+            # set equation parameters to simplified inputs
+            self.form_1_str_x = str(simplify(equation_str_x))
+            self.form_1_str_y = str(simplify(equation_str_y))
             # make the values match automatically to limit how often mismatch occurs
             # substitute these into the equation:
             # but keep it local
@@ -684,8 +685,8 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                 # the strings have been correctly given, compute the
                 # exterior derivative
                 # get the inpus from fields of x and u components
-                x_comp_str = str(simplify(self.form_1_str_x))
-                y_comp_str = str(simplify(self.form_1_str_y))
+                x_comp_str = self.form_1_str_x
+                y_comp_str = self.form_1_str_y
                 # from found u and v in the interior derivative, set up sympy components
                 sympy_expr_x = parse_expr(x_comp_str, evaluate=False)
                 sympy_expr_y = parse_expr(y_comp_str, evaluate=False)
@@ -779,7 +780,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                 
                 if pass_on_figure is False:
                     # supply these to the 2-form object creator
-                    result_form = form_2(self.xg, self.yg, form_2_result, form_2_str_loc, subplots=self.subplots)
+                    result_form = form_2(self.xg, self.yg, form_2_result, form_2_str_loc)
                 elif pass_on_figure is True:
                     if self.subplots is False:
                         result_form = form_2(self.xg, self.yg, form_2_result, form_2_str_loc, fig=self.figure, subplots=False)
@@ -792,9 +793,9 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                 return result_form
                 
         # define a method to Hodge it
-        def Hodge(self, numerical_only=True, keep_object=True):
+        def Hodge(self, numerical_only=True, keep_object=True, pass_on_figure=False):
             '''
-            Takes in two bool arguments:
+            Takes in three bool arguments:
             1) determines if the calculation should be numerical or analytic
             True if numerical, False if analytic and numerical. Default is True
             For the analytic one, the equations as string must be supplied to
@@ -802,6 +803,8 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             Note, choosing analytical, changes the equations AND the numerical answers
             2) determines if the result should be returned as a new 1-form or
                 if the current one need to be changed. Default is True
+            3) Determies if figure should be passed onto the new object
+                if it is to be created
             It calulates the Hodge on R^2 by the standard definition:
             dx -> dy and dy -> -dx
             return nothing 1-form if keep_object is False, else returns nothing
@@ -817,17 +820,27 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                     # equations have been given, a mismatch may occur
                     # warn the user
                     print('Warning: You supplied equations, doing it numerically only will result in a mismacth between numerical values and equations')
-                # now complete the process numerically:
-                new_form_1_x = -self.F_y
-                new_form_1_y = self.F_x
+                # now complete the process numerically save as instructed
                 # check keep_object:
                 if keep_object is True:
                     # change the object self properties accoridnly
-                    self.F_x = new_form_1_x
-                    self.F_y = new_form_1_y
+                    self.F_x = -self.F_y
+                    self.F_y = self.F_x
                 elif keep_object is False:
                     # pass these in to the object to create a new one:
-                    new_object = form_1(self.xg, self.yg, new_form_1_x, new_form_1_y)  # N.B no equations to supply
+                    # DEPENDING ON FIGURES AND SUBPLOTS:
+                    # N.B no equations to supply
+                    if pass_on_figure is False:
+                    # supply these to the 2-form object creator
+                    result_form = form_1(self.xg, self.yg, -self.F_y, self.F_x)
+                    elif pass_on_figure is True:
+                        if self.subplots is False:
+                            result_form = form_1(self.xg, self.yg, -self.F_y, self.F_x, fig=self.figure, subplots=False)
+                        elif self.subplots is True:
+                            result_form = form_1(self.xg, self.yg, -self.F_y, self.F_x, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+                    else:
+                        raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                
                     # return the new one to the user:
                     return new_object
                 else:
@@ -869,11 +882,16 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                         self.form_1_str_x = form_1_x_unformated
                         self.form_1_str_y = form_1_y_unformated
                     elif keep_object is False:
-                        # pass these in to the object to create a new one:
-                        if self.subplots is False:
-                            new_object = form_1(self.xg, self.yg, form_1_x, form_1_y, F_x_eqn=form_1_x_unformated, F_y_eqn=form_1_y_unformated, fig=self.figure, subplots=False)
-                        if self.subplots is True:
-                            new_object = form_1(self.xg, self.yg, form_1_x, form_1_y, F_x_eqn=form_1_x_unformated, F_y_eqn=form_1_y_unformated, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+                        if pass_on_figure is True:
+                            # pass these in to the object to create a new one:
+                            if self.subplots is False:
+                                new_object = form_1(self.xg, self.yg, form_1_x, form_1_y, F_x_eqn=form_1_x_unformated, F_y_eqn=form_1_y_unformated, fig=self.figure, subplots=False)
+                            elif self.subplots is True:
+                                new_object = form_1(self.xg, self.yg, form_1_x, form_1_y, F_x_eqn=form_1_x_unformated, F_y_eqn=form_1_y_unformated, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+                        elif pass_on_figure is False:
+                            result_form = form_1(self.xg, self.yg, -self.F_y, self.F_x)
+                        else:
+                            raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
                         # return the new one to the user:
                         return new_object
                     else:
@@ -881,7 +899,58 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             else:
                 # Error
                 raise ValueError('ERROR: Invalid input for \'numerical_only\'')
+            
         
+        # define a fucntion to compute a wedge product of two 1 forms
+        def wedge_analytical(self, equation_2_x, equation_2_y, pass_on_figure=False):
+            '''
+            Takes in 3 arguments, 2 are for the strings of the other form to
+            wedge with this one.
+            Third determines if figure from this object is to be passed on
+            to the 2-form object
+            To do so here, strings for the form must be supplied.
+            Computes the Wedge product using strings, ANALYTICALLY
+            Returns a 2-form object
+            '''
+            # first, get all entries out, save as string for these to display when
+            # window is opened again
+            to_wedge_x_1_str = self.form_1_str_x
+            to_wedge_y_1_str = self.form_1_str_y
+            to_wedge_x_2_str = equation_2_x
+            to_wedge_y_2_str = equation_2_y
+            # first, find the result of the 2-form
+            # this if, in terms of the above commented fields:
+            # 2-form = f*m - g*h
+            # get it mathematically, as a string
+            form_2_str = str(simplify( '(' + to_wedge_x_1_str + ')*(' +  to_wedge_y_2_str + ')' + ' - (' + to_wedge_y_1_str + ')*(' +  to_wedge_x_2_str + ')' ))
+            # keep it as it is locally to supply it to object maker later
+            form_2_str_loc = form_2_str + ''
+            # format it to be in terms of grids and:
+            # check against constant and zero 2-forms being supplied
+            # get the numerical evaluation of it
+            
+            form_2_str = form_2_str.replace('x', 'self.xg')
+            form_2_str = form_2_str.replace('y', 'self.yg')
+            if form_2_str.find('xg') & form_2_str.find('yg') == -1:
+                form_2_str = '(' + str(form_2_str) + ')* np.ones(np.shape(self.xg))'
+            else:
+                pass
+            # evaluate it numerically on the grid supplied
+            form_2_result = eval(form_2_str)
+            # create a 2-form object from this; to return.
+            # do this depending on what return figures was chosen
+            if pass_on_figure is False:
+                ret_object = form_2(self.xg, self.yg, form_2_result, form_2_str_loc)
+            elif pass_on_figure is True:
+                if self.subplots is False:
+                    ret_object = form_2(self.xg, self.yg, form_2_result, form_2_str_loc, fig=self.figure, subplots=False)
+                elif self.subplots is True:
+                    ret_object = form_2(self.xg, self.yg, form_2_result, form_2_str_loc, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+            else:
+                raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+            
+            # return the resulting object
+            return ret_object
     
     # now call that object to create it:
     form_1_object = form_set_up(xg, yg, F_x, F_y)
@@ -944,7 +1013,7 @@ def form_2(xg, yg, form_2, form_2_eq=None, fig=None, subplots=False, sub_axis_li
             self.colour_list = ['red', 'blue', 'grey']
             self.logarithmic_scale_bool = 0
             self.delta_factor = deltafactor
-            self.form_2_str = form_2_eq  # to start with, use rmust change to access some methods
+            self.form_2_str = str(simplify(form_2_eq))  # to start with, use rmust change to access some methods
             # Note, the string must be given with x and y as variables
         
         # #####################################################################
@@ -1276,6 +1345,85 @@ def form_2(xg, yg, form_2, form_2_eq=None, fig=None, subplots=False, sub_axis_li
                                 
                                 # change the parameter to loop over all changes in displacement for current magnitude
                                 s += 1
+        
+        # define a fucntion to Hodge the 2-form (into a 0-form)
+        def Hodge(self, numerical_only=True, pass_on_figure=False):
+            '''
+            Takes in one bool argument:
+            Determines if the calculation should be numerical or analytic
+            True if numerical, False if analytic and numerical. Default is True
+            For the analytic one, the equations as string must be supplied to
+            the object
+            Note, choosing analytical, changes the equations AND the numerical answers
+            It calulates the Hodge on R^2 by the standard definition:
+            *(dx^dy) = 1
+            returns nothing 0-form
+            '''
+            # distinguish between doing it numerically and alaytically
+            if numerical_only is True:
+                # check if equations have been given:
+                # if they have, doing it only numerically would create
+                # a mismatch, avoid that
+                if self.form_2_str == None:
+                    pass
+                else:
+                    # equations have been given, a mismatch may occur
+                    # warn the user
+                    print('Warning: You supplied equations, doing it numerically only will result in a mismacth between numerical values and equations')
+                # now complete the process numerically
+                # pass these in to the object to create a new one:
+                if pass_on_figure is False:
+                    new_object = form_0(self.xg, self.yg, self.form_2, self.form_2_str)  # N.B no equations to supply
+                elif pass_on_figure is True:
+                     new_object = form_0(self.xg, self.yg, self.form_2, self.form_2_str, fig=self.figure, subplots=self.subplots, sub_axis_list=self.axis)
+                else:
+                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                # return the new one to the user:
+                return new_object
+            
+            elif numerical_only is False:
+                # can only be done if equations have been given, check:
+                if self.form_1_str_x == None or self.form_1_str_y == None:
+                    # ERROR
+                    raise TypeError('Error: You need to supply the 2-form equation to do this, look at \'give_eqn\' method')
+                else:
+                    # some equations are there, compute the Hodge on these:
+                    # Note: Upto user to make sure their equations match their
+                    # numerical input, unless using give eqn, then its updates
+                    # numerical values to match
+                    
+                    # get numerical solutions, evaulated on local
+                    # strings changed to relate to the self grids
+                    # need to uspply these unformatted, so save those:
+                    form_0_str_unformated = self.form_2_str + '' 
+                    string_0_form = self.form_2_str  # formated
+                    # from these strings, get the numerical 0-form:
+                    string_0_form = string_0_form.replace('x', 'self.xg')
+                    string_0_form = string_0_form.replace('y', 'self.yg')
+                    
+                    if string_0_form.find('xg') & string_0_form.find('yg') == -1:
+                        string_0_form = '(' + str(string_0_form) + ')* np.ones(np.shape(self.xg))'
+                    
+                    # evaulated numerically
+                    form_0_result = eval(string_0_form)
+                    
+                    # return object, depending on option for figure passage:
+                    # pass these in to the object to create a new one:
+                    if pass_on_figure is True:
+                        if self.subplots is False:
+                            new_object = form_0(self.xg, self.yg, form_0_result, form_0_eqn=form_0_str_unformated, fig=self.figure, subplots=False)
+                        if self.subplots is True:
+                            new_object = form_0(self.xg, self.yg, form_1_x, form_1_y, F_x_eqn=form_1_x_unformated, F_y_eqn=form_1_y_unformated, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+                    elif pass_on_figure is False:
+                        new_object = form_0(self.xg, self.yg, form_0_result, form_0_eqn=form_0_str_unformated)
+                    else:
+                        raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                    
+                    # return the new one to the user:
+                    return new_object
+            else:
+                # Error
+                raise ValueError('ERROR: Invalid input for \'numerical_only\'')
     
     # now call that object to create it:
     form_2_object = form_set_up(xg, yg, form_2)
@@ -1294,7 +1442,7 @@ function to create a 0-form object and define methods for it
 
 # define a function that will set up a 2-form object that can be customised and
 # plotted
-def form_0(xg, yg, form_0, fig=None, subplots=False, sub_axis_list=[]):
+def form_0(xg, yg, form_0, form_0_eqn=None fig=None, subplots=False, sub_axis_list=[]):
     '''
     defines a 0-form object and returns it to user
     Takes 3 arguments basic, these are the 2 grids in 2D, which muse be square
@@ -1333,7 +1481,7 @@ def form_0(xg, yg, form_0, fig=None, subplots=False, sub_axis_list=[]):
             self.lines = 15
             self.fontsize = 7
             self.inline_bool = True
-            self.form_0_str = None  # to start with, use rmust change to access some methods
+            self.form_0_str = str(simplify(form_0_eqn))  # to start with, use rmust change to access some methods
             # Note, the string must be given with x and y as variables
             self.form_0_contour = None  # Initialise with that, will be changed, if user
             # gets contour plot with new density.
