@@ -469,13 +469,14 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             x_len = len(self.xg[:, 0])
             y_len = len(self.yg[0, :])
             
-            # get L from largest entry in the array, assume they are square:
-            L = self.xg[0, -1]
+            # Extract L from the x and y grids. Assumes they are square.
+            L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+            x0 = self.xg[0,0] + L
+            y0 = self.yg[0,0] + L
             
-            # define axis limits based on supplied arrays
             ax_L = L + L/self.delta_factor
-            axis.set_xlim(-ax_L, ax_L)
-            axis.set_ylim(-ax_L, ax_L)
+            axis.set_xlim(-ax_L + x0, ax_L + x0)
+            axis.set_ylim(-ax_L + y0, ax_L + y0)
             
             # find the distance between neightbouring points on the grid
             dist_points = self.xg[0, 1] - self.xg[0, 0]
@@ -960,6 +961,58 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             
             # return the resulting object
             return ret_object
+        
+        def zoom(self, target=[0,0], zoom=2, dpd=9):
+            '''
+            Create a new window which displays the field zoomed at a certain point
+            User gives arguments
+            Target: Determines the zoom location
+            Zoom: +ve float 
+            '''
+            
+            # Requires user to provide eqn of the 1-form they are zooming on.
+            
+            if self.form_1_str_x == None or self.form_1_str_y == None:
+                # ERROR
+                raise TypeError('Error: No equation provided')
+            else:
+                
+                # Target coordinates
+                x_m = target[0]
+                y_m = target[1]
+                
+                d_range = self.xg[0, -1]/zoom
+                #d_length = 
+                
+                # Set up zoom window grids
+                dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
+                dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
+                dxg, dyg = np.meshgrid(dx, dy)
+                
+                # Create variables for the user provided equation strings
+                u_str = self.form_1_str_x
+                v_str = self.form_1_str_y
+                
+                # Check if the equations provided contain x and y terms
+                if u_str.find('x') & u_str.find('y') == -1:
+                    u_str = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                else:
+                    u_str = u_str.replace('x', 'dxg')
+                    u_str = u_str.replace('y', 'dyg')
+          
+                if v_str.find('x') & v_str.find('y') == -1:
+                    v_str = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
+                else:
+                    v_str = v_str.replace('x', 'dxg')
+                    v_str = v_str.replace('y', 'dyg')
+                    
+                # Generate arrays for the components of the zoom field
+                u_zoom = eval(u_str)
+                v_zoom = eval(v_str)
+                
+                zoom_form = form_1(dxg, dyg, u_zoom, v_zoom)
+                
+                return zoom_form
     
     # now call that object to create it:
     form_1_object = form_set_up(xg, yg, F_x, F_y)

@@ -2144,7 +2144,6 @@ def deriv_calc(x_m, y_m):
     dpd = dpd_select.get()
     d_scale = scale*(zoom_slider.get())
     
-     # Calc the MOD at the click location
     lab_colours = ['red', 'blue', 'grey']
     
     # Initialise arrays for storing components
