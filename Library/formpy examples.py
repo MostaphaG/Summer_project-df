@@ -400,7 +400,7 @@ form_0.plot(subplot_index=1)
 r = np.linspace(-5, 5, 15)
 xg, yg = np.meshgrid(r, r)
 
-u = xg*cos(yg)
+u = xg*np.cos(yg)
 v = yg
 
 form1 = fp.form_1(xg, yg, u, v)
