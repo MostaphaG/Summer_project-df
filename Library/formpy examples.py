@@ -400,19 +400,19 @@ form_0.plot(subplot_index=1)
 r = np.linspace(-5, 5, 15)
 xg, yg = np.meshgrid(r, r)
 
-u = xg*np.cos(yg)
+u = xg
 v = yg
 
-form1 = fp.form_1(xg, yg, u, v)
-form1.give_eqn('x*cos(y)', 'y')
+form1 = fp.form_1(xg, yg, u, v, 'x', 'y')
+# form1.give_eqn('x*cos(y)', 'y')
 form1.max_sheets(5)
 form1.plot()
 form1.return_string()
 
 #%%
-form1_zoom = form1.zoom((5,5), 10, 9)
-form1_zoom.stacks()
-form1_zoom.arrows()
+form1_zoom = form1.zoom((10,10), 10000, 9)
+#form1_zoom.stacks()
+#form1_zoom.arrows()
 form1_zoom.colour('red')
 form1_zoom.plot()
 

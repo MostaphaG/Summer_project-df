@@ -966,8 +966,9 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             '''
             Create a new window which displays the field zoomed at a certain point
             User gives arguments
-            Target: Determines the zoom location
-            Zoom: +ve float 
+            Target: Determines the zoom location, coordinates
+            Zoom: +ve float, determines zooming amount
+            dpd: +int, determines how many points on each axis
             '''
             
             # Requires user to provide eqn of the 1-form they are zooming on.
