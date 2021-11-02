@@ -484,21 +484,33 @@ form_1_obj_a.plot(keep=True, subplot_index=2)
 
 # %%
 
-# testing VF to 1-form via the metric
 
+# Testing Hodge of a 0-form
 
-# set up needed parameters
-v = np.linspace(-6, 6, 31)
+# set up grids
+v = np.linspace(-4.5, 4.5, 11)
 xg, yg = np.meshgrid(v, v)
 
-# set up the field
-F_x = yg*np.sin(xg)
-F_y = xg*np.cos(yg)
+# set up a figure with subplots
+fig = plt.figure()
+ax1 = fig.add_subplot(221)
+ax2 = fig.add_subplot(222)
+ax3 = fig.add_subplot(223)
+ax4 = fig.add_subplot(224)
 
-field_obj = fp.vector_field(xg, yg, F_x, F_y)
+# set up the 0 form object and plot it
+form_0 = xg**2 + 3*yg
+form_0_obj = fp.form_0(xg, yg, form_0, fig=fig, subplots=True, sub_axis_list=[ax1, ax2, ax3, ax4])
+form_0_obj.plot(keep=True, subplot_index=0)
+form_0_obj.plot(keep=True, subplot_index=2)
 
+# now compute the Hodge numerically only and plot the resulting 2-form
+form_2_num = form_0_obj.Hodge(numerical_only=True, pass_on_figure=True)
+form_2_num.plot(keep=True, subplot_index=1)
 
-# define the metric on R2
-g_munu = np.array([1, 0], [0, 1])
+# supply equations and do it analytically
+form_0_obj.give_eqn('x**2 + 3*y')
+form_2_an = form_0_obj.Hodge(numerical_only=False, pass_on_figure=True)
 
+form_2_an.plot(keep=True, subplot_index=3)
 

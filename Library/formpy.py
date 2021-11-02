@@ -1377,7 +1377,7 @@ def form_2(xg, yg, form_2, form_2_eq=None, fig=None, subplots=False, sub_axis_li
             Determies if figure should be passed onto the new object
             if it is to be created
             
-            returns nothing 0-form
+            returns a 0-form
             '''
             # distinguish between doing it numerically and alaytically
             if numerical_only is True:
@@ -1791,7 +1791,93 @@ def form_0(xg, yg, form_0, form_0_eqn=None, fig=None, subplots=False, sub_axis_l
             
             # return the new object to user
             return result_1_form
+        
+        # deinfe a method for Hodge of a 0-form
+        def Hodge(self, numerical_only=True, pass_on_figure=False):
+            '''
+            Takes in two bool arguments:
             
+            numerical_only
+            Determines if the calculation should be numerical or analytic
+            True if numerical, False if analytic and numerical. Default is True
+            For the analytic one, the equations as string must be supplied to
+            the object
+            Note, choosing analytical, changes the equations AND the numerical answers
+            It calulates the Hodge on R^2 by the standard definition:
+            1* = (dx^dy)
+            
+            pass_on_figure
+            Determies if figure should be passed onto the new object
+            if it is to be created
+            
+            returns a 2-form
+            '''
+            # distinguish between doing it numerically and alaytically
+            if numerical_only is True:
+                # check if equations have been given:
+                # if they have, doing it only numerically would create
+                # a mismatch, avoid that
+                if self.form_0_str == None:
+                    pass
+                else:
+                    # equations have been given, a mismatch may occur
+                    # warn the user
+                    print('Warning: You supplied equations, doing it numerically only will result in a mismacth between numerical values and equations')
+                # now complete the process numerically
+                # pass these in to the object to create a new one:
+                if pass_on_figure is False:
+                    new_object = form_2(self.xg, self.yg, self.form_0, self.form_0_str)  # N.B no equations to supply
+                elif pass_on_figure is True:
+                     new_object = form_2(self.xg, self.yg, self.form_0, self.form_0_str, fig=self.figure, subplots=self.subplots, sub_axis_list=self.axis)
+                else:
+                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                # return the new one to the user:
+                return new_object
+            
+            elif numerical_only is False:
+                # can only be done if equations have been given, check:
+                if self.form_0_str == None:
+                    # ERROR
+                    raise TypeError('Error: You need to supply the 2-form equation to do this, look at \'give_eqn\' method')
+                else:
+                    # some equations are there, compute the Hodge on these:
+                    # Note: Upto user to make sure their equations match their
+                    # numerical input, unless using give eqn, then its updates
+                    # numerical values to match
+                    
+                    # get numerical solutions, evaulated on local
+                    # strings changed to relate to the self grids
+                    # need to uspply these unformatted, so save those:
+                    form_2_str_unformated = self.form_0_str + '' 
+                    string_2_form = self.form_0_str  # to be formated
+                    # from these strings, get the numerical 0-form:
+                    string_2_form = string_2_form.replace('x', 'self.xg')
+                    string_2_form = string_2_form.replace('y', 'self.yg')
+                    
+                    if string_2_form.find('xg') & string_2_form.find('yg') == -1:
+                        string_2_form = '(' + str(string_2_form) + ')* np.ones(np.shape(self.xg))'
+                    
+                    # evaulated numerically
+                    form_2_result = eval(string_2_form)
+                    
+                    # return object, depending on option for figure passage:
+                    # pass these in to the object to create a new one:
+                    if pass_on_figure is True:
+                        if self.subplots is False:
+                            new_object = form_2(self.xg, self.yg, form_2_result, form_2_eq=form_2_str_unformated, fig=self.figure, subplots=False)
+                        if self.subplots is True:
+                            new_object = form_2(self.xg, self.yg, form_2_result, form_2_eq=form_2_str_unformated, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+                    elif pass_on_figure is False:
+                        new_object = form_2(self.xg, self.yg, form_2_result, form_2_eq=form_2_str_unformated)
+                    else:
+                        raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                    
+                    # return the new one to the user:
+                    return new_object
+            else:
+                # Error
+                raise ValueError('ERROR: Invalid input for \'numerical_only\'')
+    
     # now call that object to create it:
     form_0_object = form_set_up(xg, yg, form_0)
     # return it to user to store
@@ -2054,17 +2140,6 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplot
                     if isnan(F_x_local[i,j]) == True or isnan(F_y_local[i,j]) == True or abs(F_x_local[i, j]) == np.inf or abs(F_y_local[i, j]) == np.inf or abs(F_y_local[i, j]) > 1e15 or abs(F_x_local[i, j]) > 1e15:
                         F_x_local[i,j] = F_y_local[i,j] = 0
             axis.quiver(self.xg, self.yg, F_x_local, F_y_local, pivot=self.orientation, scale=ScaleFactor, scale_units='xy', color=self.color) 
-        
-        # define a method that will translate this into a 1-form via the metric
-        def curvy_boyyy(self):
-            '''
-            Takes in 1 argument
-            --- The metric array (2x2)
-            
-            Completes the conversion of VF to 1-form via the metric.
-            
-            Returns a 1-form object
-            '''
         
     # now call that object to create it:
     v_object = field_set_up(xg, yg, F_x, F_y)
