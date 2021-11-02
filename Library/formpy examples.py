@@ -21,7 +21,6 @@ form_obj = fp.form_1(xg, yg, F_x, F_y)
 
 form_obj.axis.set_xlabel('x')
 form_obj.axis.set_ylabel('y')
-form_obj.arrows()
 form_obj.colour('blue')
 form_obj.fig_size(8, 9)
 form_obj.head_width(0.3)
@@ -409,10 +408,97 @@ form1.max_sheets(5)
 form1.plot()
 form1.return_string()
 
-#%%
 form1_zoom = form1.zoom((10,10), 10000, 9)
-#form1_zoom.stacks()
-#form1_zoom.arrows()
 form1_zoom.colour('red')
 form1_zoom.plot()
+
+# %%
+
+# Testing a vector field object, customisations and plotting
+
+
+# set up needed parameters
+v = np.linspace(-6, 6, 31)
+xg, yg = np.meshgrid(v, v)
+
+# set up the field
+F_x = yg*np.sin(xg)
+F_y = xg*np.cos(yg)
+
+# set up a figure, with subplots
+fig = plt.figure()
+ax1 = fig.add_subplot(121)
+ax2 = fig.add_subplot(122)
+
+# set up the object
+field_obj = fp.vector_field(xg, yg, F_x, F_y, fig=fig, subplots=True, sub_axis_list=[ax1, ax2])
+
+# on axis 1, plot default
+field_obj.plot(keep=True, subplot_index=0)
+
+
+# change some properties and plot the second subplot
+field_obj.axis[1].set_xlabel('x')
+field_obj.axis[1].set_ylabel('y')
+field_obj.colour('blue')
+field_obj.orient('tail')
+field_obj.surround_space(6)
+
+field_obj.plot(keep=True, subplot_index=1)
+
+# %%
+
+# Testing numerical ext deriv of 0-forms, using numpy gradient
+
+# set up grids
+v = np.linspace(-4.5, 4.5, 11)
+xg, yg = np.meshgrid(v, v)
+
+# set up a figure with subplots
+fig = plt.figure()
+ax1 = fig.add_subplot(131)
+ax2 = fig.add_subplot(132)
+ax3 = fig.add_subplot(133)
+
+# set up the 0 form object and plot it
+form_0 = xg**2 + 3*yg
+
+# create an object with these axis in it
+form_0_obj = fp.form_0(xg, yg, form_0, fig=fig, subplots=True, sub_axis_list=[ax1, ax2, ax3])
+
+# plot it on first subplot
+form_0_obj.plot(keep=True, subplot_index=0)
+
+# compute the numerical ext deriv and plot it on second subplot
+form_1_num_e = form_0_obj.num_ext_d(edge_order=1, pass_on_figure=True)  # pass figure to pass on subplot axis
+
+# plot it on second axis set
+form_1_num_e.plot(keep=True, subplot_index=1)
+
+# supply equation and complete ext. deriv., then plot that on 3rd axis set
+form_0_obj.give_eqn('x**2 + 3*y')
+form_1_obj_a = form_0_obj.ext_d(pass_on_figure=True)  # this supplies the 1-form with equations too
+
+# plot that 1-form object
+form_1_obj_a.plot(keep=True, subplot_index=2)
+
+# %%
+
+# testing VF to 1-form via the metric
+
+
+# set up needed parameters
+v = np.linspace(-6, 6, 31)
+xg, yg = np.meshgrid(v, v)
+
+# set up the field
+F_x = yg*np.sin(xg)
+F_y = xg*np.cos(yg)
+
+field_obj = fp.vector_field(xg, yg, F_x, F_y)
+
+
+# define the metric on R2
+g_munu = np.array([1, 0], [0, 1])
+
 

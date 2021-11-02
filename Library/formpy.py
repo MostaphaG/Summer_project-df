@@ -196,8 +196,6 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             self.s_min = s_min
             self.pt_den = len(xg[:, 0])# + 1  # assume square grids
             self.fract = fract
-            self.arrow_bool = False
-            self.stack_bool = True
             self.orientation = 'mid'
             self.scale = 1
             self.w_head = 1/8
@@ -329,26 +327,6 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             Orients arrows on quiver plot depending on this
             '''
             self.orientation = str(string)
-        
-        # plot stacks boolean
-        def stacks(self):
-            '''
-            Takes no arguments
-            Changes the boolean that determines if stcaks are plotted
-            Whenever it is called, it changes that boolean to opposite
-            The form object is initialised with this as True
-            '''
-            self.stack_bool = not self.stack_bool
-        
-        # plot arrows boolean
-        def arrows(self):
-            '''
-            Takes no arguments
-            Changes the boolean that determines if arrows are plotted
-            Whenever it is called, it changes that boolean to opposite
-            The form object is initialised with this as False
-            '''
-            self.arrow_bool = not self.arrow_bool
         
         # change boolean that det. if to sclae logarithmically
         def log_scaling(self):
@@ -546,135 +524,111 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                 R = log(log_a*R)/log(log_a)
             else:
                 pass
+
+            # define tigonometirc shifts
+            I_sin = np.sin(angles)
+            I_cos = np.cos(angles)
             
-            if self.scale_bool is False:
-                ScaleFactor = self.scale
-            elif self.scale_bool is True:
-                ScaleFactor = max_size/(0.9*(2*L/self.pt_den))
+            # define the points that set out a line of the stack sheet (middle line)
+            A_x = self.xg + (s_L/2)*I_sin
+            A_y = self.yg - (s_L/2)*I_cos
+            B_x = self.xg - (s_L/2)*I_sin
+            B_y = self.yg + (s_L/2)*I_cos
             
-            # for arrows to work, with nan and infs
-            # make a local variable of F_x and F_y
-            # so that thye don't alter globally
-            F_x_local = self.F_x * 1
-            F_y_local = self.F_y * 1
+            # define points of stack arrowheads as arrays for all stacks
+            p_sh1x = self.xg + (s_L/2)*I_cos + (s_L*self.w_head)*I_sin
+            p_sh1y = self.yg + (s_L/2)*I_sin - (s_L*self.w_head)*I_cos
+            p_sh2x = self.xg + (s_L/2)*I_cos - (s_L*self.w_head)*I_sin
+            p_sh2y = self.yg + (s_L/2)*I_sin + (s_L*self.w_head)*I_cos
+            p_sh3x = self.xg + (s_L*0.5 + s_L*self.h_head)*I_cos
+            p_sh3y = self.yg + (s_L*0.5 + s_L*self.h_head)*I_sin
             
-            # plot the quiver plot on grid points if chosen in original function
-            if self.arrow_bool is True:
-                # prevent any magnitudes from being inf or nan
-                # only here, need to do it to u and v not just mag
-                for i in range(x_len):
-                    for j in range(y_len):
-                        if isnan(F_x_local[i,j]) == True or isnan(F_y_local[i,j]) == True or abs(F_x_local[i, j]) == np.inf or abs(F_y_local[i, j]) == np.inf or abs(F_y_local[i, j]) > 1e15 or abs(F_x_local[i, j]) > 1e15:
-                            F_x_local[i,j] = F_y_local[i,j] = 0
-                axis.quiver(self.xg, self.yg, F_x_local, F_y_local, pivot=self.orientation, scale=ScaleFactor, scale_units='xy') 
-            else:
-                pass
+            # define these for when there is only 1 line in the stack plot:
+            P_sh1x = self.xg + (s_L*self.w_head)*I_sin
+            P_sh1y = self.yg - (s_L*self.w_head)*I_cos
+            P_sh2x = self.xg - (s_L*self.w_head)*I_sin
+            P_sh2y = self.yg + (s_L*self.w_head)*I_cos
+            P_sh3x = self.xg + (s_L*self.h_head)*I_cos
+            P_sh3y = self.yg + (s_L*self.h_head)*I_sin
             
-            if self.stack_bool is True:
-                # define tigonometirc shifts
-                I_sin = np.sin(angles)
-                I_cos = np.cos(angles)
-                
-                # define the points that set out a line of the stack sheet (middle line)
-                A_x = self.xg + (s_L/2)*I_sin
-                A_y = self.yg - (s_L/2)*I_cos
-                B_x = self.xg - (s_L/2)*I_sin
-                B_y = self.yg + (s_L/2)*I_cos
-                
-                # define points of stack arrowheads as arrays for all stacks
-                p_sh1x = self.xg + (s_L/2)*I_cos + (s_L*self.w_head)*I_sin
-                p_sh1y = self.yg + (s_L/2)*I_sin - (s_L*self.w_head)*I_cos
-                p_sh2x = self.xg + (s_L/2)*I_cos - (s_L*self.w_head)*I_sin
-                p_sh2y = self.yg + (s_L/2)*I_sin + (s_L*self.w_head)*I_cos
-                p_sh3x = self.xg + (s_L*0.5 + s_L*self.h_head)*I_cos
-                p_sh3y = self.yg + (s_L*0.5 + s_L*self.h_head)*I_sin
-                
-                # define these for when there is only 1 line in the stack plot:
-                P_sh1x = self.xg + (s_L*self.w_head)*I_sin
-                P_sh1y = self.yg - (s_L*self.w_head)*I_cos
-                P_sh2x = self.xg - (s_L*self.w_head)*I_sin
-                P_sh2y = self.yg + (s_L*self.w_head)*I_cos
-                P_sh3x = self.xg + (s_L*self.h_head)*I_cos
-                P_sh3y = self.yg + (s_L*self.h_head)*I_sin
-                
-                # loop over each arrow coordinate in x and y
-                for i in range(x_len):
-                    for j in range(y_len):
+            # loop over each arrow coordinate in x and y
+            for i in range(x_len):
+                for j in range(y_len):
+                    
+                    # Label each element with the number of stacks required: linear scaling
+                    for t in range(1, self.s_max+1):
+                        if (t-1)/self.s_max <= R[i, j] <= t/self.s_max:
+                            R_int[i, j] = t
+                    
+                    # set a varible for current considered magnitude as it is reused
+                    # avoids extracting from R many times.
+                    n = R_int[i, j]
+                    
+                    #if axis_check == 1 and click_opt_int > 1 and i == i_m and j == j_m:
+                    if mag[i,j] == 0:
+                        continue
+                    
+                    # deal with even number of sheets from magnitudes:
+                    if parity(n) is True:
+                        # define a parameter to loop over in the recursion equation
+                        s = 0
                         
-                        # Label each element with the number of stacks required: linear scaling
-                        for t in range(1, self.s_max+1):
-                            if (t-1)/self.s_max <= R[i, j] <= t/self.s_max:
-                                R_int[i, j] = t
-                        
-                        # set a varible for current considered magnitude as it is reused
-                        # avoids extracting from R many times.
-                        n = R_int[i, j]
-                        
-                        #if axis_check == 1 and click_opt_int > 1 and i == i_m and j == j_m:
-                        if mag[i,j] == 0:
-                            continue
-                        
-                        # deal with even number of sheets from magnitudes:
-                        if parity(n) is True:
-                            # define a parameter to loop over in the recursion equation
-                            s = 0
+                        # Define the points for sheets required for the given magnitude
+                        # from these define all the needed lines and plot them
+                        while s <= 0.5*(n-2):  # maximum set by equations (documentation)
+                            # define all the points for the 2 currently looped +- sheets in while loop
+                            Ax1 = A_x[i, j] + G(s, n, 0)*s_L*I_cos[i, j]
+                            Ay1 = A_y[i, j] + G(s, n, 0)*s_L*I_sin[i, j]
+                            Bx1 = B_x[i, j] + G(s, n, 0)*s_L*I_cos[i, j]
+                            By1 = B_y[i, j] + G(s, n, 0)*s_L*I_sin[i, j]
+                            Ax2 = A_x[i, j] - G(s, n, 0)*s_L*I_cos[i, j]
+                            Ay2 = A_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
+                            Bx2 = B_x[i, j] - G(s, n, 0)*s_L*I_cos[i, j]
+                            By2 = B_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
                             
-                            # Define the points for sheets required for the given magnitude
-                            # from these define all the needed lines and plot them
-                            while s <= 0.5*(n-2):  # maximum set by equations (documentation)
-                                # define all the points for the 2 currently looped +- sheets in while loop
-                                Ax1 = A_x[i, j] + G(s, n, 0)*s_L*I_cos[i, j]
-                                Ay1 = A_y[i, j] + G(s, n, 0)*s_L*I_sin[i, j]
-                                Bx1 = B_x[i, j] + G(s, n, 0)*s_L*I_cos[i, j]
-                                By1 = B_y[i, j] + G(s, n, 0)*s_L*I_sin[i, j]
-                                Ax2 = A_x[i, j] - G(s, n, 0)*s_L*I_cos[i, j]
-                                Ay2 = A_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
-                                Bx2 = B_x[i, j] - G(s, n, 0)*s_L*I_cos[i, j]
-                                By2 = B_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
-                                
-                                # from these, define the 2 lines, for this run
-                                axis.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=1, color=self.color))
-                                axis.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=1, color=self.color))
-                                
-                                # update parameter to reapet and draw all needed arrows
-                                s += 1
-                        # deal with the odd number of stacks:
-                        elif parity(n) is False:
-                            # Add the centre line for odd numbers of stacks
-                            axis.add_line(Line2D((A_x[i, j], B_x[i, j]), (A_y[i, j], B_y[i, j]), linewidth=1, color=self.color))
+                            # from these, define the 2 lines, for this run
+                            axis.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=1, color=self.color))
+                            axis.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=1, color=self.color))
                             
-                            # then loop over the remaining lines as per the recursion formula:
-                            s = 1  # change the looping parametr to exclude already completed 0 (corr. to middle sheet here)
+                            # update parameter to reapet and draw all needed arrows
+                            s += 1
+                    # deal with the odd number of stacks:
+                    elif parity(n) is False:
+                        # Add the centre line for odd numbers of stacks
+                        axis.add_line(Line2D((A_x[i, j], B_x[i, j]), (A_y[i, j], B_y[i, j]), linewidth=1, color=self.color))
+                        
+                        # then loop over the remaining lines as per the recursion formula:
+                        s = 1  # change the looping parametr to exclude already completed 0 (corr. to middle sheet here)
+                        
+                        # define all remaining sheets for the magnitude:
+                        while s <= 0.5*(n-1):  # maximum set by equations (documentation)
+                            # define all the points for the current +- displacement in while loop
+                            Ax1 = A_x[i, j] + G(s, n, 1)*s_L*I_cos[i, j]
+                            Ay1 = A_y[i, j] + G(s, n, 1)*s_L*I_sin[i, j]
+                            Bx1 = B_x[i, j] + G(s, n, 1)*s_L*I_cos[i, j]
+                            By1 = B_y[i, j] + G(s, n, 1)*s_L*I_sin[i, j]
+                            Ax2 = A_x[i, j] - G(s, n, 1)*s_L*I_cos[i, j]
+                            Ay2 = A_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
+                            Bx2 = B_x[i, j] - G(s, n, 1)*s_L*I_cos[i, j]
+                            By2 = B_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
                             
-                            # define all remaining sheets for the magnitude:
-                            while s <= 0.5*(n-1):  # maximum set by equations (documentation)
-                                # define all the points for the current +- displacement in while loop
-                                Ax1 = A_x[i, j] + G(s, n, 1)*s_L*I_cos[i, j]
-                                Ay1 = A_y[i, j] + G(s, n, 1)*s_L*I_sin[i, j]
-                                Bx1 = B_x[i, j] + G(s, n, 1)*s_L*I_cos[i, j]
-                                By1 = B_y[i, j] + G(s, n, 1)*s_L*I_sin[i, j]
-                                Ax2 = A_x[i, j] - G(s, n, 1)*s_L*I_cos[i, j]
-                                Ay2 = A_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
-                                Bx2 = B_x[i, j] - G(s, n, 1)*s_L*I_cos[i, j]
-                                By2 = B_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
-                                
-                                # from these, define the 2 displaced lines
-                                axis.add_line(Line2D((Ax1,Bx1),(Ay1,By1), linewidth=1, color=self.color))
-                                axis.add_line(Line2D((Ax2,Bx2),(Ay2,By2), linewidth=1, color=self.color))
-                                
-                                # change the parameter to loop over all changes in displacement for current magnitude
-                                s += 1
-                        if self.arrowheads == True:
-                            # plot lines of arrowheads from central sheet for n = 1 or on top sheet for n>1 
-                            if n > 1:   # for all lines ubt the single sheet one
-                                axis.add_line(Line2D((p_sh1x[i, j],p_sh3x[i, j]),(p_sh1y[i, j],p_sh3y[i, j]), linewidth=1, color = self.color))
-                                axis.add_line(Line2D((p_sh2x[i, j],p_sh3x[i, j]),((p_sh2y[i, j],p_sh3y[i, j])), linewidth=1, color = self.color))
-                            # then define it for the stacks with only 1 sheet:
-                            else:
-                                axis.add_line(Line2D((P_sh1x[i, j], P_sh3x[i, j]), (P_sh1y[i, j], P_sh3y[i, j]), linewidth=1, color = self.color))
-                                axis.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color = self.color))
+                            # from these, define the 2 displaced lines
+                            axis.add_line(Line2D((Ax1,Bx1),(Ay1,By1), linewidth=1, color=self.color))
+                            axis.add_line(Line2D((Ax2,Bx2),(Ay2,By2), linewidth=1, color=self.color))
+                            
+                            # change the parameter to loop over all changes in displacement for current magnitude
+                            s += 1
+                    if self.arrowheads == True:
+                        # plot lines of arrowheads from central sheet for n = 1 or on top sheet for n>1 
+                        if n > 1:   # for all lines ubt the single sheet one
+                            axis.add_line(Line2D((p_sh1x[i, j],p_sh3x[i, j]),(p_sh1y[i, j],p_sh3y[i, j]), linewidth=1, color = self.color))
+                            axis.add_line(Line2D((p_sh2x[i, j],p_sh3x[i, j]),((p_sh2y[i, j],p_sh3y[i, j])), linewidth=1, color = self.color))
+                        # then define it for the stacks with only 1 sheet:
                         else:
-                            pass
+                            axis.add_line(Line2D((P_sh1x[i, j], P_sh3x[i, j]), (P_sh1y[i, j], P_sh3y[i, j]), linewidth=1, color = self.color))
+                            axis.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color = self.color))
+                    else:
+                        pass
         
         # define a method to find its exterior derivative
         def ext_d(self, pass_on_figure=False):
@@ -1019,10 +973,6 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
     form_1_object = form_set_up(xg, yg, F_x, F_y)
     # return it to user to store
     return form_1_object
-
-
-
-
 
 # %%
 
@@ -1412,7 +1362,9 @@ def form_2(xg, yg, form_2, form_2_eq=None, fig=None, subplots=False, sub_axis_li
         # define a fucntion to Hodge the 2-form (into a 0-form)
         def Hodge(self, numerical_only=True, pass_on_figure=False):
             '''
-            Takes in one bool argument:
+            Takes in two bool arguments:
+            
+            numerical_only
             Determines if the calculation should be numerical or analytic
             True if numerical, False if analytic and numerical. Default is True
             For the analytic one, the equations as string must be supplied to
@@ -1420,6 +1372,11 @@ def form_2(xg, yg, form_2, form_2_eq=None, fig=None, subplots=False, sub_axis_li
             Note, choosing analytical, changes the equations AND the numerical answers
             It calulates the Hodge on R^2 by the standard definition:
             *(dx^dy) = 1
+            
+            pass_on_figure
+            Determies if figure should be passed onto the new object
+            if it is to be created
+            
             returns nothing 0-form
             '''
             # distinguish between doing it numerically and alaytically
@@ -1503,7 +1460,7 @@ function to create a 0-form object and define methods for it
 '''
 
 
-# define a function that will set up a 2-form object that can be customised and
+# define a function that will set up a 0-form object that can be customised and
 # plotted
 def form_0(xg, yg, form_0, form_0_eqn=None, fig=None, subplots=False, sub_axis_list=[]):
     '''
@@ -1755,9 +1712,11 @@ def form_0(xg, yg, form_0, form_0_eqn=None, fig=None, subplots=False, sub_axis_l
                 axis.clabel(CS, inline=self.inline_bool, fontsize=self.fontsize)
         
         # define a method to compute the exterior derivative
-        def ext_d(self):
+        def ext_d(self, pass_on_figure=False):
             '''
-            Takes in no argument
+            Takes in 1 argument:
+            -- pass on figure: Determies if figure should be passed onto the
+               new object if it is to be created
             Returns 1 form object
             computes the exterior derivative and returns it as the 1-form object
             '''
@@ -1790,13 +1749,325 @@ def form_0(xg, yg, form_0, form_0_eqn=None, fig=None, subplots=False, sub_axis_l
                 form_1_x = eval(form_1_x_str)
                 form_1_y = eval(form_1_y_str)
                 # supply these to the 1-form object function
-                if self.subplots is False:
+                if pass_on_figure is True:
+                    if self.subplots is False:
+                        result_1_form = form_1(self.xg, self.yg, form_1_x, form_1_y, form_1_x_unformated, form_1_y_unformated, fig=self.figure, subplots=False)
+                    elif self.subplots is True:
+                        result_1_form = form_1(self.xg, self.yg, form_1_x, form_1_y, form_1_x_unformated, form_1_y_unformated, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+                    return result_1_form
+                elif pass_on_figure is False:
                     result_1_form = form_1(self.xg, self.yg, form_1_x, form_1_y, form_1_x_unformated, form_1_y_unformated)
-                elif self.subplots is True:
-                    result_1_form = form_1(self.xg, self.yg, form_1_x, form_1_y, form_1_x_unformated, form_1_y_unformated)
+                else:
+                     raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
                 return result_1_form
-    
+        
+        # deifne a method to complete the exterior derivative numerically
+        def num_ext_d(self, edge_order=1, pass_on_figure=False):
+            '''
+            Takes in 2 arguments
+            -- edge_order: determines order same as in numpy gradient {1 or 2}
+            -- pass on figure: Determies if figure should be passed onto the
+               new object if it is to be created
+            
+            Return 1 object - 1-form
+            computes the exterior derivative numerically only
+            The equations do not need to be given
+            If given, they do not get passed onto the 1-form object anyway
+            NUMERICAL ONLY
+            '''
+            
+            # from numpy gradient, get the gradient array
+            fy, fx = np.gradient(form_0, edge_order=edge_order)
+            # supply these to the 1-form object function
+            if pass_on_figure is True:
+                if self.subplots is False:
+                    result_1_form = form_1(self.xg, self.yg, fx, fy, fig=self.figure, subplots=False)
+                elif self.subplots is True:
+                    result_1_form = form_1(self.xg, self.yg, fx, fy, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+            elif pass_on_figure is False:
+                result_1_form = form_1(self.xg, self.yg, fx, fy)
+            else:
+                raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+            
+            # return the new object to user
+            return result_1_form
+            
     # now call that object to create it:
     form_0_object = form_set_up(xg, yg, form_0)
     # return it to user to store
     return form_0_object
+
+
+# %%
+
+
+'''
+
+function to create a vector field object and define methods for it
+
+'''
+
+# define a function that will set up a vector field object that can be customised and
+# plotted
+def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=False, sub_axis_list=[]):
+    '''
+    defines a vector field object and returns it to user
+    Takes 9 arguments, these are the 2 grids in 2D, which muse be square
+    and of equal sizes. Then 2 arguments for the i component and j component
+    based on the same grids
+    Then 2 equations, for x and y (not always needed)
+    Then, can supply a figure if user doesn't wat this object
+    to create a new one for itself
+    Can also supply a bool input to define if subplots are to be allowed
+    these can be added using a method (add_subplot)
+    also, user can supply sub_axis_list, to provide the axis they have set
+    these only work if a figure has been supplied and if subplots is True
+    '''
+    # define the 1-form object and all its methods
+    class field_set_up():
+        # set up all variables
+        def __init__(self, xg, yg, F_x, F_y, deltafactor=10, fig_size=[7, 7]):
+            self.xg = xg
+            self.yg = yg
+            self.F_x = F_x
+            self.F_y = F_y
+            # set up a figure if one was not given:
+            if fig == None:
+                self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
+                self.axis = self.figure.gca()
+            else:
+                if subplots is False:
+                    self.figure = fig
+                    self.axis  = self.figure.gca()
+                elif subplots is True:
+                    if len(sub_axis_list) == 0:
+                        self.figure = fig
+                        self.axis = []
+                    else:
+                        self.figure = fig
+                        self.axis = sub_axis_list
+                else:
+                    raise TypeError('Error, incorrect input for \'subplots\'')
+            self.subplots = subplots
+            self.pt_den = len(xg[:, 0])# + 1  # assume square grids
+            self.orientation = 'mid'
+            self.scale = 1
+            self.color = 'black'
+            self.logarithmic_scale_bool = 0
+            self.scale_bool = True
+            self.delta_factor = deltafactor
+            if F_x_eqn is not None:
+                self.str_x = str(simplify(F_x_eqn))  # to start with, use rmust change to access some methods
+                # Note, the string must be given with x and y as variables
+            else:
+                self.str_x = None
+            
+            if F_y_eqn is not None:
+                self.str_y = str(simplify(F_y_eqn))
+            else:
+                self.str_x = None
+        
+        # #####################################################################
+        # write some methods that will allow the user to chenge some of the
+        # above variables
+        # #####################################################################
+        # deifne a function to return the string equations to the user
+        def return_string(self):
+            '''
+            Takes in no arguments, returns the unformatted strings back to user
+            This is done in case user wants to access strings
+            that got here not by input but by ext. alg.
+            '''
+            return self.str_x, self.str_y
+        
+        # define a method to add a subplot
+        def add_subplot(self, order):
+            '''
+            Takes in one argument, as as matplotlib add_subplot
+            It determines the shape of the subplot structure and which axis is
+            being set (eg. 231 gives a set of plots 2 rows by 3 columns
+            and this sets the first axis in that configuration)
+            Adds a subplot to the figure that this form occupies
+            Returns nothing, saves the subplot axis to the axis self param.
+            '''
+            # chck if the correct option was chosen to allow for this:
+            if type(self.axis) != list:
+                raise ValueError('Error, set up the object allowing for subplots')
+            else:
+                sub_axis = self.figure.add_subplot(order)
+                self.axis.append(sub_axis)
+        
+        # define a method to change figure size
+        def fig_size(self, n, m):
+            ''' Takes two inputs, float or int numbers, sets the figure
+            size to these dimensions in inches. Uses set_size_inches from
+            matploitlib so can just use that on
+            the atribute figure, this function is here just for
+            easier nameing'''
+            self.figure.set_size_inches(n, m)
+        
+        # change colour
+        def colour(self, color):
+            '''
+            Takes input of a single string.String must be formatted
+            as to be accepted by maplotlib colors
+            changes the colour of plotted stacks.
+            '''
+            self.color = str(color)
+        
+        # change orientation:
+        def orient(self, string):
+            '''
+            Takes one input, needs to be a string understood by matplotlib
+            quiver to orient arrows
+            eg. 'tip', 'tail', 'mid' etc.
+            Orients arrows on quiver plot depending on this
+            '''
+            self.orientation = str(string)
+        
+        # change boolean that det. if to sclae logarithmically
+        def log_scaling(self):
+            '''
+            Takes no arguments
+            Changes the boolean that determines if scaling is logarithmic
+            Whenever it is called, it changes that boolean to opposite
+            The form object is initialised with this as False
+            '''
+            self.logarithmic_scale_bool = not self.logarithmic_scale_bool
+        
+        # define a method to be able to change bool that det. if arrows autoscale
+        def autoscale(self):
+            '''
+            Takes no arguments
+            Changes the boolean that determines if arrows are autoscaled
+            Whenever it is called, it changes that boolean to opposite
+            The form object is initialised with this as False
+            '''
+            self.scale_bool = not self.scale_bool
+        
+        # define a method to change spare spacing around figure
+        def surround_space(self, delta_denominator):
+            '''
+            Takes in one argument, float or int
+            Sets the extra blank space around the domain of grids in axis
+            The input number defines the denominator or fraction to use
+            eg. supplying 3 will make the white space 1/3 of the width
+            of the domain of the grid.
+            '''
+            self.delta_factor = delta_denominator
+        
+        # define a method to change the density of grids in same range
+        # requires string input of 1-form:
+        def same_range_density(self, points_number):
+            '''
+            takes in one argument, requires the string equation to be
+            supplied
+            Changes the desnity of points in the same range to the input value
+            '''
+            if self.str_x == None or self.str_y == None:
+                # Error
+                raise ValueError('Error: You need to supply the 1-form equation to do this, look at \'give_eqn\' method')
+            else:
+                # redefine the grids
+                v = np.linspace(-self.xg[0, -1], self.xg[0, -1], points_number)
+                self.xg, self.yg = np.meshgrid(v, v)
+                # based on these change other, dependant variables
+                self.pt_den = len(self.xg[:, 0])
+                # substitute these into the equation:
+                # but keep it local
+                str_x_l = self.str_x + ''
+                str_y_l = self.str_y + ''
+                str_x_l = str_x_l.replace('x', '(self.xg)')
+                str_x_l = str_x_l.replace('y', '(self.yg)')
+                str_y_l = str_y_l.replace('x', '(self.xg)')
+                str_y_l = str_y_l.replace('y', '(self.yg)')
+                # re-evaluate the 2-form numerically
+                self.F_x = eval(str_x_l)
+                self.F_y = eval(str_y_l)
+        
+        # define a method to plot the vector field using quiver
+        def plot(self, keep=True, subplot_index=None):
+            '''
+            Finilises the plotting
+            Uses the attribues of the object as set originally and as customised
+            with methods to create a plot of the 1-form
+            Takes in 2 arguments:
+            --- \'keep\', which allows the user to plot
+            on top of the previous pltos they created without clearing axis
+            When its set to False, the axis are cleared first
+            Default is True.
+            --- \' subplot_index \', default set to None, can be input if
+            the user has selected subplots to be allowed when creating the
+            object. Determines which aixs to draw on, indecies are in order
+            that they were added to the object
+            '''
+            
+            # from self, get axis
+            # depending on if subplots are wanted:
+            if type(self.axis) != list:
+                axis = self.axis
+            else:
+                axis = self.axis[subplot_index]
+            
+            # depending on input, clear the axis or don't
+            if keep is True:
+                pass
+            else:
+                axis.clear()
+            
+            # get the lengths of x and y from their grids
+            x_len = len(self.xg[:, 0])
+            y_len = len(self.yg[0, :])
+            
+            # Extract L from the x and y grids. Assumes they are square.
+            L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+            x0 = self.xg[0,0] + L
+            y0 = self.yg[0,0] + L
+            
+            # adjust axis limits based on that.
+            ax_L = L + L/self.delta_factor
+            axis.set_xlim(-ax_L + x0, ax_L + x0)
+            axis.set_ylim(-ax_L + y0, ax_L + y0)
+            
+            # find the magnitude corresponding to each point and store in mag array
+            mag = np.sqrt(self.F_x**2 + self.F_y**2)
+            
+            # find the maximum magnitude for scaling
+            max_size = np.max(mag)   # careful with singularities, else ---> nan
+            
+            # deal with requested autoscaling
+            if self.scale_bool is False:
+                ScaleFactor = self.scale
+            elif self.scale_bool is True:
+                ScaleFactor = max_size/(0.9*(2*L/self.pt_den))
+            
+            # for arrows to work, with nan and infs
+            # make a local variable of F_x and F_y
+            # so that thye don't alter globally
+            F_x_local = self.F_x * 1
+            F_y_local = self.F_y * 1
+            
+            # prevent any magnitudes from being inf or nan
+            # only here, need to do it to u and v not just mag
+            for i in range(x_len):
+                for j in range(y_len):
+                    if isnan(F_x_local[i,j]) == True or isnan(F_y_local[i,j]) == True or abs(F_x_local[i, j]) == np.inf or abs(F_y_local[i, j]) == np.inf or abs(F_y_local[i, j]) > 1e15 or abs(F_x_local[i, j]) > 1e15:
+                        F_x_local[i,j] = F_y_local[i,j] = 0
+            axis.quiver(self.xg, self.yg, F_x_local, F_y_local, pivot=self.orientation, scale=ScaleFactor, scale_units='xy', color=self.color) 
+        
+        # define a method that will translate this into a 1-form via the metric
+        def curvy_boyyy(self):
+            '''
+            Takes in 1 argument
+            --- The metric array (2x2)
+            
+            Completes the conversion of VF to 1-form via the metric.
+            
+            Returns a 1-form object
+            '''
+        
+    # now call that object to create it:
+    v_object = field_set_up(xg, yg, F_x, F_y)
+    # return it to user to store
+    return v_object
+
