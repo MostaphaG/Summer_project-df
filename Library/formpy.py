@@ -1886,7 +1886,6 @@ def form_0(xg, yg, form_0, form_0_eqn=None, fig=None, subplots=False, sub_axis_l
 
 # %%
 
-
 '''
 
 function to create a vector field object and define methods for it
@@ -1958,13 +1957,36 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplot
         # above variables
         # #####################################################################
         # deifne a function to return the string equations to the user
+        def give_eqn(self, equation_str_x, equation_str_y):
+            '''
+            Takes in 1-argument, string
+            This must be the equation of the supplied numerical 0-form
+            It must be in terms of x and y.
+            Has to be given, for some methods to be calculatable.
+            '''
+            # set equation parameters to simplified inputs
+            self.vf_str_x = str(simplify(equation_str_x))
+            self.vf_str_y = str(simplify(equation_str_y))
+            # make the values match automatically to limit how often mismatch occurs
+            # substitute these into the equation:
+            # but keep it local
+            str_x = self.vf_str_x + ''
+            str_y = self.vf_str_y + ''
+            str_x = str_x.replace('x', '(self.xg)')
+            str_x = str_x.replace('y', '(self.yg)')
+            str_y = str_y.replace('x', '(self.xg)')
+            str_y = str_y.replace('y', '(self.yg)')
+            # re-evaluate the 2-form numerically
+            self.F_x = eval(str_x)
+            self.F_y = eval(str_y)
+            
         def return_string(self):
             '''
             Takes in no arguments, returns the unformatted strings back to user
             This is done in case user wants to access strings
             that got here not by input but by ext. alg.
             '''
-            return self.str_x, self.str_y
+            return self.vf_str_x, self.vf_str_y
         
         # define a method to add a subplot
         def add_subplot(self, order):
@@ -2143,6 +2165,59 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplot
             
             axis.quiver(self.xg, self.yg, F_x_local, F_y_local, pivot=self.orientation, scale=ScaleFactor, scale_units='xy', color=self.color) 
         
+        def zoom(self, target=[0,0], zoom=2, dpd=9):
+            '''
+            Create a new window which displays the field zoomed at a certain point
+            User gives arguments
+            Target: Determines the zoom location, coordinates
+            Zoom: +ve float, determines zooming amount
+            dpd: +int, determines how many points on each axis
+            '''
+            
+            # Requires user to provide eqn of the 1-form they are zooming on.
+            
+            if self.vf_str_x == None or self.vf_str_y == None:
+                # ERROR
+                raise TypeError('Error: No equation provided')
+            else:
+                
+                # Target coordinates
+                x_m = target[0]
+                y_m = target[1]
+                
+                d_range = self.xg[0, -1]/zoom
+                #d_length = 
+                
+                # Set up zoom window grids
+                dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
+                dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
+                dxg, dyg = np.meshgrid(dx, dy)
+                
+                # Create variables for the user provided equation strings
+                u_str = self.vf_str_x
+                v_str = self.vf_str_y
+                
+                # Check if the equations provided contain x and y terms
+                if u_str.find('x') & u_str.find('y') == -1:
+                    u_str = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                else:
+                    u_str = u_str.replace('x', 'dxg')
+                    u_str = u_str.replace('y', 'dyg')
+          
+                if v_str.find('x') & v_str.find('y') == -1:
+                    v_str = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
+                else:
+                    v_str = v_str.replace('x', 'dxg')
+                    v_str = v_str.replace('y', 'dyg')
+                    
+                # Generate arrays for the components of the zoom field
+                u_zoom = eval(u_str)
+                v_zoom = eval(v_str)
+                
+                zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom)
+                
+                return zoom_vf
+            
     # now call that object to create it:
     v_object = field_set_up(xg, yg, F_x, F_y)
     # return it to user to store
