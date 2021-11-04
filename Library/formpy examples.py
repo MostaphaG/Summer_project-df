@@ -422,8 +422,8 @@ v = np.linspace(-6, 6, 31)
 xg, yg = np.meshgrid(v, v)
 
 # set up the field
-F_x = yg*np.sin(xg)
-F_y = xg*np.cos(yg)
+F_x = xg/(xg**2 + yg**2)**1.5
+F_y = yg/(xg**2 + yg**2)**1.5
 
 # set up a figure, with subplots
 fig = plt.figure()
@@ -435,7 +435,6 @@ field_obj = fp.vector_field(xg, yg, F_x, F_y, fig=fig, subplots=True, sub_axis_l
 
 # on axis 1, plot default
 field_obj.plot(keep=True, subplot_index=0)
-
 
 # change some properties and plot the second subplot
 field_obj.axis[1].set_xlabel('x')

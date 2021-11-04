@@ -2115,18 +2115,6 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplot
             axis.set_xlim(-ax_L + x0, ax_L + x0)
             axis.set_ylim(-ax_L + y0, ax_L + y0)
             
-            # find the magnitude corresponding to each point and store in mag array
-            mag = np.sqrt(self.F_x**2 + self.F_y**2)
-            
-            # find the maximum magnitude for scaling
-            max_size = np.max(mag)   # careful with singularities, else ---> nan
-            
-            # deal with requested autoscaling
-            if self.scale_bool is False:
-                ScaleFactor = self.scale
-            elif self.scale_bool is True:
-                ScaleFactor = max_size/(0.9*(2*L/self.pt_den))
-            
             # for arrows to work, with nan and infs
             # make a local variable of F_x and F_y
             # so that thye don't alter globally
@@ -2139,6 +2127,20 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplot
                 for j in range(y_len):
                     if isnan(F_x_local[i,j]) == True or isnan(F_y_local[i,j]) == True or abs(F_x_local[i, j]) == np.inf or abs(F_y_local[i, j]) == np.inf or abs(F_y_local[i, j]) > 1e15 or abs(F_x_local[i, j]) > 1e15:
                         F_x_local[i,j] = F_y_local[i,j] = 0
+            
+            # find the magnitude corresponding to each point and store in mag array
+            mag = np.sqrt(F_x_local**2 + F_y_local**2)
+            
+            # find the maximum magnitude for scaling
+            max_size = np.max(mag)   # careful with singularities, else ---> nan
+            
+            # deal with requested autoscaling
+            if self.scale_bool is False:
+                ScaleFactor = self.scale
+            elif self.scale_bool is True:
+                ScaleFactor = max_size/(0.9*(2*L/self.pt_den))
+            
+            
             axis.quiver(self.xg, self.yg, F_x_local, F_y_local, pivot=self.orientation, scale=ScaleFactor, scale_units='xy', color=self.color) 
         
     # now call that object to create it:
