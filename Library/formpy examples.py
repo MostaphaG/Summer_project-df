@@ -483,7 +483,6 @@ form_1_obj_a.plot(keep=True, subplot_index=2)
 
 # %%
 
-
 # Testing Hodge of a 0-form
 
 # set up grids
@@ -513,3 +512,17 @@ form_2_an = form_0_obj.Hodge(numerical_only=False, pass_on_figure=True)
 
 form_2_an.plot(keep=True, subplot_index=3)
 
+#%%
+
+r = np.linspace(-4.5, 4.5, 21)
+xg, yg = np.meshgrid(r,r)
+
+u = xg*np.cos(yg)
+v = -yg*np.sin(xg)
+
+vf1 = fp.vector_field(xg,yg,u,v)
+vf1.give_eqn('x*cos(y)', '-y*sin(x)')
+vf1.plot()
+
+vfz = vf1.zoom((2,2), zoom=3, dpd=9)
+vfz.plot()

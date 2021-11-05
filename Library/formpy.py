@@ -1965,13 +1965,13 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplot
             Has to be given, for some methods to be calculatable.
             '''
             # set equation parameters to simplified inputs
-            self.vf_str_x = str(simplify(equation_str_x))
-            self.vf_str_y = str(simplify(equation_str_y))
+            self.str_x = str(simplify(equation_str_x))
+            self.str_y = str(simplify(equation_str_y))
             # make the values match automatically to limit how often mismatch occurs
             # substitute these into the equation:
             # but keep it local
-            str_x = self.vf_str_x + ''
-            str_y = self.vf_str_y + ''
+            str_x = self.str_x + ''
+            str_y = self.str_y + ''
             str_x = str_x.replace('x', '(self.xg)')
             str_x = str_x.replace('y', '(self.yg)')
             str_y = str_y.replace('x', '(self.xg)')
@@ -1986,7 +1986,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplot
             This is done in case user wants to access strings
             that got here not by input but by ext. alg.
             '''
-            return self.vf_str_x, self.vf_str_y
+            return self.str_x, self.str_y
         
         # define a method to add a subplot
         def add_subplot(self, order):
@@ -2176,7 +2176,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplot
             
             # Requires user to provide eqn of the 1-form they are zooming on.
             
-            if self.vf_str_x == None or self.vf_str_y == None:
+            if self.str_x == None or self.str_y == None:
                 # ERROR
                 raise TypeError('Error: No equation provided')
             else:
@@ -2194,8 +2194,8 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplot
                 dxg, dyg = np.meshgrid(dx, dy)
                 
                 # Create variables for the user provided equation strings
-                u_str = self.vf_str_x
-                v_str = self.vf_str_y
+                u_str = self.str_x
+                v_str = self.str_y
                 
                 # Check if the equations provided contain x and y terms
                 if u_str.find('x') & u_str.find('y') == -1:
