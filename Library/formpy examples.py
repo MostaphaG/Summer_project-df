@@ -526,3 +526,46 @@ vf1.plot()
 
 vfz = vf1.zoom((2,2), zoom=3, dpd=9)
 vfz.plot()
+
+# %%
+
+# Testing numerical 1-form exterior derivative
+
+
+# set up grids
+v = np.linspace(-4.5, 4.5, 21)
+xg, yg = np.meshgrid(v, v)
+
+# set up the 1 form object and plot it
+form_1_x = xg*np.cos(yg)
+form_1_y = yg*np.sin(xg)
+
+# set up a figure with sublots
+fig = plt.figure()
+ax1 = fig.add_subplot(131)
+ax2 = fig.add_subplot(132)
+ax3 = fig.add_subplot(133)
+
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
+ax3.set_aspect('equal')
+
+# set up a 1-form object with these:
+form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y, fig=fig, subplots=True, sub_axis_list=[ax1, ax2, ax3])
+
+# plot it
+form_1_obj.plot(keep=True, subplot_index=0)
+
+# complete the numerical exterior derivative
+form_2_num = form_1_obj.num_ext_d(pass_on_figure=True)
+
+# plot it
+form_2_num.plot(keep=True, subplot_index=1)
+
+# complete the analytical exterior derivative
+form_1_obj.give_eqn('x*cos(y)', 'y*sin(x)')
+form_2_an = form_1_obj.ext_d(pass_on_figure=True)
+
+# plot it
+form_2_an.plot(keep=True, subplot_index=2)
+

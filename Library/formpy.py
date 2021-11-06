@@ -753,7 +753,48 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                 
                 # return it to the user
                 return result_form
+        
+        # define a funciton to complete numerical only curl
+        def num_ext_d(self, pass_on_figure=False):
+            '''
+            Takes in 1 argument:
+            --- pass on figure: Determies if figure should be passed onto the
+               new object if it is to be created
+             
+            returns 2-form object
+            computes the exterior derivative numerically only
+            The equations do not need to be given
+            If given, they do not get passed onto the 2-form object anyway
+            NUMERICAL ONLY, they will be lost!
+            '''
+            
+            # get steps in dx and dy:
+            dx = self.xg[0, :]
+            dy = self.yg[:, 0]
+            
+            # Calculate deirvatvies as needed, using numpy gradient.
+            dy_F_x, _ = np.gradient(self.F_x, dx, dy)
+            _, dx_F_y = np.gradient(self.F_x, dx, dy)
+            
+            # from these, get the 2-form
+            form_2_result = dx_F_y - dy_F_x
+            
+            # return 2-form object to user
+            if pass_on_figure is False:
+                # supply these to the 2-form object creator
+                result_form = form_2(self.xg, self.yg, form_2_result)
+            elif pass_on_figure is True:
+                if self.subplots is False:
+                    result_form = form_2(self.xg, self.yg, form_2_result, fig=self.figure, subplots=False)
+                elif self.subplots is True:
+                    result_form = form_2(self.xg, self.yg, form_2_result, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+            else:
+                raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
                 
+            # return it to the user
+            return result_form
+        
+        
         # define a method to Hodge it
         def Hodge(self, numerical_only=True, keep_object=True, pass_on_figure=False):
             '''
