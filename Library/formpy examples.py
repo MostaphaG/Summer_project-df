@@ -569,3 +569,38 @@ form_2_an = form_1_obj.ext_d(pass_on_figure=True)
 # plot it
 form_2_an.plot(keep=True, subplot_index=2)
 
+
+# %%
+
+# Testing zooming on 2-forms
+
+
+v = np.linspace(-6, 6, 21)
+xg, yg = np.meshgrid(v, v)
+
+form_2 = xg*yg
+
+fig = plt.figure()
+
+fig.tight_layout()
+
+form_obj = fp.form_2(xg, yg, form_2, fig=fig)
+
+form_obj.axis.set_aspect('equal')
+
+form_obj.plot()
+
+# for zooming in, supply the equation
+form_obj.give_eqn('x*y')
+
+form_zoomed = form_obj.zooming(target=[2, 2], zoom=5, dpd=21)
+
+# plot it
+form_zoomed.plot()
+
+
+
+
+
+
+

@@ -1025,7 +1025,7 @@ function to create a 2-form object and define methods for it
 
 # define a function that will set up a 2-form object that can be customised and
 # plotted
-def form_2(xg, yg, form_2, form_2_eq=None, fig=None, subplots=False, sub_axis_list=[]):
+def form_2(xg, yg, form2, form_2_eq=None, fig=None, subplots=False, sub_axis_list=[]):
     '''
     defines a 2-form object and returns it to user
     Takes 3 arguments basic, these are the 2 grids in 2D, which muse be square
@@ -1038,10 +1038,10 @@ def form_2(xg, yg, form_2, form_2_eq=None, fig=None, subplots=False, sub_axis_li
     # define the 1-form object and all its methods
     class form_set_up():
         # set up all variables
-        def __init__(self, xg, yg, form_2, s_max=6, s_min=2, fig_size=[7, 7], deltafactor=10):
+        def __init__(self, xg, yg, form2, s_max=6, s_min=2, fig_size=[7, 7], deltafactor=10):
             self.xg = xg
             self.yg = yg
-            self.form_2 = form_2
+            self.form_2 = form2
             # set up a figure if one was not given:
             if fig == None:
                 self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
@@ -1237,7 +1237,7 @@ def form_2(xg, yg, form_2, form_2_eq=None, fig=None, subplots=False, sub_axis_li
                 axis = self.axis[subplot_index]
             
             
-            form_2 = self.form_2  # from self, get 2-form too
+            form2 = self.form_2  # from self, get 2-form too
             
             # depending on input, clear the axis or don't
             if keep is True:
@@ -1249,16 +1249,18 @@ def form_2(xg, yg, form_2, form_2_eq=None, fig=None, subplots=False, sub_axis_li
             x_len = len(self.xg[:, 0])
             y_len = len(self.yg[0, :])
             
-            # get L from largest entry in the array, assume they are square:
-            L = self.xg[0, -1]
+            # find L based on the origin of given grid is
+            L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+            x0 = self.xg[0,0] + L
+            y0 = self.yg[0,0] + L
             
-            # define axis limits based on supplied arrays
+            # rescale axis
             ax_L = L + L/self.delta_factor
-            axis.set_xlim(-ax_L, ax_L)
-            axis.set_ylim(-ax_L, ax_L)
+            axis.set_xlim(-ax_L + x0, ax_L + x0)
+            axis.set_ylim(-ax_L + y0, ax_L + y0)
             
             # get the signs of the input 2-form
-            form_2_sgn = np.sign(form_2)
+            form_2_sgn = np.sign(form2)
             
             # define an empty array of magnitudes, to then fill with integer rel. mags
             R_int = np.zeros(shape=((x_len), (y_len)))
@@ -1268,23 +1270,23 @@ def form_2(xg, yg, form_2, form_2_eq=None, fig=None, subplots=False, sub_axis_li
             # #########################################################################
             
             # set up directions
-            angles =[0*np.ones(np.shape(form_2)), (np.pi/2)*np.ones(np.shape(form_2))]
+            angles =[0*np.ones(np.shape(form2)), (np.pi/2)*np.ones(np.shape(form2))]
             
             # deal with sinularities that appear on evaluated points
             for i in range(x_len):
                 for j in range(y_len):
                     # set to zero points that are not defined or inf
-                    if isnan(form_2[i, j]) is True or abs(form_2[i, j]) == np.inf  or abs(form_2[i, j]) > 1e15:
+                    if isnan(form2[i, j]) is True or abs(form2[i, j]) == np.inf  or abs(form2[i, j]) > 1e15:
                         # colour this region as a red dot, not square to
                         # not confuse with nigh mag 2-forms in stacks. or worse, in
                         # blocks
                         circ = patch.Circle((self.xg[i, j], self.yg[i, j]), L*self.fract/3, color='red')
                         axis.add_patch(circ)
-                        form_2[i, j] = 0
+                        form2[i, j] = 0
                     # ALso, since we got this lop anyway
                     # correct for singularities in planar form 2:
                     # set to zero points that are not defined or inf
-                    if isnan(form_2[i, j]) is True:
+                    if isnan(form2[i, j]) is True:
                         form_2_sgn[i, j] = 0
             
             # #########################################################################
@@ -1300,10 +1302,10 @@ def form_2(xg, yg, form_2, form_2_eq=None, fig=None, subplots=False, sub_axis_li
             # of the arrow and with an arrowhead on top.
             # #########################################################################
             # find the maximum magnitude for scaling
-            max_size = np.max(abs(form_2))   # careful with singularities, else ---> nan
+            max_size = np.max(abs(form2))   # careful with singularities, else ---> nan
             
             # find the relative magnitude of vectors to maximum, as an array
-            R = abs(form_2)/max_size
+            R = abs(form2)/max_size
             
             # logarithmic attempt on 2-forms:
             if self.logarithmic_scale_bool == 1:
@@ -1486,8 +1488,54 @@ def form_2(xg, yg, form_2, form_2_eq=None, fig=None, subplots=False, sub_axis_li
                 # Error
                 raise ValueError('ERROR: Invalid input for \'numerical_only\'')
     
+        # define a method to create a zoomed in 2-form
+        def zooming(self, target=[0, 0], zoom=2, dpd=9):
+            '''
+            Creates a new window which displays the 2-form zoomed at a certain point
+            User gives arguments:
+            Target: Determines the zoom location, coordinates
+            Zoom: +ve float, determines zooming amount
+            dpd: +int, determines how many points on each axis
+            '''
+            
+            # Requires user to provide eqn of the 1-form they are zooming on.
+            if self.form_2_str == None:
+                # ERROR
+                raise TypeError('Error: No equation provided')
+            else:
+                
+                # Target coordinates
+                x_m = target[0]
+                y_m = target[1]
+                
+                d_range = self.xg[0, -1]/zoom
+                
+                # Set up zoom window grids
+                dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
+                dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
+                dxg, dyg = np.meshgrid(dx, dy)
+                
+                # Create variables for the user provided equation strings
+                zoom_str = self.form_2_str + ''
+                
+                # Check if the equations provided contain x and y terms
+                if zoom_str.find('x') & zoom_str.find('y') == -1:
+                    zoom_str = '(' + str(zoom_str) + ')* np.ones(np.shape(dxg))'
+                else:
+                    zoom_str = zoom_str.replace('x', 'dxg')
+                    zoom_str = zoom_str.replace('y', 'dyg')
+                
+                # Generate arrays for the components of the zoom field
+                zoom_2form = eval(zoom_str)
+                
+                # set up a new 2-form, that is the form, after zooming in
+                # that will be returned to the user
+                zoom_form = form_2(dxg, dyg, zoom_2form, form_2_eq=self.form_2_str)
+                
+                return zoom_form
+            
     # now call that object to create it:
-    form_2_object = form_set_up(xg, yg, form_2)
+    form_2_object = form_set_up(xg, yg, form2)
     # return it to user to store
     return form_2_object
 
@@ -1717,13 +1765,15 @@ def form_0(xg, yg, form_0, form_0_eqn=None, fig=None, subplots=False, sub_axis_l
             
             form_0 = self.form_0  # from self, get 2-form
             
-            # get L from largest entry in the array, assume they are square:
-            L = self.xg[0, -1]
+            # find L based on the origin of given grid is
+            L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+            x0 = self.xg[0,0] + L
+            y0 = self.yg[0,0] + L
             
-            # define axis limits based on supplied arrays
+            # rescale axis
             ax_L = L + L/self.delta_factor
-            axis.set_xlim(-ax_L, ax_L)
-            axis.set_ylim(-ax_L, ax_L)
+            axis.set_xlim(-ax_L + x0, ax_L + x0)
+            axis.set_ylim(-ax_L + y0, ax_L + y0)
             
             if self.denser != 1:
                 if self.form_0_str == None:
