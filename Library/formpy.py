@@ -774,7 +774,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             
             # Calculate deirvatvies as needed, using numpy gradient.
             dy_F_x, _ = np.gradient(self.F_x, dx, dy)
-            _, dx_F_y = np.gradient(self.F_x, dx, dy)
+            _, dx_F_y = np.gradient(self.F_y, dx, dy)
             
             # from these, get the 2-form
             form_2_result = dx_F_y - dy_F_x
