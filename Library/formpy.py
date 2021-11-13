@@ -126,7 +126,13 @@ def find_2_form(expressions, coords, xg, yg, zg=None, m=2):
         loc_res[d, 0] = loc_res[d, 0].replace('x', 'xg')
         loc_res[d, 0] = loc_res[d, 0].replace('y', 'yg')
         loc_res[d, 0] = loc_res[d, 0].replace('z', 'zg')
-    
+        
+        # check against constant result, to be of correct shape before eval
+        if loc_res[d, 0].find('x') & loc_res[d, 0].find('y') == -1:
+            loc_res[d, 0] = '(' + str(loc_res[d, 0]) + ')* np.ones(np.shape(xg))'
+        if loc_res[d, 0].find('x') & loc_res[d, 0].find('y') == -1:
+            loc_res[d, 0] = '(' + str(loc_res[d, 0]) + ')* np.ones(np.shape(yg))'
+
     # set up a vector to store the 2-form numerically, from xg and yg
     # Note - need pt_den m times.
     if m == 2:
@@ -242,6 +248,12 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             str_x = str_x.replace('y', '(self.yg)')
             str_y = str_y.replace('x', '(self.xg)')
             str_y = str_y.replace('y', '(self.yg)')
+            
+            # check against constant forms, to have correct shape
+            if str_x.find('x') & str_x.find('y') == -1:
+                str_x = '(' + str(str_x) + ')* np.ones(np.shape(self.xg))'
+            if str_y.find('x') & str_y.find('y') == -1:
+                str_y = '(' + str(str_y) + ')* np.ones(np.shape(self.yg))'
             # re-evaluate the 2-form numerically
             self.F_x = eval(str_x)
             self.F_y = eval(str_y)
@@ -404,6 +416,13 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                 str_x = str_x.replace('y', '(self.yg)')
                 str_y = str_y.replace('x', '(self.xg)')
                 str_y = str_y.replace('y', '(self.yg)')
+                
+                # cehck against constant forms, to have correct shape
+                if str_x.find('x') & str_x.find('y') == -1:
+                    str_x = '(' + str(str_x) + ')* np.ones(np.shape(self.xg))'
+                if str_y.find('x') & str_y.find('y') == -1:
+                    str_y = '(' + str(str_y) + ')* np.ones(np.shape(self.yg))'
+            
                 # re-evaluate the 2-form numerically
                 self.F_x = eval(str_x)
                 self.F_y = eval(str_y)
@@ -729,11 +748,11 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                 # to supply to form_2
                 form_2_str_loc = form_2_str*1
                 
-                # numerically evalue it, careful about constants
-                # to evaliuate it, make sure to use grids
-                form_2_str = form_2_str.replace('x', 'self.xg')
-                form_2_str = form_2_str.replace('y', 'self.yg')
-                if form_2_str.find('xg') & form_2_str.find('yg') == -1:
+                # numerically evaluate it, careful about constants
+                # to evaluate it, make sure to use grids
+                form_2_str = form_2_str.replace('x', '(self.xg)')
+                form_2_str = form_2_str.replace('y', '(self.yg)')
+                if form_2_str.find('x') & form_2_str.find('y') == -1:
                     form_2_str = '(' + str(form_2_str) + ')* np.ones(np.shape(self.xg))'
                 else:
                     pass
@@ -867,14 +886,14 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                     # need to uspply these unformatted, so save those:
                     form_1_x_unformated, form_1_y_unformated = new_str_x*1, new_str_y*1
                     # from these strings, get the numerical 1-form:
-                    new_str_x = new_str_x.replace('x', 'self.xg')
-                    new_str_x = new_str_x.replace('y', 'self.yg')
-                    new_str_y = new_str_y.replace('x', 'self.xg')
-                    new_str_y = new_str_y.replace('y', 'self.yg')
+                    new_str_x = new_str_x.replace('x', '(self.xg)')
+                    new_str_x = new_str_x.replace('y', '(self.yg)')
+                    new_str_y = new_str_y.replace('x', '(self.xg)')
+                    new_str_y = new_str_y.replace('y', '(self.yg)')
                     
-                    if new_str_x.find('xg') & new_str_x.find('yg') == -1:
+                    if new_str_x.find('x') & new_str_x.find('y') == -1:
                         new_str_x = '(' + str(new_str_x) + ')* np.ones(np.shape(self.xg))'
-                    if new_str_y.find('xg') & new_str_y.find('yg') == -1:
+                    if new_str_y.find('x') & new_str_y.find('y') == -1:
                         new_str_y = '(' + str(new_str_y) + ')* np.ones(np.shape(self.yg))'
                     
                     form_1_x = eval(new_str_x)
@@ -933,13 +952,13 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             # format it to be in terms of grids and:
             # check against constant and zero 2-forms being supplied
             # get the numerical evaluation of it
-            
             form_2_str = form_2_str.replace('x', 'self.xg')
             form_2_str = form_2_str.replace('y', 'self.yg')
-            if form_2_str.find('xg') & form_2_str.find('yg') == -1:
+            if form_2_str.find('x') & form_2_str.find('y') == -1:
                 form_2_str = '(' + str(form_2_str) + ')* np.ones(np.shape(self.xg))'
             else:
                 pass
+            
             # evaluate it numerically on the grid supplied
             form_2_result = eval(form_2_str)
             # create a 2-form object from this; to return.
@@ -1009,6 +1028,140 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                 zoom_form = form_1(dxg, dyg, u_zoom, v_zoom)
                 
                 return zoom_form
+        
+        # define a mehtod to evaluate the interior derivative of the 1-form
+        # with respect to a given vector field object or without.
+        def interior_d(self, vector_field=None, pass_on_figure=False, numerical_only=False):
+            '''
+            Computes the interior derivative of the 1-form
+            Takes in:
+            -- Vector_field = vector field object of formpy library to do the
+            derivative with respect to, needs equations to work with
+            nuymerical_only being False. Can also supply equations in a tuple:
+            (eqn_x, eqn_y). If using numerical only, can supply object or
+            tuple of numpy arrays (array_x, atrray_y). If nothing is supplied
+            for it, it assumes F_x = 1 and F_y = 1, with correct form and shape
+            
+            -- pass_on_figure = determines if figure from this object is to be
+            passed on to the 1-form object.
+            
+            --- numerical_only = bool, if true, it calculates only numerically
+            otherwise, calculates it based on given equations, evaluates
+            it numerically and supplies all to 0-form obejct creator
+            
+            Returns 0-form object
+            '''
+            
+            # split up the code depending if numerical only or analytical too:
+            if numerical_only is False:
+                # test if equations were given first:
+                if self.form_1_str_x == None or self.form_1_str_y == None:
+                    # ERROR
+                    raise ValueError('Error: You need to supply the 1-form equations to do this, look at \'give_eqn\' method')
+                # if the vector field was supplied, extract its equations, if possible
+                if vector_field is None:
+                    # if none was given, do it with respect to uniform 1, 1
+                    vf_x_str = '1'
+                    vf_y_str = '1'
+                elif type(vector_field) == tuple:
+                    # if equations were given, take these, is numericals were given here, break!
+                    if type(vector_field[0]) == str:
+                        vf_x_str = vector_field[0]
+                        vf_y_str = vector_field[1]
+                    else:
+                        raise ValueError('for analytical result, supply VF equations')
+                else:
+                    if vector_field.str_x == None or vector_field.str_y == None:
+                        # ERROR
+                        raise ValueError('Error: You need to supply the VF equations to do this, look at \'give_eqn\' method')
+                    else:
+                        vf_x_str = str(simplify(vector_field.str_x))
+                        vf_y_str = str(simplify(vector_field.str_y))
+                
+                # combine them correctly with the 1-form strings:
+                zero_form_str = str(simplify('(' + self.form_1_str_x + ')*(' + vf_x_str + ')' + ' + (' + self.form_1_str_y + ')*(' + vf_y_str + ')'))
+                
+                # keep an unformatted version to supply to the 0-form
+                zero_form_str_unformatted = zero_form_str + ''
+                
+                # format the expression to be evluated
+                zero_form_str = zero_form_str.replace('x', 'self.xg')
+                zero_form_str = zero_form_str.replace('y', 'self.yg')
+                
+                # check against constants in the expression to be evaluated
+                if zero_form_str.find('x') & zero_form_str.find('y') == -1:
+                    zero_form_str = '(' + str(zero_form_str) + ')* np.ones(np.shape(self.xg))'
+                else:
+                    pass
+                
+                # evaulate the numerical zero form:
+                zero_form_result = eval(zero_form_str)
+                
+                # return it, with equations, to user, depending on their figure
+                # preferances
+                
+                if pass_on_figure is False:
+                    # supply these to the 2-form object creator
+                    result_form = form_0(self.xg, self.yg, zero_form_result, zero_form_str_unformatted)
+                elif pass_on_figure is True:
+                    if self.subplots is False:
+                        result_form = form_0(self.xg, self.yg, zero_form_result, zero_form_str_unformatted, fig=self.figure, subplots=False)
+                    elif self.subplots is True:
+                        result_form = form_0(self.xg, self.yg, zero_form_result, zero_form_str_unformatted, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+                else:
+                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                
+                # return it to the user
+                return result_form
+            
+            # deal with it if user wants to only do it numerically
+            elif numerical_only is True:
+                # check if equations have been given:
+                # if they have, doing it only numerically would create
+                # a mismatch, avoid that
+                if self.form_1_str_x == None or self.form_1_str_y == None:
+                    pass
+                else:
+                    # equations have been given, a mismatch may occur
+                    # warn the user
+                    print('Warning: You supplied equations, doing it numerically only will not pass equations to the 0-form and these will be lost')
+                # now complete the process numerically save as instructed
+                
+                # Take the vector field components, checking what was input!
+                if vector_field is None:
+                    # if none was given, do it with respect to uniform 1, 1
+                    vf_x = np.ones(np.shape(xg))
+                    vf_y = np.ones(np.shape(xg))
+                elif type(vector_field) == tuple:
+                    # if equations were given, take these, is numericals were given here, break!
+                    if type(vector_field[0]) == str:
+                        raise ValueError('for numerical calulation, supply VF arrays, not equations')
+                    else:
+                        vf_x = vector_field[0]
+                        vf_y = vector_field[1]
+                else:
+                    # extract needed properties from the object supplied
+                    vf_x = vector_field.F_x
+                    vf_y = vector_field.F_y
+                
+                # Complete the interior derivative 1-form --> 0-form:
+                zero_form_result = self.F_x * vf_x + self.F_y * vf_y
+                
+                # return it to user:
+                if pass_on_figure is False:
+                    # supply these to the 2-form object creator
+                    result_form = form_0(self.xg, self.yg, zero_form_result)
+                elif pass_on_figure is True:
+                    if self.subplots is False:
+                        result_form = form_0(self.xg, self.yg, zero_form_result, fig=self.figure, subplots=False)
+                    elif self.subplots is True:
+                        result_form = form_0(self.xg, self.yg, zero_form_result, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+                else:
+                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                
+                # return it to the user
+                return result_form
+                
     
     # now call that object to create it:
     form_1_object = form_set_up(xg, yg, F_x, F_y)
@@ -1089,6 +1242,13 @@ def form_2(xg, yg, form2, form_2_eq=None, fig=None, subplots=False, sub_axis_lis
             string = self.form_2_str + ''
             string = string.replace('x', '(self.xg)')
             string = string.replace('y', '(self.yg)')
+            
+            # correct for consatnt form before evaluating
+            if string.find('x') & string.find('y') == -1:
+                string = '(' + str(string) + ')* np.ones(np.shape(self.xg))'
+            else:
+                pass
+            
             # re-evaluate the 2-form numerically
             self.form_2 = eval(string)
         
@@ -1202,8 +1362,14 @@ def form_2(xg, yg, form2, form_2_eq=None, fig=None, subplots=False, sub_axis_lis
                 # substitute these into the equation:
                 # but keep it local
                 str_2 = self.form_2_str + ''
-                str_2 = str_2.replace('x', 'self.xg')
-                str_2 = str_2.replace('y', 'self.yg')
+                str_2 = str_2.replace('x', '(self.xg)')
+                str_2 = str_2.replace('y', '(self.yg)')
+                
+                # correct for consatnt form before evaluating
+                if str_2.find('x') & str_2.find('y') == -1:
+                    str_2 = '(' + str(str_2) + ')* np.ones(np.shape(self.xg))'
+                else:
+                    pass
                 # re-evaluate the 2-form numerically
                 self.form_2 = eval(str_2)
         
@@ -1461,10 +1627,11 @@ def form_2(xg, yg, form2, form_2_eq=None, fig=None, subplots=False, sub_axis_lis
                     form_0_str_unformated = self.form_2_str + '' 
                     string_0_form = self.form_2_str  # formated
                     # from these strings, get the numerical 0-form:
-                    string_0_form = string_0_form.replace('x', 'self.xg')
-                    string_0_form = string_0_form.replace('y', 'self.yg')
+                    string_0_form = string_0_form.replace('x', '(self.xg)')
+                    string_0_form = string_0_form.replace('y', '(self.yg)')
                     
-                    if string_0_form.find('xg') & string_0_form.find('yg') == -1:
+                    # correct for constant forms
+                    if string_0_form.find('x') & string_0_form.find('y') == -1:
                         string_0_form = '(' + str(string_0_form) + ')* np.ones(np.shape(self.xg))'
                     
                     # evaulated numerically
@@ -1522,8 +1689,8 @@ def form_2(xg, yg, form2, form_2_eq=None, fig=None, subplots=False, sub_axis_lis
                 if zoom_str.find('x') & zoom_str.find('y') == -1:
                     zoom_str = '(' + str(zoom_str) + ')* np.ones(np.shape(dxg))'
                 else:
-                    zoom_str = zoom_str.replace('x', 'dxg')
-                    zoom_str = zoom_str.replace('y', 'dyg')
+                    zoom_str = zoom_str.replace('x', '(dxg)')
+                    zoom_str = zoom_str.replace('y', '(dyg)')
                 
                 # Generate arrays for the components of the zoom field
                 zoom_2form = eval(zoom_str)
@@ -1615,8 +1782,15 @@ def form_0(xg, yg, form_0, form_0_eqn=None, fig=None, subplots=False, sub_axis_l
             
             # update the numerical values to always match
             string = self.form_0_str + ''
-            string = string.replace('x', '(self.xg)')
-            string = string.replace('y', '(self.yg)')
+            
+            # Check if the equations provided contain x and y terms
+            # and format them to be evaluated
+            if string.find('x') & string.find('y') == -1:
+                string = '(' + str(string) + ')* np.ones(np.shape(xg))'
+            else:
+                string = string.replace('x', '(self.xg)')
+                string = string.replace('y', '(self.yg)')
+            
             # re-evaluate the 2-form numerically, preventing mismatch
             self.form_0 = eval(string)
             
@@ -1725,8 +1899,11 @@ def form_0(xg, yg, form_0, form_0_eqn=None, fig=None, subplots=False, sub_axis_l
                 # substitute these into the equation:
                 # but keep it local
                 str_0 = self.form_0_str + ''
-                str_0 = str_0.replace('x', 'self.xg')
-                str_0 = str_0.replace('y', 'self.yg')
+                str_0 = str_0.replace('x', '(self.xg)')
+                str_0 = str_0.replace('y', '(self.yg)')
+                # correct for constant forms
+                if str_0.find('x') & str_0.find('y') == -1:
+                    str_0 = '(' + str(str_0) + ')* np.ones(np.shape(self.xg))'
                 # re-evaluate the 2-form numerically
                 self.form_0 = eval(str_0)
         
@@ -1829,13 +2006,13 @@ def form_0(xg, yg, form_0, form_0_eqn=None, fig=None, subplots=False, sub_axis_l
                 # need to uspply these unformatted, so save those:
                 form_1_x_unformated, form_1_y_unformated = form_1_x_str*1, form_1_y_str*1
                 # from these strings, get the numerical 1-form:
-                form_1_x_str = form_1_x_str.replace('x', 'self.xg')
-                form_1_x_str = form_1_x_str.replace('y', 'self.yg')
-                form_1_y_str = form_1_y_str.replace('x', 'self.xg')
-                form_1_y_str = form_1_y_str.replace('y', 'self.yg')
-                if form_1_x_str.find('xg') & form_1_x_str.find('yg') == -1:
+                form_1_x_str = form_1_x_str.replace('x', '(self.xg)')
+                form_1_x_str = form_1_x_str.replace('y', '(self.yg)')
+                form_1_y_str = form_1_y_str.replace('x', '(self.xg)')
+                form_1_y_str = form_1_y_str.replace('y', '(self.yg)')
+                if form_1_x_str.find('x') & form_1_x_str.find('y') == -1:
                     form_1_x_str = '(' + str(form_1_x_str) + ')* np.ones(np.shape(self.xg))'
-                if form_1_y_str.find('xg') & form_1_y_str.find('yg') == -1:
+                if form_1_y_str.find('x') & form_1_y_str.find('y') == -1:
                     form_1_y_str = '(' + str(form_1_y_str) + ')* np.ones(np.shape(self.yg))'
                 form_1_x = eval(form_1_x_str)
                 form_1_y = eval(form_1_y_str)
@@ -1942,10 +2119,10 @@ def form_0(xg, yg, form_0, form_0_eqn=None, fig=None, subplots=False, sub_axis_l
                     form_2_str_unformated = self.form_0_str + '' 
                     string_2_form = self.form_0_str  # to be formated
                     # from these strings, get the numerical 0-form:
-                    string_2_form = string_2_form.replace('x', 'self.xg')
-                    string_2_form = string_2_form.replace('y', 'self.yg')
+                    string_2_form = string_2_form.replace('x', '(self.xg)')
+                    string_2_form = string_2_form.replace('y', '(self.yg)')
                     
-                    if string_2_form.find('xg') & string_2_form.find('yg') == -1:
+                    if string_2_form.find('x') & string_2_form.find('y') == -1:
                         string_2_form = '(' + str(string_2_form) + ')* np.ones(np.shape(self.xg))'
                     
                     # evaulated numerically
@@ -2067,6 +2244,12 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplot
             str_x = str_x.replace('y', '(self.yg)')
             str_y = str_y.replace('x', '(self.xg)')
             str_y = str_y.replace('y', '(self.yg)')
+            # check kagainst constant form components:
+            if str_x.find('x') & str_x.find('y') == -1:
+                str_x = '(' + str(str_x) + ')* np.ones(np.shape(self.xg))'
+            if str_y.find('x') & str_y.find('y') == -1:
+                str_y = '(' + str(str_y) + ')* np.ones(np.shape(self.yg))'
+            
             # re-evaluate the 2-form numerically
             self.F_x = eval(str_x)
             self.F_y = eval(str_y)
@@ -2180,6 +2363,12 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplot
                 str_x_l = str_x_l.replace('y', '(self.yg)')
                 str_y_l = str_y_l.replace('x', '(self.xg)')
                 str_y_l = str_y_l.replace('y', '(self.yg)')
+                # check kagainst constant form components:
+                if str_x_l.find('x') & str_x_l.find('y') == -1:
+                    str_x_l = '(' + str(str_x_l) + ')* np.ones(np.shape(self.xg))'
+                if str_y_l.find('x') & str_y_l.find('y') == -1:
+                    str_y_l = '(' + str(str_y_l) + ')* np.ones(np.shape(self.yg))'
+                
                 # re-evaluate the 2-form numerically
                 self.F_x = eval(str_x_l)
                 self.F_y = eval(str_y_l)

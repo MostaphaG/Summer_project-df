@@ -514,17 +514,19 @@ form_2_an.plot(keep=True, subplot_index=3)
 
 #%%
 
+# Vector field set up and zooming example
+
 r = np.linspace(-4.5, 4.5, 21)
-xg, yg = np.meshgrid(r,r)
+xg, yg = np.meshgrid(r, r)
 
 u = xg*np.cos(yg)
 v = -yg*np.sin(xg)
 
-vf1 = fp.vector_field(xg,yg,u,v)
+vf1 = fp.vector_field(xg, yg, u, v)
 vf1.give_eqn('x*cos(y)', '-y*sin(x)')
 vf1.plot()
 
-vfz = vf1.zoom((2,2), zoom=3, dpd=9)
+vfz = vf1.zoom((2, 2), zoom=3, dpd=9)
 vfz.plot()
 
 # %%
@@ -598,9 +600,135 @@ form_zoomed = form_obj.zooming(target=[2, 2], zoom=5, dpd=21)
 # plot it
 form_zoomed.plot()
 
+# %%
+
+# TESTING CONSTANT COMPONENTs
+
+# 1-form
+
+# set up needed parameters
+v = np.linspace(-6, 6, 21)
+xg, yg = np.meshgrid(v, v)
+
+# set up form components
+F_x = 1*np.ones(np.shape(xg))  # upto user to make sure their arrays are of correct size
+F_y = 3*np.ones(np.shape(xg))
+
+form_obj1 = fp.form_1(xg, yg, F_x, F_y)
+
+# beofre plotting, give equations, to see if if constant forms are dealt with
+# correctly there at least
+form_obj1.give_eqn('1', '3')
+form_obj1.same_range_density(16)
+
+form_obj1.figure.tight_layout()
+form_obj1.axis.set_aspect('equal')
+
+form_obj1.plot()
 
 
+# %%
+
+# Testing analytical interior derivative of 1-form
+
+# set up needed parameters
+r = np.linspace(-6, 6, 21)
+xg, yg = np.meshgrid(r, r)
+
+# set up form components and the object
+F_x = xg**2
+F_y = yg*xg
+form_obj1 = fp.form_1(xg, yg, F_x, F_y)
+
+# give equations to it
+form_obj1.give_eqn('x**2', 'y*x')
+
+# set up a vector field object:
+u = np.cos(yg)
+v = np.sin(xg)
+
+vf = fp.vector_field(xg, yg, u, v)
+vf.give_eqn('cos(y)', 'sin(x)')
+
+# complete interior derivative, with object, with equations and without any input:
+form_0_i_1 = form_obj1.interior_d(vector_field=vf, pass_on_figure=False, numerical_only=False)
+form_0_i_2 = form_obj1.interior_d(pass_on_figure=False, numerical_only=False)
+form_0_i_3 = form_obj1.interior_d(('cos(y)', 'sin(x)'), pass_on_figure=False, numerical_only=False)
+
+# plot each
+form_0_i_1.plot()
+form_0_i_2.plot()
+form_0_i_3.plot()
+
+# %%
+
+# Testing numerical interior derivative of a 1-form:
+
+# set up needed parameters
+r = np.linspace(-6, 6, 21)
+xg, yg = np.meshgrid(r, r)
+
+# set up form components and the object
+F_x = xg**2
+F_y = yg*xg
+form_obj1 = fp.form_1(xg, yg, F_x, F_y)
+
+# plot it
+form_obj1.plot()
+
+# set up a vector field object:
+u = np.cos(yg)
+v = np.sin(xg)
+
+vf = fp.vector_field(xg, yg, u, v)
+
+# plot it:
+vf.plot()
+
+# complete int deriv. with object, arrays and with no input:
+form_0_i_1 = form_obj1.interior_d(vector_field=vf, pass_on_figure=False, numerical_only=True)
+form_0_i_2 = form_obj1.interior_d(pass_on_figure=False, numerical_only=True)
+form_0_i_3 = form_obj1.interior_d((u, v), pass_on_figure=False, numerical_only=True)
+
+# plot each
+form_0_i_1.plot()
+form_0_i_2.plot()
+form_0_i_3.plot()
 
 
+# %%
 
+# Testing numerical int deriv with constant fields
 
+# set up needed parameters
+r = np.linspace(-6, 6, 21)
+xg, yg = np.meshgrid(r, r)
+
+# set up form components and the object
+F_x = 3* np.ones(np.shape(xg))
+F_y = 1 * np.ones(np.shape(xg))
+form_obj1 = fp.form_1(xg, yg, F_x, F_y)
+
+# plot it
+form_obj1.plot()
+
+# set up a vector field object:
+u = 1 * np.ones(np.shape(xg))
+v = np.sin(xg)
+
+vf = fp.vector_field(xg, yg, u, v)
+
+# plot it:
+vf.plot()
+
+# complete int deriv. with object, arrays and with no input:
+form_0_i_1 = form_obj1.interior_d(vector_field=vf, pass_on_figure=False, numerical_only=True)
+form_0_i_2 = form_obj1.interior_d(pass_on_figure=False, numerical_only=True)
+form_0_i_3 = form_obj1.interior_d((u, v), pass_on_figure=False, numerical_only=True)
+
+# plot each
+form_0_i_1.plot()
+form_0_i_2.plot()
+form_0_i_3.plot()
+
+# NB no contours on plot 4 (form_0_i_2) as 0-form = 4. constant, so no contorus
