@@ -1043,7 +1043,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             for it, it assumes F_x = 1 and F_y = 1, with correct form and shape
             
             -- pass_on_figure = determines if figure from this object is to be
-            passed on to the 1-form object.
+            passed on to the 0-form object.
             
             --- numerical_only = bool, if true, it calculates only numerically
             otherwise, calculates it based on given equations, evaluates
@@ -1101,7 +1101,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                 # preferances
                 
                 if pass_on_figure is False:
-                    # supply these to the 2-form object creator
+                    # supply these to the 0-form object creator
                     result_form = form_0(self.xg, self.yg, zero_form_result, zero_form_str_unformatted)
                 elif pass_on_figure is True:
                     if self.subplots is False:
@@ -1149,7 +1149,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                 
                 # return it to user:
                 if pass_on_figure is False:
-                    # supply these to the 2-form object creator
+                    # supply these to the 0-form object creator
                     result_form = form_0(self.xg, self.yg, zero_form_result)
                 elif pass_on_figure is True:
                     if self.subplots is False:
@@ -1220,8 +1220,11 @@ def form_2(xg, yg, form2, form_2_eq=None, fig=None, subplots=False, sub_axis_lis
             self.colour_list = ['red', 'blue', 'grey']
             self.logarithmic_scale_bool = 0
             self.delta_factor = deltafactor
-            self.form_2_str = str(simplify(form_2_eq))  # to start with, use rmust change to access some methods
-            # Note, the string must be given with x and y as variables
+            if form_2_eq is not None:
+                self.form_2_str = str(simplify(form_2_eq))  # to start with, user must change to access some methods
+                # Note, the string must be given with x and y as variables
+            else:
+                self.form_2_str = None
         
         # #####################################################################
         # Define basic methods to customise this object
@@ -1700,7 +1703,143 @@ def form_2(xg, yg, form2, form_2_eq=None, fig=None, subplots=False, sub_axis_lis
                 zoom_form = form_2(dxg, dyg, zoom_2form, form_2_eq=self.form_2_str)
                 
                 return zoom_form
+        
+        # define a mehtod to evaluate the interior derivative of the 2-form
+        # with respect to a given vector field object or without.
+        def interior_d(self, vector_field=None, pass_on_figure=False, numerical_only=False):
+            '''
+            Computes the interior derivative of the 2-form
+            Takes in:
+            -- Vector_field = vector field object of formpy library to do the
+            derivative with respect to, needs equations to work with
+            nuymerical_only being False. Can also supply equations in a tuple:
+            (eqn_x, eqn_y). If using numerical only, can supply object or
+            tuple of numpy arrays (array_x, atrray_y). If nothing is supplied
+            for it, it assumes F_x = 1 and F_y = 1, with correct form and shape
             
+            -- pass_on_figure = determines if figure from this object is to be
+            passed on to the 1-form object.
+            
+            --- numerical_only = bool, if true, it calculates only numerically
+            otherwise, calculates it based on given equations, evaluates
+            it numerically and supplies all to 1-form obejct creator
+            
+            '''
+            
+            # split up the code depending if numerical only or analytical too:
+            if numerical_only is False:
+                # test if the equation was given first:
+                if self.form_2_str == None:
+                    # ERROR
+                    raise ValueError('Error: You need to supply the 2-form equations to do this, look at \'give_eqn\' method')
+                
+                # if the vector field was supplied, extract its equations, if possible
+                if vector_field is None:
+                    # if none was given, do it with respect to uniform 1, 1
+                    vf_x_str = '1'
+                    vf_y_str = '1'
+                elif type(vector_field) == tuple:
+                    # if equations were given, take these, is numericals were given here, break!
+                    if type(vector_field[0]) == str:
+                        vf_x_str = vector_field[0]
+                        vf_y_str = vector_field[1]
+                    else:
+                        raise ValueError('for analytical result, supply VF equations')
+                else:
+                    if vector_field.str_x == None or vector_field.str_y == None:
+                        # ERROR
+                        raise ValueError('Error: You need to supply the VF equations to do this, look at \'give_eqn\' method')
+                    else:
+                        vf_x_str = str(simplify(vector_field.str_x))
+                        vf_y_str = str(simplify(vector_field.str_y))
+                
+                
+                # define strings of the resulting 1-form components
+                u_str = str(simplify('-(' + self.form_2_str + ')*(' + vf_y_str + ')' ))
+                v_str = str(simplify( '(' + self.form_2_str + ')*(' + vf_x_str + ')' ))
+                
+                # keep an unformatted version to supply to the 1-form
+                u_str_unformatted = u_str + ''
+                v_str_unformatted = v_str + ''
+                
+                u_str = u_str.replace('x', '(self.xg)')
+                u_str = u_str.replace('y', '(self.yg)')
+                v_str = v_str.replace('x', '(self.xg)')
+                v_str = v_str.replace('y', '(self.yg)')
+                if u_str.find('x') & u_str.find('y') == -1:
+                    u_str = '(' + str(u_str) + ')* np.ones(np.shape(self.xg))'
+                if v_str.find('x') & v_str.find('y') == -1:
+                    v_str = '(' + str(v_str) + ')* np.ones(np.shape(self.yg))'
+                
+                # evaulate the numerical 1-form components form:
+                form_x = eval(u_str)
+                form_y = eval(v_str)
+                
+                # return it, with equations, to user, depending on their figure
+                # preferances
+                
+                if pass_on_figure is False:
+                    # supply these to the 1-form object creator
+                    result_form = form_1(self.xg, self.yg, form_x, form_y, u_str_unformatted, v_str_unformatted)
+                elif pass_on_figure is True:
+                    if self.subplots is False:
+                        result_form = form_1(self.xg, self.yg, form_x, form_y, u_str_unformatted, v_str_unformatted, fig=self.figure, subplots=False)
+                    elif self.subplots is True:
+                        result_form = form_1(self.xg, self.yg, form_x, form_y, u_str_unformatted, v_str_unformatted, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+                else:
+                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                
+                # return it to the user
+                return result_form
+            
+            # deal with it if user wants to only do it numerically
+            elif numerical_only is True:
+                # check if equations have been given:
+                # if they have, doing it only numerically would create
+                # a mismatch, avoid that
+                if self.form_2_str == None:
+                    pass
+                else:
+                    # equations have been given, a mismatch may occur
+                    # warn the user
+                    print('Warning: You supplied equations, doing it numerically only will not pass equations to the 1-form and these will be lost')
+                # now complete the process numerically save as instructed
+                
+                # Take the vector field components, checking what was input!
+                if vector_field is None:
+                    # if none was given, do it with respect to uniform 1, 1
+                    vf_x = np.ones(np.shape(xg))
+                    vf_y = np.ones(np.shape(xg))
+                elif type(vector_field) == tuple:
+                    # if equations were given, take these, is numericals were given here, break!
+                    if type(vector_field[0]) == str:
+                        raise ValueError('for numerical calulation, supply VF arrays, not equations')
+                    else:
+                        vf_x = vector_field[0]
+                        vf_y = vector_field[1]
+                else:
+                    # extract needed properties from the object supplied
+                    vf_x = vector_field.F_x
+                    vf_y = vector_field.F_y
+                
+                # Complete the interior derivative 2-form --> 1-form:
+                form_x = -self.form_2 * vf_y
+                form_y = self.form_2 * vf_x
+                
+                if pass_on_figure is False:
+                    # supply these to the 1-form object creator
+                    result_form = form_1(self.xg, self.yg, form_x, form_y)
+                elif pass_on_figure is True:
+                    if self.subplots is False:
+                        result_form = form_1(self.xg, self.yg, form_x, form_y, fig=self.figure, subplots=False)
+                    elif self.subplots is True:
+                        result_form = form_1(self.xg, self.yg, form_x, form_y, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+                else:
+                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                
+                # return it to the user
+                return result_form
+        
     # now call that object to create it:
     form_2_object = form_set_up(xg, yg, form2)
     # return it to user to store

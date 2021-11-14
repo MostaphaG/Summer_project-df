@@ -732,3 +732,165 @@ form_0_i_2.plot()
 form_0_i_3.plot()
 
 # NB no contours on plot 4 (form_0_i_2) as 0-form = 4. constant, so no contorus
+
+# %%
+
+# Testing numerical interior derivative of a 2-form
+
+# set up needed parameters
+r = np.linspace(-6, 6, 21)
+xg, yg = np.meshgrid(r, r)
+
+# set up form
+form2_comp = xg*yg**2
+form_obj2 = fp.form_2(xg, yg, form2_comp)
+
+# plot it
+form_obj2.plot()
+
+# set up a vector field object:
+u = np.cos(yg)
+v = np.sin(xg)
+
+vf = fp.vector_field(xg, yg, u, v)
+
+# plot it:
+vf.plot()
+
+# complete int deriv. with object, arrays and with no input:
+form_1_i_1 = form_obj2.interior_d(vector_field=vf, pass_on_figure=False, numerical_only=True)
+form_1_i_2 = form_obj2.interior_d(pass_on_figure=False, numerical_only=True)
+form_1_i_3 = form_obj2.interior_d((u, v), pass_on_figure=False, numerical_only=True)
+
+# plot each
+form_1_i_1.plot()
+form_1_i_2.plot()
+form_1_i_3.plot()
+
+
+# %%
+
+
+# Testing analytical interior derivative of a 2-form
+
+# set up needed parameters
+r = np.linspace(-6, 6, 21)
+xg, yg = np.meshgrid(r, r)
+
+# set up form
+form2_comp = xg*yg**2
+form_obj2 = fp.form_2(xg, yg, form2_comp)
+
+# give it the equation for analytical calculations
+form_obj2.give_eqn('x*y**2')
+
+# plot it
+form_obj2.plot()
+
+# set up a vector field object:
+u = np.cos(yg)
+v = np.sin(xg)
+
+vf = fp.vector_field(xg, yg, u, v)
+
+# give it the equation
+vf.give_eqn('cos(y)', 'sin(x)')
+
+# plot it:
+vf.plot()
+
+# complete int deriv. with object, arrays and with no input:
+form_1_i_1 = form_obj2.interior_d(vector_field=vf, pass_on_figure=False, numerical_only=False)
+form_1_i_2 = form_obj2.interior_d(pass_on_figure=False, numerical_only=False)
+form_1_i_3 = form_obj2.interior_d(('cos(y)', 'sin(x)'), pass_on_figure=False, numerical_only=False)
+
+# plot each
+form_1_i_1.plot()
+form_1_i_2.plot()
+form_1_i_3.plot()
+
+# %%
+
+# Testing interior derivative of a 2-form with constant 2-form and/or vf
+
+# set up needed parameters
+r = np.linspace(-6, 6, 21)
+xg, yg = np.meshgrid(r, r)
+
+# set up form
+form2_comp = xg
+form_obj2 = fp.form_2(xg, yg, form2_comp)
+
+# give it the equation for analytical calculations
+form_obj2.give_eqn('x')
+
+# plot it
+form_obj2.plot()
+
+# set up a vector field object:
+u = np.cos(yg)
+v = np.sin(xg)
+
+vf = fp.vector_field(xg, yg, u, v)
+
+# give it the equation
+vf.give_eqn('1', '3')
+
+# plot it:
+vf.plot()
+
+# complete int deriv. with object, arrays and with no input:
+form_1_i_1 = form_obj2.interior_d(vector_field=vf, pass_on_figure=False, numerical_only=False)
+form_1_i_2 = form_obj2.interior_d(pass_on_figure=False, numerical_only=False)
+form_1_i_3 = form_obj2.interior_d(('10', 'pi'), pass_on_figure=False, numerical_only=False)
+form_1_i_4 = form_obj2.interior_d(vector_field=vf, pass_on_figure=False, numerical_only=True)
+
+# plot each
+form_1_i_1.plot()
+form_1_i_2.plot()
+form_1_i_3.plot()
+form_1_i_4.plot()
+
+
+# %%
+
+# Testing interior derivative of a 2-form with singularities
+
+# set up needed parameters
+r = np.linspace(-6, 6, 21)
+xg, yg = np.meshgrid(r, r)
+
+# set up form
+form2_comp = 1/np.sqrt(xg**2 + yg**2)
+form_obj2 = fp.form_2(xg, yg, form2_comp)
+
+# give it the equation for analytical calculations
+form_obj2.give_eqn('1/sqrt(x**2 + y**2)')
+
+# plot it
+form_obj2.plot()
+
+# set up a vector field object:
+u = np.cos(yg)
+v = np.sin(xg)
+
+vf = fp.vector_field(xg, yg, u, v)
+
+# give it the equation
+vf.give_eqn('1', 'x')  # Note, this overrites the u and v in the vf object too
+
+# plot it:
+vf.plot()
+
+# complete int deriv. with object, arrays and with no input:
+form_1_i_1 = form_obj2.interior_d(vector_field=vf, pass_on_figure=False, numerical_only=False)
+form_1_i_2 = form_obj2.interior_d(pass_on_figure=False, numerical_only=False)
+form_1_i_3 = form_obj2.interior_d(('10', 'pi'), pass_on_figure=False, numerical_only=False)
+form_1_i_4 = form_obj2.interior_d(vector_field=vf, pass_on_figure=False, numerical_only=True)
+
+# plot each
+form_1_i_1.plot()
+form_1_i_2.plot()
+form_1_i_3.plot()
+form_1_i_4.plot()
+
