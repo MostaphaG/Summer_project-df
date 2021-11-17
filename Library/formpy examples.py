@@ -894,3 +894,85 @@ form_1_i_2.plot()
 form_1_i_3.plot()
 form_1_i_4.plot()
 
+# %%
+
+# Testing conversion form vector field to 1-form with metric as 1, 1 for now:
+
+r = np.linspace(-4.5, 4.5, 21)
+xg, yg = np.meshgrid(r, r)
+
+u = xg*np.cos(yg)
+v = -yg*np.sin(xg)
+
+vf1 = fp.vector_field(xg, yg, u, v)
+vf1.plot()
+
+# change it to a 1-form
+form_1_obj = vf1.formalise()
+
+# plot that
+form_1_obj.plot()
+
+# %%
+
+# Testing conversion form vector field to 1-form with string based metric
+
+r = np.linspace(-4.5, 4.5, 21)
+xg, yg = np.meshgrid(r, r)
+
+# set up the field and vector field objecct
+u = xg
+v = -yg
+vf1 = fp.vector_field(xg, yg, u, v)
+vf1.plot()
+
+# give equations
+vf1.give_eqn('x', '-y')
+
+# set up a metric
+metric = [['1', '0'],
+          ['0', 'y**2']]  # polar transformation
+
+# via this, set up a 1-form
+form_1_obj = vf1.formalise(g=metric)
+
+# plot it
+form_1_obj.plot()
+
+# create a comparison 1-form with correct components already given
+form_1_correct = fp.form_1(xg, yg, u, v*yg**2)
+
+# plot it
+form_1_correct.plot()
+
+# %%
+
+# Testing conversion form vector field to 1-form with array based metric
+
+r = np.linspace(-4.5, 4.5, 21)
+xg, yg = np.meshgrid(r, r)
+
+# set up the field and vector field objecct
+u = xg
+v = -yg
+vf1 = fp.vector_field(xg, yg, u, v)
+vf1.plot()
+
+# set up a metric
+metric = [[np.ones(np.shape(xg)), np.zeros(np.shape(xg))],
+          [np.zeros(np.shape(xg)), yg**2]]  # polar transformation
+
+# via this, set up a 1-form
+form_1_obj = vf1.formalise(g=metric)
+
+# plot it
+form_1_obj.plot()
+
+# create a comparison 1-form with correct components already given
+form_1_correct = fp.form_1(xg, yg, u, v*yg**2)
+
+# plot it
+form_1_correct.plot()
+
+
+
