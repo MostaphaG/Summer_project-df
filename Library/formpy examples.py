@@ -449,7 +449,7 @@ field_obj.plot(keep=True, subplot_index=1)
 # Testing numerical ext deriv of 0-forms, using numpy gradient
 
 # set up grids
-v = np.linspace(-4.5, 4.5, 11)
+v = np.linspace(-4.5, 4.5, 21)
 xg, yg = np.meshgrid(v, v)
 
 # set up a figure with subplots
@@ -457,9 +457,12 @@ fig = plt.figure()
 ax1 = fig.add_subplot(131)
 ax2 = fig.add_subplot(132)
 ax3 = fig.add_subplot(133)
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
+ax3.set_aspect('equal')
 
 # set up the 0 form object and plot it
-form_0 = xg**2 + 3*yg
+form_0 = 1/np.sqrt(xg**2 + yg**2)
 
 # create an object with these axis in it
 form_0_obj = fp.form_0(xg, yg, form_0, fig=fig, subplots=True, sub_axis_list=[ax1, ax2, ax3])
@@ -474,7 +477,7 @@ form_1_num_e = form_0_obj.num_ext_d(edge_order=1, pass_on_figure=True)  # pass f
 form_1_num_e.plot(keep=True, subplot_index=1)
 
 # supply equation and complete ext. deriv., then plot that on 3rd axis set
-form_0_obj.give_eqn('x**2 + 3*y')
+form_0_obj.give_eqn('1/sqrt(x**2 + y**2)')
 form_1_obj_a = form_0_obj.ext_d(pass_on_figure=True)  # this supplies the 1-form with equations too
 
 # plot that 1-form object
@@ -535,12 +538,12 @@ vfz.plot()
 
 
 # set up grids
-v = np.linspace(-4.5, 4.5, 21)
+v = np.linspace(-4.5, 4.5, 19)
 xg, yg = np.meshgrid(v, v)
 
 # set up the 1 form object and plot it
-form_1_x = xg*np.cos(yg)
-form_1_y = yg*np.sin(xg)
+form_1_x = -xg/(xg**2 + yg**2)**1.5
+form_1_y = -yg/(xg**2 + yg**2)**1.5
 
 # set up a figure with sublots
 fig = plt.figure()
@@ -565,7 +568,7 @@ form_2_num = form_1_obj.num_ext_d(pass_on_figure=True)
 form_2_num.plot(keep=True, subplot_index=1)
 
 # complete the analytical exterior derivative
-form_1_obj.give_eqn('x*cos(y)', 'y*sin(x)')
+form_1_obj.give_eqn('-x/(x**2 + y**2)**1.5', '-y/(x**2 + y**2)**1.5')
 form_2_an = form_1_obj.ext_d(pass_on_figure=True)
 
 # plot it
@@ -986,7 +989,7 @@ form_1_correct.plot()
 r = np.linspace(-5, 5, 21)
 xg, yg = np.meshgrid(r, r)
 
-u = yg*np.cos(xg)
+u = yg
 v = -xg
 
 # Set up subplots
@@ -997,7 +1000,7 @@ ax2 = fig1.add_subplot(122)
 
 # Create vector field
 vf1 = fp.vector_field(xg, yg, u, v, fig = fig1, subplots=True, sub_axis_list=[ax1, ax2])
-vf1.give_eqn('y*cos(x)','-x')
+vf1.give_eqn('y','-x')
 vf1.plot(keep=False, subplot_index=0)
 
 # Problem: As the method creates a new vector field
@@ -1051,7 +1054,8 @@ vf1 = fp.vector_field(xg, yg, u, v, fig = fig1, subplots=True, sub_axis_list=[ax
 vf1.give_eqn('y*cos(x)','-x')
 vf1.plot(keep=False, subplot_index=0)
 
-div_field = vf1.Div((1,1), 10, 13, pass_on_figure=True)
+div_field = vf1.Div((5,0), 100, 13, pass_on_figure=True)
+div_field.autoscale()
 div_field.plot(keep=False, subplot_index=1)
 
 ax1.set_xlabel('Vector Field')
