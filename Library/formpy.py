@@ -2584,7 +2584,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplot
             
             axis.quiver(self.xg, self.yg, F_x_local, F_y_local, pivot=self.orientation, scale=ScaleFactor, scale_units='xy', color=self.color) 
         
-        def zoom(self, target=[0,0], zoom=2, dpd=9):
+        def zoom(self, target=[0,0], zoom=2, dpd=9, pass_on_figure=False):
             '''
             Create a new window which displays the field zoomed at a certain point
             User gives arguments
@@ -2633,9 +2633,85 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplot
                 u_zoom = eval(u_str)
                 v_zoom = eval(v_str)
                 
-                zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom)
-                
+                if pass_on_figure is False:
+                    # New figure
+                    zoom_vf = vector_field(dxg, dyg, U, V)
+                elif pass_on_figure is True:
+                    if self.subplots is False:
+                        zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom, fig=self.figure, subplots=False)
+                    elif self.subplots is True:
+                        zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+                else:
+                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                    
                 return zoom_vf
+            
+        def DF(self, target=[0,0], zoom=2, dpd=9, pass_on_figure=False):
+            '''
+            Creates new vector field object at a target location, showing the derivative field at this point.
+            User gives arguments:
+            Target - derivative plot location
+            Zoom - Magnification level
+            dpd - New plot point density
+            '''
+            if self.str_x == None or self.str_y == None:
+                # ERROR
+                raise TypeError('Error: No equation provided')
+            else:
+                
+                # Target coordinates
+                x_m = target[0]
+                y_m = target[1]
+                
+                d_range = self.xg[0, -1]/zoom
+                #d_length = 
+                
+                # Set up zoom window grids
+                dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
+                dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
+                dxg, dyg = np.meshgrid(dx, dy)
+                
+                # Create variables for the user provided equation strings
+                u_str = self.str_x
+                v_str = self.str_y
+
+                # Create string to evaluate the field at the target location
+                u_str_point = u_str.replace('x', 'x_m')
+                u_str_point = u_str_point.replace('y', 'y_m')
+                
+                v_str_point = v_str.replace('x', 'x_m')
+                v_str_point = v_str_point.replace('y', 'y_m')
+                
+                # Check if the equations provided contain x and y terms
+                if u_str.find('x') & u_str.find('y') == -1:
+                    u_str_grid = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                else:
+                    u_str_grid = u_str.replace('x', 'dxg')
+                    u_str_grid = u_str_grid.replace('y', 'dyg')
+          
+                if v_str.find('x') & v_str.find('y') == -1:
+                    v_str_grid = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
+                else:
+                    v_str_grid = v_str.replace('x', 'dxg')
+                    v_str_grid = v_str_grid.replace('y', 'dyg')
+                    
+                # Generate arrays for the components of the derivative field          
+                U = eval(u_str_grid) - eval(u_str_point)
+                V = eval(v_str_grid) - eval(v_str_point)
+                
+                # Return object to the user
+                if pass_on_figure is False:
+                    # New figure
+                    DF_vf = vector_field(dxg, dyg, U, V)
+                elif pass_on_figure is True:
+                    if self.subplots is False:
+                        DF_vf = vector_field(dxg, dyg, U, V, fig=self.figure, subplots=False)
+                    elif self.subplots is True:
+                        DF_vf = vector_field(dxg, dyg, U, V, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+                else:
+                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                
+                return DF_vf
         
         # define a method to change a supplied Vector filed to the 1-form
         def formalise(self, pass_on_figure=False, g=[['1', '0'], ['0', '1']]):
@@ -2739,7 +2815,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplot
                     y_str_form = str(simplify(y_str_form))
             else:
                 pass
-            
+
             # based on what was given into the Vector field, return a 1-form object with these parameters
             if analytics:
                 if pass_on_figure is False:
@@ -2766,7 +2842,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplot
         
             # return the found object
             return result_form
-        
+
     # now call that object to create it:
     v_object = field_set_up(xg, yg, F_x, F_y)
     # return it to user to store

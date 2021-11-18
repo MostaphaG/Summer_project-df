@@ -81,7 +81,6 @@ form_obj.same_range_density(18)
 # form_obj.sheet_size(0.466)
 form_obj.plot(False)
 
-
 # %%
 
 # plotting a 0-form
@@ -894,6 +893,7 @@ form_1_i_2.plot()
 form_1_i_3.plot()
 form_1_i_4.plot()
 
+<<<<<<< Updated upstream
 # %%
 
 # Testing conversion form vector field to 1-form with metric as 1, 1 for now:
@@ -974,5 +974,30 @@ form_1_correct = fp.form_1(xg, yg, u, v*yg**2)
 # plot it
 form_1_correct.plot()
 
+#%% Testing derivative of vector field
 
+#Set up grids
+r = np.linspace(-5, 5, 21)
+xg, yg = np.meshgrid(r, r)
+
+u = yg*np.cos(xg)
+v = -xg
+
+# Set up subplots
+fig1 = plt.figure(figsize=(10,5))
+ax1 = fig1.add_subplot(121)
+ax2 = fig1.add_subplot(122)
+
+
+# Create vector field
+vf1 = fp.vector_field(xg, yg, u, v, fig = fig1, subplots=True, sub_axis_list=[ax1, ax2])
+vf1.give_eqn('y*cos(x)','-x')
+vf1.plot(keep=False, subplot_index=0)
+
+# Problem: As the method creates a new vector field
+D_vf1 = vf1.DF((3,3), 5, 9, pass_on_figure=True)
+D_vf1.plot(keep=False, subplot_index=1)
+
+ax1.set_xlabel('Vector Field')
+ax2.set_xlabel('Derivative Vector Field')
 
