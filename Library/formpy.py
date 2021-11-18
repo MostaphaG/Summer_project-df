@@ -798,17 +798,17 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             # clean up F_x and F_y from nan
             # keep inf and large values, for gradient to be found still
             # deal with infs and nans in mag
-            for i in range(len(self.xg[:, 0])):
-                for j in range(len(self.yg[0, :])):
-                    # correct for ill defined values
-                    if isnan(fx[i, j]):
-                        fx[i, j] = 0
-                    if isnan(fy[i, j]):
-                        fy[i, j] = 0
-                    if abs(fx[i, j]) == np.inf  or abs(fx[i, j]) > 1e15:
-                        fx[i, j] = 1e10
-                    if abs(fy[i, j]) == np.inf  or abs(fy[i, j]) > 1e15:
-                        fy[i, j] = 1e10
+#            for i in range(len(self.xg[:, 0])):
+#                for j in range(len(self.yg[0, :])):
+#                    # correct for ill defined values
+#                    if isnan(fx[i, j]):
+#                        fx[i, j] = 0
+#                    if isnan(fy[i, j]):
+#                        fy[i, j] = 0
+#                    if abs(fx[i, j]) == np.inf  or abs(fx[i, j]) > 1e15:
+#                        fx[i, j] = 1e10
+#                    if abs(fy[i, j]) == np.inf  or abs(fy[i, j]) > 1e15:
+#                        fy[i, j] = 1e10
                     
             
             # Calculate deirvatvies as needed, using numpy gradient.
