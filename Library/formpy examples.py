@@ -937,7 +937,7 @@ vf1.give_eqn('x', '-y')
 
 # set up a metric
 metric = [['1', '0'],
-          ['0', 'y**2']]  # polar transformation
+          ['0', 'y**2']]
 
 # via this, set up a 1-form
 form_1_obj = vf1.formalise(g=metric)
@@ -966,7 +966,7 @@ vf1.plot()
 
 # set up a metric
 metric = [[np.ones(np.shape(xg)), np.zeros(np.shape(xg))],
-          [np.zeros(np.shape(xg)), yg**2]]  # polar transformation
+          [np.zeros(np.shape(xg)), yg**2]]
 
 # via this, set up a 1-form
 form_1_obj = vf1.formalise(g=metric)
@@ -1056,3 +1056,32 @@ div_field.plot(keep=False, subplot_index=1)
 
 ax1.set_xlabel('Vector Field')
 ax2.set_xlabel('Div Vector Field')
+
+# %%
+
+# Testing the metric with the inetrior derivative (numerically)
+
+r = np.linspace(-4.5, 4.5, 21)
+xg, yg = np.meshgrid(r, r)
+
+# set up the field and vector field objecct
+u = np.ones(np.shape(xg))
+v = np.ones(np.shape(xg))
+vf1 = fp.vector_field(xg, yg, u, v)
+vf1.plot()
+
+# set up a metric
+metric = [[np.ones(np.shape(xg)), np.zeros(np.shape(xg))],
+          [np.zeros(np.shape(xg)), xg**2 + yg**2]]  # polar transformation
+
+# via this, set up a 1-form
+form_1_obj = vf1.formalise(g=metric)
+
+# plot it
+form_1_obj.plot()
+
+# get the interioir deriv of that
+zero_form = form_1_obj.interior_d(vector_field=vf1, pass_on_figure=False, numerical_only=True)
+
+# plot it
+zero_form.plot()
