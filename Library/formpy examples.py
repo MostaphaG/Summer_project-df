@@ -256,7 +256,7 @@ form_1_obj.plot(keep=True, subplot_index=1)
 
 # %%
 
-# try it with 2-forms
+# trying subplots with 2-forms
 
 
 # set up grids
@@ -515,6 +515,7 @@ form_2_an.plot(keep=True, subplot_index=3)
 
 # Vector field set up and zooming example
 
+
 r = np.linspace(-4.5, 4.5, 21)
 xg, yg = np.meshgrid(r, r)
 
@@ -642,12 +643,18 @@ form_obj1 = fp.form_1(xg, yg, F_x, F_y)
 # give equations to it
 form_obj1.give_eqn('x**2', 'y*x')
 
+# plot it
+form_obj1.plot()
+
 # set up a vector field object:
 u = np.cos(yg)
 v = np.sin(xg)
 
 vf = fp.vector_field(xg, yg, u, v)
 vf.give_eqn('cos(y)', 'sin(x)')
+
+# plot it
+vf.plot()
 
 # complete interior derivative, with object, with equations and without any input:
 form_0_i_1 = form_obj1.interior_d(vector_field=vf, pass_on_figure=False, numerical_only=False)
@@ -893,7 +900,6 @@ form_1_i_2.plot()
 form_1_i_3.plot()
 form_1_i_4.plot()
 
-<<<<<<< Updated upstream
 # %%
 
 # Testing conversion form vector field to 1-form with metric as 1, 1 for now:
