@@ -1089,3 +1089,146 @@ zero_form = form_1_obj.interior_d(vector_field=vf1, pass_on_figure=False, numeri
 
 # plot it
 zero_form.plot()
+
+
+# %%
+
+# Testing 1-form to VF via the metric
+
+
+# ####################################################
+# with string based metric:
+# ####################################################
+
+
+r = np.linspace(-4.5, 4.5, 21)
+xg, yg = np.meshgrid(r, r)
+
+# set up the 1-form
+u = xg
+v = -yg
+form1 = fp.form_1(xg, yg, u, v)
+form1.plot()
+
+# give equations
+form1.give_eqn('x', '-y')
+
+# set up a metric
+metric = [['1', '0'],
+          ['0', 'y**2']]
+
+# via this, get the VF
+vf = form1.vectorise(g=metric)
+
+# plot it
+vf.plot()
+
+
+# ####################################################
+# with array based metric:
+# ####################################################
+
+
+# set up a metric
+metric = [[np.ones(np.shape(xg)), np.zeros(np.shape(xg))],
+          [np.zeros(np.shape(xg)), yg**2]]
+
+# via this, get the VF
+vf2 = form1.vectorise(g=metric)
+
+# plot it
+vf2.plot()
+
+
+# ##################################################
+# Compare to know result
+# ##################################################
+
+
+# create a comparison 1-form with correct components already given
+vf_correct = fp.vector_field(xg, yg, u, v*yg**2)
+
+# plot it
+vf_correct.plot()
+
+
+# %%
+
+# Testing the interior derivative of 1-form wrt to VF from it via the metric
+
+r = np.linspace(-4.5, 4.5, 21)
+xg, yg = np.meshgrid(r, r)
+
+# set up the 1-form
+u = np.ones(np.shape(xg))
+v = np.ones(np.shape(xg))
+form1 = fp.form_1(xg, yg, u, v)
+form1.plot()
+
+# give equations
+form1.give_eqn('1', '1')
+
+# set up the metric
+metric = [['1', '0'],
+          ['0', 'x**2 + y**2']]
+
+# find the VF
+vf = form1.vectorise(g=metric)
+
+# plot it
+vf.plot()
+
+# find the interior derivative of 1-form wrt that VF
+zero_form = form1.interior_d(vector_field=vf, pass_on_figure=False, numerical_only=False)
+
+# plot it:
+zero_form.plot()
+
+# %%
+
+# Further tests with numerical exterior derivative of 1-form
+# Trying to get B field 2-form to work out numerically
+
+
+# set up grids
+v = np.linspace(-4.5, 4.5, 25)
+xg, yg = np.meshgrid(v, v)
+
+# set up the 1 form object and plot it
+#form_1_x = -xg/((xg**2 + yg**2)**1.5)
+#form_1_y = -yg/((xg**2 + yg**2)**1.5)
+
+#form_1_x = 1/(xg**2 + yg**2)
+#form_1_y = 1
+
+#form_1_x = -xg/(xg**2 + yg**2)
+#form_1_y = -yg/(xg**2 + yg**2)
+
+form_1_x = 1/xg
+form_1_y = 1
+
+# set up a 1-form object with these:
+form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y)
+
+# close its empty figure, not needed
+plt.close(form_1_obj.figure)
+
+# complete the numerical exterior derivative
+form_2_num = form_1_obj.num_ext_d()
+
+# plot it
+form_2_num.plot()
+
+# complete the analytical exterior derivative
+#form_1_obj.give_eqn('-x/((x**2 + y**2)**1.5)', '-y/((x**2 + y**2)**1.5)')
+
+#form_1_obj.give_eqn('1/(x**2 + y**2)', '1')
+
+#form_1_obj.give_eqn('-x/(x**2 + y**2)', '-y/(x**2 + y**2)')
+
+form_1_obj.give_eqn('1/x', '1')
+
+form_2_an = form_1_obj.ext_d()
+
+# plot it
+form_2_an.plot()

@@ -797,19 +797,18 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             
             # clean up F_x and F_y from nan
             # keep inf and large values, for gradient to be found still
-            # deal with infs and nans in mag
-#            for i in range(len(self.xg[:, 0])):
-#                for j in range(len(self.yg[0, :])):
-#                    # correct for ill defined values
-#                    if isnan(fx[i, j]):
-#                        fx[i, j] = 0
-#                    if isnan(fy[i, j]):
-#                        fy[i, j] = 0
-#                    if abs(fx[i, j]) == np.inf  or abs(fx[i, j]) > 1e15:
-#                        fx[i, j] = 1e10
-#                    if abs(fy[i, j]) == np.inf  or abs(fy[i, j]) > 1e15:
-#                        fy[i, j] = 1e10
-                    
+            for i in range(len(self.xg[:, 0])):
+                for j in range(len(self.yg[0, :])):
+                    # correct for ill defined values
+                    if isnan(fx[i, j]):
+                        fx[i, j] = 0
+                    if isnan(fy[i, j]):
+                        fy[i, j] = 0
+                    if abs(fx[i, j]) == np.inf  or abs(fx[i, j]) > 1e15:
+                        fx[i, j] = 1e10
+                    if abs(fy[i, j]) == np.inf  or abs(fy[i, j]) > 1e15:
+                        fy[i, j] = 1e10
+            
             
             # Calculate deirvatvies as needed, using numpy gradient.
             dy_F_x, _ = np.gradient(fx, dx, dy)
@@ -1181,8 +1180,137 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                 
                 # return it to the user
                 return result_form
+        
+        # define a method to change a supplied Vector filed to the 1-form
+        def vectorise(self, pass_on_figure=False, g=[['1', '0'], ['0', '1']]):
+            '''
+            Passes in everything it can (all it has been supplied)
+            to the VF object.
+            Works via the ('inverse') metric on R2
+            Can supply the metric in as equations or as evaluated arrays
+            Format of the metric is a list of numpy arrays
+            0th array is the top row, its 0th component is 11, 1st is 12
+            1st array is the botton row, its 0th comp is 21 and 1st is 22.
+            Note, if it is supplied as arrays, they must come from numpy grids
+            via meshgrid, if it is supplied as strings, needs to be in terms of
+            x and y, and contain no special funtions, apart from ones imported
+            here automatically and listed in the documentation #!!!
+            Apart form the metric, takes in pass_on_figure:
+                ----determines if figure from this object is to be
+                passed on to the 1-form object.
+            
+            Returns a single object (VF object)
+            '''
+            
+            # extract what is needed form the metric depending on what the user
+            # supplied
+            # check if its has string components
+            if type(g[0][0]) == str and type(g[0][1]) == str and type(g[1][0]) == str and type(g[1][1]) == str:
+                # deal with supplied string metric
+                # need to format it, correct it for constants and evaluate it's numerical equivalent
+                str_comp_00 = g[0][0] + ''
+                str_comp_01 = g[0][1] + ''
+                str_comp_10 = g[1][0] + ''
+                str_comp_11 = g[1][1] + ''
+                str_comp_00 = str_comp_00.replace('x', '(self.xg)')
+                str_comp_00 = str_comp_00.replace('y', '(self.yg)')
+                str_comp_01 = str_comp_01.replace('x', '(self.xg)')
+                str_comp_01 = str_comp_01.replace('y', '(self.yg)')
+                str_comp_10 = str_comp_10.replace('x', '(self.xg)')
+                str_comp_10 = str_comp_10.replace('y', '(self.yg)')
+                str_comp_11 = str_comp_11.replace('x', '(self.xg)')
+                str_comp_11 = str_comp_11.replace('y', '(self.yg)')
+                # check against constant form components:
+                if str_comp_00.find('x') & str_comp_00.find('y') == -1:
+                    str_comp_00 = '(' + str(str_comp_00) + ')* np.ones(np.shape(self.xg))'
+                if str_comp_01.find('x') & str_comp_01.find('y') == -1:
+                    str_comp_01 = '(' + str(str_comp_01) + ')* np.ones(np.shape(self.yg))'
+                if str_comp_10.find('x') & str_comp_10.find('y') == -1:
+                    str_comp_10 = '(' + str(str_comp_10) + ')* np.ones(np.shape(self.yg))'
+                if str_comp_11.find('x') & str_comp_11.find('y') == -1:
+                    str_comp_11 = '(' + str(str_comp_11) + ')* np.ones(np.shape(self.yg))'
                 
-    
+                # evaluate the components numerically, inputting them into a
+                # store numerical metric
+                comp_00 = eval(str_comp_00)
+                comp_01 = eval(str_comp_01)
+                comp_10 = eval(str_comp_10)
+                comp_11 = eval(str_comp_11)
+                g_num = [[comp_00, comp_01], [comp_10, comp_11]]
+                
+                # set up a dummy variable to store the fact that numericals were given
+                # not to check again later
+                analytics = True
+                
+            elif type(g[0][0]) == np.ndarray and type(g[0][1]) == np.ndarray and type(g[1][0]) == np.ndarray and type(g[1][1]) == np.ndarray:
+                # deal with the metric being supplied as components
+                # if the user has 1-form equations, warn that these can't
+                # be passed anymore, because we don't have equations for this
+                # metric
+                if self.form_1_str_x == None and self.form_1_str_y == None:
+                    pass
+                else:
+                    print('The 1-form has equations, but the metric does not, these will be lost and the resulting VF will only have numerical values, not equations supplied')
+                # No need to do anythng more to the metric, upto the user to make sure its
+                # correctly sized, as with other code in this library
+                # just rename the metric here
+                g_num = g
+                
+                # set up a dummy variable to store the fact that numericals were
+                # not given, not to check again later
+                analytics = False
+                
+            else:
+                # Inconsistant metric components
+                raise TypeError('Metric components are inconcisstant')
+            
+            # from 1-form components, get VF components by the metric
+            # first, do so numerically, as this must always happen
+            form_x = self.F_x * g_num[0][0] + self.F_y * g_num[0][1]
+            form_y = self.F_y * g_num[1][1] + self.F_x * g_num[1][0]
+            
+            # if the equations were given, evaluate these analytically too:
+            # only if vector file doriginally has equations
+            if analytics:
+                if self.form_1_str_x == None and self.form_1_str_y == None:
+                    print('You supplied the metric as equations (or it was default), but did not give 1-form equations, therefore only numericals will be completed')
+                    analytics = False
+                else:
+                    x_str_form = '(' + self.form_1_str_x + ')*(' + g[0][0] + ') + (' + self.form_1_str_y + ')*(' + g[0][1] + ')'
+                    y_str_form = '(' + self.form_1_str_y + ')*(' + g[1][1] + ') + (' + self.form_1_str_x + ')*(' + g[1][0] + ')'
+                    # simplify them
+                    x_str_form = str(simplify(x_str_form))
+                    y_str_form = str(simplify(y_str_form))
+            else:
+                pass
+
+            # based on what was given into the Vector field, return a 1-form object with these parameters
+            if analytics:
+                if pass_on_figure is False:
+                    # supply these to the 1-form object creator
+                    result_field = vector_field(self.xg, self.yg, form_x, form_y, x_str_form, y_str_form)
+                elif pass_on_figure is True:
+                    if self.subplots is False:
+                        result_field = vector_field(self.xg, self.yg, form_x, form_y, x_str_form, y_str_form, fig=self.figure, subplots=False)
+                    elif self.subplots is True:
+                        result_field = vector_field(self.xg, self.yg, form_x, form_y, x_str_form, y_str_form, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+                else:
+                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+            elif not analytics:
+                if pass_on_figure is False:
+                    # supply these to the 1-form object creator
+                    result_field = vector_field(self.xg, self.yg, form_x, form_y)
+                elif pass_on_figure is True:
+                    if self.subplots is False:
+                        result_field = vector_field(self.xg, self.yg, form_x, form_y, fig=self.figure, subplots=False)
+                    elif self.subplots is True:
+                        result_field = vector_field(self.xg, self.yg, form_x, form_y, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+                else:
+                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+        
+            # return the found object
+            return result_field
+
     # now call that object to create it:
     form_1_object = form_set_up(xg, yg, F_x, F_y)
     # return it to user to store
