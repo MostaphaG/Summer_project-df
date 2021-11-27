@@ -1061,6 +1061,32 @@ div_field.plot(keep=False, subplot_index=1)
 ax1.set_xlabel('Vector Field')
 ax2.set_xlabel('Div Vector Field')
 
+#%% Test curl of vector field with subplot
+
+#Set up grids
+r = np.linspace(-5, 5, 21)
+xg, yg = np.meshgrid(r, r)
+
+u = yg*np.cos(xg)
+v = -xg
+
+# Set up subplots
+fig1 = plt.figure(figsize=(10,5))
+ax1 = fig1.add_subplot(121)
+ax2 = fig1.add_subplot(122)
+
+# Create vector field
+vf1 = fp.vector_field(xg, yg, u, v, fig = fig1, subplots=True, sub_axis_list=[ax1, ax2])
+vf1.give_eqn('y*cos(x)','-x')
+vf1.plot(keep=False, subplot_index=0)
+
+curl_field = vf1.Curl((0,0), 100, 13, pass_on_figure=True)
+# curl_field.autoscale()
+curl_field.plot(keep=False, subplot_index=1)
+
+ax1.set_xlabel('Vector Field')
+ax2.set_xlabel('Curl Vector Field')
+
 # %%
 
 # Testing the metric with the inetrior derivative (numerically)

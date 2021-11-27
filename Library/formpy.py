@@ -2978,6 +2978,124 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplot
                     raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
                 
                 return Div_vf
+            
+        def Curl(self, target=[0,0], zoom=2, dpd=9, pass_on_figure=False):
+            '''
+            Creates new vector field object at a target location, showing local rotation (Curl)
+            User gives arguments:
+            Target - derivative plot location
+            Zoom - Magnification level
+            dpd - New plot point density
+            '''
+            if self.str_x == None or self.str_y == None:
+                # ERROR
+                raise TypeError('Error: No equation provided')
+            else:
+                
+                # Target coordinates
+                x_m = target[0]
+                y_m = target[1]
+                
+                d_range = self.xg[0, -1]/zoom
+                #d_length = 
+                
+                # Set up zoom window grids
+                dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
+                dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
+                dxg, dyg = np.meshgrid(dx, dy)
+                
+                # Create variables for the user provided equation strings
+                u_str = self.str_x
+                v_str = self.str_y
+
+                # Create string to evaluate the field at the target location
+                u_str_point = u_str.replace('x', 'x_m')
+                u_str_point = u_str_point.replace('y', 'y_m')
+                
+                v_str_point = v_str.replace('x', 'x_m')
+                v_str_point = v_str_point.replace('y', 'y_m')
+                
+                # Check if the equations provided contain x and y terms
+                if u_str.find('x') & u_str.find('y') == -1:
+                    u_str_grid = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                else:
+                    u_str_grid = u_str.replace('x', 'dxg')
+                    u_str_grid = u_str_grid.replace('y', 'dyg')
+          
+                if v_str.find('x') & v_str.find('y') == -1:
+                    v_str_grid = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
+                else:
+                    v_str_grid = v_str.replace('x', 'dxg')
+                    v_str_grid = v_str_grid.replace('y', 'dyg')
+                    
+                # Generate arrays for the components of the derivative field          
+                U = eval(u_str_grid) - eval(u_str_point)
+                V = eval(v_str_grid) - eval(v_str_point)
+                
+                # =============================================================================
+                # Geometric Curl Method - See Documentation                
+                # =============================================================================
+                
+                U_curl = np.zeros(shape=(dpd, dpd))
+                V_curl = np.zeros(shape=(dpd, dpd))
+                
+                # Looping Constant
+                N = dpd - 1
+        
+                # Quadrant Points
+                if dpd % 2 == 1:
+                    quad_x = int(dpd/2)
+                    quad_y = int((dpd+1)/2)
+                else:
+                    quad_x = int(dpd/2)
+                    quad_y = int(dpd/2)
+                    
+                for i in range(quad_x):
+                    # get the l number, for projection of j on radial / i on tangent
+                    l = i - 0.5*N
+                    
+                    # INNER LOOP
+                    for j in range(quad_y):
+                        # get the k number of projection: i on radial / j on tangent
+                        k = j - 0.5*N
+                        
+                        # get the commuting parts of V and W for each square corner
+                        # (x and y components of the subtracted field)
+                        U_comm_1 = 0.25*(2*U[i, j] + V[j, N-i] - V[N-j, i])
+                        U_comm_2 = 0.25*(2*U[j, N-i] + V[N-i, N-j] - V[i, j])
+                        U_comm_3 = 0.25*(2*U[N-i, N-j] + V[N-j, i] - V[j, N-i])
+                        U_comm_4 = 0.25*(2*U[N-j, i] + V[i, j] - V[N-i, N-j])
+                        
+                        V_comm_1 = 0.25*(2*V[i, j] - U[j, N-i] + U[N-j, i])
+                        V_comm_2 = 0.25*(2*V[j, N-i] - U[N-i, N-j] + U[i, j])
+                        V_comm_3 = 0.25*(2*V[N-i, N-j] - U[N-j, i] + U[j, N-i])
+                        V_comm_4 = 0.25*(2*V[N-j, i] - U[i, j] + U[N-i, N-j])
+                        
+                        # gte a normalisation factor from l and k
+                        A = k**2 + l**2
+                        
+                        U_curl[i, j] = (U_comm_1*l + V_comm_1*(-k))*l/A
+                        V_curl[i, j] = (U_comm_1*l + V_comm_1*(-k))*(-k)/A
+                        U_curl[j, N-i] = (U_comm_2*(-k) + V_comm_2*(-l))*(-k)/A
+                        V_curl[j, N-i] = (U_comm_2*(-k) + V_comm_2*(-l))*(-l)/A
+                        U_curl[N-i, N-j] = (U_comm_3*(-l) + V_comm_3*k)*(-l)/A
+                        V_curl[N-i, N-j] = (U_comm_3*(-l) + V_comm_3*k)*k/A
+                        U_curl[N-j, i] = (U_comm_4*k + V_comm_4*l)*k/A
+                        V_curl[N-j, i] = (U_comm_4*k + V_comm_4*l)*l/A
+                    
+                # Return object to the user
+                if pass_on_figure is False:
+                    # New figure
+                    Curl_vf = vector_field(dxg, dyg, U_curl, V_curl)
+                elif pass_on_figure is True:
+                    if self.subplots is False:
+                        Curl_vf = vector_field(dxg, dyg, U_curl, V_curl, fig=self.figure, subplots=False)
+                    elif self.subplots is True:
+                        Curl_vf = vector_field(dxg, dyg, U_curl, V_curl, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+                else:
+                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                
+                return Curl_vf
         
         # define a method to change a supplied Vector filed to the 1-form
         def formalise(self, pass_on_figure=False, g=[['1', '0'], ['0', '1']]):
