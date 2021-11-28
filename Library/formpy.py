@@ -995,6 +995,71 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             # return the resulting object
             return ret_object
         
+        
+        # define a method for numerical wedge product
+        def wedge_num(self, form_1_second=None, pass_on_figure=False):
+            '''
+            Takes in 2 arguments:
+            The first one is the form_1_second, either as:
+                --- 1-form object
+                --- numerical components
+            If none supplied, assumed to be a (1, 1) 1-form
+            Third determines if figure from this object is to be passed on
+            to the 2-form object
+            Computes the Wedge product numerically
+            Returns a 2-form object
+            '''
+            
+            # test if equations were given first:
+            if self.form_1_str_x == None or self.form_1_str_y == None:
+                pass
+            else:
+                # Warn user that these will be lost
+                print('The first 1-form you are completing the wedge with has equations supplied, these will be lost')
+            
+            # if the vector field was supplied, extract its equations, if possible
+            if form_1_second is None:
+                # if none was given, do it with respect to uniform 1, 1
+                f12_x = np.ones(np.shape(self.xg))
+                f12_y = np.ones(np.shape(self.xg))
+            elif type(form_1_second) == tuple:
+                # if numerical grids were given, take these, is equations were given here, break!
+                if type(form_1_second[0]) == str:
+                    raise ValueError('for numerical calulation, supply 1-form arrays, not equations')
+                else:
+                    f12_x = form_1_second[0]
+                    f12_y = form_1_second[1]
+            else:
+                # object supplied, get numericals
+                f12_x = form_1_second.F_x
+                f12_y = form_1_second.F_y
+                
+                # warn user if equations were given too:
+                if form_1_second.form_1_str_x == None or form_1_second.form_1_str_y == None:
+                    pass
+                else:
+                    # Warn user that these will be lost
+                    print('The second 1-form in wedge has equations supplied, these will be lost')
+            
+            # from these get the numerical 2-form
+            result = self.F_x * f12_y - self.F_y * f12_x
+            
+            # return it to user:
+            if pass_on_figure is False:
+                # supply these to the 0-form object creator
+                result_form = form_2(self.xg, self.yg, result)
+            elif pass_on_figure is True:
+                if self.subplots is False:
+                    result_form = form_2(self.xg, self.yg, result, fig=self.figure, subplots=False)
+                elif self.subplots is True:
+                    result_form = form_2(self.xg, self.yg, result, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+            else:
+                raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+            
+            # return it to the user
+            return result_form
+            
+        
         def zoom(self, target=[0,0], zoom=2, dpd=9):
             '''
             Create a new window which displays the field zoomed at a certain point

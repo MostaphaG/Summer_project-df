@@ -368,6 +368,34 @@ form_wedged_2.plot()
 # return string
 print(form_wedged_2.return_string())
 
+
+# %%
+
+# Example of Wedge done numerically
+
+# set up grids
+v = np.linspace(-4.5, 4.5, 26)
+xg, yg = np.meshgrid(v, v)
+
+# set up a figure
+fig = plt.figure()
+ax1 = fig.add_subplot(121)
+ax2 = fig.add_subplot(122)
+
+# set up the 1 form object
+form_1_x = 3*np.ones(np.shape(xg))
+form_1_y = yg**2
+form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y, fig=fig, subplots=True, sub_axis_list=[ax1, ax2])
+
+# plot it
+form_1_obj.plot(keep=True, subplot_index=0)
+
+# now find wedge of it with a different form
+form_wedged_2 = form_1_obj.wedge_num(form_1_second=(1/yg**2, np.ones(np.shape(xg))), pass_on_figure=True)
+
+# plot it
+form_wedged_2.plot(keep=True, subplot_index=1)
+
 # %%
 
 # Example of 2-form Hodge
