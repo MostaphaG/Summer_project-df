@@ -795,27 +795,33 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             fx = self.F_x + np.zeros(np.shape(self.xg))
             fy = self.F_y + np.zeros(np.shape(self.xg))
             
+            #np.set_printoptions(True)
+            
             # clean up F_x and F_y from nan
             # keep inf and large values, for gradient to be found still
-            for i in range(len(self.xg[:, 0])):
-                for j in range(len(self.yg[0, :])):
-                    # correct for ill defined values
-                    if isnan(fx[i, j]):
-                        fx[i, j] = 0
-                    if isnan(fy[i, j]):
-                        fy[i, j] = 0
-                    if abs(fx[i, j]) == np.inf  or abs(fx[i, j]) > 1e15:
-                        fx[i, j] = 1e10
-                    if abs(fy[i, j]) == np.inf  or abs(fy[i, j]) > 1e15:
-                        fy[i, j] = 1e10
+#            for i in range(len(self.xg[:, 0])):
+#                for j in range(len(self.yg[0, :])):
+#                    # correct for ill defined values
+#                    if isnan(fx[i, j]):
+#                        fx[i, j] = 0
+#                    if isnan(fy[i, j]):
+#                        fy[i, j] = 0
+#                    if abs(fx[i, j]) == np.inf  or abs(fx[i, j]) > 1e15:
+#                        fx[i, j] = 1e10
+#                    if abs(fy[i, j]) == np.inf  or abs(fy[i, j]) > 1e15:
+#                        fy[i, j] = 1e10
             
             
             # Calculate deirvatvies as needed, using numpy gradient.
             dy_F_x, _ = np.gradient(fx, dx, dy)
             _, dx_F_y = np.gradient(fy, dx, dy)
             
+#            dy_F_x, _ = np.gradient(fx - fy, dx, dy)
+#            _, dx_F_y = np.gradient(fy - fx, dx, dy)
+            
             # from these, get the 2-form
             form_2_result = dx_F_y - dy_F_x
+            #form_2_result = 0.5*(form_2_result + form_2_result.transpose())
             
             # return 2-form object to user
             if pass_on_figure is False:
@@ -1655,21 +1661,21 @@ def form_2(xg, yg, form2, form_2_eq=None, fig=None, subplots=False, sub_axis_lis
             angles =[0*np.ones(np.shape(form2)), (np.pi/2)*np.ones(np.shape(form2))]
             
             # deal with sinularities that appear on evaluated points
-            for i in range(x_len):
-                for j in range(y_len):
-                    # set to zero points that are not defined or inf
-                    if isnan(form2[i, j]) is True or abs(form2[i, j]) == np.inf  or abs(form2[i, j]) > 1e15:
-                        # colour this region as a red dot, not square to
-                        # not confuse with nigh mag 2-forms in stacks. or worse, in
-                        # blocks
-                        circ = patch.Circle((self.xg[i, j], self.yg[i, j]), L*self.fract/3, color='red')
-                        axis.add_patch(circ)
-                        form2[i, j] = 0
-                    # ALso, since we got this lop anyway
-                    # correct for singularities in planar form 2:
-                    # set to zero points that are not defined or inf
-                    if isnan(form2[i, j]) is True:
-                        form_2_sgn[i, j] = 0
+#            for i in range(x_len):
+#                for j in range(y_len):
+#                    # set to zero points that are not defined or inf
+#                    if isnan(form2[i, j]) is True or abs(form2[i, j]) == np.inf  or abs(form2[i, j]) > 1e15:
+#                        # colour this region as a red dot, not square to
+#                        # not confuse with nigh mag 2-forms in stacks. or worse, in
+#                        # blocks
+#                        circ = patch.Circle((self.xg[i, j], self.yg[i, j]), L*self.fract/3, color='red')
+#                        axis.add_patch(circ)
+#                        form2[i, j] = 0
+#                    # ALso, since we got this lop anyway
+#                    # correct for singularities in planar form 2:
+#                    # set to zero points that are not defined or inf
+#                    if isnan(form2[i, j]) is True:
+#                        form_2_sgn[i, j] = 0
             
             # #########################################################################
             # use the the direction of arrows to define stack properties

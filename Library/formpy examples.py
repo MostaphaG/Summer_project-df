@@ -346,21 +346,21 @@ v = np.linspace(-4.5, 4.5, 26)
 xg, yg = np.meshgrid(v, v)
 
 # set up the 1 form object
-form_1_x = yg*np.cos(xg)
-form_1_y = -xg
+form_1_x = xg**2
+form_1_y = yg**2
 form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y)
 
 # change the stack sizes
 form_1_obj.sheet_size(0.04)
 
 # supply equations
-form_1_obj.give_eqn('y*cos(x)', '-x')
+form_1_obj.give_eqn('x**2', 'y**2')
 
 # plot it
 form_1_obj.plot()
 
 # now find wedge of it with a different form
-form_wedged_2 = form_1_obj.wedge_analytical('x*y', '2*y')
+form_wedged_2 = form_1_obj.wedge_analytical('1/y**2', 'x**2')
 
 # plot it
 form_wedged_2.plot()
@@ -383,7 +383,7 @@ ax1 = fig.add_subplot(121)
 ax2 = fig.add_subplot(122)
 
 # set up the 1 form object
-form_1_x = 3*np.ones(np.shape(xg))
+form_1_x = 1/xg**3
 form_1_y = yg**2
 form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y, fig=fig, subplots=True, sub_axis_list=[ax1, ax2])
 
@@ -391,7 +391,7 @@ form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y, fig=fig, subplots=True, sub_a
 form_1_obj.plot(keep=True, subplot_index=0)
 
 # now find wedge of it with a different form
-form_wedged_2 = form_1_obj.wedge_num(form_1_second=(1/yg**2, np.ones(np.shape(xg))), pass_on_figure=True)
+form_wedged_2 = form_1_obj.wedge_num(form_1_second=(1/yg**2, xg**2), pass_on_figure=True)
 
 # plot it
 form_wedged_2.plot(keep=True, subplot_index=1)
@@ -1243,13 +1243,17 @@ zero_form.plot()
 # Further tests with numerical exterior derivative of 1-form
 # Trying to get B field 2-form to work out numerically
 
+np.set_printoptions(True)
 
 # set up grids
-v = np.linspace(-4.5, 4.5, 25)
+v = np.linspace(-0.1, 0.1, 10)
 xg, yg = np.meshgrid(v, v)
 
 # set up the 1 form object and plot it
-#form_1_x = -xg/((xg**2 + yg**2)**1.5)
+form_1_x = -xg/((xg**2 + yg**2)**1.5)
+form_1_y = -yg/((xg**2 + yg**2)**1.5)
+
+#form_1_x = xg/((xg**2 + yg**2)**1.5)
 #form_1_y = -yg/((xg**2 + yg**2)**1.5)
 
 #form_1_x = 1/(xg**2 + yg**2)
@@ -1258,8 +1262,11 @@ xg, yg = np.meshgrid(v, v)
 #form_1_x = -xg/(xg**2 + yg**2)
 #form_1_y = -yg/(xg**2 + yg**2)
 
-form_1_x = 1/xg
-form_1_y = 1
+#form_1_x = xg
+#form_1_y = yg
+
+#form_1_x = -yg
+#form_1_y = np.cos(xg)
 
 # set up a 1-form object with these:
 form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y)
@@ -1274,13 +1281,17 @@ form_2_num = form_1_obj.num_ext_d()
 form_2_num.plot()
 
 # complete the analytical exterior derivative
-#form_1_obj.give_eqn('-x/((x**2 + y**2)**1.5)', '-y/((x**2 + y**2)**1.5)')
+form_1_obj.give_eqn('-x/((x**2 + y**2)**1.5)', '-y/((x**2 + y**2)**1.5)')
+
+#form_1_obj.give_eqn('x/((x**2 + y**2)**1.5)', '-y/((x**2 + y**2)**1.5)')
 
 #form_1_obj.give_eqn('1/(x**2 + y**2)', '1')
 
 #form_1_obj.give_eqn('-x/(x**2 + y**2)', '-y/(x**2 + y**2)')
 
-form_1_obj.give_eqn('1/x', '1')
+#form_1_obj.give_eqn('x', '-y')
+
+#form_1_obj.give_eqn('-y', 'cos(x)')
 
 form_2_an = form_1_obj.ext_d()
 
