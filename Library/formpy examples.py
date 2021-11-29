@@ -490,7 +490,7 @@ ax2.set_aspect('equal')
 ax3.set_aspect('equal')
 
 # set up the 0 form object and plot it
-form_0 = 1/np.sqrt(xg**2 + yg**2)
+form_0 = xg + yg
 
 # create an object with these axis in it
 form_0_obj = fp.form_0(xg, yg, form_0, fig=fig, subplots=True, sub_axis_list=[ax1, ax2, ax3])
@@ -505,11 +505,15 @@ form_1_num_e = form_0_obj.num_ext_d(edge_order=1, pass_on_figure=True)  # pass f
 form_1_num_e.plot(keep=True, subplot_index=1)
 
 # supply equation and complete ext. deriv., then plot that on 3rd axis set
-form_0_obj.give_eqn('1/sqrt(x**2 + y**2)')
+form_0_obj.give_eqn('x + y')
 form_1_obj_a = form_0_obj.ext_d(pass_on_figure=True)  # this supplies the 1-form with equations too
 
 # plot that 1-form object
 form_1_obj_a.plot(keep=True, subplot_index=2)
+
+# plot the difference between trhe two (analytical and numerical)
+form_test = fp.form_1(xg, yg, form_1_num_e.F_x - form_1_obj_a.F_x, form_1_num_e.F_y - form_1_obj_a.F_y)
+form_test.plot()
 
 # %%
 
