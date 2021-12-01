@@ -490,7 +490,7 @@ ax2.set_aspect('equal')
 ax3.set_aspect('equal')
 
 # set up the 0 form object and plot it
-form_0 = xg + yg
+form_0 = np.sin(xg + yg)
 
 # create an object with these axis in it
 form_0_obj = fp.form_0(xg, yg, form_0, fig=fig, subplots=True, sub_axis_list=[ax1, ax2, ax3])
@@ -505,15 +505,15 @@ form_1_num_e = form_0_obj.num_ext_d(edge_order=1, pass_on_figure=True)  # pass f
 form_1_num_e.plot(keep=True, subplot_index=1)
 
 # supply equation and complete ext. deriv., then plot that on 3rd axis set
-form_0_obj.give_eqn('x + y')
+form_0_obj.give_eqn('sin(x+y)')
 form_1_obj_a = form_0_obj.ext_d(pass_on_figure=True)  # this supplies the 1-form with equations too
 
 # plot that 1-form object
 form_1_obj_a.plot(keep=True, subplot_index=2)
 
 # plot the difference between trhe two (analytical and numerical)
-form_test = fp.form_1(xg, yg, form_1_num_e.F_x - form_1_obj_a.F_x, form_1_num_e.F_y - form_1_obj_a.F_y)
-form_test.plot()
+#form_test = fp.form_1(xg, yg, form_1_num_e.F_x - form_1_obj_a.F_x, form_1_num_e.F_y - form_1_obj_a.F_y)
+#form_test.plot()
 
 # %%
 
@@ -1244,18 +1244,99 @@ zero_form.plot()
 
 # %%
 
+# Test EM potential 0-form ext deriv twice to 2-form (that should be 0)
+
+# set up grids
+v = np.linspace(-4.5, 4.5, 21)
+xg, yg = np.meshgrid(v, v)
+
+# set up a figure with subplots
+fig = plt.figure()
+ax1 = fig.add_subplot(131)
+ax2 = fig.add_subplot(132)
+ax3 = fig.add_subplot(133)
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
+ax3.set_aspect('equal')
+
+# set up the 0 form object and plot it
+form_0 = xg + yg
+
+# create an object with these axis in it
+form_0_obj = fp.form_0(xg, yg, form_0, fig=fig, subplots=True, sub_axis_list=[ax1, ax2, ax3])
+
+# compute the numerical ext deriv
+form_1_num = form_0_obj.num_ext_d(edge_order=1, pass_on_figure=True)  # pass figure to pass on subplot axis
+
+# supply equation and complete ext. deriv. analytically
+form_0_obj.give_eqn('x + y')
+form_1_ana = form_0_obj.ext_d(pass_on_figure=True)  # this supplies the 1-form with equations too
+
+# find the numerical exterior derivaitve of numerical 1-form and plot
+form_2_num = form_1_num.num_ext_d(pass_on_figure=True)
+form_2_num.plot(keep=True, subplot_index=0)
+
+# find numerical exterior derivative of analytical 1-form and plot
+form_2_numana = form_1_ana.num_ext_d(pass_on_figure=True)
+form_2_numana.plot(keep=True, subplot_index=0)
+
+# find analytical ext deriv. of analytical 1-form and plot
+form_2_ana = form_1_ana.ext_d(pass_on_figure=True)
+form_2_ana.plot(keep=True, subplot_index=0)
+
+
+# %%
+
+# Test 0-form for EM potential
+
+# set up grids
+v = np.linspace(-4.5, 4.5, 21)
+xg, yg = np.meshgrid(v, v)
+
+# set up a figure with subplots
+fig = plt.figure()
+ax1 = fig.add_subplot(131)
+ax2 = fig.add_subplot(132)
+ax3 = fig.add_subplot(133)
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
+ax3.set_aspect('equal')
+
+# set up the 0 form object and plot it
+form_0 = 1/(xg**2 + yg**2)
+
+# create an object with these axis in it
+form_0_obj = fp.form_0(xg, yg, form_0, fig=fig, subplots=True, sub_axis_list=[ax1, ax2, ax3])
+
+# plot it on first subplot
+form_0_obj.plot(keep=True, subplot_index=0)
+
+# compute the numerical ext deriv and plot it on second subplot
+form_1_num_e = form_0_obj.num_ext_d(edge_order=1, pass_on_figure=True)  # pass figure to pass on subplot axis
+
+# plot it on second axis set
+form_1_num_e.plot(keep=True, subplot_index=1)
+
+# supply equation and complete ext. deriv., then plot that on 3rd axis set
+form_0_obj.give_eqn('1/(x**2 + y**2)')
+form_1_obj_a = form_0_obj.ext_d(pass_on_figure=True)  # this supplies the 1-form with equations too
+
+# plot that 1-form object
+form_1_obj_a.plot(keep=True, subplot_index=2)
+
+# %%
+
 # Further tests with numerical exterior derivative of 1-form
-# Trying to get B field 2-form to work out numerically
 
 np.set_printoptions(True)
 
 # set up grids
-v = np.linspace(-0.1, 0.1, 10)
+v = np.linspace(-0.1, 0.1, 21)
 xg, yg = np.meshgrid(v, v)
 
 # set up the 1 form object and plot it
-form_1_x = -xg/((xg**2 + yg**2)**1.5)
-form_1_y = -yg/((xg**2 + yg**2)**1.5)
+#form_1_x = -xg/((xg**2 + yg**2)**1.5)
+#form_1_y = -yg/((xg**2 + yg**2)**1.5)
 
 #form_1_x = xg/((xg**2 + yg**2)**1.5)
 #form_1_y = -yg/((xg**2 + yg**2)**1.5)
@@ -1266,17 +1347,61 @@ form_1_y = -yg/((xg**2 + yg**2)**1.5)
 #form_1_x = -xg/(xg**2 + yg**2)
 #form_1_y = -yg/(xg**2 + yg**2)
 
-#form_1_x = xg
+#form_1_x = np.ones(np.shape(xg))
 #form_1_y = yg
 
 #form_1_x = -yg
 #form_1_y = np.cos(xg)
 
+form_1_x = xg
+form_1_y = yg
+
 # set up a 1-form object with these:
 form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y)
+plt.close(form_1_obj.figure)  # not plotting the 1-form anyway
 
-# close its empty figure, not needed
-plt.close(form_1_obj.figure)
+# complete the numerical exterior derivative
+form_2_num = form_1_obj.num_ext_d()
+
+# plot it
+form_2_num.plot()
+
+# complete the analytical exterior derivative
+#form_1_obj.give_eqn('-x/((x**2 + y**2)**1.5)', '-y/((x**2 + y**2)**1.5)')
+
+#form_1_obj.give_eqn('x/((x**2 + y**2)**1.5)', '-y/((x**2 + y**2)**1.5)')
+
+#form_1_obj.give_eqn('1/(x**2 + y**2)', '1')
+
+#form_1_obj.give_eqn('-x/(x**2 + y**2)', '-y/(x**2 + y**2)')
+
+#form_1_obj.give_eqn('1', 'y')
+
+#form_1_obj.give_eqn('-y', 'cos(x)')
+
+form_1_obj.give_eqn('x', 'y')
+
+form_2_an = form_1_obj.ext_d()
+
+# plot it
+form_2_an.plot()
+
+
+# %%
+
+# 1-form ext deriv testing for mag field
+
+# set up grids
+v = np.linspace(-0.1, 0.1, 22)
+xg, yg = np.meshgrid(v, v)
+
+# set up the 1 form object and plot it
+form_1_x = -xg/((xg**2 + yg**2)**1.5)
+form_1_y = -yg/((xg**2 + yg**2)**1.5)
+
+# set up a 1-form object with these:
+form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y)
+plt.close(form_1_obj.figure)  # not plotting the 1-form anyway
 
 # complete the numerical exterior derivative
 form_2_num = form_1_obj.num_ext_d()
@@ -1286,16 +1411,6 @@ form_2_num.plot()
 
 # complete the analytical exterior derivative
 form_1_obj.give_eqn('-x/((x**2 + y**2)**1.5)', '-y/((x**2 + y**2)**1.5)')
-
-#form_1_obj.give_eqn('x/((x**2 + y**2)**1.5)', '-y/((x**2 + y**2)**1.5)')
-
-#form_1_obj.give_eqn('1/(x**2 + y**2)', '1')
-
-#form_1_obj.give_eqn('-x/(x**2 + y**2)', '-y/(x**2 + y**2)')
-
-#form_1_obj.give_eqn('x', '-y')
-
-#form_1_obj.give_eqn('-y', 'cos(x)')
 
 form_2_an = form_1_obj.ext_d()
 

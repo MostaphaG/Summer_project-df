@@ -485,6 +485,10 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             # get variables needed for the initial, simplified stack plot
             # #########################################################################
             
+            # set all insignificant values to zero:
+            self.F_x[np.abs(self.F_x) < 1e-15] = 0
+            self.F_x[np.abs(self.F_x) < 1e-15] = 0
+            
             # find the arrow length corresponding to each point and store in mag array
             mag = np.sqrt(self.F_x**2 + self.F_y**2)
             
@@ -799,22 +803,25 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             
             # clean up F_x and F_y from nan
             # keep inf and large values, for gradient to be found still
-#            for i in range(len(self.xg[:, 0])):
-#                for j in range(len(self.yg[0, :])):
-#                    # correct for ill defined values
-#                    if isnan(fx[i, j]):
-#                        fx[i, j] = 0
-#                    if isnan(fy[i, j]):
-#                        fy[i, j] = 0
-#                    if abs(fx[i, j]) == np.inf  or abs(fx[i, j]) > 1e15:
-#                        fx[i, j] = 1e10
-#                    if abs(fy[i, j]) == np.inf  or abs(fy[i, j]) > 1e15:
-#                        fy[i, j] = 1e10
+            for i in range(len(self.xg[:, 0])):
+                for j in range(len(self.yg[0, :])):
+                    # correct for ill defined values
+                    if isnan(fx[i, j]):
+                        fx[i, j] = 0
+                    if isnan(fy[i, j]):
+                        fy[i, j] = 0
+                    if abs(fx[i, j]) == np.inf  or abs(fx[i, j]) > 1e15:
+                        fx[i, j] = 1e10
+                    if abs(fy[i, j]) == np.inf  or abs(fy[i, j]) > 1e15:
+                        fy[i, j] = 1e10
             
             
             # Calculate deirvatvies as needed, using numpy gradient.
             dy_F_x, _ = np.gradient(fx, dx, dy)
             _, dx_F_y = np.gradient(fy, dx, dy)
+            
+#            dy_F_x, _ = np.gradient(0.5*(fx + fx.transpose()), dx, dy)
+#            _, dx_F_y = np.gradient(0.5*(fy + fy.transpose()), dx, dy)
             
 #            dy_F_x, _ = np.gradient(fx - fy, dx, dy)
 #            _, dx_F_y = np.gradient(fy - fx, dx, dy)
@@ -1627,6 +1634,9 @@ def form_2(xg, yg, form2, form_2_eq=None, fig=None, subplots=False, sub_axis_lis
             
             form2 = self.form_2  # from self, get 2-form too
             
+            # set all insignificant values to zero:
+            form2[np.abs(form2) < 1e-15] = 0
+            
             # depending on input, clear the axis or don't
             if keep is True:
                 pass
@@ -1661,21 +1671,21 @@ def form_2(xg, yg, form2, form_2_eq=None, fig=None, subplots=False, sub_axis_lis
             angles =[0*np.ones(np.shape(form2)), (np.pi/2)*np.ones(np.shape(form2))]
             
             # deal with sinularities that appear on evaluated points
-#            for i in range(x_len):
-#                for j in range(y_len):
-#                    # set to zero points that are not defined or inf
-#                    if isnan(form2[i, j]) is True or abs(form2[i, j]) == np.inf  or abs(form2[i, j]) > 1e15:
-#                        # colour this region as a red dot, not square to
-#                        # not confuse with nigh mag 2-forms in stacks. or worse, in
-#                        # blocks
-#                        circ = patch.Circle((self.xg[i, j], self.yg[i, j]), L*self.fract/3, color='red')
-#                        axis.add_patch(circ)
-#                        form2[i, j] = 0
-#                    # ALso, since we got this lop anyway
-#                    # correct for singularities in planar form 2:
-#                    # set to zero points that are not defined or inf
-#                    if isnan(form2[i, j]) is True:
-#                        form_2_sgn[i, j] = 0
+            for i in range(x_len):
+                for j in range(y_len):
+                    # set to zero points that are not defined or inf
+                    if isnan(form2[i, j]) is True or abs(form2[i, j]) == np.inf  or abs(form2[i, j]) > 1e15:
+                        # colour this region as a red dot, not square to
+                        # not confuse with nigh mag 2-forms in stacks. or worse, in
+                        # blocks
+                        circ = patch.Circle((self.xg[i, j], self.yg[i, j]), L*self.fract/3, color='red')
+                        axis.add_patch(circ)
+                        form2[i, j] = 0
+                    # ALso, since we got this lop anyway
+                    # correct for singularities in planar form 2:
+                    # set to zero points that are not defined or inf
+                    if isnan(form2[i, j]) is True:
+                        form_2_sgn[i, j] = 0
             
             # #########################################################################
             # use the the direction of arrows to define stack properties
@@ -2300,6 +2310,9 @@ def form_0(xg, yg, form_0, form_0_eqn=None, fig=None, subplots=False, sub_axis_l
             
             form_0 = self.form_0  # from self, get 2-form
             
+            # set all insignificant values to zero:
+            form_0[np.abs(form_0) < 1e-15] = 0
+            
             # find L based on the origin of given grid is
             L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
             x0 = self.xg[0,0] + L
@@ -2787,6 +2800,12 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplot
                 for j in range(y_len):
                     if isnan(F_x_local[i,j]) == True or isnan(F_y_local[i,j]) == True or abs(F_x_local[i, j]) == np.inf or abs(F_y_local[i, j]) == np.inf or abs(F_y_local[i, j]) > 1e15 or abs(F_x_local[i, j]) > 1e15:
                         F_x_local[i,j] = F_y_local[i,j] = 0
+            
+            
+            # set all insignificant values to zero:
+            F_x_local[np.abs(F_x_local) < 1e-15] = 0
+            F_y_local[np.abs(F_y_local) < 1e-15] = 0
+            
             
             # find the magnitude corresponding to each point and store in mag array
             mag = np.sqrt(F_x_local**2 + F_y_local**2)
