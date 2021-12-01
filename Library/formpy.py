@@ -2636,7 +2636,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplot
         # define a method to add a subplot
         def add_subplot(self, order):
             '''
-            Takes in one argument, as as matplotlib add_subplot
+            Takes in one argument, as matplotlib add_subplot
             It determines the shape of the subplot structure and which axis is
             being set (eg. 231 gives a set of plots 2 rows by 3 columns
             and this sets the first axis in that configuration)
@@ -2883,6 +2883,79 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplot
                     raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
                     
                 return zoom_vf
+            
+        def zoom_inset(self, target=[0,0], zoom=2, dpd=9):
+            '''
+            Zoom, but display in an inset plot
+            '''
+            
+            # Requires user to provide eqn of the 1-form they are zooming on.
+            
+            if self.str_x == None or self.str_y == None:
+                # ERROR
+                raise TypeError('Error: No equation provided')
+            else:
+                
+                # Target coordinates
+                x_m = target[0]
+                y_m = target[1]
+                
+                # Get the size of the original VF
+                L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+                
+                # Range of the points in the new zoomed grid
+                # Assumes the original VF is centred on (0,0)
+                d_range = self.xg[0, -1]/zoom
+                
+                # Size of the inset plot (default as 0.3)
+                d_length = 0.3
+
+                # Set up zoom window grids
+                dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
+                dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
+                dxg, dyg = np.meshgrid(dx, dy)
+                
+                # Create variables for the user provided equation strings
+                u_str = self.str_x
+                v_str = self.str_y
+                
+                # Check if the equations provided contain x and y terms
+                if u_str.find('x') & u_str.find('y') == -1:
+                    u_str = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                else:
+                    u_str = u_str.replace('x', 'dxg')
+                    u_str = u_str.replace('y', 'dyg')
+          
+                if v_str.find('x') & v_str.find('y') == -1:
+                    v_str = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
+                else:
+                    v_str = v_str.replace('x', 'dxg')
+                    v_str = v_str.replace('y', 'dyg')
+                    
+                # Generate arrays for the components of the zoom field
+                u_zoom = eval(u_str)
+                v_zoom = eval(v_str)
+                
+                # Specify the position and the size of the inset plot
+                # [x0, y0, width, height], (x0,y0) are coords of the lower left corner
+                # Given as fraction of the main plot size. (e.g. 0,0,0.5,0.5 covers the bottom left quadrant)
+                q = 0.92
+                zoom_inset_ax = self.axis.inset_axes([0.5*(1 + q*x_m/L - d_length), 0.5*(1 + q*y_m/L - d_length), d_length, d_length])
+                
+                # if pass_on_figure is False:
+                #     # New figure
+                #     zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom)
+                # elif pass_on_figure is True:
+                #     if self.subplots is False:
+                #         zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom, fig=self.figure, subplots=False)
+                #     elif self.subplots is True:
+                #         zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+                # else:
+                #     raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                
+                
+                
+                # return zoom_vf
             
         def DF(self, target=[0,0], zoom=2, dpd=9, pass_on_figure=False):
             '''

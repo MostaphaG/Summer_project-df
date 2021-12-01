@@ -1416,3 +1416,66 @@ form_2_an = form_1_obj.ext_d()
 
 # plot it
 form_2_an.plot()
+
+#%% Testing numpy exterior derivative
+
+import formpy as fp
+import numpy as np
+import matplotlib.pyplot as plt
+
+r = np.linspace(-5,5,15)
+xg,yg = np.meshgrid(r,r)
+
+# u = -xg/(xg**2 + yg**2)**1.5
+# v = -yg/(xg**2 + yg**2)**1.5
+
+fig1 = plt.figure(figsize=(15,5))
+ax1 = fig1.add_subplot(131)
+ax2 = fig1.add_subplot(132)
+ax3 = fig1.add_subplot(133)
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
+ax3.set_aspect('equal')
+ax1.set_xlabel('1-Form')
+ax2.set_xlabel('Analytical d')
+ax3.set_xlabel('Numerical d')
+
+# Field is the exterior derivative of function x*cos(y), so 2-form result should be 0
+# u = np.cos(yg)
+# v = -xg*np.sin(yg)
+
+u = xg*np.cos(yg)
+v = yg*np.sin(xg)
+
+field = fp.form_1(xg, yg, u, v, fig=fig1, subplots=True, sub_axis_list=[ax1, ax2, ax3])
+field.give_eqn('x*cos(y)','y*sin(x)')
+field.plot(keep=True, subplot_index = 0)
+
+ext_derivative = field.ext_d(pass_on_figure=True)
+ext_derivative_np = field.num_ext_d(pass_on_figure=True)
+
+ext_derivative.plot(keep=True, subplot_index = 1)
+ext_derivative_np.plot(keep=True, subplot_index = 2)
+
+#%%
+ana_2f = ext_derivative.form_2()
+num_2f = ext_derivative_np.form_2()
+
+#%% Zooming inset axis
+
+r = np.linspace(-5,5,15)
+xg,yg = np.meshgrid(r,r)
+
+fig1 = plt.figure(figsize=(7,7))
+ax1 = fig1.gca()
+ax1.set_aspect('equal')
+
+u = xg*np.cos(yg)
+v = yg*np.sin(xg)
+
+field = fp.vector_field(xg, yg, u, v, fig=fig1)
+field.give_eqn('x*cos(y)','y*sin(x)')
+
+field.zoom_inset((2,-3), 10, 9)
+
+field.plot()
