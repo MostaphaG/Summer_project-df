@@ -2533,7 +2533,7 @@ function to create a vector field object and define methods for it
 
 # define a function that will set up a vector field object that can be customised and
 # plotted
-def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=False, sub_axis_list=[]):
+def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None, subplots=False, sub_axis_list=[]):
     '''
     defines a vector field object and returns it to user
     Takes 9 arguments, these are the 2 grids in 2D, which muse be square
@@ -2558,8 +2558,18 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplot
             # set up a figure if one was not given:
             if fig == None:
                 self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
-                self.axis = self.figure.gca()
+                
+                if ax == None:
+                    self.axis = self.figure.gca()
+                else: 
+                    self.axis = ax
             else:
+                
+                # if ax == None:
+                #     self.axis = self.figure.gca()
+                # else: 
+                #     self.axis = ax
+                    
                 if subplots is False:
                     self.figure = fig
                     self.axis  = self.figure.gca()
@@ -2941,6 +2951,11 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplot
                 # Given as fraction of the main plot size. (e.g. 0,0,0.5,0.5 covers the bottom left quadrant)
                 q = 0.92
                 zoom_inset_ax = self.axis.inset_axes([0.5*(1 + q*x_m/L - d_length), 0.5*(1 + q*y_m/L - d_length), d_length, d_length])
+                
+                zoom_vf_inset = vector_field(dxg, dyg, u_zoom, v_zoom, ax = zoom_inset_ax)
+                
+                zoom_vf_inset.plot()
+                # Now the inset axis is here, need to plot the zoomed field in the new axis.
                 
                 # if pass_on_figure is False:
                 #     # New figure

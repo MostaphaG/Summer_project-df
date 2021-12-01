@@ -1476,6 +1476,9 @@ v = yg*np.sin(xg)
 field = fp.vector_field(xg, yg, u, v, fig=fig1)
 field.give_eqn('x*cos(y)','y*sin(x)')
 
-field.zoom_inset((2,-3), 10, 9)
-
 field.plot()
+
+# The method zoom_inset creates the zoomed field, creates the inset axis and plots the field on the inset axis.
+# Target, zoom and dpd carry over from original zoom.
+field.zoom_inset((2,0), 100, 9)
+
