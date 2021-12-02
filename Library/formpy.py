@@ -2564,7 +2564,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
                 else: 
                     self.axis = ax
             else:
-                
+            
                 # if ax == None:
                 #     self.axis = self.figure.gca()
                 # else: 

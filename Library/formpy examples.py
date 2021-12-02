@@ -490,7 +490,7 @@ ax2.set_aspect('equal')
 ax3.set_aspect('equal')
 
 # set up the 0 form object and plot it
-form_0 = np.sin(xg + yg)
+form_0 = (xg+yg)/(xg**2 +yg**2)**1.5
 
 # create an object with these axis in it
 form_0_obj = fp.form_0(xg, yg, form_0, fig=fig, subplots=True, sub_axis_list=[ax1, ax2, ax3])
@@ -505,7 +505,7 @@ form_1_num_e = form_0_obj.num_ext_d(edge_order=1, pass_on_figure=True)  # pass f
 form_1_num_e.plot(keep=True, subplot_index=1)
 
 # supply equation and complete ext. deriv., then plot that on 3rd axis set
-form_0_obj.give_eqn('sin(x+y)')
+form_0_obj.give_eqn('(x+y)/(x**2 + y**2)**1.5')
 form_1_obj_a = form_0_obj.ext_d(pass_on_figure=True)  # this supplies the 1-form with equations too
 
 # plot that 1-form object
@@ -1392,15 +1392,19 @@ form_2_an.plot()
 # 1-form ext deriv testing for mag field
 
 # set up grids
-v = np.linspace(-0.1, 0.1, 22)
+v = np.linspace(-2, 2, 22)
 xg, yg = np.meshgrid(v, v)
 
 # set up the 1 form object and plot it
-form_1_x = -xg/((xg**2 + yg**2)**1.5)
-form_1_y = -yg/((xg**2 + yg**2)**1.5)
+#form_1_x = -xg/((xg**2 + yg**2)**1.5)
+#form_1_y = -yg/((xg**2 + yg**2)**1.5)
+
+form_1_x = 2*xg**np.exp(xg*yg) + xg**2*yg*np.exp(xg*yg)  # IMPORTANT EXAMPLE
+form_1_y = xg**3 * np.exp(xg*yg) + 2*yg
 
 # set up a 1-form object with these:
 form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y)
+#form_1_obj.plot()
 plt.close(form_1_obj.figure)  # not plotting the 1-form anyway
 
 # complete the numerical exterior derivative
@@ -1410,7 +1414,9 @@ form_2_num = form_1_obj.num_ext_d()
 form_2_num.plot()
 
 # complete the analytical exterior derivative
-form_1_obj.give_eqn('-x/((x**2 + y**2)**1.5)', '-y/((x**2 + y**2)**1.5)')
+#form_1_obj.give_eqn('-x/((x**2 + y**2)**1.5)', '-y/((x**2 + y**2)**1.5)')
+
+form_1_obj.give_eqn('2*x*e**(x*y) + x**2*y*e**(x*y)', 'x**3 * e**(x*y) + 2*y')
 
 form_2_an = form_1_obj.ext_d()
 
@@ -1441,14 +1447,14 @@ ax2.set_xlabel('Analytical d')
 ax3.set_xlabel('Numerical d')
 
 # Field is the exterior derivative of function x*cos(y), so 2-form result should be 0
-# u = np.cos(yg)
-# v = -xg*np.sin(yg)
+u = np.cos(yg)
+v = -xg*np.sin(yg)
 
-u = xg*np.cos(yg)
-v = yg*np.sin(xg)
+#u = xg*np.cos(yg)
+#v = yg*np.sin(xg)
 
 field = fp.form_1(xg, yg, u, v, fig=fig1, subplots=True, sub_axis_list=[ax1, ax2, ax3])
-field.give_eqn('x*cos(y)','y*sin(x)')
+field.give_eqn('cos(y)','-x*sin(y)')
 field.plot(keep=True, subplot_index = 0)
 
 ext_derivative = field.ext_d(pass_on_figure=True)
