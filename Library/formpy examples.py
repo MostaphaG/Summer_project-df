@@ -1488,3 +1488,59 @@ field.plot()
 # Target, zoom and dpd carry over from original zoom.
 field.zoom_inset((2,0), 100, 9)
 
+#%%
+
+import formpy as fp
+import numpy as np
+import matplotlib.pyplot as plt
+
+r = np.linspace(-5, 5, 101)
+xg, yg = np.meshgrid(r,r)
+
+u = -yg*np.sin(xg)
+v = np.cos(xg)
+
+dy_u = np.zeros(shape=(len(r),len(r)))
+dx_v = np.zeros(shape=(len(r),len(r)))
+
+# # Need to take the gradients of the rows of v and the cols of u
+
+# u0 = u[:,0]
+# v0 = v[0,:]
+
+# dy_u0 = np.gradient(u0)
+# dx_v0 = np.gradient(v0)
+
+# # Store in new arrays
+
+# dy_u[:,0] = dy_u0
+# dx_v[0,:] = dx_v0
+
+for i in range(len(r)):
+    dy_u[:,i] = np.gradient(u[:,i], edge_order=2)
+    dx_v[i,:] = np.gradient(v[i,:], edge_order=2)
+
+ed = dx_v - dy_u
+
+# Result appears to be half of what the numerical ext derivative function does.
+
+xg2 = xg[1:-1,1:-1]
+yg2 = yg[1:-1,1:-1]
+ed2 = ed[1:-1,1:-1]
+
+f2 = fp.form_2(xg2, yg2, ed2)
+
+f2.plot()
+
+
+#%%
+
+f1 = fp.form_1(xg, yg, u, v)
+
+f1.give_eqn('-y*sin(x)','cos(x)')
+
+f1_ed_num = f1.num_ext_d()
+f1_ed_ana = f1.ext_d()
+
+f1_ed_num.plot()
+f1_ed_ana.plot()
