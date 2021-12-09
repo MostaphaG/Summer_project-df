@@ -2533,7 +2533,7 @@ function to create a vector field object and define methods for it
 
 # define a function that will set up a vector field object that can be customised and
 # plotted
-def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None, subplots=False, sub_axis_list=[]):
+def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None):
     '''
     defines a vector field object and returns it to user
     Takes 9 arguments, these are the 2 grids in 2D, which muse be square
@@ -2555,33 +2555,48 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
             self.yg = yg
             self.F_x = F_x
             self.F_y = F_y
-            # set up a figure if one was not given:
-            if fig == None:                
-                if ax == None:
-                    self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
-                    self.axis = self.figure.gca()
-                else: 
-                    self.axis = ax
+            
+            # Changing up the way we create figures and axes to make the process more general.
+            # User can provide a figure and a specified axis to plot the vector field object
+            # Else, by default, a new figure will be provided
+            
+            if fig == None:
+                self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
+                
+                # If no figure is provided, the axis for plotting must be on the new figure
+                
+                self.axis = self.figure.gca()
+                
+                # if ax == None:
+                #     self.axis = self.figure.gca()
+                # else: 
+                #     self.axis = ax
+                    
             else:
+                self.figure = fig
+                if ax == None:
+                    self.axis = self.figure.gca()
+                else:
+                    self.axis = ax
             
                 # if ax == None:
                 #     self.axis = self.figure.gca()
                 # else: 
                 #     self.axis = ax
                     
-                if subplots is False:
-                    self.figure = fig
-                    self.axis  = self.figure.gca()
-                elif subplots is True:
-                    if len(sub_axis_list) == 0:
-                        self.figure = fig
-                        self.axis = []
-                    else:
-                        self.figure = fig
-                        self.axis = sub_axis_list
-                else:
-                    raise TypeError('Error, incorrect input for \'subplots\'')
-            self.subplots = subplots
+            #     if subplots is False:
+            #         self.figure = fig
+            #         self.axis  = self.figure.gca()
+            #     elif subplots is True:
+            #         if len(sub_axis_list) == 0:
+            #             self.figure = fig
+            #             self.axis = []
+            #         else:
+            #             self.figure = fig
+            #             self.axis = sub_axis_list
+            #     else:
+            #         raise TypeError('Error, incorrect input for \'subplots\'')
+            # self.subplots = subplots
             self.pt_den = len(xg[:, 0])# + 1  # assume square grids
             self.orientation = 'mid'
             self.scale = 1
@@ -2643,21 +2658,21 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
             return self.str_x, self.str_y
         
         # define a method to add a subplot
-        def add_subplot(self, order):
-            '''
-            Takes in one argument, as matplotlib add_subplot
-            It determines the shape of the subplot structure and which axis is
-            being set (eg. 231 gives a set of plots 2 rows by 3 columns
-            and this sets the first axis in that configuration)
-            Adds a subplot to the figure that this form occupies
-            Returns nothing, saves the subplot axis to the axis self param.
-            '''
-            # chck if the correct option was chosen to allow for this:
-            if type(self.axis) != list:
-                raise ValueError('Error, set up the object allowing for subplots')
-            else:
-                sub_axis = self.figure.add_subplot(order)
-                self.axis.append(sub_axis)
+        # def add_subplot(self, order):
+        #     '''
+        #     Takes in one argument, as matplotlib add_subplot
+        #     It determines the shape of the subplot structure and which axis is
+        #     being set (eg. 231 gives a set of plots 2 rows by 3 columns
+        #     and this sets the first axis in that configuration)
+        #     Adds a subplot to the figure that this form occupies
+        #     Returns nothing, saves the subplot axis to the axis self param.
+        #     '''
+        #     # chck if the correct option was chosen to allow for this:
+        #     if type(self.axis) != list:
+        #         raise ValueError('Error, set up the object allowing for subplots')
+        #     else:
+        #         sub_axis = self.figure.add_subplot(order)
+        #         self.axis.append(sub_axis)
         
         # define a method to change figure size
         def fig_size(self, n, m):
@@ -2754,7 +2769,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
                 self.F_y = eval(str_y_l)
         
         # define a method to plot the vector field using quiver
-        def plot(self, keep=True, subplot_index=None):
+        def plot(self, keep=True):
             '''
             Finilises the plotting
             Uses the attribues of the object as set originally and as customised
@@ -2772,16 +2787,16 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
             
             # from self, get axis
             # depending on if subplots are wanted:
-            if type(self.axis) != list:
-                axis = self.axis
-            else:
-                axis = self.axis[subplot_index]
+            # if type(self.axis) != list:
+            #     axis = self.axis
+            # else:
+            #     axis = self.axis[subplot_index]
             
             # depending on input, clear the axis or don't
             if keep is True:
                 pass
             else:
-                axis.clear()
+                self.axis.clear()
             
             # get the lengths of x and y from their grids
             x_len = len(self.xg[:, 0])
@@ -2794,8 +2809,8 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
             
             # adjust axis limits based on that.
             ax_L = L + L/self.delta_factor
-            axis.set_xlim(-ax_L + x0, ax_L + x0)
-            axis.set_ylim(-ax_L + y0, ax_L + y0)
+            self.axis.set_xlim(-ax_L + x0, ax_L + x0)
+            self.axis.set_ylim(-ax_L + y0, ax_L + y0)
             
             # for arrows to work, with nan and infs
             # make a local variable of F_x and F_y
@@ -2829,9 +2844,9 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
                 ScaleFactor = max_size/(0.9*(2*L/self.pt_den))
             
             
-            axis.quiver(self.xg, self.yg, F_x_local, F_y_local, pivot=self.orientation, scale=ScaleFactor, scale_units='xy', color=self.color) 
+            self.axis.quiver(self.xg, self.yg, F_x_local, F_y_local, pivot=self.orientation, scale=ScaleFactor, scale_units='xy', color=self.color) 
         
-        def zoom(self, target=[0,0], zoom=2, dpd=9, pass_on_figure=False):
+        def zoom(self, target=[0,0], zoom=2, dpd=9, fig=None, ax=None, inset=False):
             '''
             Create a new window which displays the field zoomed at a certain point
             User gives arguments
@@ -2851,74 +2866,15 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
                 x_m = target[0]
                 y_m = target[1]
                 
-                d_range = self.xg[0, -1]/zoom
-                #d_length = 
-                
-                # Set up zoom window grids
-                dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
-                dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
-                dxg, dyg = np.meshgrid(dx, dy)
-                
-                # Create variables for the user provided equation strings
-                u_str = self.str_x
-                v_str = self.str_y
-                
-                # Check if the equations provided contain x and y terms
-                if u_str.find('x') & u_str.find('y') == -1:
-                    u_str = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
-                else:
-                    u_str = u_str.replace('x', 'dxg')
-                    u_str = u_str.replace('y', 'dyg')
-          
-                if v_str.find('x') & v_str.find('y') == -1:
-                    v_str = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
-                else:
-                    v_str = v_str.replace('x', 'dxg')
-                    v_str = v_str.replace('y', 'dyg')
-                    
-                # Generate arrays for the components of the zoom field
-                u_zoom = eval(u_str)
-                v_zoom = eval(v_str)
-                
-                if pass_on_figure is False:
-                    # New figure
-                    zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom)
-                elif pass_on_figure is True:
-                    if self.subplots is False:
-                        zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom, fig=self.figure, subplots=False)
-                    elif self.subplots is True:
-                        zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom, fig=self.figure, subplots=True, sub_axis_list=self.axis)
-                else:
-                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
-                    
-                return zoom_vf
-            
-        def zoom_inset(self, target=[0,0], zoom=2, dpd=9):
-            '''
-            Zoom, but display in an inset plot
-            '''
-            
-            # Requires user to provide eqn of the 1-form they are zooming on.
-            
-            if self.str_x == None or self.str_y == None:
-                # ERROR
-                raise TypeError('Error: No equation provided')
-            else:
-                
-                # Target coordinates
-                x_m = target[0]
-                y_m = target[1]
-                
                 # Get the size of the original VF
                 L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
                 
-                # Range of the points in the new zoomed grid
-                # Assumes the original VF is centred on (0,0)
-                d_range = self.xg[0, -1]/zoom
+                # Zoom axis range
+                d_range = L/zoom
                 
                 # Size of the inset plot (default as 0.3)
-                d_length = 0.3
-
+                d_length = 0.3 
+                
                 # Set up zoom window grids
                 dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
                 dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
@@ -2945,33 +2901,110 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
                 u_zoom = eval(u_str)
                 v_zoom = eval(v_str)
                 
-                # Specify the position and the size of the inset plot
-                # [x0, y0, width, height], (x0,y0) are coords of the lower left corner
-                # Given as fraction of the main plot size. (e.g. 0,0,0.5,0.5 covers the bottom left quadrant)
-                q = 0.92
-                zoom_inset_ax = self.axis.inset_axes([0.5*(1 + q*x_m/L - d_length), 0.5*(1 + q*y_m/L - d_length), d_length, d_length])
                 
-                zoom_vf_inset = vector_field(dxg, dyg, u_zoom, v_zoom, ax=zoom_inset_ax)
-                
-                zoom_vf_inset.plot()
-                # Now the inset axis is here, need to plot the zoomed field in the new axis.
-                
-                # if pass_on_figure is False:
-                #     # New figure
-                #     zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom)
+                if inset == True:
+                    # Create inset axis in the current axis.
+                    q = 0.92
+                    zoom_inset_ax = self.axis.inset_axes([0.5*(1 + q*x_m/L - d_length), 0.5*(1 + q*y_m/L - d_length), d_length, d_length])
+                    zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom, fig = self.figure, ax = zoom_inset_ax)
+                else:
+                    if fig == None:  
+                        # Create new figure for the zoomed field
+                        zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom) 
+                    else:
+                        # Plot on the specified figure and axis 
+                        zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom, fig = fig, ax = ax)
+
                 # elif pass_on_figure is True:
                 #     if self.subplots is False:
                 #         zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom, fig=self.figure, subplots=False)
                 #     elif self.subplots is True:
                 #         zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+                
                 # else:
                 #     raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
                 
-                
-                
-                # return zoom_vf
+                return zoom_vf
             
-        def DF(self, target=[0,0], zoom=2, dpd=9, pass_on_figure=False):
+        # def zoom_inset(self, target=[0,0], zoom=2, dpd=9):
+        #     '''
+        #     Zoom, but display in an inset plot
+        #     '''
+            
+        #     # Requires user to provide eqn of the 1-form they are zooming on.
+            
+        #     if self.str_x == None or self.str_y == None:
+        #         # ERROR
+        #         raise TypeError('Error: No equation provided')
+        #     else:
+                
+        #         # Target coordinates
+        #         x_m = target[0]
+        #         y_m = target[1]
+                
+        #         # Get the size of the original VF
+        #         L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+                
+        #         # Range of the points in the new zoomed grid
+        #         # Assumes the original VF is centred on (0,0)
+        #         d_range = L/zoom
+                
+        #         # Size of the inset plot (default as 0.3)
+        #         d_length = 0.3
+
+        #         # Set up zoom window grids
+        #         dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
+        #         dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
+        #         dxg, dyg = np.meshgrid(dx, dy)
+                
+        #         # Create variables for the user provided equation strings
+        #         u_str = self.str_x
+        #         v_str = self.str_y
+                
+        #         # Check if the equations provided contain x and y terms
+        #         if u_str.find('x') & u_str.find('y') == -1:
+        #             u_str = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+        #         else:
+        #             u_str = u_str.replace('x', 'dxg')
+        #             u_str = u_str.replace('y', 'dyg')
+          
+        #         if v_str.find('x') & v_str.find('y') == -1:
+        #             v_str = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
+        #         else:
+        #             v_str = v_str.replace('x', 'dxg')
+        #             v_str = v_str.replace('y', 'dyg')
+                    
+        #         # Generate arrays for the components of the zoom field
+        #         u_zoom = eval(u_str)
+        #         v_zoom = eval(v_str)
+                
+        #         # Specify the position and the size of the inset plot
+        #         # [x0, y0, width, height], (x0,y0) are coords of the lower left corner
+        #         # Given as fraction of the main plot size. (e.g. 0,0,0.5,0.5 covers the bottom left quadrant)
+        #         q = 0.92
+        #         zoom_inset_ax = self.axis.inset_axes([0.5*(1 + q*x_m/L - d_length), 0.5*(1 + q*y_m/L - d_length), d_length, d_length])
+                
+        #         zoom_vf_inset = vector_field(dxg, dyg, u_zoom, v_zoom, ax = zoom_inset_ax)
+                
+        #         zoom_vf_inset.plot()
+        #         # Now the inset axis is here, need to plot the zoomed field in the new axis.
+                
+        #         # if pass_on_figure is False:
+        #         #     # New figure
+        #         #     zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom)
+        #         # elif pass_on_figure is True:
+        #         #     if self.subplots is False:
+        #         #         zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom, fig=self.figure, subplots=False)
+        #         #     elif self.subplots is True:
+        #         #         zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+        #         # else:
+        #         #     raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                
+                
+                
+        #         # return zoom_vf
+            
+        def DF(self, target=[0,0], zoom=2, dpd=9, fig=None, ax=None, inset=False):
             '''
             Creates new vector field object at a target location, showing the derivative field at this point.
             User gives arguments:
@@ -2988,8 +3021,14 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
                 x_m = target[0]
                 y_m = target[1]
                 
-                d_range = self.xg[0, -1]/zoom
-                #d_length = 
+                # Get the size of the original VF
+                L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+                
+                # Zoom axis range
+                d_range = L/zoom
+                
+                # Size of the inset plot (default as 0.3)
+                d_length = 0.3  
                 
                 # Set up zoom window grids
                 dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
@@ -3024,21 +3063,22 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
                 U = eval(u_str_grid) - eval(u_str_point)
                 V = eval(v_str_grid) - eval(v_str_point)
                 
-                # Return object to the user
-                if pass_on_figure is False:
-                    # New figure
-                    DF_vf = vector_field(dxg, dyg, U, V)
-                elif pass_on_figure is True:
-                    if self.subplots is False:
-                        DF_vf = vector_field(dxg, dyg, U, V, fig=self.figure, subplots=False)
-                    elif self.subplots is True:
-                        DF_vf = vector_field(dxg, dyg, U, V, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+                if inset == True:
+                    # Create inset axis in the current axis.
+                    q = 0.92
+                    zoom_inset_ax = self.axis.inset_axes([0.5*(1 + q*x_m/L - d_length), 0.5*(1 + q*y_m/L - d_length), d_length, d_length])
+                    DF_vf = vector_field(dxg, dyg, U, V, fig = self.figure, ax = zoom_inset_ax)
                 else:
-                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                    if fig == None:  
+                        # Create new figure for the zoomed field
+                        DF_vf = vector_field(dxg, dyg, U, V) 
+                    else:
+                        # Plot on the specified figure and axis 
+                        DF_vf = vector_field(dxg, dyg, U, V, fig = fig, ax = ax)
                 
                 return DF_vf
             
-        def Div(self, target=[0,0], zoom=2, dpd=9, pass_on_figure=False):
+        def Div(self, target=[0,0], zoom=2, dpd=9, fig=None, ax=None, inset=False):
             '''
             Creates new vector field object at a target location, showing the Divergence of the field at this point.
             User gives arguments:
@@ -3055,8 +3095,14 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
                 x_m = target[0]
                 y_m = target[1]
                 
-                d_range = self.xg[0, -1]/zoom
-                #d_length = 
+                # Get the size of the original VF
+                L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+                
+                # Zoom axis range
+                d_range = L/zoom
+                
+                # Size of the inset plot (default as 0.3)
+                d_length = 0.3 
                 
                 # Set up zoom window grids
                 dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
@@ -3142,21 +3188,22 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
                         U_div[N-j, i] = (U_comm_4*(-l) + V_comm_4*k)*(-l)/A
                         V_div[N-j, i] = (U_comm_4*(-l) + V_comm_4*k)*k/A
                 
-                # Return object to the user
-                if pass_on_figure is False:
-                    # New figure
-                    Div_vf = vector_field(dxg, dyg, U_div, V_div)
-                elif pass_on_figure is True:
-                    if self.subplots is False:
-                        Div_vf = vector_field(dxg, dyg, U_div, V_div, fig=self.figure, subplots=False)
-                    elif self.subplots is True:
-                        Div_vf = vector_field(dxg, dyg, U_div, V_div, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+                if inset == True:
+                    # Create inset axis in the current axis.
+                    q = 0.92
+                    zoom_inset_ax = self.axis.inset_axes([0.5*(1 + q*x_m/L - d_length), 0.5*(1 + q*y_m/L - d_length), d_length, d_length])
+                    Div_vf = vector_field(dxg, dyg, U_div, V_div, fig = self.figure, ax = zoom_inset_ax)
                 else:
-                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                    if fig == None:  
+                        # Create new figure for the zoomed field
+                        Div_vf = vector_field(dxg, dyg, U_div, V_div) 
+                    else:
+                        # Plot on the specified figure and axis 
+                        Div_vf = vector_field(dxg, dyg, U_div, V_div, fig = fig, ax = ax)
                 
                 return Div_vf
             
-        def Curl(self, target=[0,0], zoom=2, dpd=9, pass_on_figure=False):
+        def Curl(self, target=[0,0], zoom=2, dpd=9, fig=None, ax=None, inset=False):
             '''
             Creates new vector field object at a target location, showing local rotation (Curl)
             User gives arguments:
@@ -3173,8 +3220,14 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
                 x_m = target[0]
                 y_m = target[1]
                 
-                d_range = self.xg[0, -1]/zoom
-                #d_length = 
+                # Get the size of the original VF
+                L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+                
+                # Zoom axis range
+                d_range = L/zoom
+                
+                # Size of the inset plot (default as 0.3)
+                d_length = 0.3 
                 
                 # Set up zoom window grids
                 dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
@@ -3260,17 +3313,18 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
                         U_curl[N-j, i] = (U_comm_4*k + V_comm_4*l)*k/A
                         V_curl[N-j, i] = (U_comm_4*k + V_comm_4*l)*l/A
                     
-                # Return object to the user
-                if pass_on_figure is False:
-                    # New figure
-                    Curl_vf = vector_field(dxg, dyg, U_curl, V_curl)
-                elif pass_on_figure is True:
-                    if self.subplots is False:
-                        Curl_vf = vector_field(dxg, dyg, U_curl, V_curl, fig=self.figure, subplots=False)
-                    elif self.subplots is True:
-                        Curl_vf = vector_field(dxg, dyg, U_curl, V_curl, fig=self.figure, subplots=True, sub_axis_list=self.axis)
+                if inset == True:
+                    # Create inset axis in the current axis.
+                    q = 0.92
+                    zoom_inset_ax = self.axis.inset_axes([0.5*(1 + q*x_m/L - d_length), 0.5*(1 + q*y_m/L - d_length), d_length, d_length])
+                    Curl_vf = vector_field(dxg, dyg, U_curl, V_curl, fig = self.figure, ax = zoom_inset_ax)
                 else:
-                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                    if fig == None:  
+                        # Create new figure for the zoomed field
+                        Curl_vf = vector_field(dxg, dyg, U_curl, V_curl) 
+                    else:
+                        # Plot on the specified figure and axis 
+                        Curl_vf = vector_field(dxg, dyg, U_curl, V_curl, fig = fig, ax = ax)
                 
                 return Curl_vf
         
@@ -3408,4 +3462,5 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
     v_object = field_set_up(xg, yg, F_x, F_y)
     # return it to user to store
     return v_object
+
 
