@@ -1486,15 +1486,15 @@ field.plot()
 
 # The method zoom_inset creates the zoomed field, creates the inset axis and plots the field on the inset axis.
 # Target, zoom and dpd carry over from original zoom.
-field.zoom_inset((2,0), 100, 9)
+field.zoom_inset((3, -3), 10, 9)
 
 # %%
 
-r = np.linspace(-5, 5, 30)
+r = np.linspace(-2, 2, 30)
 xg, yg = np.meshgrid(r, r)
 
-u = -yg*np.sin(xg)
-v = np.cos(xg)
+u = yg**2
+v = xg
 
 dy_u = np.zeros(shape=(len(r), len(r)))
 dx_v = np.zeros(shape=(len(r), len(r)))
@@ -1528,15 +1528,31 @@ f2 = fp.form_2(xg2, yg2, ed2)
 
 f2.plot()
 
+f3 = fp.form_2(xg,yg,ed)
+
+f3.plot()
 
 #%%
 
-f1 = fp.form_1(xg, yg, u, v)
+r = np.linspace(-2, 2, 30)
+xg, yg = np.meshgrid(r, r)
 
-f1.give_eqn('-y*sin(x)','cos(x)')
+u = -yg*np.sin(xg)
+v = np.cos(xg)
+
+f1 = fp.form_1(xg, yg, u, v)
+plt.close()
+
+f1.give_eqn('-y*sin(x)', 'cos(x)')
 
 f1_ed_num = f1.num_ext_d()
 f1_ed_ana = f1.ext_d()
 
 f1_ed_num.plot()
 f1_ed_ana.plot()
+
+# %%
+
+f_subt = f1_ed_num.form_2 - f1_ed_ana.form_2
+fsub = fp.form_2(xg, yg, f_subt)
+fsub.plot()
