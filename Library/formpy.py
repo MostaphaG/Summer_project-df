@@ -2556,10 +2556,9 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
             self.F_x = F_x
             self.F_y = F_y
             # set up a figure if one was not given:
-            if fig == None:
-                self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
-                
+            if fig == None:                
                 if ax == None:
+                    self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
                     self.axis = self.figure.gca()
                 else: 
                     self.axis = ax
@@ -2952,7 +2951,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
                 q = 0.92
                 zoom_inset_ax = self.axis.inset_axes([0.5*(1 + q*x_m/L - d_length), 0.5*(1 + q*y_m/L - d_length), d_length, d_length])
                 
-                zoom_vf_inset = vector_field(dxg, dyg, u_zoom, v_zoom, ax = zoom_inset_ax)
+                zoom_vf_inset = vector_field(dxg, dyg, u_zoom, v_zoom, ax=zoom_inset_ax)
                 
                 zoom_vf_inset.plot()
                 # Now the inset axis is here, need to plot the zoomed field in the new axis.
