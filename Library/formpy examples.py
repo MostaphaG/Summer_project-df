@@ -1488,20 +1488,16 @@ field.plot()
 # Target, zoom and dpd carry over from original zoom.
 field.zoom_inset((2,0), 100, 9)
 
-#%%
+# %%
 
-import formpy as fp
-import numpy as np
-import matplotlib.pyplot as plt
-
-r = np.linspace(-5, 5, 101)
-xg, yg = np.meshgrid(r,r)
+r = np.linspace(-5, 5, 30)
+xg, yg = np.meshgrid(r, r)
 
 u = -yg*np.sin(xg)
 v = np.cos(xg)
 
-dy_u = np.zeros(shape=(len(r),len(r)))
-dx_v = np.zeros(shape=(len(r),len(r)))
+dy_u = np.zeros(shape=(len(r), len(r)))
+dx_v = np.zeros(shape=(len(r), len(r)))
 
 # # Need to take the gradients of the rows of v and the cols of u
 
@@ -1517,16 +1513,16 @@ dx_v = np.zeros(shape=(len(r),len(r)))
 # dx_v[0,:] = dx_v0
 
 for i in range(len(r)):
-    dy_u[:,i] = np.gradient(u[:,i], edge_order=2)
-    dx_v[i,:] = np.gradient(v[i,:], edge_order=2)
+    dy_u[:, i] = np.gradient(u[:, i], edge_order=2)
+    dx_v[i, :] = np.gradient(v[i, :], edge_order=2)
 
 ed = dx_v - dy_u
 
 # Result appears to be half of what the numerical ext derivative function does.
 
-xg2 = xg[1:-1,1:-1]
-yg2 = yg[1:-1,1:-1]
-ed2 = ed[1:-1,1:-1]
+xg2 = xg[1:-1, 1:-1]
+yg2 = yg[1:-1, 1:-1]
+ed2 = ed[1:-1, 1:-1]
 
 f2 = fp.form_2(xg2, yg2, ed2)
 
