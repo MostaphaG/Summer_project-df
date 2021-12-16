@@ -1396,11 +1396,11 @@ v = np.linspace(-2, 2, 22)
 xg, yg = np.meshgrid(v, v)
 
 # set up the 1 form object and plot it
-#form_1_x = -xg/((xg**2 + yg**2)**1.5)
-#form_1_y = -yg/((xg**2 + yg**2)**1.5)
+form_1_x = -xg/np.sqrt(xg**2 + yg**2)**3
+form_1_y = -yg/np.sqrt(xg**2 + yg**2)**3
 
-form_1_x = 2*xg**np.exp(xg*yg) + xg**2*yg*np.exp(xg*yg)  # IMPORTANT EXAMPLE
-form_1_y = xg**3 * np.exp(xg*yg) + 2*yg
+#form_1_x = 2*xg**np.exp(xg*yg) + xg**2*yg*np.exp(xg*yg)  # IMPORTANT EXAMPLE
+#form_1_y = xg**3 * np.exp(xg*yg) + 2*yg
 
 # set up a 1-form object with these:
 form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y)
@@ -1537,22 +1537,40 @@ f3.plot()
 r = np.linspace(-2, 2, 30)
 xg, yg = np.meshgrid(r, r)
 
-u = -yg*np.sin(xg)
-v = np.cos(xg)
+form0 = 1/(xg**2 + yg**2)**(0.5)
 
-f1 = fp.form_1(xg, yg, u, v)
-plt.close()
+f0 = fp.form_0(xg, yg, form0)
 
-f1.give_eqn('-y*sin(x)', 'cos(x)')
+f0.plot()
 
-f1_ed_num = f1.num_ext_d()
-f1_ed_ana = f1.ext_d()
+f1 = f0.num_ext_d()
 
-f1_ed_num.plot()
-f1_ed_ana.plot()
+f1.plot()
+
+f2 = f1.num_ext_d()
+
+f2.plot()
 
 # %%
 
-f_subt = f1_ed_num.form_2 - f1_ed_ana.form_2
-fsub = fp.form_2(xg, yg, f_subt)
-fsub.plot()
+r = np.linspace(-2, 2, 30)
+xg, yg = np.meshgrid(r, r)
+
+form_1_x = -0.5/(xg**2 + yg**2)
+form_1_y = -0.5/(xg**2 + yg**2)
+
+f1 = fp.form_1(xg, yg, form_1_x, form_1_y)
+f1.plot()
+
+f0 = f1.interior_d((1, 1), numerical_only=True)
+f0.plot()
+
+f1new = f0.num_ext_d()
+f1new.plot()
+
+f2 = f1new.num_ext_d()
+
+f2.plot()
+
+
+

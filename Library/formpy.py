@@ -1635,7 +1635,7 @@ def form_2(xg, yg, form2, form_2_eq=None, fig=None, subplots=False, sub_axis_lis
             form2 = self.form_2  # from self, get 2-form too
             
             # set all insignificant values to zero:
-            form2[np.abs(form2) < 1e-15] = 0
+            form2[np.abs(form2) < 1e-12] = 0
             
             # depending on input, clear the axis or don't
             if keep is True:
@@ -2342,6 +2342,19 @@ def form_0(xg, yg, form_0, form_0_eqn=None, fig=None, subplots=False, sub_axis_l
                         form_0_contour = eval(zero_form_str)*np.ones(np.shape(contour_x_grid))
                     else:
                         form_0_contour = eval(zero_form_str)
+                    
+                    # deal with sinularities that appear on evaluated points
+                    for i in range(len(xg[0, :])):
+                        for j in range(len(yg[:, 0])):
+                            # set to zero points that are not defined or inf
+                            if isnan(form_0_contour[i, j]) is True or abs(form_0_contour[i, j]) == np.inf  or abs(form_0_contour[i, j]) > 1e15:
+                                # colour this region as a red dot, not square to
+                                # not confuse with nigh mag 2-forms in stacks. or worse, in
+                                # blocks
+                                circ = patch.Circle((self.xg[i, j], self.yg[i, j]), L*self.fract/3, color='red')
+                                axis.add_patch(circ)
+                                form_0_contour[i, j] = 0
+                    
                     # set up the contour plot
                     CS = axis.contour(contour_x_grid, contour_y_grid, form_0_contour, levels=self.lines)
                     axis.clabel(CS, inline=self.inline_bool, fontsize=self.fontsize)
