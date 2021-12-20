@@ -143,7 +143,6 @@ def G(s, n, c):
     else:
         return (s/(n-1))
 
-
 # define a function that will complete all stack plotting:
 def stack_plot(xg, yg, axis, F_x, F_y, s_max, L, pt_den, fract, arrows=False, stacks=True, orientation='mid', scale=1, w_head=1/8, h_head=1/4, axis_check=0, arrowheads=True, colour='green', check_2_frm=0, s_min=2, logartmic_scale_bool=0):
     global s_L
@@ -166,9 +165,6 @@ def stack_plot(xg, yg, axis, F_x, F_y, s_max, L, pt_den, fract, arrows=False, st
     
     # find the distance between neightbouring points on the grid
     dist_points = xg[0, 1] - xg[0, 0]
-    
-    # define an empty array of magnitudes, to then fill with integer rel. mags
-    R_int = np.zeros(shape=((x_len), (y_len)))
 
     # #########################################################################
     # get variables needed for the initial, simplified stack plot
@@ -219,10 +215,10 @@ def stack_plot(xg, yg, axis, F_x, F_y, s_max, L, pt_den, fract, arrows=False, st
     # Define scaling factor
     ScaleFactor = max_size/(0.9*(2*L/pt_den))
 
-    
-    
     # find the relative magnitude of vectors to maximum, as an array
     R = mag/max_size
+    
+    R_int = np.zeros(np.shape(R))
     
     # logarithmic attempt
     if logartmic_scale_bool == 1:
@@ -261,18 +257,18 @@ def stack_plot(xg, yg, axis, F_x, F_y, s_max, L, pt_den, fract, arrows=False, st
         I_cos = np.cos(angles)
         
         # define the points that set out a line of the stack sheet (middle line)
-        A_x = xg + (sheet_L/2)*I_sin
-        A_y = yg - (sheet_L/2)*I_cos
-        B_x = xg - (sheet_L/2)*I_sin
-        B_y = yg + (sheet_L/2)*I_cos
+        A_x = xg + 0.5*sheet_L*I_sin
+        A_y = yg - 0.5*sheet_L*I_cos
+        B_x = xg - 0.5*sheet_L*I_sin
+        B_y = yg + 0.5*sheet_L*I_cos
         
         # define points of stack arrowheads as arrays for all stacks
-        p_sh1x = xg + (s_L/2)*I_cos + (sheet_L*w_head)*I_sin
-        p_sh1y = yg + (s_L/2)*I_sin - (sheet_L*w_head)*I_cos
-        p_sh2x = xg + (s_L/2)*I_cos - (sheet_L*w_head)*I_sin
-        p_sh2y = yg + (s_L/2)*I_sin + (sheet_L*w_head)*I_cos
-        p_sh3x = xg + (s_L*0.5 + s_L*h_head)*I_cos
-        p_sh3y = yg + (s_L*0.5 + s_L*h_head)*I_sin
+        p_sh1x = xg + 0.5*s_L*I_cos + (sheet_L*w_head)*I_sin
+        p_sh1y = yg + 0.5*s_L*I_sin - (sheet_L*w_head)*I_cos
+        p_sh2x = xg + 0.5*s_L*I_cos - (sheet_L*w_head)*I_sin
+        p_sh2y = yg + 0.5*s_L*I_sin + (sheet_L*w_head)*I_cos
+        p_sh3x = xg + (0.5 + h_head)*s_L*I_cos
+        p_sh3y = yg + (0.5 + h_head)*s_L*I_sin
         
         # define these for when there is only 1 line in the stack plot:
         P_sh1x = xg + (sheet_L*w_head)*I_sin
@@ -282,88 +278,100 @@ def stack_plot(xg, yg, axis, F_x, F_y, s_max, L, pt_den, fract, arrows=False, st
         P_sh3x = xg + (s_L*h_head)*I_cos
         P_sh3y = yg + (s_L*h_head)*I_sin
         
-        # loop over each arrow coordinate in x and y
-        for i in range(x_len):
-            for j in range(y_len):
-                if check_2_frm == 0:
-                    # define it for all magnitudes. Separately for odd and even corr. number of sheets:
-                    # Label each element with the number of stacks required: linear scaling
-                    for t in range(1, s_max+1):
-                        if (t-1)/s_max <= R[i, j] <= t/s_max:
-                            R_int[i, j] = t
-                else:
-                    for t in range(s_min, s_max+1):
-                        if (t-2)/s_max <= R[i, j] <= (t-1)/s_max:
-                            R_int[i, j] = t
-                # set a varible for current considered magnitude as it is reused
-                # avoids extracting from R many times.
-                n = R_int[i, j]
+        if check_2_frm == 0:
+            for i in range(s_max + 1):
+                t = s_max - i
+                R_int[R <= t/s_max] = t
+        else:
+            for i in range(s_max - s_min + 1):
+                t = s_max - i
+                R_int[R <= t/s_max] = t
+        
+        # Loop over the number of sheets
+        for n in range(0, s_max+1):
+            
+            # Skip to next iteration if no sheets to be plotted
+            if n == 0:
+                continue
+            
+            # List of the indexes of elements with a certain number of sheets
+            n_list = []
+            for i in range(x_len):
+                for j in range(y_len):
+                    if R_int[i,j] == n:
+                        n_list.append([i,j])
+            
+            # If there are no elements with n sheets, skip the iteration
+            if len(n_list) == 0:
+                continue
+ 
+            if parity(n) is True:
+                K = 0.5*(n-2)
+                J = 0
+            else:
+                K = 0.5*(n-1)
+                J = 1
                 
-                #if axis_check == 1 and click_opt_int > 1 and i == i_m and j == j_m:
-                if mag[i,j] == 0:
-                    continue
+            # Looping parameter
+            s = J
+            
+            # Define the points for sheets required for the given magnitude
+            # from these define all the needed lines and plot them
+            
+            # If only one sheet, just add middle line
+            if n == 1:
                 
-                # deal with even number of sheets from magnitudes:
-                if parity(n) is True:
-                    # define a parameter to loop over in the recursion equation
-                    s = 0
+                for (i,j) in n_list:
+                    axis.add_line(Line2D((A_x[i,j], B_x[i,j]), (A_y[i,j], B_y[i,j]), linewidth=1, color=colour))
                     
-                    # Define the points for sheets required for the given magnitude
-                    # from these define all the needed lines and plot them
-                    while s <= 0.5*(n-2):  # maximum set by equations (documentation)
-                        # define all the points for the 2 currently looped +- sheets in while loop
-                        Ax1 = A_x[i, j] + G(s, n, 0)*s_L*I_cos[i, j]
-                        Ay1 = A_y[i, j] + G(s, n, 0)*s_L*I_sin[i, j]
-                        Bx1 = B_x[i, j] + G(s, n, 0)*s_L*I_cos[i, j]
-                        By1 = B_y[i, j] + G(s, n, 0)*s_L*I_sin[i, j]
-                        Ax2 = A_x[i, j] - G(s, n, 0)*s_L*I_cos[i, j]
-                        Ay2 = A_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
-                        Bx2 = B_x[i, j] - G(s, n, 0)*s_L*I_cos[i, j]
-                        By2 = B_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
+                    if arrowheads == True:
                         
-                        # from these, define the 2 lines, for this run
-                        axis.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=1, color=colour))
-                        axis.add_line(Line2D((Ax2, Bx2), (Ay2, By2), linewidth=1, color=colour))
-                        
-                        # update parameter to reapet and draw all needed arrows
-                        s += 1
-                # deal with the odd number of stacks:
-                elif parity(n) is False:
-                    # Add the centre line for odd numbers of stacks
-                    axis.add_line(Line2D((A_x[i, j], B_x[i, j]), (A_y[i, j], B_y[i, j]), linewidth=1, color=colour))
+                        # plot lines of arrowheads from central sheet for n = 1 or on top sheet for n>1 
+                        if n > 1:   # for all lines ubt the single sheet one
+                            axis.add_line(Line2D((p_sh1x[i,j],p_sh3x[i,j]),(p_sh1y[i,j],p_sh3y[i,j]), linewidth=1, color='green'))
+                            axis.add_line(Line2D((p_sh2x[i,j],p_sh3x[i,j]),((p_sh2y[i,j],p_sh3y[i,j])), linewidth=1, color='green'))
+                        # then define it for the stacks with only 1 sheet:
+                        else:
+                            axis.add_line(Line2D((P_sh1x[i,j], P_sh3x[i,j]), (P_sh1y[i,j], P_sh3y[i,j]), linewidth=1, color='green'))
+                            axis.add_line(Line2D((P_sh2x[i,j], P_sh3x[i,j]), ((P_sh2y[i,j], P_sh3y[i,j])), linewidth=1, color='green'))
+            
+            # If more than one sheet,
+            else:
                     
-                    # then loop over the remaining lines as per the recursion formula:
-                    s = 1  # change the looping parametr to exclude already completed 0 (corr. to middle sheet here)
+            
+                while s <= K:  # maximum set by equations (documentation)
+                    # define all the points for the 2 currently looped +- sheets in while loop
+                    Ax1 = A_x + G(s, n, J)*s_L*I_cos
+                    Ay1 = A_y + G(s, n, J)*s_L*I_sin
+                    Bx1 = B_x + G(s, n, J)*s_L*I_cos
+                    By1 = B_y + G(s, n, J)*s_L*I_sin
+                    Ax2 = A_x - G(s, n, J)*s_L*I_cos
+                    Ay2 = A_y - G(s, n, J)*s_L*I_sin
+                    Bx2 = B_x - G(s, n, J)*s_L*I_cos
+                    By2 = B_y - G(s, n, J)*s_L*I_sin
                     
-                    # define all remaining sheets for the magnitude:
-                    while s <= 0.5*(n-1):  # maximum set by equations (documentation)
-                        # define all the points for the current +- displacement in while loop
-                        Ax1 = A_x[i, j] + G(s, n, 1)*s_L*I_cos[i, j]
-                        Ay1 = A_y[i, j] + G(s, n, 1)*s_L*I_sin[i, j]
-                        Bx1 = B_x[i, j] + G(s, n, 1)*s_L*I_cos[i, j]
-                        By1 = B_y[i, j] + G(s, n, 1)*s_L*I_sin[i, j]
-                        Ax2 = A_x[i, j] - G(s, n, 1)*s_L*I_cos[i, j]
-                        Ay2 = A_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
-                        Bx2 = B_x[i, j] - G(s, n, 1)*s_L*I_cos[i, j]
-                        By2 = B_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
+                    # For elements with n sheets
+                    for (i,j) in n_list:  
+                        # Add the required lines
+                        axis.add_line(Line2D((Ax1[i,j], Bx1[i,j]), (Ay1[i,j], By1[i,j]), linewidth=1, color=colour))
+                        axis.add_line(Line2D((Ax2[i,j], Bx2[i,j]), (Ay2[i,j], By2[i,j]), linewidth=1, color=colour))
                         
-                        # from these, define the 2 displaced lines
-                        axis.add_line(Line2D((Ax1,Bx1),(Ay1,By1), linewidth=1, color=colour))
-                        axis.add_line(Line2D((Ax2,Bx2),(Ay2,By2), linewidth=1, color=colour))
+                        # If odd number of sheets, add the middle sheet
+                        if J == 1:
+                            axis.add_line(Line2D((A_x[i,j], B_x[i,j]), (A_y[i,j], B_y[i,j]), linewidth=1, color=colour))
                         
-                        # change the parameter to loop over all changes in displacement for current magnitude
-                        s += 1
-                if arrowheads == True:
-                    # plot lines of arrowheads from central sheet for n = 1 or on top sheet for n>1 
-                    if n > 1:   # for all lines ubt the single sheet one
-                        axis.add_line(Line2D((p_sh1x[i, j],p_sh3x[i, j]),(p_sh1y[i, j],p_sh3y[i, j]), linewidth=1, color='green'))
-                        axis.add_line(Line2D((p_sh2x[i, j],p_sh3x[i, j]),((p_sh2y[i, j],p_sh3y[i, j])), linewidth=1, color='green'))
-                    # then define it for the stacks with only 1 sheet:
-                    else:
-                        axis.add_line(Line2D((P_sh1x[i, j], P_sh3x[i, j]), (P_sh1y[i, j], P_sh3y[i, j]), linewidth=1, color='green'))
-                        axis.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color='green'))
-                else:
-                    pass
+                        if arrowheads == True:
+                            
+                            # plot lines of arrowheads from central sheet for n = 1 or on top sheet for n>1 
+                            if n > 1:   # for all lines ubt the single sheet one
+                                axis.add_line(Line2D((p_sh1x[i,j],p_sh3x[i,j]),(p_sh1y[i,j],p_sh3y[i,j]), linewidth=1, color='green'))
+                                axis.add_line(Line2D((p_sh2x[i,j],p_sh3x[i,j]),((p_sh2y[i,j],p_sh3y[i,j])), linewidth=1, color='green'))
+                            # then define it for the stacks with only 1 sheet:
+                            else:
+                                axis.add_line(Line2D((P_sh1x[i,j], P_sh3x[i,j]), (P_sh1y[i,j], P_sh3y[i,j]), linewidth=1, color='green'))
+                                axis.add_line(Line2D((P_sh2x[i,j], P_sh3x[i,j]), ((P_sh2y[i,j], P_sh3y[i,j])), linewidth=1, color='green'))
+                    
+                    s += 1
 
     plt.close()
 
