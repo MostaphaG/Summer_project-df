@@ -2,16 +2,20 @@
 import formpy as fp
 import numpy as np
 import matplotlib.pyplot as plt
+import timeit
 
 # %%
+
+tstart = timeit.default_timer()
 
 # plotting a 1-form
 
 # set up needed parameters
-v = np.linspace(-6, 6, 31)
+v = np.linspace(-6, 6, 41)
 xg, yg = np.meshgrid(v, v)
-F_x = yg*np.sin(xg)
-F_y = xg*np.cos(yg)
+
+F_x = 10*xg*yg
+F_y = 1/(np.sin(yg))
 
 # PLOT, note, it will create a figure for user
 # we probably don't want that, otherwise we would have to make this
@@ -31,6 +35,8 @@ form_obj.surround_space(6)
 
 form_obj.plot()
 
+tstop = timeit.default_timer()
+print(tstop-tstart)
 
 # %%
 
@@ -1574,3 +1580,44 @@ f2.plot()
 
 
 
+# %%
+
+tstart = timeit.default_timer()
+
+# plotting a 1-form
+
+# set up needed parameters
+v = np.linspace(-6, 6, 31)
+xg, yg = np.meshgrid(v, v)
+
+F_x = yg*np.sin(xg)
+F_y = -xg*np.cos(yg)
+
+# PLOT, note, it will create a figure for user
+# we probably don't want that, otherwise we would have to make this
+# a method to the matplotlib object, which might mean we need to play with
+# their library, which I suppose we can't.
+form1 = fp.form_1(xg, yg, F_x, F_y)
+form1.sheet_size(0.03)
+form1.plot()
+
+form0 = fp.form_0(xg, yg, F_x*F_y)
+form0.plot()
+
+form2 = fp.form_2(xg, yg, F_x*F_y)
+form2.plot()
+
+tstop = timeit.default_timer()
+print(tstop-tstart)
+# %%
+
+v = np.linspace(-6, 6, 31)
+xg, yg = np.meshgrid(v, v)
+
+form2new = fp.form_2(xg, yg, yg)
+
+form2new.give_eqn('y')
+
+form2new.zooming(target=[-2, 2], zoom=2, dpd=9)
+
+form2new.plot()
