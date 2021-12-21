@@ -2575,16 +2575,41 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
             
             if fig == None:
                 self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
+                
+                # If no figure is provided, the axis for plotting must be on the new figure
+                
                 self.axis = self.figure.gca()
-                plt.close()
-
+                
+                # if ax == None:
+                #     self.axis = self.figure.gca()
+                # else: 
+                #     self.axis = ax
+                    
             else:
                 self.figure = fig
                 if ax == None:
                     self.axis = self.figure.gca()
                 else:
                     self.axis = ax
-
+            
+                # if ax == None:
+                #     self.axis = self.figure.gca()
+                # else: 
+                #     self.axis = ax
+                    
+            #     if subplots is False:
+            #         self.figure = fig
+            #         self.axis  = self.figure.gca()
+            #     elif subplots is True:
+            #         if len(sub_axis_list) == 0:
+            #             self.figure = fig
+            #             self.axis = []
+            #         else:
+            #             self.figure = fig
+            #             self.axis = sub_axis_list
+            #     else:
+            #         raise TypeError('Error, incorrect input for \'subplots\'')
+            # self.subplots = subplots
             self.pt_den = len(xg[:, 0])# + 1  # assume square grids
             self.orientation = 'mid'
             self.scale = 1
@@ -2663,13 +2688,13 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
         #         self.axis.append(sub_axis)
         
         # define a method to change figure size
-        # def fig_size(self, n, m):
-        #     ''' Takes two inputs, float or int numbers, sets the figure
-        #     size to these dimensions in inches. Uses set_size_inches from
-        #     matploitlib so can just use that on
-        #     the atribute figure, this function is here just for
-        #     easier nameing'''
-        #     self.figure.set_size_inches(n, m)
+        def fig_size(self, n, m):
+            ''' Takes two inputs, float or int numbers, sets the figure
+            size to these dimensions in inches. Uses set_size_inches from
+            matploitlib so can just use that on
+            the atribute figure, this function is here just for
+            easier nameing'''
+            self.figure.set_size_inches(n, m)
         
         # change colour
         def colour(self, color):
@@ -2773,9 +2798,12 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
             that they were added to the object
             '''
             
-            # if self.figure == 
-            #     self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
-            #     self.axis = self.figure.gca()
+            # from self, get axis
+            # depending on if subplots are wanted:
+            # if type(self.axis) != list:
+            #     axis = self.axis
+            # else:
+            #     axis = self.axis[subplot_index]
             
             # depending on input, clear the axis or don't
             if keep is True:
@@ -2830,8 +2858,6 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
             
             
             self.axis.quiver(self.xg, self.yg, F_x_local, F_y_local, pivot=self.orientation, scale=ScaleFactor, scale_units='xy', color=self.color) 
-        
-            self.figure.show()
         
         def zoom(self, target=[0,0], zoom=2, dpd=9, fig=None, ax=None, inset=False):
             '''
