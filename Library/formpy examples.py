@@ -1620,16 +1620,17 @@ fig = plt.figure(figsize=(7, 7))
 ax = fig.gca()
 ax.set_aspect('equal')
 
-u = xg*np.cos(yg)
-v = yg*np.sin(xg)
+u = yg*np.sin(xg)
+v = -xg*np.cos(yg)
 
 field = fp.vector_field(xg, yg, u, v, fig=fig, ax=ax)
-field.give_eqn('x*cos(y)','y*sin(x)')
+field.give_eqn('y*sin(x)','x*cos(y)')
 
 field.plot()
 
 # zoom
-field.zoom(target=[2, 2], zoom=1, dpd=9, fig=fig, ax=ax, inset=True)
+zoomed = field.zoom(target=[2, 2], zoom=1, dpd=9, fig=fig, ax=ax, inset=True)
+zoomed.plot()
 
 
 # %%
@@ -1637,10 +1638,12 @@ field.zoom(target=[2, 2], zoom=1, dpd=9, fig=fig, ax=ax, inset=True)
 v = np.linspace(-6, 6, 31)
 xg, yg = np.meshgrid(v, v)
 
-form2new = fp.form_2(xg, yg, yg)
+form = -yg*np.sin(xg) * xg*np.cos(yg)
 
-form2new.give_eqn('y')
+form2 = fp.form_2(xg, yg, form)
 
-form2new.zooming(target=[-2, 2], zoom=2, dpd=9)
+form2.give_eqn('-y*sin(x)*x*cos(y)')
 
-form2new.plot()
+form2_zoomed = form2.zooming(target=[-2, 2], zoom=2, dpd=9)
+
+form2_zoomed.plot()

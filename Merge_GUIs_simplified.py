@@ -889,13 +889,13 @@ field_y_list = ['- x*cos(y)',
 
 # define 2-form names and equations for the pre-defined 2-forms dropdown
 # its on R2, therefore all are only dx^dy
-list_form_2_names = ['default: x**2*y',
+list_form_2_names = ['default: x*y**2',
                      'constant: 3',   
                      'Gaussian'
                      ]
 
 # define its equations:
-list_form_2_equations = ['x**2*y',
+list_form_2_equations = ['x*y**2',
                          '3',
                          'e**(-x**2-y**2)'
                          ]
