@@ -1609,6 +1609,29 @@ form2.plot()
 
 tstop = timeit.default_timer()
 print(tstop-tstart)
+
+# %%
+
+
+r = np.linspace(-5, 5, 21)
+xg, yg = np.meshgrid(r, r)
+
+fig = plt.figure(figsize=(7, 7))
+ax = fig.gca()
+ax.set_aspect('equal')
+
+u = xg*np.cos(yg)
+v = yg*np.sin(xg)
+
+field = fp.vector_field(xg, yg, u, v, fig=fig)
+field.give_eqn('x*cos(y)','y*sin(x)')
+
+field.plot()
+
+# zoom
+field.zoom(target=[2, 2], zoom=2, dpd=9, fig=fig, ax=ax, inset=True)
+
+
 # %%
 
 v = np.linspace(-6, 6, 31)
