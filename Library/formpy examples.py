@@ -1623,13 +1623,13 @@ ax.set_aspect('equal')
 u = xg*np.cos(yg)
 v = yg*np.sin(xg)
 
-field = fp.vector_field(xg, yg, u, v, fig=fig)
+field = fp.vector_field(xg, yg, u, v, fig=fig, ax=ax)
 field.give_eqn('x*cos(y)','y*sin(x)')
 
 field.plot()
 
 # zoom
-field.zoom(target=[2, 2], zoom=2, dpd=9, fig=fig, ax=ax, inset=True)
+field.zoom(target=[2, 2], zoom=1, dpd=9, fig=fig, ax=ax, inset=True)
 
 
 # %%

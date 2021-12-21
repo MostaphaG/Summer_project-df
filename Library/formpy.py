@@ -2859,7 +2859,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
             
             self.axis.quiver(self.xg, self.yg, F_x_local, F_y_local, pivot=self.orientation, scale=ScaleFactor, scale_units='xy', color=self.color) 
         
-        def zoom(self, target=[0,0], zoom=2, dpd=9, fig=None, ax=None, inset=False):
+        def zoom(self, target=[0, 0], zoom=2, dpd=9, d_length=0.3, fig=None, ax=None, inset=False):
             '''
             Create a new window which displays the field zoomed at a certain point
             User gives arguments
@@ -2872,7 +2872,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
             
             if self.str_x == None or self.str_y == None:
                 # ERROR
-                raise TypeError('Error: No equation provided')
+                raise TypeError('No equation provided')
             else:
                 
                 # Target coordinates
