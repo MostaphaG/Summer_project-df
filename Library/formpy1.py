@@ -4,17 +4,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
-from matplotlib.backends.backend_tkagg import (
-    FigureCanvasTkAgg, NavigationToolbar2Tk)
-import matplotlib as mpl
 from sympy import diff, simplify
 from sympy.parsing.sympy_parser import parse_expr
 from math import isnan
 from matplotlib import patches as patch
-import matplotlib.path as mplPath
-from matplotlib import animation
-from scipy.integrate import odeint
-import matplotlib.path as mPath
 
 # input many numpy functions to deal with user input
 from numpy import sin, cos, tan, sqrt, log, arctan, arcsin, arccos, tanh
@@ -22,6 +15,7 @@ from numpy import sinh, cosh, arcsinh, arccosh, arctanh, exp, pi, e
 
 # define some functions that are not very important to user but are useful
 # for other functions we write:
+
 
 # deifne a fucntion to check number parity
 def parity(x):
