@@ -952,34 +952,26 @@ ax1 = fig.add_subplot(131)
 ax2 = fig.add_subplot(132)
 ax3 = fig.add_subplot(133)
 ax1.set_aspect('equal')
+ax1.set_title(r'$0-form \ \omega$')
 ax2.set_aspect('equal')
+ax2.set_title(r'$d \omega$')
 ax3.set_aspect('equal')
+ax3.set_title(r'$d^{2} \omega$')
 
 # set up the 0 form object and plot it
-form_0 = xg + yg
+form_0 = xg**(np.cos(yg*xg))
+form_0_obj = fp.form_0(xg, yg, form_0)
+form_0_obj.give_eqn('x**(cos(y*x))')
 
-# create an object with these axis in it
-form_0_obj = fp.form_0(xg, yg, form_0, fig=fig, subplots=True, sub_axis_list=[ax1, ax2, ax3])
+form_0_obj.plot(ax1)
 
-# compute the numerical ext deriv
-form_1_num = form_0_obj.num_ext_d(edge_order=1, pass_on_figure=True)  # pass figure to pass on subplot axis
+# compute the ext deriv and plot
+form_1_obj = form_0_obj.ext_d()
+form_1_obj.plot(ax2)
 
-# supply equation and complete ext. deriv. analytically
-form_0_obj.give_eqn('x + y')
-form_1_ana = form_0_obj.ext_d(pass_on_figure=True)  # this supplies the 1-form with equations too
-
-# find the numerical exterior derivaitve of numerical 1-form and plot
-form_2_num = form_1_num.num_ext_d(pass_on_figure=True)
-form_2_num.plot(keep=True, subplot_index=0)
-
-# find numerical exterior derivative of analytical 1-form and plot
-form_2_numana = form_1_ana.num_ext_d(pass_on_figure=True)
-form_2_numana.plot(keep=True, subplot_index=0)
-
-# find analytical ext deriv. of analytical 1-form and plot
-form_2_ana = form_1_ana.ext_d(pass_on_figure=True)
-form_2_ana.plot(keep=True, subplot_index=0)
-
+# compute next derivative and plot
+form_2_obj = form_1_obj.ext_d()
+form_2_obj.plot(ax3)
 
 # %%
 
@@ -1080,28 +1072,43 @@ form_1_correct.plot(ax3)
 # with string based metric:
 # ####################################################
 
-
+# get grids
 r = np.linspace(-4.5, 4.5, 21)
 xg, yg = np.meshgrid(r, r)
 
+# set up figure and subplots:
+fig = plt.figure()
+ax1 = fig.add_subplot(141)
+ax2 = fig.add_subplot(142)
+ax3 = fig.add_subplot(143)
+ax4 = fig.add_subplot(144)
+ax1.set_aspect('equal')
+ax1.set_title(r'$Starting \ 1-form \ v_{i}$')
+ax2.set_aspect('equal')
+ax2.set_title(r'$v^{i} = g^{ij} v_{j} \ by \ FormPy \ with \ strings$')
+ax3.set_aspect('equal')
+ax3.set_title(r'$v^{i} = g^{ij} v_{j} \ by \ FormPy, \ numerically$')
+ax4.set_aspect('equal')
+ax4.set_title(r'$knwon \ result \ for \ v^{i}$')
+
 # set up the 1-form
 u = xg
-v = -yg
+v = yg
 form1 = fp.form_1(xg, yg, u, v)
-form1.plot()
+form1.give_eqn('x', 'y')
 
-# give equations
-form1.give_eqn('x', '-y')
+# plot 1-form 
+form1.plot(ax1)
 
 # set up a metric
 metric = [['1', '0'],
-          ['0', 'y**2']]
+          ['0', 'x**2 + y**2']]
 
 # via this, get the VF
 vf = form1.vectorise(g=metric)
 
-# plot it
-vf.plot()
+# plot vector field
+vf.plot(ax2)
 
 
 # ####################################################
@@ -1111,13 +1118,13 @@ vf.plot()
 
 # set up a metric
 metric = [[np.ones(np.shape(xg)), np.zeros(np.shape(xg))],
-          [np.zeros(np.shape(xg)), yg**2]]
+          [np.zeros(np.shape(xg)), yg**2 + xg**2]]
 
 # via this, get the VF
 vf2 = form1.vectorise(g=metric)
 
 # plot it
-vf2.plot()
+vf2.plot(ax3)
 
 
 # ##################################################
@@ -1126,56 +1133,84 @@ vf2.plot()
 
 
 # create a comparison 1-form with correct components already given
-vf_correct = fp.vector_field(xg, yg, u, v*yg**2)
+vf_correct = fp.vector_field(xg, yg, u, v*(xg**2 + yg**2))
 
 # plot it
-vf_correct.plot()
+vf_correct.plot(ax4)
 
 
 # %%
 
-# Testing the metric with the inetrior derivative (numerically)
+# Testing the vector field to 1-form via metric with inetrior derivative (numerically)
 
 r = np.linspace(-4.5, 4.5, 21)
 xg, yg = np.meshgrid(r, r)
 
-# set up the field and vector field objecct
+# set up figure and subplots
+fig = plt.figure()
+ax1 = fig.add_subplot(131)
+ax2 = fig.add_subplot(132)
+ax3 = fig.add_subplot(133)
+ax1.set_aspect('equal')
+ax1.set_title(r'$Starting \ VF \ v^{i}$')
+ax2.set_aspect('equal')
+ax2.set_title(r'$v_{i} = g_{ij} v^{j} \ by \ FormPy \ numerically$')
+ax3.set_aspect('equal')
+ax3.set_title(r'$\iota_{v^{i}}(v_{i})$')
+
+# set up vector field objecct
 u = np.ones(np.shape(xg))
 v = np.ones(np.shape(xg))
 vf1 = fp.vector_field(xg, yg, u, v)
-vf1.plot()
+
+# plot it
+vf1.plot(ax1)
 
 # set up a metric
 metric = [[np.ones(np.shape(xg)), np.zeros(np.shape(xg))],
           [np.zeros(np.shape(xg)), xg**2 + yg**2]]  # polar transformation
 
-# via this, set up a 1-form
+# via this, get the 1-form
 form_1_obj = vf1.formalise(g=metric)
 
 # plot it
-form_1_obj.plot()
+form_1_obj.plot(ax2)
 
-# get the interioir deriv of that
-zero_form = form_1_obj.interior_d(vector_field=vf1, pass_on_figure=False, numerical_only=True)
+# get the interioir deriv of that w.r.t intial VF
+zero_form = form_1_obj.interior_d(vector_field=vf1, numerical_only=True)
 
 # plot it
-zero_form.plot()
+zero_form.plot(ax3)
 
 # %%
 
 # Testing the interior derivative of 1-form wrt to VF from it via the metric
+# Backwards to above, and done analytically.
 
+# set up grids
 r = np.linspace(-4.5, 4.5, 21)
 xg, yg = np.meshgrid(r, r)
+
+# set up figure and subplots
+fig = plt.figure()
+ax1 = fig.add_subplot(131)
+ax2 = fig.add_subplot(132)
+ax3 = fig.add_subplot(133)
+ax1.set_aspect('equal')
+ax1.set_title(r'$Starting \ 1-form \ v_{i}$')
+ax2.set_aspect('equal')
+ax2.set_title(r'$v^{i} = g^{ij} v_{j} \ by \ FormPy \ numerically$')
+ax3.set_aspect('equal')
+ax3.set_title(r'$\iota_{v^{i}}(v_{i})$')
 
 # set up the 1-form
 u = np.ones(np.shape(xg))
 v = np.ones(np.shape(xg))
 form1 = fp.form_1(xg, yg, u, v)
-form1.plot()
-
-# give equations
 form1.give_eqn('1', '1')
+
+# plot it
+form1.plot(ax1)
 
 # set up the metric
 metric = [['1', '0'],
@@ -1185,17 +1220,15 @@ metric = [['1', '0'],
 vf = form1.vectorise(g=metric)
 
 # plot it
-vf.plot()
+vf.plot(ax2)
 
 # find the interior derivative of 1-form wrt that VF
-zero_form = form1.interior_d(vector_field=vf, pass_on_figure=False, numerical_only=False)
+zero_form = form1.interior_d(vector_field=vf, numerical_only=False)
 
 # plot it:
-zero_form.plot()
-
+zero_form.plot(ax3)
 
 # %%
-
 
 '''
 
@@ -1213,43 +1246,64 @@ Tricky examples - const comps. singularities etc
 v = np.linspace(-6, 6, 21)
 xg, yg = np.meshgrid(v, v)
 
-# set up form components
-F_x = 1*np.ones(np.shape(xg))  # upto user to make sure their arrays are of correct size
-F_y = 3*np.ones(np.shape(xg))
+# set up subplots
+fig = plt.figure()
+ax1 = fig.add_subplot(121)
+ax2 = fig.add_subplot(122)
+ax1.set_aspect('equal')
+ax1.set_title(r'$Starting \ 1-form \ no \ equations$')
+ax2.set_aspect('equal')
+ax2.set_title(r'$Starting \ 1-form \ with \ equations$')
 
+
+# set up form components and form
+F_x = 0*np.ones(np.shape(xg))  # upto user to make sure their arrays are of correct size
+F_y = 3*np.ones(np.shape(xg))
 form_obj1 = fp.form_1(xg, yg, F_x, F_y)
 
-# beofre plotting, give equations, to see if if constant forms are dealt with
-# correctly there at least
-form_obj1.give_eqn('1', '3')
+form_obj1.plot(ax1)
+
+# give equations and plot then
+form_obj1.give_eqn('0', '3')
 form_obj1.same_range_density(16)
 
-form_obj1.figure.tight_layout()
-form_obj1.axis.set_aspect('equal')
-
-form_obj1.plot()
+form_obj1.plot(ax2)
 
 # %%
 
 
 # test of 0-form ext deriv with constant resulting 1-form
-
+# numerically and analytically
 
 # set up grids
 v = np.linspace(-4.5, 4.5, 11)
 xg, yg = np.meshgrid(v, v)
 
+# set up subplots
+fig = plt.figure()
+ax1 = fig.add_subplot(131)
+ax2 = fig.add_subplot(132)
+ax3 = fig.add_subplot(133)
+ax1.set_aspect('equal')
+ax1.set_title(r'$Starting \ 0-form \ \phi$')
+ax2.set_aspect('equal')
+ax2.set_title(r'$ d\phi$ \ analytically$')
+ax3.set_aspect('equal')
+ax3.set_title(r'$ d\phi$ \ numerically$')
+
 # set up the 0 form object and plot it
 form_0 = xg**2 + 3*yg
 form_0_obj = fp.form_0(xg, yg, form_0)
-form_0_obj.plot()
+form_0_obj.plot(ax1)
 
 # supply equation and complete ext. deriv.
 form_0_obj.give_eqn('x**2 + 3*y')
-form_1_obj = form_0_obj.ext_d()  # this supplies the 1-form with equations too
+form_1_obj_num = form_0_obj.ext_d()  # this supplies the 1-form with equations too
+form_1_obj_num.plot(ax2)
 
-# plot that 1-form object
-form_1_obj.plot()
+# numerical ext deriv.
+form_1_obj_ana = form_0_obj.num_ext_d()
+form_1_obj_ana.plot(ax3)
 
 # %%
 
@@ -1260,32 +1314,49 @@ form_1_obj.plot()
 r = np.linspace(-6, 6, 21)
 xg, yg = np.meshgrid(r, r)
 
+# set up subplots
+fig = plt.figure()
+ax1 = fig.add_subplot(231)
+ax2 = fig.add_subplot(232)
+ax3 = fig.add_subplot(233)
+ax4 = fig.add_subplot(234)
+ax5 = fig.add_subplot(235)
+ax1.set_aspect('equal')
+ax1.set_title(r'$Starting \ 1-form \ v_{i}$')
+ax2.set_aspect('equal')
+ax2.set_title(r'$Starting \ VF \ v^{i}$')
+ax3.set_aspect('equal')
+ax3.set_title(r'$ numerical \ \iota_{v^{i}}(v_{i}) \ supplying \ FormPy \ instance$')
+ax4.set_aspect('equal')
+ax4.set_title(r'$ numerical \ \iota_{v^{i}}(v_{i}) \ supplying \ grids \ tuple$')
+ax5.set_aspect('equal')
+ax5.set_title(r'$ numerical \ \iota_{(1, 1)}(v_{i}) \ nothing \ supplied$')
+
 # set up form components and the object
 F_x = 3* np.ones(np.shape(xg))
 F_y = 1 * np.ones(np.shape(xg))
 form_obj1 = fp.form_1(xg, yg, F_x, F_y)
 
 # plot it
-form_obj1.plot()
+form_obj1.plot(ax1)
 
 # set up a vector field object:
 u = 1 * np.ones(np.shape(xg))
 v = np.sin(xg)
-
 vf = fp.vector_field(xg, yg, u, v)
 
 # plot it:
-vf.plot()
+vf.plot(ax2)
 
 # complete int deriv. with object, arrays and with no input:
-form_0_i_1 = form_obj1.interior_d(vector_field=vf, pass_on_figure=False, numerical_only=True)
-form_0_i_2 = form_obj1.interior_d(pass_on_figure=False, numerical_only=True)
-form_0_i_3 = form_obj1.interior_d((u, v), pass_on_figure=False, numerical_only=True)
+form_0_i_1 = form_obj1.interior_d(vector_field=vf, numerical_only=True)
+form_0_i_2 = form_obj1.interior_d(numerical_only=True)
+form_0_i_3 = form_obj1.interior_d((u, v), numerical_only=True)
 
 # plot each
-form_0_i_1.plot()
-form_0_i_2.plot()
-form_0_i_3.plot()
+form_0_i_1.plot(ax3)
+form_0_i_2.plot(ax5)
+form_0_i_3.plot(ax4)
 
 # NB no contours on plot 4 (form_0_i_2) as 0-form = 4. constant, so no contorus
 
@@ -1297,79 +1368,110 @@ form_0_i_3.plot()
 r = np.linspace(-6, 6, 21)
 xg, yg = np.meshgrid(r, r)
 
+# set up subplots
+fig = plt.figure()
+ax1 = fig.add_subplot(231)
+ax2 = fig.add_subplot(232)
+ax3 = fig.add_subplot(233)
+ax4 = fig.add_subplot(234)
+ax5 = fig.add_subplot(235)
+ax6 = fig.add_subplot(236)
+ax1.set_aspect('equal')
+ax1.set_title(r'$Starting \ 2-form \Omega $')
+ax2.set_aspect('equal')
+ax2.set_title(r'$Starting \ VF \ v^{i}$')
+ax3.set_aspect('equal')
+ax3.set_title(r'$ numerical \ \iota_{v^{i}}(\Omega) \ supplying \ FormPy \ instance \ analytically$')
+ax4.set_aspect('equal')
+ax4.set_title(r'$ numerical \ \iota_{v^{i}}(\Omega) \ supplying \ FormPy \ instance \ numerically$')
+ax5.set_aspect('equal')
+ax5.set_title(r'$ numerical \ \iota_{(10, \pi)}(\Omega) \ sypplying \ strings$')
+ax6.set_aspect('equal')
+ax6.set_title(r'$ numerical \ \iota_{(1, 1)}(\Omega) \ nothing \ supplied$')
+
 # set up form
 form2_comp = xg
 form_obj2 = fp.form_2(xg, yg, form2_comp)
-
-# give it the equation for analytical calculations
 form_obj2.give_eqn('x')
 
 # plot it
-form_obj2.plot()
+form_obj2.plot(ax1)
 
 # set up a vector field object:
 u = np.cos(yg)
 v = np.sin(xg)
-
 vf = fp.vector_field(xg, yg, u, v)
-
-# give it the equation
 vf.give_eqn('1', '3')
 
 # plot it:
-vf.plot()
+vf.plot(ax2)
 
 # complete int deriv. with object, arrays and with no input:
-form_1_i_1 = form_obj2.interior_d(vector_field=vf, pass_on_figure=False, numerical_only=False)
-form_1_i_2 = form_obj2.interior_d(pass_on_figure=False, numerical_only=False)
-form_1_i_3 = form_obj2.interior_d(('10', 'pi'), pass_on_figure=False, numerical_only=False)
-form_1_i_4 = form_obj2.interior_d(vector_field=vf, pass_on_figure=False, numerical_only=True)
+form_1_i_1 = form_obj2.interior_d(vector_field=vf, numerical_only=False)
+form_1_i_2 = form_obj2.interior_d(numerical_only=False)
+form_1_i_3 = form_obj2.interior_d(('10', 'pi'), numerical_only=False)
+form_1_i_4 = form_obj2.interior_d(vector_field=vf, numerical_only=True)
 
 # plot each
-form_1_i_1.plot()
-form_1_i_2.plot()
-form_1_i_3.plot()
-form_1_i_4.plot()
+form_1_i_1.plot(ax3)
+form_1_i_2.plot(ax6)
+form_1_i_3.plot(ax5)
+form_1_i_4.plot(ax4)
+
 
 # %%
 
-# Testing interior derivative of a 2-form with singularities
 
 # set up needed parameters
 r = np.linspace(-6, 6, 21)
 xg, yg = np.meshgrid(r, r)
 
+# set up subplots
+fig = plt.figure()
+ax1 = fig.add_subplot(231)
+ax2 = fig.add_subplot(232)
+ax3 = fig.add_subplot(233)
+ax4 = fig.add_subplot(234)
+ax5 = fig.add_subplot(235)
+ax6 = fig.add_subplot(236)
+ax1.set_aspect('equal')
+ax1.set_title(r'$Starting \ 2-form \Omega $')
+ax2.set_aspect('equal')
+ax2.set_title(r'$Starting \ VF \ v^{i}$')
+ax3.set_aspect('equal')
+ax3.set_title(r'$ numerical \ \iota_{v^{i}}(\Omega) \ supplying \ FormPy \ instance \ analytically$')
+ax4.set_aspect('equal')
+ax4.set_title(r'$ numerical \ \iota_{v^{i}}(\Omega) \ supplying \ FormPy \ instance \ numerically$')
+ax5.set_aspect('equal')
+ax5.set_title(r'$ numerical \ \iota_{(10, \pi)}(\Omega) \ sypplying \ strings$')
+ax6.set_aspect('equal')
+ax6.set_title(r'$ numerical \ \iota_{(1, 1)}(\Omega) \ nothing \ supplied$')
+
 # set up form
 form2_comp = 1/np.sqrt(xg**2 + yg**2)
 form_obj2 = fp.form_2(xg, yg, form2_comp)
-
-# give it the equation for analytical calculations
 form_obj2.give_eqn('1/sqrt(x**2 + y**2)')
 
 # plot it
-form_obj2.plot()
+form_obj2.plot(ax1)
 
 # set up a vector field object:
-u = np.cos(yg)
-v = np.sin(xg)
-
+u = np.ones(np.shape(xg))
+v = xg
 vf = fp.vector_field(xg, yg, u, v)
-
-# give it the equation
-vf.give_eqn('1', 'x')  # Note, this overrites the u and v in the vf object too
+vf.give_eqn('1', 'x')
 
 # plot it:
-vf.plot()
+vf.plot(ax2)
 
 # complete int deriv. with object, arrays and with no input:
-form_1_i_1 = form_obj2.interior_d(vector_field=vf, pass_on_figure=False, numerical_only=False)
-form_1_i_2 = form_obj2.interior_d(pass_on_figure=False, numerical_only=False)
-form_1_i_3 = form_obj2.interior_d(('10', 'pi'), pass_on_figure=False, numerical_only=False)
-form_1_i_4 = form_obj2.interior_d(vector_field=vf, pass_on_figure=False, numerical_only=True)
+form_1_i_1 = form_obj2.interior_d(vector_field=vf, numerical_only=False)
+form_1_i_2 = form_obj2.interior_d(numerical_only=False)
+form_1_i_3 = form_obj2.interior_d(('10', 'pi'), numerical_only=False)
+form_1_i_4 = form_obj2.interior_d(vector_field=vf, numerical_only=True)
 
 # plot each
-form_1_i_1.plot()
-form_1_i_2.plot()
-form_1_i_3.plot()
-form_1_i_4.plot()
-
+form_1_i_1.plot(ax3)
+form_1_i_2.plot(ax6)
+form_1_i_3.plot(ax5)
+form_1_i_4.plot(ax4)
