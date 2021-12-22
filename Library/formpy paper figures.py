@@ -4,61 +4,79 @@ import matplotlib.pyplot as plt
 
 # %%
 
-# Figure presenting funcitonality of a basic Vector field
+# 1-form plot and zooming on it
 
-# set up the axis grids, figure and axis 
-r = np.linspace(-5, 5, 15)
-xg, yg = np.meshgrid(r, r)
-fig = plt.figure(figsize=(7, 7))
-ax = fig.gca()
-ax.set_aspect('equal')
 
-# set up the vecotr field e^x and e^y components
-u = xg*np.cos(yg)
-v = yg*np.sin(xg)
+# %%
 
-# set up the vector filed object
-field = fp.vector_field(xg, yg, u, v, fig=fig)
-field.give_eqn('x*cos(y)','y*sin(x)')
+# 2-form plot with zoom inset
 
-field.plot()
 
-# The method zoom_inset creates the zoomed field, creates the inset axis and plots the field on the inset axis.
-# Target, zoom and dpd carry over from original zoom.
-field.zoom_inset((3, -3), 10, 9)
+# %%
+
+# Example of exterior derivative
 
 
 
 # %%
 
-# Figure for basic 0-form
+# Example of interior derivative
+# Perhaps Lorentz force if it ends up working
 
 
 # %%
 
-# Figure for basic 1-form
+# Hodge Example
 
 
 # %%
 
-# Figure for basic 2-form
+# Wedge example
 
 
 # %%
 
-# Figure to show Hodge operations 
+# Subplot example
+# Could do:
+# Combo of ext. alg. operations
+# Comparison between numerical and analaytical operations for some method
+    # (Not great figure though, showing two same plots)
 
 
-# %%
 
-# Figure to show exterior derivative 
-
-# %%
-
-# Figure to show wedge
 
 
 # %%
 
-# Figure to show the interior derivative (possibly with metirc inc.)
+# Example of metric:
+# polar or hyperbolic metric, VF, 1-form and the interior deriv of the 2
+
+
+# %%
+
+'''
+Showcasing
+'''
+
+# %%
+
+# Example showing proof of Stokes theorem
+
+
+# %%
+
+# electric/magnetic fields examples
+
+
+# %%
+
+# 2D BH example (?)
+
+
+# %%
+
+# d^2 (any 0-form) = 0
+
+
+
 
