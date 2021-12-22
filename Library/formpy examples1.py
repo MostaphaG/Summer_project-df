@@ -54,49 +54,63 @@ print(tstop-tstart)
 
 # plotting a 2-form
 
+# set up 2-form
 v = np.linspace(-6, 6, 21)
 xg, yg = np.meshgrid(v, v)
-
 form_2 = xg*yg
-
-
 form_obj = fp.form_2(xg, yg, form_2)
-form_obj.plot()
 
+# Create a figure and axis to plot it on
+fig = plt.figure()
+ax = fig.gca()
+ax.set_xlabel(r'$x$')
+ax.set_ylabel(r'$y$')
+ax.set_aspect('equal')
+
+form_obj.plot(ax)
+
+# wait, then change some properties and redraw
 plt.pause(3)
-
-# redo this with some 'customisations' (bad ones for an example)
 form_obj.give_eqn('x*y')
 form_obj.same_range_density(18)
-# form_obj.sheet_size(0.466)
-form_obj.plot(False)
+ax.clear()
+ax.set_xlabel(r'$x$')
+ax.set_ylabel(r'$y$')
+ax.set_aspect('equal')
+form_obj.plot(ax)
 
 # %%
 
 # plotting a 0-form
 
+# set up
 v = np.linspace(-4.5, 4.5, 11)
 xg, yg = np.meshgrid(v, v)
-
-
 form_0 = np.cos(xg*yg)
-
 form_obj = fp.form_0(xg, yg, form_0)
 form_obj.lines_number(4)
 # form_obj.density_increase(20)  # demonstation of an error
-form_obj.plot()
 
+# Create a figure and axis to plot it on
+fig = plt.figure()
+ax = fig.gca()
+ax.set_xlabel(r'$x$')
+ax.set_ylabel(r'$y$')
+ax.set_aspect('equal')
+
+form_obj.plot(ax)
+
+
+# wait, recustomise and redraw
 plt.pause(2)
-
-# customising grids with an equation:
-
 form_obj.give_eqn('cos(x*y)')
-
-# change the density:
 form_obj.density_increase(25)
 form_obj.lines_number(15)
-form_obj.plot(keep=False)
-
+ax.clear()
+ax.set_xlabel(r'$x$')
+ax.set_ylabel(r'$y$')
+ax.set_aspect('equal')
+form_obj.plot(ax)
 
 # %%
 
@@ -106,7 +120,7 @@ form_obj.plot(keep=False)
 v = np.linspace(-6, 6, 31)
 xg, yg = np.meshgrid(v, v)
 
-# set up the field
+# set up the field grids
 F_x = xg/(xg**2 + yg**2)**1.5
 F_y = yg/(xg**2 + yg**2)**1.5
 
@@ -114,25 +128,26 @@ F_y = yg/(xg**2 + yg**2)**1.5
 fig = plt.figure()
 ax1 = fig.add_subplot(121)
 ax2 = fig.add_subplot(122)
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
 
 # set up the object
-field_obj = fp.vector_field(xg, yg, F_x, F_y, fig=fig, subplots=True, sub_axis_list=[ax1, ax2])
+field_obj = fp.vector_field(xg, yg, F_x, F_y)
 
 # on axis 1, plot default
-field_obj.plot(keep=True, subplot_index=0)
+field_obj.plot(ax1)
 
 # change some properties and plot the second subplot
-field_obj.axis[1].set_xlabel('x')
-field_obj.axis[1].set_ylabel('y')
 field_obj.colour('blue')
 field_obj.orient('tail')
+field_obj.autoscale()
 field_obj.surround_space(6)
 
-field_obj.plot(keep=True, subplot_index=1)
+field_obj.plot(ax2)
 
 # %%
 
-# example of using subplots
+# More complex example of using subplots
 
 # set up grids
 v = np.linspace(-4.5, 4.5, 21)
@@ -142,73 +157,79 @@ xg, yg = np.meshgrid(v, v)
 form_1_x = yg
 form_1_y = -xg
 
-# set up a figure
-fig = plt.figure(figsize=(14, 7))
+# set up a figure, with subplots
+fig = plt.figure()
+ax1 = fig.add_subplot(121)
+ax2 = fig.add_subplot(122)
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
 
 # create a form object using these
-form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y, fig=fig, subplots=True)
+form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y)
 
-form_1_obj.add_subplot(121)
-form_1_obj.add_subplot(122)
+form_1_obj.plot(ax1)
 
-form_1_obj.plot(keep=False, subplot_index=0)
-
-form_1_obj.Hodge(numerical_only=True, keep_object=True)
-form_1_obj.plot(keep=True, subplot_index=1)
+star_1_form = form_1_obj.Hodge(numerical_only=True, keep_object=False)
+star_1_form.plot(ax2)
 
 
 # %%
 
-# trying subplots with 2-forms
-
+# subplots with 2-forms
 
 # set up grids
 v = np.linspace(-4.5, 4.5, 21)
 xg, yg = np.meshgrid(v, v)
 
-fig = plt.figure(figsize=(14, 7))
 
-# set up the 1 form object and plot it
+# set up the 1 form object
 form_1_x = yg
-form_1_y = -xg
-form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y, fig=fig, subplots=True)
+form_1_y = xg
+form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y)
 
+# set up the 2 form
 form_2 = xg*yg
-form_2_obj = fp.form_2(xg, yg, form_2, fig=fig, subplots=True)
+form_2_obj = fp.form_2(xg, yg, form_2)
 
-form_1_obj.add_subplot(121)
-form_2_obj.add_subplot(121)
-form_2_obj.add_subplot(122)
+# set up a figure, with subplots
+fig = plt.figure()
+ax1 = fig.add_subplot(121)
+ax2 = fig.add_subplot(122)
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
 
-form_1_obj.plot(keep=False, subplot_index=0)
-form_2_obj.plot(keep=True, subplot_index=1)
+form_1_obj.plot(ax1)
+form_2_obj.plot(ax2)
 
 
 # %%
 
-# testing proividing subplot axis straight in:
+# Further subplot example
 
 # set up grids
 v = np.linspace(-4.5, 4.5, 11)
 xg, yg = np.meshgrid(v, v)
 
+# set up the 0 form object
+form_0 = xg**2 + 3*yg
+form_0_obj = fp.form_0(xg, yg, form_0)
+
+# set up axis
 fig = plt.figure()
 ax1 = fig.add_subplot(121)
 ax2 = fig.add_subplot(122)
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
 
-# set up the 0 form object and plot it
-form_0 = xg**2 + 3*yg
-form_0_obj = fp.form_0(xg, yg, form_0, fig=fig, subplots=True, sub_axis_list=[ax1, ax2])
-
-form_0_obj.plot(keep=False, subplot_index=0)
+form_0_obj.plot(ax1)
 
 # supply equation and change its density
 form_0_obj.give_eqn('x**2 + 3*y')
 form_0_obj.same_range_density(31)
 form_0_obj.lines_number(20)
 
-# plot that changed 0-form object
-form_0_obj.plot(keep=True, subplot_index=1)
+# plot that changed 0-form object on second axis set
+form_0_obj.plot(ax2)
 
 
 # %%
@@ -224,42 +245,53 @@ Zooming
 
 # Vector field set up and zooming example
 
-
+# set up VF
 r = np.linspace(-4.5, 4.5, 21)
 xg, yg = np.meshgrid(r, r)
-
 u = xg*np.cos(yg)
 v = -yg*np.sin(xg)
-
 vf1 = fp.vector_field(xg, yg, u, v)
 vf1.give_eqn('x*cos(y)', '-y*sin(x)')
-vf1.plot()
 
-vfz = vf1.zoom((2, 2), zoom=3, dpd=9)
-vfz.plot()
+# set up figure and axis to plot it on
+fig = plt.figure()
+ax = fig.gca()
+ax.set_xlabel(r'$x$')
+ax.set_ylabel(r'$y$')
+ax.set_aspect('equal')
+
+vf1.plot(ax)
+
+zomm_axis, zoom_vf = vf1.zoom((2, 2), zoom=3, dpd=9, inset=True, axis=ax)
 
 #%%
 
-# Zooming inset axis
+# Zooming with inset is false
 
+# set up VF
 r = np.linspace(-5,5,15)
-xg,yg = np.meshgrid(r,r)
-
-fig1 = plt.figure(figsize=(7,7))
-ax1 = fig1.gca()
-ax1.set_aspect('equal')
-
+xg, yg = np.meshgrid(r, r)
 u = xg*np.cos(yg)
 v = yg*np.sin(xg)
-
-field = fp.vector_field(xg, yg, u, v, fig=fig1)
+field = fp.vector_field(xg, yg, u, v)
 field.give_eqn('x*cos(y)','y*sin(x)')
 
-field.plot()
+# set up figure and axis
+fig = plt.figure(figsize=(7, 7))
+ax1 = fig.add_subplot(121)
+ax2 = fig.add_subplot(122)
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
 
-# The method zoom_inset creates the zoomed field, creates the inset axis and plots the field on the inset axis.
-# Target, zoom and dpd carry over from original zoom.
-field.zoom_inset((3, -3), 10, 9)
+# plot
+field.plot(ax1)
+
+# zoom in, to get field, but not inset, plot on subplot ax2
+zoomed_VF = field.zoom((3, -3), 10, 9)
+zoomed_VF.surround_space(4)
+zoomed_VF.colour('r')
+
+zoomed_VF.plot(ax2)
 
 # %%
 
@@ -268,49 +300,22 @@ field.zoom_inset((3, -3), 10, 9)
 r = np.linspace(-5, 5, 21)
 xg, yg = np.meshgrid(r, r)
 
+u = yg*np.sin(xg)
+v = -xg*np.cos(yg)
+
+field = fp.vector_field(xg, yg, u, v)
+field.give_eqn('y*sin(x)','x*cos(y)')
+
 fig = plt.figure(figsize=(7, 7))
 ax = fig.gca()
 ax.set_aspect('equal')
 
-u = yg*np.sin(xg)
-v = -xg*np.cos(yg)
+field.plot(ax)
 
-field = fp.vector_field(xg, yg, u, v, fig=fig, ax=ax)
-field.give_eqn('y*sin(x)','x*cos(y)')
-
-field.plot()
-
-# zoom
-zoomed = field.zoom(target=[2, 2], zoom=1, dpd=9, fig=fig, ax=ax, inset=True)
-zoomed.plot()
-
-# %%
-
-# Test zooming of vector field with subplot
-
-#Set up grids
-r = np.linspace(-5, 5, 21)
-xg, yg = np.meshgrid(r, r)
-
-u = yg*np.cos(xg)
-v = -xg
-
-# Set up subplots
-fig1 = plt.figure(figsize=(10,5))
-ax1 = fig1.add_subplot(121)
-ax2 = fig1.add_subplot(122)
-
-# Create vector field
-vf1 = fp.vector_field(xg, yg, u, v, fig = fig1, subplots=True, sub_axis_list=[ax1, ax2])
-vf1.give_eqn('y*cos(x)','-x')
-vf1.plot(keep=False, subplot_index=0)
-
-zoom_field = vf1.zoom((2,-2), 20, 13, pass_on_figure=True)
-zoom_field.plot(keep=False, subplot_index=1)
-
-ax1.set_xlabel('Vector Field')
-ax2.set_xlabel('Zoomed Vector Field')
-
+# zoom, but put down as inset, with customisations.
+zoomed_axis, zoomed_field = field.zoom(target=[2, 2], zoom=10, dpd=9, inset=True, axis=ax)
+zoomed_field.colour('r')
+zoomed_field.plot(zoomed_axis)
 
 # %%
 
@@ -341,47 +346,24 @@ zoomed_ax, zoomed_form = form1.zoom(target=[2, 2], zoom=10, dpd=7, inset=True, a
 
 # Testing 2-form zooming
 
+# set up the 2-form
 v = np.linspace(-6, 6, 31)
 xg, yg = np.meshgrid(v, v)
-
-form = -yg*np.sin(xg) * xg*np.cos(yg)
-
+#form = -yg*np.sin(xg) * xg*np.cos(yg)
+#form2 = fp.form_2(xg, yg, form)
+#form2.give_eqn('-y*sin(x)*x*cos(y)')
+form = xg*yg**2
 form2 = fp.form_2(xg, yg, form)
+form2.give_eqn('x**2*y')
 
-form2.give_eqn('-y*sin(x)*x*cos(y)')
-
-form2_zoomed = form2.zooming(target=[-2, 2], zoom=2, dpd=9)
-
-form2_zoomed.plot()
-
-# %%
-
-# Testing zooming on 2-forms
-
-
-v = np.linspace(-6, 6, 21)
-xg, yg = np.meshgrid(v, v)
-
-form_2 = xg*yg
-
+# set up a figure and axis to plot it and its inset
 fig = plt.figure()
+ax = fig.gca()
+ax.set_aspect('equal')
 
-fig.tight_layout()
+form2.plot(ax)
 
-form_obj = fp.form_2(xg, yg, form_2, fig=fig)
-
-form_obj.axis.set_aspect('equal')
-
-form_obj.plot()
-
-# for zooming in, supply the equation
-form_obj.give_eqn('x*y')
-
-form_zoomed = form_obj.zooming(target=[2, 2], zoom=5, dpd=21)
-
-# plot it
-form_zoomed.plot()
-
+zoomed_ax, form2_zoomed = form2.zooming(target=[2, -3], zoom=10, dpd=9, inset=True, axis=ax)
 
 # %%
 
@@ -395,86 +377,80 @@ VF insets with calculus
 
 # Testing derivative of vector field
 
-#Set up grids
+# Set up field
 r = np.linspace(-5, 5, 21)
 xg, yg = np.meshgrid(r, r)
-
 u = yg
 v = -xg
-
-# Set up subplots
-fig1 = plt.figure(figsize=(10,5))
-ax1 = fig1.add_subplot(121)
-ax2 = fig1.add_subplot(122)
-
-
-# Create vector field
-vf1 = fp.vector_field(xg, yg, u, v, fig = fig1, subplots=True, sub_axis_list=[ax1, ax2])
+vf1 = fp.vector_field(xg, yg, u, v)
 vf1.give_eqn('y','-x')
-vf1.plot(keep=False, subplot_index=0)
 
-# Problem: As the method creates a new vector field
-D_vf1 = vf1.DF((3,3), 5, 9, pass_on_figure=True)
-D_vf1.plot(keep=False, subplot_index=1)
+# Set up axis
+fig = plt.figure()
+ax = fig.gca()
+ax.set_xlabel(r'$x$')
+ax.set_ylabel(r'$y$')
+ax.set_aspect('equal')
 
-ax1.set_xlabel('Vector Field')
-ax2.set_xlabel('Derivative Vector Field')
+# plot field
+vf1.plot(ax)
+
+# find local deriv and plot as inset
+D_inset_ax, D_vf1 = vf1.DF((3, 3), 5, 9, inset=True, axis=ax)
 
 #%%
 
 # Test divergence of vector field with subplot
 
-#Set up grids
+# Set up fields
 r = np.linspace(-5, 5, 21)
 xg, yg = np.meshgrid(r, r)
+u = yg*np.cos(xg)
+v = -xg
+vf1 = fp.vector_field(xg, yg, u, v)
+vf1.give_eqn('y*cos(x)','-x')
 
+# Set up axis
+fig = plt.figure()
+ax = fig.gca()
+ax.set_xlabel(r'$x$')
+ax.set_ylabel(r'$y$')
+ax.set_aspect('equal')
+
+# plot VF
+vf1.plot(ax)
+
+# plot inset with its div, with new changed properties.
+dif_axis, div_field = vf1.Div((0,2), 100, 13, inset=True, axis=ax)
+#div_field.autoscale()
+div_field.plot(dif_axis)
+
+# %%
+
+# Test curl of vector field with inset
+
+# Set up field
+r = np.linspace(-5, 5, 21)
+xg, yg = np.meshgrid(r, r)
 u = yg*np.cos(xg)
 v = -xg
 
-# Set up subplots
-fig1 = plt.figure(figsize=(10,5))
-ax1 = fig1.add_subplot(121)
-ax2 = fig1.add_subplot(122)
-
 # Create vector field
-vf1 = fp.vector_field(xg, yg, u, v, fig = fig1, subplots=True, sub_axis_list=[ax1, ax2])
+vf1 = fp.vector_field(xg, yg, u, v)
 vf1.give_eqn('y*cos(x)','-x')
-vf1.plot(keep=False, subplot_index=0)
 
-div_field = vf1.Div((5,0), 100, 13, pass_on_figure=True)
-div_field.autoscale()
-div_field.plot(keep=False, subplot_index=1)
+# Set up axis
+fig = plt.figure()
+ax = fig.gca()
+ax.set_xlabel(r'$x$')
+ax.set_ylabel(r'$y$')
+ax.set_aspect('equal')
 
-ax1.set_xlabel('Vector Field')
-ax2.set_xlabel('Div Vector Field')
+vf1.plot(ax)
 
-#%%
-
-# Test curl of vector field with subplot
-
-#Set up grids
-r = np.linspace(-5, 5, 21)
-xg, yg = np.meshgrid(r, r)
-
-u = yg*np.cos(xg)
-v = -xg
-
-# Set up subplots
-fig1 = plt.figure(figsize=(10,5))
-ax1 = fig1.add_subplot(121)
-ax2 = fig1.add_subplot(122)
-
-# Create vector field
-vf1 = fp.vector_field(xg, yg, u, v, fig = fig1, subplots=True, sub_axis_list=[ax1, ax2])
-vf1.give_eqn('y*cos(x)','-x')
-vf1.plot(keep=False, subplot_index=0)
-
-curl_field = vf1.Curl((0,0), 100, 13, pass_on_figure=True)
+curl_inset_ax, curl_field = vf1.Curl((0,2), 4, 13, inset=True, axis=ax)
 # curl_field.autoscale()
-curl_field.plot(keep=False, subplot_index=1)
-
-ax1.set_xlabel('Vector Field')
-ax2.set_xlabel('Curl Vector Field')
+curl_field.plot(curl_inset_ax)
 
 # %%
 
@@ -493,45 +469,66 @@ Exterior Alg.
 v = np.linspace(-4.5, 4.5, 11)
 xg, yg = np.meshgrid(v, v)
 
-# set up the 0 form object and plot it
+# set up the 0 form object
 form_0 = np.cos(xg*yg)
 form_0_obj = fp.form_0(xg, yg, form_0)
-form_0_obj.plot()
+form_0_obj.give_eqn('cos(x*y)')
+form_0_obj.density_increase(25)
+form_0_obj.lines_number(15)
+
+# set up figure to plot on
+fig = plt.figure(figsize=(7, 7))
+ax1 = fig.add_subplot(131)
+ax2 = fig.add_subplot(132)
+ax3 = fig.add_subplot(133)
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
+ax3.set_aspect('equal')
+
+# plot the 0-form
+form_0_obj.plot(ax1)
 
 # try exterior derivative without having first given an equation in
 # throws an error
 # form_1_obj = form_0_obj.ext_d()
 
-# supply equation and complete ext. deriv.
-form_0_obj.give_eqn('cos(x*y)')
+
+# complete analytical ext. deriv.
 form_1_obj = form_0_obj.ext_d()  # this supplies the 1-form with equations too
 
 # plot that 1-form object
-form_1_obj.plot()
+form_1_obj.plot(ax2)
 
-plt.pause(2)
-
-# change its density and replot
+# change its density and plot on last axis pair
 form_1_obj.same_range_density(26)
 form_1_obj.sheet_size(0.04)
-form_1_obj.plot(False)
+form_1_obj.plot(ax3)
 
+# return its equation
 print(form_1_obj.return_string())
 
 # %%
 
 # Testing ext deriv of 1-form
 
-# set up grids
+# set up grids and 1 form object
 v = np.linspace(-4.5, 4.5, 21)
 xg, yg = np.meshgrid(v, v)
-
-# set up the 1 form object and plot it
 form_1_x = xg*np.cos(yg)
 form_1_y = yg*np.sin(xg)
-
 form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y)
-form_1_obj.plot()
+
+# set up figure to plot on
+fig = plt.figure(figsize=(7, 7))
+ax1 = fig.add_subplot(131)
+ax2 = fig.add_subplot(132)
+ax3 = fig.add_subplot(133)
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
+ax3.set_aspect('equal')
+
+
+form_1_obj.plot(ax1)
 
 # supply equation and complete ext. deriv.
 form_1_obj.give_eqn('x*cos(y)', 'y*sin(x)')
@@ -540,15 +537,14 @@ form_1_obj.give_eqn('x*cos(y)', 'y*sin(x)')
 form_2_obj = form_1_obj.ext_d()  # this supplies the 2-form with equations too
 
 # plot that 2-form object
-form_2_obj.plot()
+form_2_obj.plot(ax2)
 
-plt.pause(2)
-
-# change its density and replot
+# change its density and plot on last axis set
 form_2_obj.same_range_density(26)
 form_2_obj.max_sheets(10)
-form_2_obj.plot(False)
+form_2_obj.plot(ax3)
 
+# print 2-form equation
 print(form_2_obj.return_string())
 
 
@@ -556,28 +552,27 @@ print(form_2_obj.return_string())
 
 # exterior derivaitve of 1-form on subplots
 
-# set up grids
+# set up grids and 1-form
 v = np.linspace(-4.5, 4.5, 21)
 xg, yg = np.meshgrid(v, v)
-
-fig = plt.figure(figsize=(14, 7))
-
-# set up the 1 form object and plot it
 form_1_x = yg*np.cos(xg)
 form_1_y = -xg
-form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y, fig=fig, subplots=True)
-
-# supply eqautions into the 1-form
+form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y)
 form_1_obj.give_eqn('y*cos(x)', '-x')
 
-form_2_obj = form_1_obj.ext_d(pass_on_figure=True)
+# set up figure to plot on
+fig = plt.figure(figsize=(7, 7))
+ax1 = fig.add_subplot(121)
+ax2 = fig.add_subplot(122)
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
 
-form_1_obj.add_subplot(121)
-form_2_obj.add_subplot(121)  # form_2 did not have the first one given, so indexes will be wrong if we don't supply it a dummy one
-form_2_obj.add_subplot(122)
+# complete ext deriv.
+form_2_obj = form_1_obj.ext_d()
 
-form_1_obj.plot(keep=False, subplot_index=0)
-form_2_obj.plot(keep=True, subplot_index=1)
+# plot these:
+form_1_obj.plot(ax1)
+form_2_obj.plot(ax2)
 
 # %%
 
@@ -625,104 +620,111 @@ print(form_wedged_2.return_string())
 
 # Example of Wedge done numerically
 
-# set up grids
+# set up grids and 1-form
 v = np.linspace(-4.5, 4.5, 26)
 xg, yg = np.meshgrid(v, v)
+form_1_x = 2/xg**3
+form_1_y = yg**2
+form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y)
 
-# set up a figure
+# set up a figure and axis
 fig = plt.figure()
 ax1 = fig.add_subplot(121)
 ax2 = fig.add_subplot(122)
 
-# set up the 1 form object
-form_1_x = 1/xg**3
-form_1_y = yg**2
-form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y, fig=fig, subplots=True, sub_axis_list=[ax1, ax2])
-
 # plot it
-form_1_obj.plot(keep=True, subplot_index=0)
+form_1_obj.plot(ax1)
 
 # now find wedge of it with a different form
-form_wedged_2 = form_1_obj.wedge_num(form_1_second=(1/yg**2, xg**2), pass_on_figure=True)
+form_wedged_2 = form_1_obj.wedge_num(form_1_second=(1/yg**2, xg**3))
 
 # plot it
-form_wedged_2.plot(keep=True, subplot_index=1)
+form_wedged_2.plot(ax2)
 
 # %%
 
 # Testing the Hodge of a 1-form
 
-# set up grids
+# set up grids and 1-form
 v = np.linspace(-4.5, 4.5, 21)
 xg, yg = np.meshgrid(v, v)
-
-# set up the 1 form object and plot it
 form_1_x = yg
 form_1_y = -xg
-
 form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y)
+form_1_obj.give_eqn('y', '-x')
 
+# set up a figure and axis
 fig = plt.figure()
 ax = fig.gca()
 ax.set_xlabel(r'$x$')
 ax.set_xlabel(r'$x$')
 ax.set_aspect('equal')
 
+# plot the 1-form
 form_1_obj.plot(ax)
-
-# wait, as we want to plot on same axis, with replacement
-plt.pause(2)
-
-# supply equation and complete Hodge
-form_1_obj.give_eqn('y', '-x')
 
 # compute the Hodge and replot
 form_1_obj.Hodge(numerical_only=False, keep_object=True)
 
-# replot and wait
+plt.pause(1)
 ax.clear()
-form_1_obj.plot(ax)
-plt.pause(2)
+ax.set_xlabel(r'$x$')
+ax.set_xlabel(r'$x$')
+ax.set_aspect('equal')
 
-# compute the Hodge again, now set to a new form
-form_1_obj_2H = form_1_obj.Hodge(numerical_only=False, keep_object=False)
+form_1_obj.plot(ax)
+
+# compute the Hodge again, now set to a new form and noe numerically
+form_1_obj_2H = form_1_obj.Hodge(numerical_only=True, keep_object=False)
 
 # replot
+plt.pause(1)
 ax.clear()
+ax.set_xlabel(r'$x$')
+ax.set_xlabel(r'$x$')
+ax.set_aspect('equal')
 form_1_obj_2H.plot(ax)
 
 # %%
 
 # Example of 2-form Hodge
 
+# set up 2-form
 v = np.linspace(-6, 6, 21)
 xg, yg = np.meshgrid(v, v)
-
 form_2 = xg*yg
+form_obj = fp.form_2(xg, yg, form_2)
 
+# set up figures and axis
 fig = plt.figure()
 ax1 = fig.add_subplot(121)
 ax2 = fig.add_subplot(122)
 
-form_obj = fp.form_2(xg, yg, form_2, fig=fig, subplots=True, sub_axis_list=[ax1, ax2])
-
-form_obj.plot(subplot_index=0)
+form_obj.plot(ax1)
 
 # supply equations
 form_obj.give_eqn('x*y')
 
-# complete Hodge
-form_0 = form_obj.Hodge(numerical_only=False, pass_on_figure=True)
+# complete analytical Hodge and plot
+form_0 = form_obj.Hodge(numerical_only=False)
+form_0.plot(ax2)
 
-form_0.plot(subplot_index=1)
+# complete numerical Hodge, wait and replot
+form_0 = form_obj.Hodge(numerical_only=True)
+plt.pause(2)
+ax2.clear()
+form_0.plot(ax2)  # should observe no difference (and do)
 
 # %%
 
 # Testing Hodge of a 0-form
 
-# set up grids
+# set up grids and 0-form
 v = np.linspace(-4.5, 4.5, 11)
 xg, yg = np.meshgrid(v, v)
+form_0 = xg**2 + 3*yg
+form_0_obj = fp.form_0(xg, yg, form_0)
+form_0_obj.give_eqn('x**2 + 3*y')
 
 # set up a figure with subplots
 fig = plt.figure()
@@ -731,21 +733,17 @@ ax2 = fig.add_subplot(222)
 ax3 = fig.add_subplot(223)
 ax4 = fig.add_subplot(224)
 
-# set up the 0 form object and plot it
-form_0 = xg**2 + 3*yg
-form_0_obj = fp.form_0(xg, yg, form_0, fig=fig, subplots=True, sub_axis_list=[ax1, ax2, ax3, ax4])
-form_0_obj.plot(keep=True, subplot_index=0)
-form_0_obj.plot(keep=True, subplot_index=2)
+# plot it on two of the axis
+form_0_obj.plot(ax1)
+form_0_obj.plot(ax3)
 
-# now compute the Hodge numerically only and plot the resulting 2-form
-form_2_num = form_0_obj.Hodge(numerical_only=True, pass_on_figure=True)
-form_2_num.plot(keep=True, subplot_index=1)
+# compute the Hodge analytically and plot the resulting 2-form
+form_2_ana = form_0_obj.Hodge(numerical_only=True)
+form_2_ana.plot(ax2)
 
 # supply equations and do it analytically
-form_0_obj.give_eqn('x**2 + 3*y')
-form_2_an = form_0_obj.Hodge(numerical_only=False, pass_on_figure=True)
-
-form_2_an.plot(keep=True, subplot_index=3)
+form_2_num = form_0_obj.Hodge(numerical_only=False)
+form_2_num.plot(ax4)
 
 
 # %%
@@ -760,32 +758,38 @@ xg, yg = np.meshgrid(r, r)
 F_x = xg**2
 F_y = yg*xg
 form_obj1 = fp.form_1(xg, yg, F_x, F_y)
-
-# give equations to it
 form_obj1.give_eqn('x**2', 'y*x')
 
-# plot it
-form_obj1.plot()
-
-# set up a vector field object:
+# set up components and VF object
 u = np.cos(yg)
 v = np.sin(xg)
-
 vf = fp.vector_field(xg, yg, u, v)
 vf.give_eqn('cos(y)', 'sin(x)')
 
+
+# set up figure and axis
+fig = plt.figure()
+ax1 = fig.add_subplot(231)
+ax2 = fig.add_subplot(232)
+ax3 = fig.add_subplot(233)
+ax4 = fig.add_subplot(234)
+ax5 = fig.add_subplot(235)
+
+# plot the 1-form
+form_obj1.plot(ax1)
+
 # plot it
-vf.plot()
+vf.plot(ax2)
 
 # complete interior derivative, with object, with equations and without any input:
-form_0_i_1 = form_obj1.interior_d(vector_field=vf, pass_on_figure=False, numerical_only=False)
-form_0_i_2 = form_obj1.interior_d(pass_on_figure=False, numerical_only=False)
-form_0_i_3 = form_obj1.interior_d(('cos(y)', 'sin(x)'), pass_on_figure=False, numerical_only=False)
+form_0_i_1 = form_obj1.interior_d(vector_field=vf, numerical_only=False)
+form_0_i_2 = form_obj1.interior_d(numerical_only=False)
+form_0_i_3 = form_obj1.interior_d(('cos(y)', 'sin(x)'), numerical_only=False)
 
 # plot each
-form_0_i_1.plot()
-form_0_i_2.plot()
-form_0_i_3.plot()
+form_0_i_1.plot(ax3)
+form_0_i_2.plot(ax4)
+form_0_i_3.plot(ax5)
 
 # %%
 
@@ -795,32 +799,39 @@ form_0_i_3.plot()
 r = np.linspace(-6, 6, 21)
 xg, yg = np.meshgrid(r, r)
 
-# set up form components and the object
+# set up form object
 F_x = xg**2
 F_y = yg*xg
 form_obj1 = fp.form_1(xg, yg, F_x, F_y)
 
-# plot it
-form_obj1.plot()
-
 # set up a vector field object:
 u = np.cos(yg)
 v = np.sin(xg)
-
 vf = fp.vector_field(xg, yg, u, v)
 
-# plot it:
-vf.plot()
+# set up figure and axis
+fig = plt.figure()
+ax1 = fig.add_subplot(231)
+ax2 = fig.add_subplot(232)
+ax3 = fig.add_subplot(233)
+ax4 = fig.add_subplot(234)
+ax5 = fig.add_subplot(235)
+
+# plot form
+form_obj1.plot(ax1)
+
+# plot VF:
+vf.plot(ax2)
 
 # complete int deriv. with object, arrays and with no input:
-form_0_i_1 = form_obj1.interior_d(vector_field=vf, pass_on_figure=False, numerical_only=True)
-form_0_i_2 = form_obj1.interior_d(pass_on_figure=False, numerical_only=True)
-form_0_i_3 = form_obj1.interior_d((u, v), pass_on_figure=False, numerical_only=True)
+form_0_i_1 = form_obj1.interior_d(vector_field=vf, numerical_only=True)
+form_0_i_2 = form_obj1.interior_d(numerical_only=True)
+form_0_i_3 = form_obj1.interior_d((u, v), numerical_only=True)
 
 # plot each
-form_0_i_1.plot()
-form_0_i_2.plot()
-form_0_i_3.plot()
+form_0_i_1.plot(ax3)
+form_0_i_2.plot(ax4)
+form_0_i_3.plot(ax5)
 
 # %%
 
@@ -834,8 +845,21 @@ xg, yg = np.meshgrid(r, r)
 form2_comp = xg*yg**2
 form_obj2 = fp.form_2(xg, yg, form2_comp)
 
+# create figure with subplots to put these all on:
+fig = plt.figure()
+ax1 = fig.add_subplot(151)
+ax2 = fig.add_subplot(152)
+ax3 = fig.add_subplot(153)
+ax4 = fig.add_subplot(154)
+ax5 = fig.add_subplot(155)
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
+ax3.set_aspect('equal')
+ax4.set_aspect('equal')
+ax5.set_aspect('equal')
+
 # plot it
-form_obj2.plot()
+form_obj2.plot(ax1)
 
 # set up a vector field object:
 u = np.cos(yg)
@@ -844,17 +868,17 @@ v = np.sin(xg)
 vf = fp.vector_field(xg, yg, u, v)
 
 # plot it:
-vf.plot()
+vf.plot(ax2)
 
 # complete int deriv. with object, arrays and with no input:
-form_1_i_1 = form_obj2.interior_d(vector_field=vf, pass_on_figure=False, numerical_only=True)
-form_1_i_2 = form_obj2.interior_d(pass_on_figure=False, numerical_only=True)
-form_1_i_3 = form_obj2.interior_d((u, v), pass_on_figure=False, numerical_only=True)
+form_1_i_1 = form_obj2.interior_d(vector_field=vf, numerical_only=True)
+form_1_i_2 = form_obj2.interior_d(numerical_only=True)
+form_1_i_3 = form_obj2.interior_d((u, v), numerical_only=True)
 
 # plot each
-form_1_i_1.plot()
-form_1_i_2.plot()
-form_1_i_3.plot()
+form_1_i_1.plot(ax3)
+form_1_i_2.plot(ax4)
+form_1_i_3.plot(ax5)
 
 
 # %%
@@ -873,8 +897,23 @@ form_obj2 = fp.form_2(xg, yg, form2_comp)
 # give it the equation for analytical calculations
 form_obj2.give_eqn('x*y**2')
 
+
+# create figure with subplots to put these all on:
+fig = plt.figure()
+ax1 = fig.add_subplot(151)
+ax2 = fig.add_subplot(152)
+ax3 = fig.add_subplot(153)
+ax4 = fig.add_subplot(154)
+ax5 = fig.add_subplot(155)
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
+ax3.set_aspect('equal')
+ax4.set_aspect('equal')
+ax5.set_aspect('equal')
+
+
 # plot it
-form_obj2.plot()
+form_obj2.plot(ax1)
 
 # set up a vector field object:
 u = np.cos(yg)
@@ -886,22 +925,22 @@ vf = fp.vector_field(xg, yg, u, v)
 vf.give_eqn('cos(y)', 'sin(x)')
 
 # plot it:
-vf.plot()
+vf.plot(ax2)
 
 # complete int deriv. with object, arrays and with no input:
-form_1_i_1 = form_obj2.interior_d(vector_field=vf, pass_on_figure=False, numerical_only=False)
-form_1_i_2 = form_obj2.interior_d(pass_on_figure=False, numerical_only=False)
-form_1_i_3 = form_obj2.interior_d(('cos(y)', 'sin(x)'), pass_on_figure=False, numerical_only=False)
+form_1_i_1 = form_obj2.interior_d(vector_field=vf, numerical_only=False)
+form_1_i_2 = form_obj2.interior_d(numerical_only=False)
+form_1_i_3 = form_obj2.interior_d(('cos(y)', 'sin(x)'), numerical_only=False)
 
 # plot each
-form_1_i_1.plot()
-form_1_i_2.plot()
-form_1_i_3.plot()
+form_1_i_1.plot(ax3)
+form_1_i_2.plot(ax4)
+form_1_i_3.plot(ax5)
 
 # %%
 
 # Test Double ext deriv giving zero as 2-form
-# Numerically
+# Analytically
 
 # set up grids
 v = np.linspace(-4.5, 4.5, 21)
@@ -959,29 +998,38 @@ r = np.linspace(-4.5, 4.5, 21)
 xg, yg = np.meshgrid(r, r)
 
 # set up the field and vector field objecct
-u = xg
-v = -yg
+u = np.ones(np.shape(xg))
+v = yg
 vf1 = fp.vector_field(xg, yg, u, v)
-vf1.plot()
+vf1.give_eqn('1', 'y')
 
-# give equations
-vf1.give_eqn('x', '-y')
+# set up figure and axis to plot on
+fig = plt.figure()
+ax1 = fig.add_subplot(131)
+ax2 = fig.add_subplot(132)
+ax3 = fig.add_subplot(133)
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
+ax3.set_aspect('equal')
 
-# set up a metric
+# plot the VF
+vf1.plot(ax1)
+
+# set up a metric with strings
 metric = [['1', '0'],
-          ['0', 'y**2']]
+          ['0', '(x**2 + y**2)']]
 
 # via this, set up a 1-form
 form_1_obj = vf1.formalise(g=metric)
 
 # plot it
-form_1_obj.plot()
+form_1_obj.plot(ax2)
 
 # create a comparison 1-form with correct components already given
-form_1_correct = fp.form_1(xg, yg, u, v*yg**2)
+form_1_correct = fp.form_1(xg, yg, u, v*(xg**2+yg**2))
 
 # plot it
-form_1_correct.plot()
+form_1_correct.plot(ax3)
 
 # %%
 
@@ -991,26 +1039,37 @@ r = np.linspace(-4.5, 4.5, 21)
 xg, yg = np.meshgrid(r, r)
 
 # set up the field and vector field objecct
-u = xg
-v = -yg
+u = np.ones(np.shape(xg))
+v = yg
 vf1 = fp.vector_field(xg, yg, u, v)
-vf1.plot()
 
-# set up a metric
+# set up figure and axis to plot on
+fig = plt.figure()
+ax1 = fig.add_subplot(131)
+ax2 = fig.add_subplot(132)
+ax3 = fig.add_subplot(133)
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
+ax3.set_aspect('equal')
+
+# plot VF
+vf1.plot(ax1)
+
+# set up a metric with arrays
 metric = [[np.ones(np.shape(xg)), np.zeros(np.shape(xg))],
-          [np.zeros(np.shape(xg)), yg**2]]
+          [np.zeros(np.shape(xg)), yg**2 + xg**2]]
 
 # via this, set up a 1-form
 form_1_obj = vf1.formalise(g=metric)
 
 # plot it
-form_1_obj.plot()
+form_1_obj.plot(ax2)
 
 # create a comparison 1-form with correct components already given
-form_1_correct = fp.form_1(xg, yg, u, v*yg**2)
+form_1_correct = fp.form_1(xg, yg, u, v*(xg**2 + yg**2))
 
 # plot it
-form_1_correct.plot()
+form_1_correct.plot(ax3)
 
 # %%
 
