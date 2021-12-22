@@ -963,7 +963,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             return result_form
             
         
-        def zoom(self, target=[0, 0], zoom=2, dpd=9, inset=True, axis=None):
+        def zoom(self, target=[0, 0], zoom=2, dpd=9, inset=True, axis=None, d_length=0.3):
             '''
             Create a new window which displays the field zoomed at a certain point
             User gives arguments
@@ -973,6 +973,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             inset - bool - determines if zoom is to plotted as an inset
                     if True, need to also give axis on which to plot
             axis - matplotlib axes instance - on it, the instance will plot.
+            d_length - float - size of inset as fraction of total figure
             
             returns:
             --------------
@@ -997,10 +998,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                 L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
                 
                 # Zoom axis range
-                d_range = L/zoom
-                
-                # Size of the inset plot (default as 0.3)
-                d_length = 0.3 
+                d_range = d_length*L/zoom
                 
                 # Set up zoom window grids
                 dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
@@ -1693,7 +1691,7 @@ def form_2(xg, yg, form2, form_2_eq=None):
                 raise ValueError('ERROR: Invalid input for \'numerical_only\'')
     
         # define a method to create a zoomed in 2-form
-        def zooming(self, target=[0, 0], zoom=2, dpd=9, inset=False, axis=None):
+        def zooming(self, target=[0, 0], zoom=2, dpd=9, inset=False, axis=None, d_length=0.3):
             
             '''
             Creates a new window which displays the 2-form zoomed at a certain point
@@ -1705,6 +1703,7 @@ def form_2(xg, yg, form2, form_2_eq=None):
             inset - bool - determies if the zoom is plotted on the given axis
             as an inset
             axis - matplotlib axis, only supply if inset is True, plots intset on these
+            d_length - float - size of inset as fraction of total figure
             
             returns:
             --------------
@@ -1727,10 +1726,7 @@ def form_2(xg, yg, form2, form_2_eq=None):
                 # Get the size of the original
                 L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
                 
-                d_range = self.xg[0, -1]/zoom
-                
-                # Size of the inset plot (default as 0.3)
-                d_length = 0.3 
+                d_range = d_length*L/zoom
                 
                 # Set up zoom window grids
                 dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
@@ -2513,7 +2509,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             axis.quiver(self.xg, self.yg, F_x_local, F_y_local, pivot=self.orientation, scale=ScaleFactor, scale_units='xy', color=self.color) 
         
         
-        def zoom(self, target=[0, 0], zoom=2, dpd=9, d_length=0.3, inset=False, axis=None):
+        def zoom(self, target=[0, 0], zoom=2, dpd=9, inset=False, axis=None, d_length=0.3):
             '''
             Create a new window which displays the field zoomed at a certain point
             User gives arguments
@@ -2523,6 +2519,8 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             
             inset - bool - if true, zoomed field plotted on given axis
             axis - matplotlib axes instance - axis to plot on if instance it True
+            d_length - float - size of inset as fraction of total figure
+            
             
             Returns:
             --------
@@ -2547,10 +2545,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                 L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
                 
                 # Zoom axis range
-                d_range = L/zoom
-                
-                # Size of the inset plot (default as 0.3)
-                d_length = 0.3 
+                d_range = d_length*L/zoom
                 
                 # Set up zoom window grids
                 dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
