@@ -352,7 +352,7 @@ xg, yg = np.meshgrid(v, v)
 #form = -yg*np.sin(xg) * xg*np.cos(yg)
 #form2 = fp.form_2(xg, yg, form)
 #form2.give_eqn('-y*sin(x)*x*cos(y)')
-form = xg*yg**2
+form = xg**2 * yg
 form2 = fp.form_2(xg, yg, form)
 form2.give_eqn('x**2*y')
 
