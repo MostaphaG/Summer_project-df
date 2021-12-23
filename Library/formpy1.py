@@ -989,62 +989,74 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                 # ERROR
                 raise TypeError('Error: No equation provided')
             else:
-                
-                # Target coordinates
-                x_m = target[0]
-                y_m = target[1]
-                
-                # Get the size of the original VF
-                L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
-                
-                # Zoom axis range
-                d_range = insize*L/zoom
-                
-                # Set up zoom window grids
-                dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
-                dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
-                dxg, dyg = np.meshgrid(dx, dy)
-                
-                # Create variables for the user provided equation strings
-                u_str = self.form_1_str_x
-                v_str = self.form_1_str_y
-                
-                # Check if the equations provided contain x and y terms
-                if u_str.find('x') & u_str.find('y') == -1:
-                    u_str = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                 # Zoom must be one or greater
+                if zoom < 1:
+                    raise ValueError('Zoom must be greater than one')
                 else:
-                    u_str = u_str.replace('x', 'dxg')
-                    u_str = u_str.replace('y', 'dyg')
-          
-                if v_str.find('x') & v_str.find('y') == -1:
-                    v_str = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
-                else:
-                    v_str = v_str.replace('x', 'dxg')
-                    v_str = v_str.replace('y', 'dyg')
                     
-                # Generate arrays for the components of the zoom field
-                u_zoom = eval(u_str)
-                v_zoom = eval(v_str)
-                
-                # crate the zoomed in form
-                zoom_form = form_1(dxg, dyg, u_zoom, v_zoom)
-                zoom_form.sheet_size(1/dpd)
-                
-                if inset == True:
-                    if axis != None:
-                        # Create inset axis in the current axis.
-                        q = 0.92
-                        zoom_inset_ax = axis.inset_axes([0.5*(1 + q*x_m/L - insize), 0.5*(1 + q*y_m/L - insize), insize, insize])
-                        zoom_form.plot(zoom_inset_ax)
-                        
-                        # return the zoomed on axis
-                        # also return zoomed in form in case user wants that.
-                        return zoom_inset_ax, zoom_form
+                    if insize > 1 or insize < 0:
+                        raise ValueError('Insize must be +ve and less than one')
                     else:
-                        raise ValueError('Cannot inset without supplied axis')
-                else:
-                    # inset is false, just return the new zoomed in instance
-                    return zoom_form
+                        
+                        # If no inset, set the size of the zoom axis to allow normal plotting
+                        if inset == False:
+                            insize = 1
+                
+                        # Target coordinates
+                        x_m = target[0]
+                        y_m = target[1]
+                        
+                        # Get the size of the original VF
+                        L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+                        
+                        # Zoom axis range
+                        d_range = insize*L/zoom
+                        
+                        # Set up zoom window grids
+                        dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
+                        dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
+                        dxg, dyg = np.meshgrid(dx, dy)
+                        
+                        # Create variables for the user provided equation strings
+                        u_str = self.form_1_str_x
+                        v_str = self.form_1_str_y
+                        
+                        # Check if the equations provided contain x and y terms
+                        if u_str.find('x') & u_str.find('y') == -1:
+                            u_str = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                        else:
+                            u_str = u_str.replace('x', 'dxg')
+                            u_str = u_str.replace('y', 'dyg')
+                  
+                        if v_str.find('x') & v_str.find('y') == -1:
+                            v_str = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
+                        else:
+                            v_str = v_str.replace('x', 'dxg')
+                            v_str = v_str.replace('y', 'dyg')
+                            
+                        # Generate arrays for the components of the zoom field
+                        u_zoom = eval(u_str)
+                        v_zoom = eval(v_str)
+                        
+                        # crate the zoomed in form
+                        zoom_form = form_1(dxg, dyg, u_zoom, v_zoom)
+                        zoom_form.sheet_size(1/dpd)
+                        
+                        if inset == True:
+                            if axis != None:
+                                # Create inset axis in the current axis.
+                                q = 0.92
+                                zoom_inset_ax = axis.inset_axes([0.5*(1 + q*x_m/L - insize), 0.5*(1 + q*y_m/L - insize), insize, insize])
+                                zoom_form.plot(zoom_inset_ax)
+                                
+                                # return the zoomed on axis
+                                # also return zoomed in form in case user wants that.
+                                return zoom_inset_ax, zoom_form
+                            else:
+                                raise ValueError('Cannot inset without supplied axis')
+                        else:
+                            # inset is false, just return the new zoomed in instance
+                            return zoom_form
         
         
         # define a mehtod to evaluate the interior derivative of the 1-form
@@ -1718,54 +1730,66 @@ def form_2(xg, yg, form2, form_2_eq=None):
                 # ERROR
                 raise TypeError('Error: No equation provided')
             else:
-                
-                # Target coordinates
-                x_m = target[0]
-                y_m = target[1]
-                
-                # Get the size of the original
-                L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
-                
-                d_range = insize*L/zoom
-                
-                # Set up zoom window grids
-                dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
-                dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
-                dxg, dyg = np.meshgrid(dx, dy)
-                
-                # Create variables for the user provided equation strings
-                zoom_str = self.form_2_str + ''
-                
-                # Check if the equations provided contain x and y terms
-                if zoom_str.find('x') & zoom_str.find('y') == -1:
-                    zoom_str = '(' + str(zoom_str) + ')* np.ones(np.shape(dxg))'
+                 # Zoom must be one or greater
+                if zoom < 1:
+                    raise ValueError('Zoom must be greater than one')
                 else:
-                    zoom_str = zoom_str.replace('x', '(dxg)')
-                    zoom_str = zoom_str.replace('y', '(dyg)')
-                
-                # Generate arrays for the components of the zoom field
-                zoom_2form = eval(zoom_str)
-                
-                # from that create 2-form instance
-                zoomform2 = form_2(dxg, dyg, zoom_2form, self.form_2_str)
-                
-                # depending on preferances, return to user and plot
-                if inset == True:
-                    if axis != None:
-                        # Create inset axis in the current axis.
-                        q = 0.92
-                        zoom_inset_ax = axis.inset_axes([0.5*(1 + q*x_m/L - insize), 0.5*(1 + q*y_m/L - insize), insize, insize])
-                        zoomform2.plot(zoom_inset_ax)
-                        
-                        # return the zoomed on axis
-                        # also return zoomed in form in case user wants that.
-                        return zoom_inset_ax, zoomform2
+                    
+                    if insize > 1 or insize < 0:
+                        raise ValueError('Insize must be +ve and less than one')
                     else:
-                        raise ValueError('Cannot inset without supplied axis')
-                else:
-                    # inset is false, just return the new zoomed in instance
-                    return zoomform2
-        
+                        
+                        # If no inset, set the size of the zoom axis to allow normal plotting
+                        if inset == False:
+                            insize = 1
+                            
+                        # Target coordinates
+                        x_m = target[0]
+                        y_m = target[1]
+                        
+                        # Get the size of the original
+                        L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+                        
+                        d_range = insize*L/zoom
+                        
+                        # Set up zoom window grids
+                        dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
+                        dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
+                        dxg, dyg = np.meshgrid(dx, dy)
+                        
+                        # Create variables for the user provided equation strings
+                        zoom_str = self.form_2_str + ''
+                        
+                        # Check if the equations provided contain x and y terms
+                        if zoom_str.find('x') & zoom_str.find('y') == -1:
+                            zoom_str = '(' + str(zoom_str) + ')* np.ones(np.shape(dxg))'
+                        else:
+                            zoom_str = zoom_str.replace('x', '(dxg)')
+                            zoom_str = zoom_str.replace('y', '(dyg)')
+                        
+                        # Generate arrays for the components of the zoom field
+                        zoom_2form = eval(zoom_str)
+                        
+                        # from that create 2-form instance
+                        zoomform2 = form_2(dxg, dyg, zoom_2form, self.form_2_str)
+                        
+                        # depending on preferances, return to user and plot
+                        if inset == True:
+                            if axis != None:
+                                # Create inset axis in the current axis.
+                                q = 0.92
+                                zoom_inset_ax = axis.inset_axes([0.5*(1 + q*x_m/L - insize), 0.5*(1 + q*y_m/L - insize), insize, insize])
+                                zoomform2.plot(zoom_inset_ax)
+                                
+                                # return the zoomed on axis
+                                # also return zoomed in form in case user wants that.
+                                return zoom_inset_ax, zoomform2
+                            else:
+                                raise ValueError('Cannot inset without supplied axis')
+                        else:
+                            # inset is false, just return the new zoomed in instance
+                            return zoomform2
+                
         
         # define a mehtod to evaluate the interior derivative of the 2-form
         # with respect to a given vector field object or without.
@@ -2628,72 +2652,84 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                 # ERROR
                 raise TypeError('Error: No equation provided')
             else:
-                
-                # Target coordinates
-                x_m = target[0]
-                y_m = target[1]
-                
-                # Get the size of the original VF
-                L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
-                
-                # Zoom axis range
-                d_range = L/zoom
-                
-                # Size of the inset plot (default as 0.3)
-                insize = 0.3  
-                
-                # Set up zoom window grids
-                dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
-                dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
-                dxg, dyg = np.meshgrid(dx, dy)
-                
-                # Create variables for the user provided equation strings
-                u_str = self.str_x
-                v_str = self.str_y
-
-                # Create string to evaluate the field at the target location
-                u_str_point = u_str.replace('x', 'x_m')
-                u_str_point = u_str_point.replace('y', 'y_m')
-                
-                v_str_point = v_str.replace('x', 'x_m')
-                v_str_point = v_str_point.replace('y', 'y_m')
-                
-                # Check if the equations provided contain x and y terms
-                if u_str.find('x') & u_str.find('y') == -1:
-                    u_str_grid = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                 # Zoom must be one or greater
+                if zoom < 1:
+                    raise ValueError('Zoom must be greater than one')
                 else:
-                    u_str_grid = u_str.replace('x', 'dxg')
-                    u_str_grid = u_str_grid.replace('y', 'dyg')
-          
-                if v_str.find('x') & v_str.find('y') == -1:
-                    v_str_grid = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
-                else:
-                    v_str_grid = v_str.replace('x', 'dxg')
-                    v_str_grid = v_str_grid.replace('y', 'dyg')
                     
-                # Generate arrays for the components of the derivative field          
-                U = eval(u_str_grid) - eval(u_str_point)
-                V = eval(v_str_grid) - eval(v_str_point)
-                
-                # from that create VF instance
-                deriv_vf = vector_field(dxg, dyg, U, V, self.str_x, self.str_y)
-                
-                # depending on preferances, return to user and plot
-                if inset == True:
-                    if axis != None:
-                        # Create inset axis in the current axis.
-                        q = 0.92
-                        deriv_inset_ax = axis.inset_axes([0.5*(1 + q*x_m/L - insize), 0.5*(1 + q*y_m/L - insize), insize, insize])
-                        deriv_vf.plot(deriv_inset_ax)
-                        
-                        # return the zoomed on axis
-                        # also return zoomed in form in case user wants that.
-                        return deriv_inset_ax, deriv_vf
+                    if insize > 1 or insize < 0:
+                        raise ValueError('Insize must be +ve and less than one')
                     else:
-                        raise ValueError('Cannot inset without supplied axis')
-                else:
-                    # inset is false, just return the new zoomed in instance
-                    return deriv_vf
+                        
+                        # If no inset, set the size of the zoom axis to allow normal plotting
+                        if inset == False:
+                            insize = 1
+                
+                        # Target coordinates
+                        x_m = target[0]
+                        y_m = target[1]
+                        
+                        # Get the size of the original VF
+                        L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+                        
+                        # Zoom axis range
+                        d_range = L/zoom
+                        
+                        # Size of the inset plot (default as 0.3)
+                        insize = 0.3  
+                        
+                        # Set up zoom window grids
+                        dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
+                        dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
+                        dxg, dyg = np.meshgrid(dx, dy)
+                        
+                        # Create variables for the user provided equation strings
+                        u_str = self.str_x
+                        v_str = self.str_y
+        
+                        # Create string to evaluate the field at the target location
+                        u_str_point = u_str.replace('x', 'x_m')
+                        u_str_point = u_str_point.replace('y', 'y_m')
+                        
+                        v_str_point = v_str.replace('x', 'x_m')
+                        v_str_point = v_str_point.replace('y', 'y_m')
+                        
+                        # Check if the equations provided contain x and y terms
+                        if u_str.find('x') & u_str.find('y') == -1:
+                            u_str_grid = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                        else:
+                            u_str_grid = u_str.replace('x', 'dxg')
+                            u_str_grid = u_str_grid.replace('y', 'dyg')
+                  
+                        if v_str.find('x') & v_str.find('y') == -1:
+                            v_str_grid = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
+                        else:
+                            v_str_grid = v_str.replace('x', 'dxg')
+                            v_str_grid = v_str_grid.replace('y', 'dyg')
+                            
+                        # Generate arrays for the components of the derivative field          
+                        U = eval(u_str_grid) - eval(u_str_point)
+                        V = eval(v_str_grid) - eval(v_str_point)
+                        
+                        # from that create VF instance
+                        deriv_vf = vector_field(dxg, dyg, U, V, self.str_x, self.str_y)
+                        
+                        # depending on preferances, return to user and plot
+                        if inset == True:
+                            if axis != None:
+                                # Create inset axis in the current axis.
+                                q = 0.92
+                                deriv_inset_ax = axis.inset_axes([0.5*(1 + q*x_m/L - insize), 0.5*(1 + q*y_m/L - insize), insize, insize])
+                                deriv_vf.plot(deriv_inset_ax)
+                                
+                                # return the zoomed on axis
+                                # also return zoomed in form in case user wants that.
+                                return deriv_inset_ax, deriv_vf
+                            else:
+                                raise ValueError('Cannot inset without supplied axis')
+                        else:
+                            # inset is false, just return the new zoomed in instance
+                            return deriv_vf
         
             
         def Div(self, target=[0,0], zoom=2, dpd=9, inset=False, axis=None):
@@ -2718,124 +2754,136 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                 # ERROR
                 raise TypeError('Error: No equation provided')
             else:
-                
-                # Target coordinates
-                x_m = target[0]
-                y_m = target[1]
-                
-                # Get the size of the original VF
-                L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
-                
-                # Zoom axis range
-                d_range = L/zoom
-                
-                # Size of the inset plot (default as 0.3)
-                insize = 0.3 
-                
-                # Set up zoom window grids
-                dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
-                dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
-                dxg, dyg = np.meshgrid(dx, dy)
-                
-                # Create variables for the user provided equation strings
-                u_str = self.str_x
-                v_str = self.str_y
-
-                # Create string to evaluate the field at the target location
-                u_str_point = u_str.replace('x', 'x_m')
-                u_str_point = u_str_point.replace('y', 'y_m')
-                
-                v_str_point = v_str.replace('x', 'x_m')
-                v_str_point = v_str_point.replace('y', 'y_m')
-                
-                # Check if the equations provided contain x and y terms
-                if u_str.find('x') & u_str.find('y') == -1:
-                    u_str_grid = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                 # Zoom must be one or greater
+                if zoom < 1:
+                    raise ValueError('Zoom must be greater than one')
                 else:
-                    u_str_grid = u_str.replace('x', 'dxg')
-                    u_str_grid = u_str_grid.replace('y', 'dyg')
-          
-                if v_str.find('x') & v_str.find('y') == -1:
-                    v_str_grid = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
-                else:
-                    v_str_grid = v_str.replace('x', 'dxg')
-                    v_str_grid = v_str_grid.replace('y', 'dyg')
                     
-                # Generate arrays for the components of the derivative field          
-                U = eval(u_str_grid) - eval(u_str_point)
-                V = eval(v_str_grid) - eval(v_str_point)
-                
-                # =============================================================================
-                # Geometric Divergence Method - See Documentation                
-                # =============================================================================
-                
-                U_div = np.zeros(shape=(dpd, dpd))
-                V_div = np.zeros(shape=(dpd, dpd))
-                
-                # Looping Constant
-                N = dpd - 1
-        
-                # get number of points in quadrant
-                if dpd % 2 == 1:
-                    quad_x = int(dpd/2)
-                    quad_y = int((dpd+1)/2)
-                else:
-                    quad_x = int(dpd/2)
-                    quad_y = int(dpd/2)
-                    
-                for i in range(quad_x):
-                    # get the l number, for projection of j on radial / i on tangent
-                    l = i - 0.5*N
-                    
-                    # INNER LOOP
-                    for j in range(quad_y):
-                        # get the k number of projection: i on radial / j on tangent
-                        k = j - 0.5*N
-                        
-                        # get the commuting parts of V and W for each square corner
-                        # (x and y components of the subtracted field)
-                        U_comm_1 = 0.25*(2*U[i, j] + V[j, N-i] - V[N-j, i])
-                        U_comm_2 = 0.25*(2*U[j, N-i] + V[N-i, N-j] - V[i, j])
-                        U_comm_3 = 0.25*(2*U[N-i, N-j] + V[N-j, i] - V[j, N-i])
-                        U_comm_4 = 0.25*(2*U[N-j, i] + V[i, j] - V[N-i, N-j])
-                        
-                        V_comm_1 = 0.25*(2*V[i, j] - U[j, N-i] + U[N-j, i])
-                        V_comm_2 = 0.25*(2*V[j, N-i] - U[N-i, N-j] + U[i, j])
-                        V_comm_3 = 0.25*(2*V[N-i, N-j] - U[N-j, i] + U[j, N-i])
-                        V_comm_4 = 0.25*(2*V[N-j, i] - U[i, j] + U[N-i, N-j])
-                        
-                        # gte a normalisation factor from l and k
-                        A = k**2 + l**2
-                        
-                        U_div[i, j] = (U_comm_1*k + V_comm_1*l)*k/A
-                        V_div[i, j] = (U_comm_1*k + V_comm_1*l)*l/A
-                        U_div[j, N-i] = (U_comm_2*l + V_comm_2*(-k))*l/A
-                        V_div[j, N-i] = (U_comm_2*l + V_comm_2*(-k))*(-k)/A
-                        U_div[N-i, N-j] = (U_comm_3*(-k) + V_comm_3*(-l))*(-k)/A
-                        V_div[N-i, N-j] = (U_comm_3*(-k) + V_comm_3*(-l))*(-l)/A
-                        U_div[N-j, i] = (U_comm_4*(-l) + V_comm_4*k)*(-l)/A
-                        V_div[N-j, i] = (U_comm_4*(-l) + V_comm_4*k)*k/A
-                
-                
-               # from that create VF instance
-                div_vf = vector_field(dxg, dyg, U_div, V_div, self.str_x, self.str_y)
-                
-                # depending on preferances, return to user and plot
-                if inset == True:
-                    if axis != None:
-                        # Create inset axis in the current axis.
-                        q = 0.92
-                        div_inset_ax = axis.inset_axes([0.5*(1 + q*x_m/L - insize), 0.5*(1 + q*y_m/L - insize), insize, insize])
-                        div_vf.plot(div_inset_ax)
-                        
-                        # return the zoomed on axis
-                        # also return zoomed in form in case user wants that.
-                        return div_inset_ax, div_vf
+                    if insize > 1 or insize < 0:
+                        raise ValueError('Insize must be +ve and less than one')
                     else:
-                        raise ValueError('Cannot inset without supplied axis')
-                else:
-                    # inset is false, just return the new zoomed in instance
-                    return div_vf
+                        
+                        # If no inset, set the size of the zoom axis to allow normal plotting
+                        if inset == False:
+                            insize = 1
+                
+                        # Target coordinates
+                        x_m = target[0]
+                        y_m = target[1]
+                        
+                        # Get the size of the original VF
+                        L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+                        
+                        # Zoom axis range
+                        d_range = L/zoom
+                        
+                        # Size of the inset plot (default as 0.3)
+                        insize = 0.3 
+                        
+                        # Set up zoom window grids
+                        dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
+                        dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
+                        dxg, dyg = np.meshgrid(dx, dy)
+                        
+                        # Create variables for the user provided equation strings
+                        u_str = self.str_x
+                        v_str = self.str_y
+        
+                        # Create string to evaluate the field at the target location
+                        u_str_point = u_str.replace('x', 'x_m')
+                        u_str_point = u_str_point.replace('y', 'y_m')
+                        
+                        v_str_point = v_str.replace('x', 'x_m')
+                        v_str_point = v_str_point.replace('y', 'y_m')
+                        
+                        # Check if the equations provided contain x and y terms
+                        if u_str.find('x') & u_str.find('y') == -1:
+                            u_str_grid = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                        else:
+                            u_str_grid = u_str.replace('x', 'dxg')
+                            u_str_grid = u_str_grid.replace('y', 'dyg')
+                  
+                        if v_str.find('x') & v_str.find('y') == -1:
+                            v_str_grid = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
+                        else:
+                            v_str_grid = v_str.replace('x', 'dxg')
+                            v_str_grid = v_str_grid.replace('y', 'dyg')
+                            
+                        # Generate arrays for the components of the derivative field          
+                        U = eval(u_str_grid) - eval(u_str_point)
+                        V = eval(v_str_grid) - eval(v_str_point)
+                        
+                        # =============================================================================
+                        # Geometric Divergence Method - See Documentation                
+                        # =============================================================================
+                        
+                        U_div = np.zeros(shape=(dpd, dpd))
+                        V_div = np.zeros(shape=(dpd, dpd))
+                        
+                        # Looping Constant
+                        N = dpd - 1
+                
+                        # get number of points in quadrant
+                        if dpd % 2 == 1:
+                            quad_x = int(dpd/2)
+                            quad_y = int((dpd+1)/2)
+                        else:
+                            quad_x = int(dpd/2)
+                            quad_y = int(dpd/2)
+                            
+                        for i in range(quad_x):
+                            # get the l number, for projection of j on radial / i on tangent
+                            l = i - 0.5*N
+                            
+                            # INNER LOOP
+                            for j in range(quad_y):
+                                # get the k number of projection: i on radial / j on tangent
+                                k = j - 0.5*N
+                                
+                                # get the commuting parts of V and W for each square corner
+                                # (x and y components of the subtracted field)
+                                U_comm_1 = 0.25*(2*U[i, j] + V[j, N-i] - V[N-j, i])
+                                U_comm_2 = 0.25*(2*U[j, N-i] + V[N-i, N-j] - V[i, j])
+                                U_comm_3 = 0.25*(2*U[N-i, N-j] + V[N-j, i] - V[j, N-i])
+                                U_comm_4 = 0.25*(2*U[N-j, i] + V[i, j] - V[N-i, N-j])
+                                
+                                V_comm_1 = 0.25*(2*V[i, j] - U[j, N-i] + U[N-j, i])
+                                V_comm_2 = 0.25*(2*V[j, N-i] - U[N-i, N-j] + U[i, j])
+                                V_comm_3 = 0.25*(2*V[N-i, N-j] - U[N-j, i] + U[j, N-i])
+                                V_comm_4 = 0.25*(2*V[N-j, i] - U[i, j] + U[N-i, N-j])
+                                
+                                # gte a normalisation factor from l and k
+                                A = k**2 + l**2
+                                
+                                U_div[i, j] = (U_comm_1*k + V_comm_1*l)*k/A
+                                V_div[i, j] = (U_comm_1*k + V_comm_1*l)*l/A
+                                U_div[j, N-i] = (U_comm_2*l + V_comm_2*(-k))*l/A
+                                V_div[j, N-i] = (U_comm_2*l + V_comm_2*(-k))*(-k)/A
+                                U_div[N-i, N-j] = (U_comm_3*(-k) + V_comm_3*(-l))*(-k)/A
+                                V_div[N-i, N-j] = (U_comm_3*(-k) + V_comm_3*(-l))*(-l)/A
+                                U_div[N-j, i] = (U_comm_4*(-l) + V_comm_4*k)*(-l)/A
+                                V_div[N-j, i] = (U_comm_4*(-l) + V_comm_4*k)*k/A
+                        
+                        
+                       # from that create VF instance
+                        div_vf = vector_field(dxg, dyg, U_div, V_div, self.str_x, self.str_y)
+                        
+                        # depending on preferances, return to user and plot
+                        if inset == True:
+                            if axis != None:
+                                # Create inset axis in the current axis.
+                                q = 0.92
+                                div_inset_ax = axis.inset_axes([0.5*(1 + q*x_m/L - insize), 0.5*(1 + q*y_m/L - insize), insize, insize])
+                                div_vf.plot(div_inset_ax)
+                                
+                                # return the zoomed on axis
+                                # also return zoomed in form in case user wants that.
+                                return div_inset_ax, div_vf
+                            else:
+                                raise ValueError('Cannot inset without supplied axis')
+                        else:
+                            # inset is false, just return the new zoomed in instance
+                            return div_vf
             
         def Curl(self, target=[0,0], zoom=2, dpd=9, inset=False, axis=None):
             '''
@@ -2859,123 +2907,135 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                 # ERROR
                 raise TypeError('Error: No equation provided')
             else:
-                
-                # Target coordinates
-                x_m = target[0]
-                y_m = target[1]
-                
-                # Get the size of the original VF
-                L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
-                
-                # Zoom axis range
-                d_range = L/zoom
-                
-                # Size of the inset plot (default as 0.3)
-                insize = 0.3 
-                
-                # Set up zoom window grids
-                dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
-                dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
-                dxg, dyg = np.meshgrid(dx, dy)
-                
-                # Create variables for the user provided equation strings
-                u_str = self.str_x
-                v_str = self.str_y
-
-                # Create string to evaluate the field at the target location
-                u_str_point = u_str.replace('x', 'x_m')
-                u_str_point = u_str_point.replace('y', 'y_m')
-                
-                v_str_point = v_str.replace('x', 'x_m')
-                v_str_point = v_str_point.replace('y', 'y_m')
-                
-                # Check if the equations provided contain x and y terms
-                if u_str.find('x') & u_str.find('y') == -1:
-                    u_str_grid = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                 # Zoom must be one or greater
+                if zoom < 1:
+                    raise ValueError('Zoom must be greater than one')
                 else:
-                    u_str_grid = u_str.replace('x', 'dxg')
-                    u_str_grid = u_str_grid.replace('y', 'dyg')
-          
-                if v_str.find('x') & v_str.find('y') == -1:
-                    v_str_grid = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
-                else:
-                    v_str_grid = v_str.replace('x', 'dxg')
-                    v_str_grid = v_str_grid.replace('y', 'dyg')
                     
-                # Generate arrays for the components of the derivative field          
-                U = eval(u_str_grid) - eval(u_str_point)
-                V = eval(v_str_grid) - eval(v_str_point)
-                
-                # =============================================================================
-                # Geometric Curl Method - See Documentation                
-                # =============================================================================
-                
-                U_curl = np.zeros(shape=(dpd, dpd))
-                V_curl = np.zeros(shape=(dpd, dpd))
-                
-                # Looping Constant
-                N = dpd - 1
-        
-                # Quadrant Points
-                if dpd % 2 == 1:
-                    quad_x = int(dpd/2)
-                    quad_y = int((dpd+1)/2)
-                else:
-                    quad_x = int(dpd/2)
-                    quad_y = int(dpd/2)
-                    
-                for i in range(quad_x):
-                    # get the l number, for projection of j on radial / i on tangent
-                    l = i - 0.5*N
-                    
-                    # INNER LOOP
-                    for j in range(quad_y):
-                        # get the k number of projection: i on radial / j on tangent
-                        k = j - 0.5*N
-                        
-                        # get the commuting parts of V and W for each square corner
-                        # (x and y components of the subtracted field)
-                        U_comm_1 = 0.25*(2*U[i, j] + V[j, N-i] - V[N-j, i])
-                        U_comm_2 = 0.25*(2*U[j, N-i] + V[N-i, N-j] - V[i, j])
-                        U_comm_3 = 0.25*(2*U[N-i, N-j] + V[N-j, i] - V[j, N-i])
-                        U_comm_4 = 0.25*(2*U[N-j, i] + V[i, j] - V[N-i, N-j])
-                        
-                        V_comm_1 = 0.25*(2*V[i, j] - U[j, N-i] + U[N-j, i])
-                        V_comm_2 = 0.25*(2*V[j, N-i] - U[N-i, N-j] + U[i, j])
-                        V_comm_3 = 0.25*(2*V[N-i, N-j] - U[N-j, i] + U[j, N-i])
-                        V_comm_4 = 0.25*(2*V[N-j, i] - U[i, j] + U[N-i, N-j])
-                        
-                        # gte a normalisation factor from l and k
-                        A = k**2 + l**2
-                        
-                        U_curl[i, j] = (U_comm_1*l + V_comm_1*(-k))*l/A
-                        V_curl[i, j] = (U_comm_1*l + V_comm_1*(-k))*(-k)/A
-                        U_curl[j, N-i] = (U_comm_2*(-k) + V_comm_2*(-l))*(-k)/A
-                        V_curl[j, N-i] = (U_comm_2*(-k) + V_comm_2*(-l))*(-l)/A
-                        U_curl[N-i, N-j] = (U_comm_3*(-l) + V_comm_3*k)*(-l)/A
-                        V_curl[N-i, N-j] = (U_comm_3*(-l) + V_comm_3*k)*k/A
-                        U_curl[N-j, i] = (U_comm_4*k + V_comm_4*l)*k/A
-                        V_curl[N-j, i] = (U_comm_4*k + V_comm_4*l)*l/A
-                    
-                # from that create VF instance
-                curl_vf = vector_field(dxg, dyg, U_curl, V_curl, self.str_x, self.str_y)
-                
-                # depending on preferances, return to user and plot
-                if inset == True:
-                    if axis != None:
-                        # Create inset axis in the current axis.
-                        q = 0.92
-                        curl_inset_ax = axis.inset_axes([0.5*(1 + q*x_m/L - insize), 0.5*(1 + q*y_m/L - insize), insize, insize])
-                        curl_vf.plot(curl_inset_ax)
-                        
-                        # return the zoomed on axis
-                        # also return zoomed in form in case user wants that.
-                        return curl_inset_ax, curl_vf
+                    if insize > 1 or insize < 0:
+                        raise ValueError('Insize must be +ve and less than one')
                     else:
-                        raise ValueError('Cannot inset without supplied axis')
-                else:
-                    # inset is false, just return the new zoomed in instance
-                    return curl_vf
+                        
+                        # If no inset, set the size of the zoom axis to allow normal plotting
+                        if inset == False:
+                            insize = 1
+                
+                        # Target coordinates
+                        x_m = target[0]
+                        y_m = target[1]
+                        
+                        # Get the size of the original VF
+                        L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+                        
+                        # Zoom axis range
+                        d_range = L/zoom
+                        
+                        # Size of the inset plot (default as 0.3)
+                        insize = 0.3 
+                        
+                        # Set up zoom window grids
+                        dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
+                        dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
+                        dxg, dyg = np.meshgrid(dx, dy)
+                        
+                        # Create variables for the user provided equation strings
+                        u_str = self.str_x
+                        v_str = self.str_y
+        
+                        # Create string to evaluate the field at the target location
+                        u_str_point = u_str.replace('x', 'x_m')
+                        u_str_point = u_str_point.replace('y', 'y_m')
+                        
+                        v_str_point = v_str.replace('x', 'x_m')
+                        v_str_point = v_str_point.replace('y', 'y_m')
+                        
+                        # Check if the equations provided contain x and y terms
+                        if u_str.find('x') & u_str.find('y') == -1:
+                            u_str_grid = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                        else:
+                            u_str_grid = u_str.replace('x', 'dxg')
+                            u_str_grid = u_str_grid.replace('y', 'dyg')
+                  
+                        if v_str.find('x') & v_str.find('y') == -1:
+                            v_str_grid = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
+                        else:
+                            v_str_grid = v_str.replace('x', 'dxg')
+                            v_str_grid = v_str_grid.replace('y', 'dyg')
+                            
+                        # Generate arrays for the components of the derivative field          
+                        U = eval(u_str_grid) - eval(u_str_point)
+                        V = eval(v_str_grid) - eval(v_str_point)
+                        
+                        # =============================================================================
+                        # Geometric Curl Method - See Documentation                
+                        # =============================================================================
+                        
+                        U_curl = np.zeros(shape=(dpd, dpd))
+                        V_curl = np.zeros(shape=(dpd, dpd))
+                        
+                        # Looping Constant
+                        N = dpd - 1
+                
+                        # Quadrant Points
+                        if dpd % 2 == 1:
+                            quad_x = int(dpd/2)
+                            quad_y = int((dpd+1)/2)
+                        else:
+                            quad_x = int(dpd/2)
+                            quad_y = int(dpd/2)
+                            
+                        for i in range(quad_x):
+                            # get the l number, for projection of j on radial / i on tangent
+                            l = i - 0.5*N
+                            
+                            # INNER LOOP
+                            for j in range(quad_y):
+                                # get the k number of projection: i on radial / j on tangent
+                                k = j - 0.5*N
+                                
+                                # get the commuting parts of V and W for each square corner
+                                # (x and y components of the subtracted field)
+                                U_comm_1 = 0.25*(2*U[i, j] + V[j, N-i] - V[N-j, i])
+                                U_comm_2 = 0.25*(2*U[j, N-i] + V[N-i, N-j] - V[i, j])
+                                U_comm_3 = 0.25*(2*U[N-i, N-j] + V[N-j, i] - V[j, N-i])
+                                U_comm_4 = 0.25*(2*U[N-j, i] + V[i, j] - V[N-i, N-j])
+                                
+                                V_comm_1 = 0.25*(2*V[i, j] - U[j, N-i] + U[N-j, i])
+                                V_comm_2 = 0.25*(2*V[j, N-i] - U[N-i, N-j] + U[i, j])
+                                V_comm_3 = 0.25*(2*V[N-i, N-j] - U[N-j, i] + U[j, N-i])
+                                V_comm_4 = 0.25*(2*V[N-j, i] - U[i, j] + U[N-i, N-j])
+                                
+                                # gte a normalisation factor from l and k
+                                A = k**2 + l**2
+                                
+                                U_curl[i, j] = (U_comm_1*l + V_comm_1*(-k))*l/A
+                                V_curl[i, j] = (U_comm_1*l + V_comm_1*(-k))*(-k)/A
+                                U_curl[j, N-i] = (U_comm_2*(-k) + V_comm_2*(-l))*(-k)/A
+                                V_curl[j, N-i] = (U_comm_2*(-k) + V_comm_2*(-l))*(-l)/A
+                                U_curl[N-i, N-j] = (U_comm_3*(-l) + V_comm_3*k)*(-l)/A
+                                V_curl[N-i, N-j] = (U_comm_3*(-l) + V_comm_3*k)*k/A
+                                U_curl[N-j, i] = (U_comm_4*k + V_comm_4*l)*k/A
+                                V_curl[N-j, i] = (U_comm_4*k + V_comm_4*l)*l/A
+                            
+                        # from that create VF instance
+                        curl_vf = vector_field(dxg, dyg, U_curl, V_curl, self.str_x, self.str_y)
+                        
+                        # depending on preferances, return to user and plot
+                        if inset == True:
+                            if axis != None:
+                                # Create inset axis in the current axis.
+                                q = 0.92
+                                curl_inset_ax = axis.inset_axes([0.5*(1 + q*x_m/L - insize), 0.5*(1 + q*y_m/L - insize), insize, insize])
+                                curl_vf.plot(curl_inset_ax)
+                                
+                                # return the zoomed on axis
+                                # also return zoomed in form in case user wants that.
+                                return curl_inset_ax, curl_vf
+                            else:
+                                raise ValueError('Cannot inset without supplied axis')
+                        else:
+                            # inset is false, just return the new zoomed in instance
+                            return curl_vf
         
         # define a method to change a supplied Vector filed to the 1-form
         def formalise(self, g=[['1', '0'], ['0', '1']]):

@@ -1484,7 +1484,7 @@ import matplotlib.pyplot as plt
 import timeit
 
 # Set up grids and components
-r = np.linspace(-1,5,21)
+r = np.linspace(-1,5,25)
 xg,yg=np.meshgrid(r,r)
 u = xg*np.cos(yg)
 v = -yg*np.sin(xg)
@@ -1495,9 +1495,26 @@ ax1 = fig1.add_subplot(131)
 ax2 = fig1.add_subplot(132)
 ax3 = fig1.add_subplot(133)
 
-# Plot field
 vf = fp.vector_field(xg,yg,u,v)
 vf.plot(ax1)
 vf.give_eqn('x*cos(y)','-y*cos(x)')
 
-zoomvf = vf.zoom(target=(1,1), zoom=10, inset=True, axis=ax1, insize=0.3332)
+# Need to adjust zooming such that fields not centred on (0,0) still work
+vf.zoom(target=(2,2), zoom=5, dpd=11, inset=True, axis=ax1, insize=0.4)
+
+
+#%%
+
+
+f1 = fp.form_1(xg,yg,u,v)
+f1.plot(ax1)
+f1.give_eqn('x*cos(y)','-y*cos(x)')
+
+vf = fp.vector_field(xg,yg,u,v)
+vf.plot(ax2)
+
+# Need to adjust zooming such that fields not centred on (0,0) still work
+f1z = f1.zoom(target=(2,2), zoom=5, dpd=11, inset=True, axis=ax1, insize=0.4)
+
+f1_ed = f1.ext_d()
+f1_ed.plot(ax3)
