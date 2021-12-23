@@ -125,7 +125,7 @@ F_x = xg/(xg**2 + yg**2)**1.5
 F_y = yg/(xg**2 + yg**2)**1.5
 
 # set up a figure, with subplots
-fig = plt.figure()
+fig = plt.figure(figsize=(10,5))
 ax1 = fig.add_subplot(121)
 ax2 = fig.add_subplot(122)
 ax1.set_aspect('equal')
@@ -192,7 +192,7 @@ form_2 = xg*yg
 form_2_obj = fp.form_2(xg, yg, form_2)
 
 # set up a figure, with subplots
-fig = plt.figure()
+fig = plt.figure(figsize=(10,5))
 ax1 = fig.add_subplot(121)
 ax2 = fig.add_subplot(122)
 ax1.set_aspect('equal')
@@ -262,7 +262,7 @@ ax.set_aspect('equal')
 
 vf1.plot(ax)
 
-zomm_axis, zoom_vf = vf1.zoom((2, 2), zoom=3, dpd=9, inset=True, axis=ax)
+zoom_axis, zoom_vf = vf1.zoom((2, 2), zoom=3, dpd=9, inset=True, axis=ax)
 
 #%%
 
@@ -363,7 +363,7 @@ ax.set_aspect('equal')
 
 form2.plot(ax)
 
-zoomed_ax, form2_zoomed = form2.zooming(target=[2, -3], zoom=10, dpd=9, inset=True, axis=ax)
+zoomed_ax, form2_zoomed = form2.zoom(target=[2, -3], zoom=10, dpd=9, inset=True, axis=ax)
 
 # %%
 
@@ -1475,3 +1475,29 @@ form_1_i_1.plot(ax3)
 form_1_i_2.plot(ax6)
 form_1_i_3.plot(ax5)
 form_1_i_4.plot(ax4)
+
+#%% Sam testing
+
+import formpy1 as fp
+import numpy as np
+import matplotlib.pyplot as plt
+import timeit
+
+# Set up grids and components
+r = np.linspace(-1,5,21)
+xg,yg=np.meshgrid(r,r)
+u = xg*np.cos(yg)
+v = -yg*np.sin(xg)
+
+# Create figure and axis for plotting
+fig1 = plt.figure(figsize=(15,5))
+ax1 = fig1.add_subplot(131)
+ax2 = fig1.add_subplot(132)
+ax3 = fig1.add_subplot(133)
+
+# Plot field
+vf = fp.vector_field(xg,yg,u,v)
+vf.plot(ax1)
+vf.give_eqn('x*cos(y)','-y*cos(x)')
+
+zoomvf = vf.zoom(target=(1,1), zoom=10, inset=True, axis=ax1, insize=0.3332)
