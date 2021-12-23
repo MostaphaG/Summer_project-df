@@ -1488,6 +1488,7 @@ r = np.linspace(-4,4,25)
 xg,yg=np.meshgrid(r,r)
 u = xg*np.cos(yg)
 v = -yg*np.sin(xg)
+Z = xg*np.cos(yg)
 
 # Create figure and axis for plotting
 fig1 = plt.figure(figsize=(12,6))
@@ -1504,9 +1505,9 @@ ax2 = fig1.add_subplot(122)
 # f1z.plot(ax2)
 
 # #%%
-f1 = fp.form_1(xg, yg, u, v)
+f1 = fp.form_2(xg, yg, Z)
 f1.plot(ax1)
-f1.give_eqn('x*cos(y)','-y*sin(x)')
+f1.give_eqn('x*cos(y)')
 
 f1z = f1.zoom(target=(1,1), zoom=5, dpd=11, inset=True, axis=ax1)
 # f1z.plot(ax2)

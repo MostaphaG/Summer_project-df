@@ -1046,8 +1046,8 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                         
                         q = 1
                         
-                        xi = (x_m - self.xg[0,0])/2*Lx
-                        yi = (y_m - self.yg[0,0])/2*Ly
+                        xi = (x_m - self.xg[0,0])/(2*Lx)
+                        yi = (y_m - self.yg[0,0])/(2*Ly)
                         
                         if inset == True:
                             if axis != None:
@@ -1785,8 +1785,8 @@ def form_2(xg, yg, form2, form_2_eq=None):
                         
                         q = 1
                         
-                        xi = (x_m - self.xg[0,0])/2*Lx
-                        yi = (y_m - self.yg[0,0])/2*Ly
+                        xi = (x_m - self.xg[0,0])/(2*Lx)
+                        yi = (y_m - self.yg[0,0])/(2*Ly)
                         
                         if inset == True:
                             if axis != None:
