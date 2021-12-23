@@ -2579,14 +2579,16 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                         y_m = target[1]
                         
                         # Get the size of the original VF
-                        L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+                        Lx = 0.5*(self.xg[0,-1] - self.xg[0,0])
+                        Ly = 0.5*(self.yg[-1,0] - self.yg[0,0])
                         
                         # Zoom axis range
-                        d_range = insize*L/zoom
+                        d_range_x = insize*Lx/zoom
+                        d_range_y = insize*Ly/zoom
                         
                         # Set up zoom window grids
-                        dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
-                        dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
+                        dx = np.linspace(-d_range_x + x_m, d_range_x + x_m, dpd)
+                        dy = np.linspace(-d_range_y + y_m, d_range_y + y_m, dpd)
                         dxg, dyg = np.meshgrid(dx, dy)
                         
                         # Create variables for the user provided equation strings
@@ -2613,12 +2615,18 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                         # from that create VF instance
                         zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom, self.str_x, self.str_y)
                         
+                        q = 0.92
+                        
+                        xi = (q*x_m - self.xg[0,0])/(2*Lx)
+                        yi = (q*y_m - self.yg[0,0])/(2*Ly)
+                        
                         # depending on preferances, return to user and plot
                         if inset == True:
                             if axis != None:
                                 # Create inset axis in the current axis.
-                                q = 0.92
-                                zoom_inset_ax = axis.inset_axes([0.5*(1 + q*x_m/L - insize), 0.5*(1 + q*y_m/L - insize), insize, insize])
+                                
+                                zoom_inset_ax = axis.inset_axes([(xi - 0.5*insize), (yi - 0.5*insize), insize, insize])
+                                # zoom_inset_ax = axis.inset_axes([0.5*(1 + q*x_m/L - insize), 0.5*(1 + q*y_m/L - insize), insize, insize])
                                 zoom_vf.plot(zoom_inset_ax)
                                 
                                 # return the zoomed on axis
