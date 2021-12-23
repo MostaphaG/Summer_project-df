@@ -963,7 +963,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             return result_form
             
         
-        def zoom(self, target=[0, 0], zoom=2, dpd=9, inset=True, axis=None, insize=0.3):
+        def zoom(self, target=[0, 0], zoom=2, dpd=9, inset=False, axis=None, insize=0.3):
             '''
             Create a new window which displays the field zoomed at a certain point
             User gives arguments
@@ -1007,14 +1007,16 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                         y_m = target[1]
                         
                         # Get the size of the original VF
-                        L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+                        Lx = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+                        Ly = 0.5*(self.yg[-1, 0] - self.yg[0, 0])
                         
                         # Zoom axis range
-                        d_range = insize*L/zoom
+                        d_range_x = insize*Lx/zoom
+                        d_range_y = insize*Ly/zoom
                         
                         # Set up zoom window grids
-                        dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
-                        dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
+                        dx = np.linspace(-d_range_x + x_m, d_range_x + x_m, dpd)
+                        dy = np.linspace(-d_range_y + y_m, d_range_y + y_m, dpd)
                         dxg, dyg = np.meshgrid(dx, dy)
                         
                         # Create variables for the user provided equation strings
@@ -1039,14 +1041,19 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                         v_zoom = eval(v_str)
                         
                         # crate the zoomed in form
-                        zoom_form = form_1(dxg, dyg, u_zoom, v_zoom)
+                        zoom_form = form_1(dxg, dyg, u_zoom, v_zoom, self.form_1_str_x, self.form_1_str_y)
                         zoom_form.sheet_size(1/dpd)
+                        
+                        q = 1
+                        
+                        xi = (x_m - self.xg[0,0])/2*Lx
+                        yi = (y_m - self.yg[0,0])/2*Ly
                         
                         if inset == True:
                             if axis != None:
                                 # Create inset axis in the current axis.
-                                q = 0.92
-                                zoom_inset_ax = axis.inset_axes([0.5*(1 + q*x_m/L - insize), 0.5*(1 + q*y_m/L - insize), insize, insize])
+                                
+                                zoom_inset_ax = axis.inset_axes([(xi - 0.5*insize), (yi - 0.5*insize), insize, insize])
                                 zoom_form.plot(zoom_inset_ax)
                                 
                                 # return the zoomed on axis
@@ -1747,14 +1754,17 @@ def form_2(xg, yg, form2, form_2_eq=None):
                         x_m = target[0]
                         y_m = target[1]
                         
-                        # Get the size of the original
-                        L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+                        # Get the size of the original VF
+                        Lx = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+                        Ly = 0.5*(self.yg[-1, 0] - self.yg[0, 0])
                         
-                        d_range = insize*L/zoom
+                        # Zoom axis range
+                        d_range_x = insize*Lx/zoom
+                        d_range_y = insize*Ly/zoom
                         
                         # Set up zoom window grids
-                        dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
-                        dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
+                        dx = np.linspace(-d_range_x + x_m, d_range_x + x_m, dpd)
+                        dy = np.linspace(-d_range_y + y_m, d_range_y + y_m, dpd)
                         dxg, dyg = np.meshgrid(dx, dy)
                         
                         # Create variables for the user provided equation strings
@@ -1773,14 +1783,16 @@ def form_2(xg, yg, form2, form_2_eq=None):
                         # from that create 2-form instance
                         zoomform2 = form_2(dxg, dyg, zoom_2form, self.form_2_str)
                         
-                        # depending on preferances, return to user and plot
+                        q = 1
+                        
+                        xi = (x_m - self.xg[0,0])/2*Lx
+                        yi = (y_m - self.yg[0,0])/2*Ly
+                        
                         if inset == True:
                             if axis != None:
                                 # Create inset axis in the current axis.
-                                q = 0.92
-                                zoom_inset_ax = axis.inset_axes([0.5*(1 + q*x_m/L - insize), 0.5*(1 + q*y_m/L - insize), insize, insize])
+                                zoom_inset_ax = axis.inset_axes([(xi - 0.5*insize), (yi - 0.5*insize), insize, insize])
                                 zoomform2.plot(zoom_inset_ax)
-                                
                                 # return the zoomed on axis
                                 # also return zoomed in form in case user wants that.
                                 return zoom_inset_ax, zoomform2
@@ -2615,7 +2627,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                         # from that create VF instance
                         zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom, self.str_x, self.str_y)
                         
-                        q = 0.92
+                        q = 1
                         
                         xi = (q*x_m - self.xg[0,0])/(2*Lx)
                         yi = (q*y_m - self.yg[0,0])/(2*Ly)
@@ -2626,7 +2638,6 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                                 # Create inset axis in the current axis.
                                 
                                 zoom_inset_ax = axis.inset_axes([(xi - 0.5*insize), (yi - 0.5*insize), insize, insize])
-                                # zoom_inset_ax = axis.inset_axes([0.5*(1 + q*x_m/L - insize), 0.5*(1 + q*y_m/L - insize), insize, insize])
                                 zoom_vf.plot(zoom_inset_ax)
                                 
                                 # return the zoomed on axis
@@ -2638,7 +2649,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                             # inset is false, just return the new zoomed in instance
                             return zoom_vf
             
-        def DF(self, target=[0, 0], zoom=2, dpd=9, inset=False, axis=None):
+        def DF(self, target=[0, 0], zoom=2, dpd=9, inset=False, axis=None, insize=0.3):
             '''
             Creates new vector field object at a target location, showing the derivative field at this point.
             User gives arguments:
@@ -2678,17 +2689,16 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                         y_m = target[1]
                         
                         # Get the size of the original VF
-                        L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+                        Lx = 0.5*(self.xg[0,-1] - self.xg[0,0])
+                        Ly = 0.5*(self.yg[-1,0] - self.yg[0,0])
                         
                         # Zoom axis range
-                        d_range = L/zoom
-                        
-                        # Size of the inset plot (default as 0.3)
-                        insize = 0.3  
+                        d_range_x = insize*Lx/zoom
+                        d_range_y = insize*Ly/zoom
                         
                         # Set up zoom window grids
-                        dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
-                        dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
+                        dx = np.linspace(-d_range_x + x_m, d_range_x + x_m, dpd)
+                        dy = np.linspace(-d_range_y + y_m, d_range_y + y_m, dpd)
                         dxg, dyg = np.meshgrid(dx, dy)
                         
                         # Create variables for the user provided equation strings
@@ -2722,12 +2732,18 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                         # from that create VF instance
                         deriv_vf = vector_field(dxg, dyg, U, V, self.str_x, self.str_y)
                         
+                        q = 1
+                        
+                        # Coordinates for plotting the inset axis
+                        xi = (q*x_m - self.xg[0,0])/(2*Lx)
+                        yi = (q*y_m - self.yg[0,0])/(2*Ly)
+                        
                         # depending on preferances, return to user and plot
                         if inset == True:
                             if axis != None:
                                 # Create inset axis in the current axis.
-                                q = 0.92
-                                deriv_inset_ax = axis.inset_axes([0.5*(1 + q*x_m/L - insize), 0.5*(1 + q*y_m/L - insize), insize, insize])
+                                
+                                deriv_inset_ax = axis.inset_axes([(xi - 0.5*insize), (yi - 0.5*insize), insize, insize])
                                 deriv_vf.plot(deriv_inset_ax)
                                 
                                 # return the zoomed on axis
@@ -2740,7 +2756,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                             return deriv_vf
         
             
-        def Div(self, target=[0,0], zoom=2, dpd=9, inset=False, axis=None):
+        def Div(self, target=[0,0], zoom=2, dpd=9, inset=False, axis=None, insize=0.3):
             '''
             Creates new vector field object at a target location, showing the Divergence of the field at this point.
             User gives arguments:
@@ -2779,18 +2795,17 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                         x_m = target[0]
                         y_m = target[1]
                         
-                        # Get the size of the original VF
-                        L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+                        # Get the size of the original VF# Get the size of the original VF
+                        Lx = 0.5*(self.xg[0,-1] - self.xg[0,0])
+                        Ly = 0.5*(self.yg[-1,0] - self.yg[0,0])
                         
                         # Zoom axis range
-                        d_range = L/zoom
-                        
-                        # Size of the inset plot (default as 0.3)
-                        insize = 0.3 
+                        d_range_x = insize*Lx/zoom
+                        d_range_y = insize*Ly/zoom
                         
                         # Set up zoom window grids
-                        dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
-                        dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
+                        dx = np.linspace(-d_range_x + x_m, d_range_x + x_m, dpd)
+                        dy = np.linspace(-d_range_y + y_m, d_range_y + y_m, dpd)
                         dxg, dyg = np.meshgrid(dx, dy)
                         
                         # Create variables for the user provided equation strings
@@ -2876,12 +2891,18 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                        # from that create VF instance
                         div_vf = vector_field(dxg, dyg, U_div, V_div, self.str_x, self.str_y)
                         
+                        q = 1
+                        
+                        # Coordinates for plotting the inset axis
+                        xi = (q*x_m - self.xg[0,0])/(2*Lx)
+                        yi = (q*y_m - self.yg[0,0])/(2*Ly)
+                        
                         # depending on preferances, return to user and plot
                         if inset == True:
                             if axis != None:
                                 # Create inset axis in the current axis.
-                                q = 0.92
-                                div_inset_ax = axis.inset_axes([0.5*(1 + q*x_m/L - insize), 0.5*(1 + q*y_m/L - insize), insize, insize])
+                                
+                                div_inset_ax = axis.inset_axes([(xi - 0.5*insize), (yi - 0.5*insize), insize, insize])
                                 div_vf.plot(div_inset_ax)
                                 
                                 # return the zoomed on axis
@@ -2893,7 +2914,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                             # inset is false, just return the new zoomed in instance
                             return div_vf
             
-        def Curl(self, target=[0,0], zoom=2, dpd=9, inset=False, axis=None):
+        def Curl(self, target=[0,0], zoom=2, dpd=9, inset=False, axis=None, insize=0.3):
             '''
             Creates new vector field object at a target location, showing local rotation (Curl)
             User gives arguments:
@@ -2932,18 +2953,17 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                         x_m = target[0]
                         y_m = target[1]
                         
-                        # Get the size of the original VF
-                        L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+                        # Get the size of the original VF# Get the size of the original VF
+                        Lx = 0.5*(self.xg[0,-1] - self.xg[0,0])
+                        Ly = 0.5*(self.yg[-1,0] - self.yg[0,0])
                         
                         # Zoom axis range
-                        d_range = L/zoom
-                        
-                        # Size of the inset plot (default as 0.3)
-                        insize = 0.3 
+                        d_range_x = insize*Lx/zoom
+                        d_range_y = insize*Ly/zoom
                         
                         # Set up zoom window grids
-                        dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
-                        dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
+                        dx = np.linspace(-d_range_x + x_m, d_range_x + x_m, dpd)
+                        dy = np.linspace(-d_range_y + y_m, d_range_y + y_m, dpd)
                         dxg, dyg = np.meshgrid(dx, dy)
                         
                         # Create variables for the user provided equation strings
@@ -3028,12 +3048,18 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                         # from that create VF instance
                         curl_vf = vector_field(dxg, dyg, U_curl, V_curl, self.str_x, self.str_y)
                         
+                        q = 1
+                        
+                        # Coordinates for plotting the inset axis
+                        xi = (q*x_m - self.xg[0,0])/(2*Lx)
+                        yi = (q*y_m - self.yg[0,0])/(2*Ly)
+                        
                         # depending on preferances, return to user and plot
                         if inset == True:
                             if axis != None:
                                 # Create inset axis in the current axis.
-                                q = 0.92
-                                curl_inset_ax = axis.inset_axes([0.5*(1 + q*x_m/L - insize), 0.5*(1 + q*y_m/L - insize), insize, insize])
+                                
+                                curl_inset_ax = axis.inset_axes([(xi - 0.5*insize), (yi - 0.5*insize), insize, insize])
                                 curl_vf.plot(curl_inset_ax)
                                 
                                 # return the zoomed on axis
