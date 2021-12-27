@@ -59,14 +59,6 @@ Attempts at optimising stackplot
 # ############################################################################
 
 
-def parity(x):
-    if x % 2 == 1:
-        result = False
-    elif x % 2 == 0:
-        result = True
-    return result
-
-
 def G(s, n, c):
     if c == 0:
         return ((2*s + 1)/(2*(n-1)))
@@ -75,6 +67,7 @@ def G(s, n, c):
 
 
 def stackplot(axis, xg, yg, F_x, F_y, s_max=6, s_min=2, color='green', w_head=1/8, h_head=1/4, fract=0.05, delta_factor=10, logarithmic_scale_bool=0, arrowheads=True):
+    global indexes
     # get the lengths of x and y from their grids
     x_len = len(xg[:, 0])
     y_len = len(yg[0, :])
@@ -84,6 +77,7 @@ def stackplot(axis, xg, yg, F_x, F_y, s_max=6, s_min=2, color='green', w_head=1/
     x0 = xg[0,0] + L
     y0 = yg[0,0] + L
     
+    # scale to size accordinly to deltafactor
     ax_L = L + L/delta_factor
     axis.set_xlim(-ax_L + x0, ax_L + x0)
     axis.set_ylim(-ax_L + y0, ax_L + y0)
@@ -92,6 +86,7 @@ def stackplot(axis, xg, yg, F_x, F_y, s_max=6, s_min=2, color='green', w_head=1/
     dist_points = xg[0, 1] - xg[0, 0]
     
     # define an empty array of magnitudes, to then fill with integer rel. mags
+    # these will dtermine, number of stacks to plot for each mag
     R_int = np.zeros(shape=((x_len), (y_len)))
 
     # #########################################################################
@@ -110,21 +105,37 @@ def stackplot(axis, xg, yg, F_x, F_y, s_max=6, s_min=2, color='green', w_head=1/
     
     # find regions ON GRID that are nan or inf as a bool array
     #bool_array = undef_region(mag)
-    
     # deal with infs and nans in mag
-    for i in range(x_len):
-        for j in range(y_len):
-            # set to zero points that are not defined or inf
-            if isnan(mag[i, j]) is True:
-                #colour this region as a shaded square
+    isnan_arr = np.isnan(mag)
+    indexes = np.vstack(np.nonzero(isnan_arr))
+    if indexes.size != 0:
+        for i in indexes[:, 0]:
+            for j in indexes[:, 1]:
                 rect = patch.Rectangle((xg[i, j] - dist_points/2, yg[i, j]  - dist_points/2), dist_points, dist_points, color='#B5B5B5')
                 axis.add_patch(rect)
                 mag[i, j] = 0
+    for i in range(x_len):
+        for j in range(y_len):
             if abs(mag[i, j]) == np.inf  or abs(mag[i, j]) > 1e15:
                 # colour this point as a big red dot
                 circ = patch.Circle((xg[i, j], yg[i, j]), L*fract/3, color='red')
                 axis.add_patch(circ)
                 mag[i, j] = 0
+    
+#    isnan_arr = np.isnan(mag)
+#    for i in range(x_len):
+#        for j in range(y_len):
+#            # set to zero points that are not defined or inf
+#            if isnan_arr[i, j] is True:
+#                #colour this region as a shaded square
+#                rect = patch.Rectangle((xg[i, j] - dist_points/2, yg[i, j]  - dist_points/2), dist_points, dist_points, color='#B5B5B5')
+#                axis.add_patch(rect)
+#                mag[i, j] = 0
+#            if abs(mag[i, j]) == np.inf  or abs(mag[i, j]) > 1e15:
+#                # colour this point as a big red dot
+#                circ = patch.Circle((xg[i, j], yg[i, j]), L*fract/3, color='red')
+#                axis.add_patch(circ)
+#                mag[i, j] = 0
     
     # #########################################################################
     # use the the direction of arrows to define stack properties
@@ -205,7 +216,7 @@ def stackplot(axis, xg, yg, F_x, F_y, s_max=6, s_min=2, color='green', w_head=1/
                 continue
             
             # deal with even number of sheets from magnitudes:
-            if parity(n) is True:
+            if n % 2 == 0:
                 # define a parameter to loop over in the recursion equation
                 s = 0
                 
@@ -229,7 +240,7 @@ def stackplot(axis, xg, yg, F_x, F_y, s_max=6, s_min=2, color='green', w_head=1/
                     # update parameter to reapet and draw all needed arrows
                     s += 1
             # deal with the odd number of stacks:
-            elif parity(n) is False:
+            else:
                 # Add the centre line for odd numbers of stacks
                 axis.add_line(Line2D((A_x[i, j], B_x[i, j]), (A_y[i, j], B_y[i, j]), linewidth=1, color=color))
                 

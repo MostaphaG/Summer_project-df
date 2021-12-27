@@ -15,19 +15,17 @@ from numpy import sinh, cosh, arcsinh, arccosh, arctanh, exp, pi, e
 
 # define some functions that are not very important to user but are useful
 # for other functions we write:
-
-
 # deifne a fucntion to check number parity
-def parity(x):
-    '''
-    return True when number provided is even and False when it is odd. Checks
-    integers only, and not arrays.
-    '''
-    if x % 2 == 1:
-        result = False
-    elif x % 2 == 0:
-        result = True
-    return result
+#def parity(x):
+#    '''
+#    return True when number provided is even and False when it is odd. Checks
+#    integers only, and not arrays.
+#    '''
+#    if x % 2 == 1:
+#        result = False
+#    elif x % 2 == 0:
+#        result = True
+#    return result
 
 
 # define function that sets the recursion constant for the loop to plot stacks
@@ -431,10 +429,11 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             #bool_array = undef_region(mag)
             
             # deal with infs and nans in mag
+            isnan_arr = np.isnan(mag)
             for i in range(x_len):
                 for j in range(y_len):
                     # set to zero points that are not defined or inf
-                    if isnan(mag[i, j]) is True:
+                    if isnan_arr[i, j] is True:
                         #colour this region as a shaded square
                         rect = patch.Rectangle((self.xg[i, j] - dist_points/2, yg[i, j]  - dist_points/2), dist_points, dist_points, color='#B5B5B5')
                         axis.add_patch(rect)
@@ -524,7 +523,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                         continue
                     
                     # deal with even number of sheets from magnitudes:
-                    if parity(n) is True:
+                    if n % 2 == 0:
                         # define a parameter to loop over in the recursion equation
                         s = 0
                         
@@ -548,7 +547,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                             # update parameter to reapet and draw all needed arrows
                             s += 1
                     # deal with the odd number of stacks:
-                    elif parity(n) is False:
+                    else:
                         # Add the centre line for odd numbers of stacks
                         axis.add_line(Line2D((A_x[i, j], B_x[i, j]), (A_y[i, j], B_y[i, j]), linewidth=1, color=self.color))
                         
@@ -1509,10 +1508,11 @@ def form_2(xg, yg, form2, form_2_eq=None):
             angles =[0*np.ones(np.shape(form2)), (np.pi/2)*np.ones(np.shape(form2))]
             
             # deal with sinularities that appear on evaluated points
+            isnan_arr = np.isnan(form2)
             for i in range(x_len):
                 for j in range(y_len):
                     # set to zero points that are not defined or inf
-                    if isnan(form2[i, j]) is True or abs(form2[i, j]) == np.inf  or abs(form2[i, j]) > 1e15:
+                    if isnan_arr[i, j] is True or abs(form2[i, j]) == np.inf  or abs(form2[i, j]) > 1e15:
                         # colour this region as a red dot, not square to
                         # not confuse with nigh mag 2-forms in stacks. or worse, in
                         # blocks
@@ -1587,7 +1587,7 @@ def form_2(xg, yg, form2, form_2_eq=None):
                         n = R_int[i, j]
                         
                         # deal with even number of sheets from magnitudes:
-                        if parity(n) is True:
+                        if n % 2 == 0:
                             # define a parameter to loop over in the recursion equation
                             s = 0
                             
@@ -1611,7 +1611,7 @@ def form_2(xg, yg, form2, form_2_eq=None):
                                 # update parameter to reapet and draw all needed arrows
                                 s += 1
                         # deal with the odd number of stacks:
-                        elif parity(n) is False:
+                        else:
                             # Add the centre line for odd numbers of stacks
                             axis.add_line(Line2D((A_x[i, j], B_x[i, j]), (A_y[i, j], B_y[i, j]), linewidth=0.7, color=self.colour_list[color_index]))
                             
@@ -2144,10 +2144,11 @@ def form_0(xg, yg, form_0, form_0_eqn=None):
                         form_0_contour = eval(zero_form_str)
                     
                     # deal with sinularities that appear on evaluated points
+                    isnan_arr = np.isnan(form_0_contour)
                     for i in range(len(xg[0, :])):
                         for j in range(len(yg[:, 0])):
                             # set to zero points that are not defined or inf
-                            if isnan(form_0_contour[i, j]) is True or abs(form_0_contour[i, j]) == np.inf  or abs(form_0_contour[i, j]) > 1e15:
+                            if isnan_arr[i, j] or abs(form_0_contour[i, j]) == np.inf  or abs(form_0_contour[i, j]) > 1e15:
                                 # colour this region as a red dot, not square to
                                 # not confuse with nigh mag 2-forms in stacks. or worse, in
                                 # blocks
@@ -2518,9 +2519,10 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             
             # prevent any magnitudes from being inf or nan
             # only here, need to do it to u and v not just mag
+            isnan_arr = np.isnan(F_x_local)
             for i in range(x_len):
                 for j in range(y_len):
-                    if isnan(F_x_local[i,j]) == True or isnan(F_y_local[i,j]) == True or abs(F_x_local[i, j]) == np.inf or abs(F_y_local[i, j]) == np.inf or abs(F_y_local[i, j]) > 1e15 or abs(F_x_local[i, j]) > 1e15:
+                    if isnan_arr[i,j] or isnan(F_y_local[i,j]) == True or abs(F_x_local[i, j]) == np.inf or abs(F_y_local[i, j]) == np.inf or abs(F_y_local[i, j]) > 1e15 or abs(F_x_local[i, j]) > 1e15:
                         F_x_local[i,j] = F_y_local[i,j] = 0
             
             
