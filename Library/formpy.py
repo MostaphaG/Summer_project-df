@@ -4,17 +4,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
-from matplotlib.backends.backend_tkagg import (
-    FigureCanvasTkAgg, NavigationToolbar2Tk)
-import matplotlib as mpl
 from sympy import diff, simplify
 from sympy.parsing.sympy_parser import parse_expr
 from math import isnan
 from matplotlib import patches as patch
-import matplotlib.path as mplPath
-from matplotlib import animation
-from scipy.integrate import odeint
-import matplotlib.path as mPath
 
 # input many numpy functions to deal with user input
 from numpy import sin, cos, tan, sqrt, log, arctan, arcsin, arccos, tanh
@@ -22,6 +15,7 @@ from numpy import sinh, cosh, arcsinh, arccosh, arctanh, exp, pi, e
 
 # define some functions that are not very important to user but are useful
 # for other functions we write:
+
 
 # deifne a fucntion to check number parity
 def parity(x):
@@ -158,7 +152,7 @@ function to create a 1-form object and define methods for it
 
 # define a function taht will set up a 1-form object that can be customised and
 # plotted
-def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=False, sub_axis_list=[]):
+def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
     '''
     defines a 1-form object and returns it to user
     Takes 9 arguments, these are the 2 grids in 2D, which muse be square
@@ -175,33 +169,15 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
     # define the 1-form object and all its methods
     class form_set_up():
         # set up all variables
-        def __init__(self, xg, yg, F_x, F_y, s_max=6, s_min=2, fract=0.05, deltafactor=10, fig_size=[7, 7]):
+        def __init__(self, xg, yg, F_x, F_y):
             self.xg = xg
             self.yg = yg
             self.F_x = F_x
             self.F_y = F_y
-            # set up a figure if one was not given:
-            if fig == None:
-                self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
-                self.axis = self.figure.gca()
-            else:
-                if subplots is False:
-                    self.figure = fig
-                    self.axis  = self.figure.gca()
-                elif subplots is True:
-                    if len(sub_axis_list) == 0:
-                        self.figure = fig
-                        self.axis = []
-                    else:
-                        self.figure = fig
-                        self.axis = sub_axis_list
-                else:
-                    raise TypeError('Error, incorrect input for \'subplots\'')
-            self.subplots = subplots
-            self.s_max = s_max
-            self.s_min = s_min
+            self.s_max = 6
+            self.s_min = 2
             self.pt_den = len(xg[:, 0])# + 1  # assume square grids
-            self.fract = fract
+            self.fract = 0.05
             self.orientation = 'mid'
             self.scale = 1
             self.w_head = 1/8
@@ -210,7 +186,8 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             self.color = 'green'
             self.logarithmic_scale_bool = 0
             self.scale_bool = True
-            self.delta_factor = deltafactor
+            self.delta_factor = 10
+            
             if F_x_eqn is not None:
                 self.form_1_str_x = str(simplify(F_x_eqn))  # to start with, use rmust change to access some methods
                 # Note, the string must be given with x and y as variables
@@ -220,7 +197,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             if F_y_eqn is not None:
                 self.form_1_str_y = str(simplify(F_y_eqn))
             else:
-                self.form_1_str_x = None
+                self.form_1_str_y = None
             
         # #####################################################################
         # write some methods that will allow the user to chenge some of the
@@ -266,32 +243,6 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             that got here not by input but by ext. alg.
             '''
             return self.form_1_str_x, self.form_1_str_y
-        
-        # define a method to add a subplot
-        def add_subplot(self, order):
-            '''
-            Takes in one argument, as as matplotlib add_subplot
-            It determines the shape of the subplot structure and which axis is
-            being set (eg. 231 gives a set of plots 2 rows by 3 columns
-            and this sets the first axis in that configuration)
-            Adds a subplot to the figure that this form occupies
-            Returns nothing, saves the subplot axis to the axis self param.
-            '''
-            # chck if the correct option was chosen to allow for this:
-            if type(self.axis) != list:
-                raise ValueError('Error, set up the object allowing for subplots')
-            else:
-                sub_axis = self.figure.add_subplot(order)
-                self.axis.append(sub_axis)
-        
-        # define a method to change figure size
-        def fig_size(self, n, m):
-            ''' Takes two inputs, float or int numbers, sets the figure
-            size to these dimensions in inches. Uses set_size_inches from
-            matploitlib so can just use that on
-            the atribute figure, this function is here just for
-            easier nameing'''
-            self.figure.set_size_inches(n, m)
         
         # change colour
         def colour(self, color):
@@ -434,33 +385,14 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
         
         # define a fucntion that will use the set up 1-form and plot it
         # stcakplot: but it takes the above defined variables:
-        def plot(self, keep=True, subplot_index=None):
+        def plot(self, axis):
             '''
             Finilises the plotting
             Uses the attribues of the object as set originally and as customised
             with methods to create a plot of the 1-form
-            Takes in 2 arguments:
-            --- \'keep\', which allows the user to plot
-            on top of the previous pltos they created without clearing axis
-            When its set to False, the axis are cleared first
-            Default is True.
-            --- \' subplot_index \', default set to None, can be input if
-            the user has selected subplots to be allowed when creating the
-            object. Determines which aixs to draw on, indecies are in order
-            that they were added to the object
+            Takes in 1 argument:
+                axis: matplotlib axes that the plot it to be put on
             '''
-            # from self, get axis
-            # depending on if subplots are wanted:
-            if type(self.axis) != list:
-                axis = self.axis
-            else:
-                axis = self.axis[subplot_index]
-            
-            # depending on input, clear the axis or don't
-            if keep is True:
-                pass
-            else:
-                axis.clear()
             
             # get the lengths of x and y from their grids
             x_len = len(self.xg[:, 0])
@@ -654,12 +586,9 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                         pass
         
         # define a method to find its exterior derivative
-        def ext_d(self, pass_on_figure=False):
+        def ext_d(self):
             '''
-            Takes in 1 argument:
-            determines if the figure should be passed onto the 2-form
-               object that is returned, or if it should create one of its own
-            Returns 2 form object.
+            Takes in no arguments
             Computes the exterior derivative and returns it
             as the 2-form object
             '''
@@ -763,26 +692,16 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                 
                 form_2_result = eval(form_2_str)
                 
-                if pass_on_figure is False:
-                    # supply these to the 2-form object creator
-                    result_form = form_2(self.xg, self.yg, form_2_result, form_2_str_loc)
-                elif pass_on_figure is True:
-                    if self.subplots is False:
-                        result_form = form_2(self.xg, self.yg, form_2_result, form_2_str_loc, fig=self.figure, subplots=False)
-                    elif self.subplots is True:
-                        result_form = form_2(self.xg, self.yg, form_2_result, form_2_str_loc, fig=self.figure, subplots=True, sub_axis_list=self.axis)
-                else:
-                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                # set up object to return to user
+                result_form = form_2(self.xg, self.yg, form_2_result, form_2_str_loc)
                 
                 # return it to the user
                 return result_form
         
         # define a funciton to complete numerical only curl
-        def num_ext_d(self, pass_on_figure=False):
+        def num_ext_d(self):
             '''
-            Takes in 1 argument:
-            --- pass on figure: Determies if figure should be passed onto the
-               new object if it is to be created
+            Takes in no arguments
              
             returns 2-form object
             computes the exterior derivative numerically only
@@ -831,25 +750,16 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             #form_2_result = 0.5*(form_2_result + form_2_result.transpose())
             
             # return 2-form object to user
-            if pass_on_figure is False:
-                # supply these to the 2-form object creator
-                result_form = form_2(self.xg, self.yg, form_2_result)
-            elif pass_on_figure is True:
-                if self.subplots is False:
-                    result_form = form_2(self.xg, self.yg, form_2_result, fig=self.figure, subplots=False)
-                elif self.subplots is True:
-                    result_form = form_2(self.xg, self.yg, form_2_result, fig=self.figure, subplots=True, sub_axis_list=self.axis)
-            else:
-                raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
-                
+            result_form = form_2(self.xg, self.yg, form_2_result)
+            
             # return it to the user
             return result_form
         
         
         # define a method to Hodge it
-        def Hodge(self, numerical_only=True, keep_object=True, pass_on_figure=False):
+        def Hodge(self, numerical_only=True, keep_object=True):
             '''
-            Takes in three bool arguments:
+            Takes in two bool arguments:
             1) determines if the calculation should be numerical or analytic
             True if numerical, False if analytic and numerical. Default is True
             For the analytic one, the equations as string must be supplied to
@@ -857,10 +767,10 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             Note, choosing analytical, changes the equations AND the numerical answers
             2) determines if the result should be returned as a new 1-form or
                 if the current one need to be changed. Default is True
-            3) Determies if figure should be passed onto the new object
-                if it is to be created
+            
             It calulates the Hodge on R^2 by the standard definition:
             dx -> dy and dy -> -dx
+            
             return nothing 1-form if keep_object is False, else returns nothing
             '''
             # distinguish between doing it numerically and alaytically
@@ -868,12 +778,9 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                 # check if equations have been given:
                 # if they have, doing it only numerically would create
                 # a mismatch, avoid that
-                if self.form_1_str_x == None or self.form_1_str_y == None:
-                    pass
-                else:
-                    # equations have been given, a mismatch may occur
-                    # warn the user
+                if self.form_1_str_x != None or self.form_1_str_y != None:
                     print('Warning: You supplied equations, doing it numerically only will result in a mismacth between numerical values and equations')
+                
                 # now complete the process numerically save as instructed
                 # check keep_object:
                 if keep_object is True:
@@ -884,19 +791,8 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                     self.F_y = new_y
                 elif keep_object is False:
                     # pass these in to the object to create a new one:
-                    # DEPENDING ON FIGURES AND SUBPLOTS:
                     # N.B no equations to supply
-                    if pass_on_figure is False:
-                        # supply these to the 2-form object creator
-                        new_object = form_1(self.xg, self.yg, -self.F_y, self.F_x)
-                    elif pass_on_figure is True:
-                        if self.subplots is False:
-                            new_object = form_1(self.xg, self.yg, -self.F_y, self.F_x, fig=self.figure, subplots=False)
-                        elif self.subplots is True:
-                            new_object = form_1(self.xg, self.yg, -self.F_y, self.F_x, fig=self.figure, subplots=True, sub_axis_list=self.axis)
-                    else:
-                        raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
-                
+                    new_object = form_1(self.xg, self.yg, -self.F_y, self.F_x)
                     # return the new one to the user:
                     return new_object
                 else:
@@ -938,32 +834,22 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                         self.form_1_str_x = form_1_x_unformated
                         self.form_1_str_y = form_1_y_unformated
                     elif keep_object is False:
-                        if pass_on_figure is True:
-                            # pass these in to the object to create a new one:
-                            if self.subplots is False:
-                                new_object = form_1(self.xg, self.yg, form_1_x, form_1_y, F_x_eqn=form_1_x_unformated, F_y_eqn=form_1_y_unformated, fig=self.figure, subplots=False)
-                            elif self.subplots is True:
-                                new_object = form_1(self.xg, self.yg, form_1_x, form_1_y, F_x_eqn=form_1_x_unformated, F_y_eqn=form_1_y_unformated, fig=self.figure, subplots=True, sub_axis_list=self.axis)
-                        elif pass_on_figure is False:
-                            new_object = form_1(self.xg, self.yg, -self.F_y, self.F_x)
-                        else:
-                            raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                        new_object = form_1(self.xg, self.yg, form_1_x, form_1_y, F_x_eqn=form_1_x_unformated, F_y_eqn=form_1_y_unformated)
                         # return the new one to the user:
                         return new_object
                     else:
                         raise ValueError('Error, Invalid input for \'keep_object\'')
             else:
                 # Error
-                raise ValueError('ERROR: Invalid input for \'numerical_only\'')
+                raise ValueError('Invalid input for \'numerical_only\'')
             
         
         # define a fucntion to compute a wedge product of two 1 forms
-        def wedge_analytical(self, equation_2_x, equation_2_y, pass_on_figure=False):
+        def wedge_analytical(self, form_1_second):
             '''
-            Takes in 3 arguments, 2 are for the strings of the other form to
-            wedge with this one.
-            Third determines if figure from this object is to be passed on
-            to the 2-form object
+            Takes in 2 arguments, for the strings of the other form to
+            wedge with this one as a tuple or as a 1-form object with equations
+            If none are gievn, does wedge with (1, 1)
             To do so here, strings for the form must be supplied.
             Computes the Wedge product using strings, ANALYTICALLY
             Returns a 2-form object
@@ -972,8 +858,25 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             # window is opened again
             to_wedge_x_1_str = self.form_1_str_x
             to_wedge_y_1_str = self.form_1_str_y
-            to_wedge_x_2_str = equation_2_x
-            to_wedge_y_2_str = equation_2_y
+            
+            # get needed second obejct strings dep. on input
+            if form_1_second is None:
+                # if none was given, do it with respect to uniform 1, 1
+                to_wedge_x_2_str = '1'
+                to_wedge_y_2_str = '1'
+            elif type(form_1_second) == tuple:
+                # if numerical grids were given, take these, is equations were given here, break!
+                if type(form_1_second[0]) != str or type(form_1_second[1]) != str:
+                    raise ValueError('for analytical calulation, supply 1-form equations as strings')
+                else:
+                    # not checked for all posibilites, expect them to be strings
+                    to_wedge_x_2_str = form_1_second[0]
+                    to_wedge_y_2_str = form_1_second[1]
+            else:
+                # object supplied, get numericals
+                to_wedge_x_2_str = form_1_second.F_x
+                to_wedge_y_2_str = form_1_second.F_y
+            
             # first, find the result of the 2-form
             # this if, in terms of the above commented fields:
             # 2-form = f*m - g*h
@@ -988,37 +891,24 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             form_2_str = form_2_str.replace('y', 'self.yg')
             if form_2_str.find('x') & form_2_str.find('y') == -1:
                 form_2_str = '(' + str(form_2_str) + ')* np.ones(np.shape(self.xg))'
-            else:
-                pass
             
             # evaluate it numerically on the grid supplied
             form_2_result = eval(form_2_str)
-            # create a 2-form object from this; to return.
-            # do this depending on what return figures was chosen
-            if pass_on_figure is False:
-                ret_object = form_2(self.xg, self.yg, form_2_result, form_2_str_loc)
-            elif pass_on_figure is True:
-                if self.subplots is False:
-                    ret_object = form_2(self.xg, self.yg, form_2_result, form_2_str_loc, fig=self.figure, subplots=False)
-                elif self.subplots is True:
-                    ret_object = form_2(self.xg, self.yg, form_2_result, form_2_str_loc, fig=self.figure, subplots=True, sub_axis_list=self.axis)
-            else:
-                raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
             
-            # return the resulting object
+            # create a 2-form object from this; to return and do so
+            ret_object = form_2(self.xg, self.yg, form_2_result, form_2_str_loc)
             return ret_object
         
         
         # define a method for numerical wedge product
-        def wedge_num(self, form_1_second=None, pass_on_figure=False):
+        def wedge_num(self, form_1_second=None):
             '''
             Takes in 2 arguments:
             The first one is the form_1_second, either as:
                 --- 1-form object
                 --- numerical components
             If none supplied, assumed to be a (1, 1) 1-form
-            Third determines if figure from this object is to be passed on
-            to the 2-form object
+            
             Computes the Wedge product numerically
             Returns a 2-form object
             '''
@@ -1036,9 +926,20 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                 f12_x = np.ones(np.shape(self.xg))
                 f12_y = np.ones(np.shape(self.xg))
             elif type(form_1_second) == tuple:
-                # if numerical grids were given, take these, is equations were given here, break!
-                if type(form_1_second[0]) == str:
-                    raise ValueError('for numerical calulation, supply 1-form arrays, not equations')
+                # if numerical grids were given, take these, if equations, change to values on grids:
+                if type(form_1_second[0]) == str and type(form_1_second[1]) == str:
+                    new_str_x = form_1_second[0].replace('x', '(self.xg)')
+                    new_str_x = new_str_x.replace('y', '(self.yg)')
+                    new_str_y = form_1_second[1].replace('x', '(self.xg)')
+                    new_str_y = new_str_y.replace('y', '(self.yg)')
+                    
+                    if new_str_x.find('x') & new_str_x.find('y') == -1:
+                        new_str_x = '(' + str(new_str_x) + ')* np.ones(np.shape(self.xg))'
+                    if new_str_y.find('x') & new_str_y.find('y') == -1:
+                        new_str_y = '(' + str(new_str_y) + ')* np.ones(np.shape(self.yg))'
+                    
+                    f12_x = eval(new_str_x)
+                    f12_y = eval(new_str_y)
                 else:
                     f12_x = form_1_second[0]
                     f12_y = form_1_second[1]
@@ -1047,7 +948,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                 f12_x = form_1_second.F_x
                 f12_y = form_1_second.F_y
                 
-                # warn user if equations were given too:
+                # warn user if equations were given in object too:
                 if form_1_second.form_1_str_x == None or form_1_second.form_1_str_y == None:
                     pass
                 else:
@@ -1058,28 +959,28 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             result = self.F_x * f12_y - self.F_y * f12_x
             
             # return it to user:
-            if pass_on_figure is False:
-                # supply these to the 0-form object creator
-                result_form = form_2(self.xg, self.yg, result)
-            elif pass_on_figure is True:
-                if self.subplots is False:
-                    result_form = form_2(self.xg, self.yg, result, fig=self.figure, subplots=False)
-                elif self.subplots is True:
-                    result_form = form_2(self.xg, self.yg, result, fig=self.figure, subplots=True, sub_axis_list=self.axis)
-            else:
-                raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
-            
-            # return it to the user
+            result_form = form_2(self.xg, self.yg, result)
             return result_form
             
         
-        def zoom(self, target=[0,0], zoom=2, dpd=9):
+        def zoom(self, target=[0, 0], zoom=2, dpd=9, inset=False, axis=None, insize=0.3):
             '''
             Create a new window which displays the field zoomed at a certain point
             User gives arguments
             Target: Determines the zoom location, coordinates
             Zoom: +ve float, determines zooming amount
             dpd: +int, determines how many points on each axis
+            inset - bool - determines if zoom is to plotted as an inset
+                    if True, need to also give axis on which to plot
+            axis - matplotlib axes instance - on it, the instance will plot.
+            insize - float - size of inset as fraction of total figure
+            
+            returns:
+            --------------
+                if inset is False, returns the zoomed in insatnce as a 0-form
+                object
+                if inset if True, returns the inset axis, with the plot on them
+                on top of the given axis and the 0-form instance
             '''
             
             # Requires user to provide eqn of the 1-form they are zooming on.
@@ -1088,47 +989,86 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                 # ERROR
                 raise TypeError('Error: No equation provided')
             else:
-                
-                # Target coordinates
-                x_m = target[0]
-                y_m = target[1]
-                
-                d_range = self.xg[0, -1]/zoom
-                #d_length = 
-                
-                # Set up zoom window grids
-                dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
-                dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
-                dxg, dyg = np.meshgrid(dx, dy)
-                
-                # Create variables for the user provided equation strings
-                u_str = self.form_1_str_x
-                v_str = self.form_1_str_y
-                
-                # Check if the equations provided contain x and y terms
-                if u_str.find('x') & u_str.find('y') == -1:
-                    u_str = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                 # Zoom must be one or greater
+                if zoom < 1:
+                    raise ValueError('Zoom must be greater than one')
                 else:
-                    u_str = u_str.replace('x', 'dxg')
-                    u_str = u_str.replace('y', 'dyg')
-          
-                if v_str.find('x') & v_str.find('y') == -1:
-                    v_str = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
-                else:
-                    v_str = v_str.replace('x', 'dxg')
-                    v_str = v_str.replace('y', 'dyg')
                     
-                # Generate arrays for the components of the zoom field
-                u_zoom = eval(u_str)
-                v_zoom = eval(v_str)
+                    if insize > 1 or insize < 0:
+                        raise ValueError('Insize must be +ve and less than one')
+                    else:
+                        
+                        # If no inset, set the size of the zoom axis to allow normal plotting
+                        if inset == False:
+                            insize = 1
                 
-                zoom_form = form_1(dxg, dyg, u_zoom, v_zoom)
-                
-                return zoom_form
+                        # Target coordinates
+                        x_m = target[0]
+                        y_m = target[1]
+                        
+                        # Get the size of the original VF
+                        Lx = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+                        Ly = 0.5*(self.yg[-1, 0] - self.yg[0, 0])
+                        
+                        # Zoom axis range
+                        d_range_x = insize*Lx/zoom
+                        d_range_y = insize*Ly/zoom
+                        
+                        # Set up zoom window grids
+                        dx = np.linspace(-d_range_x + x_m, d_range_x + x_m, dpd)
+                        dy = np.linspace(-d_range_y + y_m, d_range_y + y_m, dpd)
+                        dxg, dyg = np.meshgrid(dx, dy)
+                        
+                        # Create variables for the user provided equation strings
+                        u_str = self.form_1_str_x
+                        v_str = self.form_1_str_y
+                        
+                        # Check if the equations provided contain x and y terms
+                        if u_str.find('x') & u_str.find('y') == -1:
+                            u_str = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                        else:
+                            u_str = u_str.replace('x', 'dxg')
+                            u_str = u_str.replace('y', 'dyg')
+                  
+                        if v_str.find('x') & v_str.find('y') == -1:
+                            v_str = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
+                        else:
+                            v_str = v_str.replace('x', 'dxg')
+                            v_str = v_str.replace('y', 'dyg')
+                            
+                        # Generate arrays for the components of the zoom field
+                        u_zoom = eval(u_str)
+                        v_zoom = eval(v_str)
+                        
+                        # crate the zoomed in form
+                        zoom_form = form_1(dxg, dyg, u_zoom, v_zoom, self.form_1_str_x, self.form_1_str_y)
+                        zoom_form.sheet_size(1/dpd)
+                        
+                        q = 1
+                        
+                        xi = (x_m - self.xg[0,0])/(2*Lx)
+                        yi = (y_m - self.yg[0,0])/(2*Ly)
+                        
+                        if inset == True:
+                            if axis != None:
+                                # Create inset axis in the current axis.
+                                
+                                zoom_inset_ax = axis.inset_axes([(xi - 0.5*insize), (yi - 0.5*insize), insize, insize])
+                                zoom_form.plot(zoom_inset_ax)
+                                
+                                # return the zoomed on axis
+                                # also return zoomed in form in case user wants that.
+                                return zoom_inset_ax, zoom_form
+                            else:
+                                raise ValueError('Cannot inset without supplied axis')
+                        else:
+                            # inset is false, just return the new zoomed in instance
+                            return zoom_form
+        
         
         # define a mehtod to evaluate the interior derivative of the 1-form
         # with respect to a given vector field object or without.
-        def interior_d(self, vector_field=None, pass_on_figure=False, numerical_only=False):
+        def interior_d(self, vector_field=None, numerical_only=False):
             '''
             Computes the interior derivative of the 1-form
             Takes in:
@@ -1138,9 +1078,6 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             (eqn_x, eqn_y). If using numerical only, can supply object or
             tuple of numpy arrays (array_x, atrray_y). If nothing is supplied
             for it, it assumes F_x = 1 and F_y = 1, with correct form and shape
-            
-            -- pass_on_figure = determines if figure from this object is to be
-            passed on to the 0-form object.
             
             --- numerical_only = bool, if true, it calculates only numerically
             otherwise, calculates it based on given equations, evaluates
@@ -1196,17 +1133,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                 
                 # return it, with equations, to user, depending on their figure
                 # preferances
-                
-                if pass_on_figure is False:
-                    # supply these to the 0-form object creator
-                    result_form = form_0(self.xg, self.yg, zero_form_result, zero_form_str_unformatted)
-                elif pass_on_figure is True:
-                    if self.subplots is False:
-                        result_form = form_0(self.xg, self.yg, zero_form_result, zero_form_str_unformatted, fig=self.figure, subplots=False)
-                    elif self.subplots is True:
-                        result_form = form_0(self.xg, self.yg, zero_form_result, zero_form_str_unformatted, fig=self.figure, subplots=True, sub_axis_list=self.axis)
-                else:
-                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                result_form = form_0(self.xg, self.yg, zero_form_result, zero_form_str_unformatted)
                 
                 # return it to the user
                 return result_form
@@ -1244,23 +1171,14 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
                 # Complete the interior derivative 1-form --> 0-form:
                 zero_form_result = self.F_x * vf_x + self.F_y * vf_y
                 
-                # return it to user:
-                if pass_on_figure is False:
-                    # supply these to the 0-form object creator
-                    result_form = form_0(self.xg, self.yg, zero_form_result)
-                elif pass_on_figure is True:
-                    if self.subplots is False:
-                        result_form = form_0(self.xg, self.yg, zero_form_result, fig=self.figure, subplots=False)
-                    elif self.subplots is True:
-                        result_form = form_0(self.xg, self.yg, zero_form_result, fig=self.figure, subplots=True, sub_axis_list=self.axis)
-                else:
-                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                # supply these to the 0-form object creator
+                result_form = form_0(self.xg, self.yg, zero_form_result)
                 
                 # return it to the user
                 return result_form
         
         # define a method to change a supplied Vector filed to the 1-form
-        def vectorise(self, pass_on_figure=False, g=[['1', '0'], ['0', '1']]):
+        def vectorise(self, g=[['1', '0'], ['0', '1']]):
             '''
             Passes in everything it can (all it has been supplied)
             to the VF object.
@@ -1273,9 +1191,6 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
             via meshgrid, if it is supplied as strings, needs to be in terms of
             x and y, and contain no special funtions, apart from ones imported
             here automatically and listed in the documentation #!!!
-            Apart form the metric, takes in pass_on_figure:
-                ----determines if figure from this object is to be
-                passed on to the 1-form object.
             
             Returns a single object (VF object)
             '''
@@ -1364,28 +1279,10 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, subplots=Fals
 
             # based on what was given into the Vector field, return a 1-form object with these parameters
             if analytics:
-                if pass_on_figure is False:
-                    # supply these to the 1-form object creator
-                    result_field = vector_field(self.xg, self.yg, form_x, form_y, x_str_form, y_str_form)
-                elif pass_on_figure is True:
-                    if self.subplots is False:
-                        result_field = vector_field(self.xg, self.yg, form_x, form_y, x_str_form, y_str_form, fig=self.figure, subplots=False)
-                    elif self.subplots is True:
-                        result_field = vector_field(self.xg, self.yg, form_x, form_y, x_str_form, y_str_form, fig=self.figure, subplots=True, sub_axis_list=self.axis)
-                else:
-                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                result_field = vector_field(self.xg, self.yg, form_x, form_y, x_str_form, y_str_form)
             elif not analytics:
-                if pass_on_figure is False:
-                    # supply these to the 1-form object creator
-                    result_field = vector_field(self.xg, self.yg, form_x, form_y)
-                elif pass_on_figure is True:
-                    if self.subplots is False:
-                        result_field = vector_field(self.xg, self.yg, form_x, form_y, fig=self.figure, subplots=False)
-                    elif self.subplots is True:
-                        result_field = vector_field(self.xg, self.yg, form_x, form_y, fig=self.figure, subplots=True, sub_axis_list=self.axis)
-                else:
-                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
-        
+                result_field = vector_field(self.xg, self.yg, form_x, form_y)
+            
             # return the found object
             return result_field
 
@@ -1404,7 +1301,7 @@ function to create a 2-form object and define methods for it
 
 # define a function that will set up a 2-form object that can be customised and
 # plotted
-def form_2(xg, yg, form2, form_2_eq=None, fig=None, subplots=False, sub_axis_list=[]):
+def form_2(xg, yg, form2, form_2_eq=None):
     '''
     defines a 2-form object and returns it to user
     Takes 3 arguments basic, these are the 2 grids in 2D, which muse be square
@@ -1417,35 +1314,17 @@ def form_2(xg, yg, form2, form_2_eq=None, fig=None, subplots=False, sub_axis_lis
     # define the 1-form object and all its methods
     class form_set_up():
         # set up all variables
-        def __init__(self, xg, yg, form2, s_max=6, s_min=2, fig_size=[7, 7], deltafactor=10):
+        def __init__(self, xg, yg, form2):
             self.xg = xg
             self.yg = yg
             self.form_2 = form2
-            # set up a figure if one was not given:
-            if fig == None:
-                self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
-                self.axis = self.figure.gca()
-            else:
-                if subplots is False:
-                    self.figure = fig
-                    self.axis  = self.figure.gca()
-                elif subplots is True:
-                    if len(sub_axis_list) == 0:
-                        self.figure = fig
-                        self.axis = []
-                    else:
-                        self.figure = fig
-                        self.axis = sub_axis_list
-                else:
-                    raise ValueError('Error, incorrect input for \'subplots\'')
-            self.subplots = subplots
-            self.s_max = s_max
-            self.s_min = s_min
+            self.s_max = 6
+            self.s_min = 2
             self.pt_den = len(xg[:, 0])  # + 1  # assume square grids
             self.fract = 2/((self.pt_den - 1))
             self.colour_list = ['red', 'blue', 'grey']
             self.logarithmic_scale_bool = 0
-            self.delta_factor = deltafactor
+            self.delta_factor = 10
             if form_2_eq is not None:
                 self.form_2_str = str(simplify(form_2_eq))  # to start with, user must change to access some methods
                 # Note, the string must be given with x and y as variables
@@ -1489,34 +1368,6 @@ def form_2(xg, yg, form2, form_2_eq=None, fig=None, subplots=False, sub_axis_lis
             that got here not by input but by ext. alg.
             '''
             return self.form_2_str
-        
-        # define a method to add a subplot
-        def add_subplot(self, order):
-            '''
-            Takes in one argument, as as matplotlib add_subplot
-            It determines the shape of the subplot structure and which axis is
-            being set (eg. 231 gives a set of plots 2 rows by 3 columns
-            and this sets the first axis in that configuration)
-            Adds a subplot to the figure that this form occupies
-            Returns nothing, saves the subplot axis to the axis self param.
-            '''
-            # chck if the correct option was chosen to allow for this:
-            if type(self.axis) != list:
-                raise TypeError('Error, set up the object allowing for subplots')
-            else:
-                sub_axis = self.figure.add_subplot(order)
-                self.axis.append(sub_axis)
-        
-        # define a method to change figure size
-        def fig_size(self, n, m):
-            '''
-            Takes two inputs, float or int numbers, sets the figure
-            size to these dimensions in inches. Uses set_size_inches from
-            matploitlib so can just use that on
-            the atribute figure, this function is here just for
-            easier nameing
-            '''
-            self.figure.set_size_inches(n, m)
         
         # change colour list
         def colour(self, colours):
@@ -1609,7 +1460,7 @@ def form_2(xg, yg, form2, form_2_eq=None, fig=None, subplots=False, sub_axis_lis
         
         # define a function to plot the set up 2-form
         # originally form_2_components_plot
-        def plot(self, keep=True, subplot_index=None):
+        def plot(self, axis):
             '''
             Finilises the plotting
             Takes in 2 inputs:
@@ -1623,25 +1474,12 @@ def form_2(xg, yg, form2, form_2_eq=None, fig=None, subplots=False, sub_axis_lis
             Uses the attribues of the object as set originally and as customised
             with methods to create a plot of the 2-form
             '''
-            # for ease of later writting:
-            # from self, get axis
-            # depending on if subplots are wanted:
-            if type(self.axis) != list:
-                axis = self.axis
-            else:
-                axis = self.axis[subplot_index]
             
             
             form2 = self.form_2  # from self, get 2-form too
             
             # set all insignificant values to zero:
             form2[np.abs(form2) < 1e-12] = 0
-            
-            # depending on input, clear the axis or don't
-            if keep is True:
-                pass
-            else:
-                axis.clear()
             
             # get the lengths of x and y from their grids
             x_len = len(self.xg[:, 0])
@@ -1801,7 +1639,7 @@ def form_2(xg, yg, form2, form_2_eq=None, fig=None, subplots=False, sub_axis_lis
                                 s += 1
         
         # define a fucntion to Hodge the 2-form (into a 0-form)
-        def Hodge(self, numerical_only=True, pass_on_figure=False):
+        def Hodge(self, numerical_only=True):
             '''
             Takes in two bool arguments:
             
@@ -1814,40 +1652,29 @@ def form_2(xg, yg, form2, form_2_eq=None, fig=None, subplots=False, sub_axis_lis
             It calulates the Hodge on R^2 by the standard definition:
             *(dx^dy) = 1
             
-            pass_on_figure
-            Determies if figure should be passed onto the new object
-            if it is to be created
-            
             returns a 0-form
             '''
-            # distinguish between doing it numerically and alaytically
+            
+            # distinguish between doing it numerically and analytically
             if numerical_only is True:
                 # check if equations have been given:
                 # if they have, doing it only numerically would create
                 # a mismatch, avoid that
-                if self.form_2_str == None:
-                    pass
-                else:
+                if self.form_2_str != None:
                     # equations have been given, a mismatch may occur
                     # warn the user
-                    print('Warning: You supplied equations, doing it numerically only will result in a mismacth between numerical values and equations')
+                    print('Warning: You supplied equations, doing it numerically only will lose these')
+                
                 # now complete the process numerically
                 # pass these in to the object to create a new one:
-                if pass_on_figure is False:
-                    new_object = form_0(self.xg, self.yg, self.form_2, self.form_2_str)  # N.B no equations to supply
-                elif pass_on_figure is True:
-                     new_object = form_0(self.xg, self.yg, self.form_2, self.form_2_str, fig=self.figure, subplots=self.subplots, sub_axis_list=self.axis)
-                else:
-                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                new_object = form_0(self.xg, self.yg, self.form_2)  # N.B no equations to supply
+                
                 # return the new one to the user:
                 return new_object
             
             elif numerical_only is False:
                 # can only be done if equations have been given, check:
-                if self.form_2_str == None:
-                    # ERROR
-                    raise TypeError('Error: You need to supply the 2-form equation to do this, look at \'give_eqn\' method')
-                else:
+                if self.form_2_str != None:
                     # some equations are there, compute the Hodge on these:
                     # Note: Upto user to make sure their equations match their
                     # numerical input, unless using give eqn, then its updates
@@ -1871,30 +1698,38 @@ def form_2(xg, yg, form2, form_2_eq=None, fig=None, subplots=False, sub_axis_lis
                     
                     # return object, depending on option for figure passage:
                     # pass these in to the object to create a new one:
-                    if pass_on_figure is True:
-                        if self.subplots is False:
-                            new_object = form_0(self.xg, self.yg, form_0_result, form_0_eqn=form_0_str_unformated, fig=self.figure, subplots=False)
-                        if self.subplots is True:
-                            new_object = form_0(self.xg, self.yg, form_0_result, form_0_eqn=form_0_str_unformated, fig=self.figure, subplots=True, sub_axis_list=self.axis)
-                    elif pass_on_figure is False:
-                        new_object = form_0(self.xg, self.yg, form_0_result, form_0_eqn=form_0_str_unformated)
-                    else:
-                        raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                    new_object = form_0(self.xg, self.yg, form_0_result, form_0_eqn=form_0_str_unformated)
                     
                     # return the new one to the user:
                     return new_object
+                else:
+                    # ERROR
+                    raise TypeError('You need to supply the 2-form equation to do this, look at \'give_eqn\' method')
             else:
                 # Error
                 raise ValueError('ERROR: Invalid input for \'numerical_only\'')
     
         # define a method to create a zoomed in 2-form
-        def zooming(self, target=[0, 0], zoom=2, dpd=9):
+        def zoom(self, target=[0, 0], zoom=2, dpd=9, inset=False, axis=None, insize=0.3):
+            
             '''
             Creates a new window which displays the 2-form zoomed at a certain point
             User gives arguments:
             Target: Determines the zoom location, coordinates
             Zoom: +ve float, determines zooming amount
             dpd: +int, determines how many points on each axis
+            
+            inset - bool - determies if the zoom is plotted on the given axis
+            as an inset
+            axis - matplotlib axis, only supply if inset is True, plots intset on these
+            insize - float - size of inset as fraction of total figure
+            
+            returns:
+            --------------
+                if inset is False, returns the zoomed in insatnce as a 0-form
+                object
+                if inset if True, returns the inset axis, with the plot on them
+                on top of the given axis and the 0-form instance
             '''
             
             # Requires user to provide eqn of the 1-form they are zooming on.
@@ -1902,40 +1737,75 @@ def form_2(xg, yg, form2, form_2_eq=None, fig=None, subplots=False, sub_axis_lis
                 # ERROR
                 raise TypeError('Error: No equation provided')
             else:
-                
-                # Target coordinates
-                x_m = target[0]
-                y_m = target[1]
-                
-                d_range = self.xg[0, -1]/zoom
-                
-                # Set up zoom window grids
-                dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
-                dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
-                dxg, dyg = np.meshgrid(dx, dy)
-                
-                # Create variables for the user provided equation strings
-                zoom_str = self.form_2_str + ''
-                
-                # Check if the equations provided contain x and y terms
-                if zoom_str.find('x') & zoom_str.find('y') == -1:
-                    zoom_str = '(' + str(zoom_str) + ')* np.ones(np.shape(dxg))'
+                 # Zoom must be one or greater
+                if zoom < 1:
+                    raise ValueError('Zoom must be greater than one')
                 else:
-                    zoom_str = zoom_str.replace('x', '(dxg)')
-                    zoom_str = zoom_str.replace('y', '(dyg)')
+                    
+                    if insize > 1 or insize < 0:
+                        raise ValueError('Insize must be +ve and less than one')
+                    else:
+                        
+                        # If no inset, set the size of the zoom axis to allow normal plotting
+                        if inset == False:
+                            insize = 1
+                            
+                        # Target coordinates
+                        x_m = target[0]
+                        y_m = target[1]
+                        
+                        # Get the size of the original VF
+                        Lx = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+                        Ly = 0.5*(self.yg[-1, 0] - self.yg[0, 0])
+                        
+                        # Zoom axis range
+                        d_range_x = insize*Lx/zoom
+                        d_range_y = insize*Ly/zoom
+                        
+                        # Set up zoom window grids
+                        dx = np.linspace(-d_range_x + x_m, d_range_x + x_m, dpd)
+                        dy = np.linspace(-d_range_y + y_m, d_range_y + y_m, dpd)
+                        dxg, dyg = np.meshgrid(dx, dy)
+                        
+                        # Create variables for the user provided equation strings
+                        zoom_str = self.form_2_str + ''
+                        
+                        # Check if the equations provided contain x and y terms
+                        if zoom_str.find('x') & zoom_str.find('y') == -1:
+                            zoom_str = '(' + str(zoom_str) + ')* np.ones(np.shape(dxg))'
+                        else:
+                            zoom_str = zoom_str.replace('x', '(dxg)')
+                            zoom_str = zoom_str.replace('y', '(dyg)')
+                        
+                        # Generate arrays for the components of the zoom field
+                        zoom_2form = eval(zoom_str)
+                        
+                        # from that create 2-form instance
+                        zoomform2 = form_2(dxg, dyg, zoom_2form, self.form_2_str)
+                        
+                        q = 1
+                        
+                        xi = (x_m - self.xg[0,0])/(2*Lx)
+                        yi = (y_m - self.yg[0,0])/(2*Ly)
+                        
+                        if inset == True:
+                            if axis != None:
+                                # Create inset axis in the current axis.
+                                zoom_inset_ax = axis.inset_axes([(xi - 0.5*insize), (yi - 0.5*insize), insize, insize])
+                                zoomform2.plot(zoom_inset_ax)
+                                # return the zoomed on axis
+                                # also return zoomed in form in case user wants that.
+                                return zoom_inset_ax, zoomform2
+                            else:
+                                raise ValueError('Cannot inset without supplied axis')
+                        else:
+                            # inset is false, just return the new zoomed in instance
+                            return zoomform2
                 
-                # Generate arrays for the components of the zoom field
-                zoom_2form = eval(zoom_str)
-                
-                # set up a new 2-form, that is the form, after zooming in
-                # that will be returned to the user
-                zoom_form = form_2(dxg, dyg, zoom_2form, form_2_eq=self.form_2_str)
-                
-                return zoom_form
         
         # define a mehtod to evaluate the interior derivative of the 2-form
         # with respect to a given vector field object or without.
-        def interior_d(self, vector_field=None, pass_on_figure=False, numerical_only=False):
+        def interior_d(self, vector_field=None, numerical_only=False):
             '''
             Computes the interior derivative of the 2-form
             Takes in:
@@ -1945,9 +1815,6 @@ def form_2(xg, yg, form2, form_2_eq=None, fig=None, subplots=False, sub_axis_lis
             (eqn_x, eqn_y). If using numerical only, can supply object or
             tuple of numpy arrays (array_x, atrray_y). If nothing is supplied
             for it, it assumes F_x = 1 and F_y = 1, with correct form and shape
-            
-            -- pass_on_figure = determines if figure from this object is to be
-            passed on to the 1-form object.
             
             --- numerical_only = bool, if true, it calculates only numerically
             otherwise, calculates it based on given equations, evaluates
@@ -2004,19 +1871,8 @@ def form_2(xg, yg, form2, form_2_eq=None, fig=None, subplots=False, sub_axis_lis
                 form_x = eval(u_str)
                 form_y = eval(v_str)
                 
-                # return it, with equations, to user, depending on their figure
-                # preferances
-                
-                if pass_on_figure is False:
-                    # supply these to the 1-form object creator
-                    result_form = form_1(self.xg, self.yg, form_x, form_y, u_str_unformatted, v_str_unformatted)
-                elif pass_on_figure is True:
-                    if self.subplots is False:
-                        result_form = form_1(self.xg, self.yg, form_x, form_y, u_str_unformatted, v_str_unformatted, fig=self.figure, subplots=False)
-                    elif self.subplots is True:
-                        result_form = form_1(self.xg, self.yg, form_x, form_y, u_str_unformatted, v_str_unformatted, fig=self.figure, subplots=True, sub_axis_list=self.axis)
-                else:
-                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                # create the object to return
+                result_form = form_1(self.xg, self.yg, form_x, form_y, u_str_unformatted, v_str_unformatted)
                 
                 # return it to the user
                 return result_form
@@ -2055,16 +1911,8 @@ def form_2(xg, yg, form2, form_2_eq=None, fig=None, subplots=False, sub_axis_lis
                 form_x = -self.form_2 * vf_y
                 form_y = self.form_2 * vf_x
                 
-                if pass_on_figure is False:
-                    # supply these to the 1-form object creator
-                    result_form = form_1(self.xg, self.yg, form_x, form_y)
-                elif pass_on_figure is True:
-                    if self.subplots is False:
-                        result_form = form_1(self.xg, self.yg, form_x, form_y, fig=self.figure, subplots=False)
-                    elif self.subplots is True:
-                        result_form = form_1(self.xg, self.yg, form_x, form_y, fig=self.figure, subplots=True, sub_axis_list=self.axis)
-                else:
-                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                # supply these to the 1-form object creator
+                result_form = form_1(self.xg, self.yg, form_x, form_y)
                 
                 # return it to the user
                 return result_form
@@ -2086,7 +1934,7 @@ function to create a 0-form object and define methods for it
 
 # define a function that will set up a 0-form object that can be customised and
 # plotted
-def form_0(xg, yg, form_0, form_0_eqn=None, fig=None, subplots=False, sub_axis_list=[]):
+def form_0(xg, yg, form_0, form_0_eqn=None):
     '''
     defines a 0-form object and returns it to user
     Takes 3 arguments basic, these are the 2 grids in 2D, which muse be square
@@ -2095,32 +1943,13 @@ def form_0(xg, yg, form_0, form_0_eqn=None, fig=None, subplots=False, sub_axis_l
     # define the 1-form object and all its methods
     class form_set_up():
         # set up all initial, defualt variables
-        def __init__(self, xg, yg, form_0, fig_size=[7, 7], deltafactor=10):
+        def __init__(self, xg, yg, form_0):
             self.xg = xg
             self.yg = yg
             self.form_0 = form_0
-            # set up a figure if one was not given:
-            if fig == None:
-                self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
-                self.axis = self.figure.gca()
-            else:
-                if subplots is False:
-                    self.figure = fig
-                    self.axis  = self.figure.gca()
-                elif subplots is True:
-                    if len(sub_axis_list) == 0:
-                        self.figure = fig
-                        self.axis = []
-                    else:
-                        self.figure = fig
-                        self.axis = sub_axis_list
-                else:
-                    raise ValueError('Error, incorrect input for \'subplots\'')
-            
-            self.subplots = subplots
             self.pt_den = len(xg[:, 0])  # + 1  # assume square grids
             self.logarithmic_scale_bool = 0
-            self.delta_factor = deltafactor
+            self.delta_factor = 10
             self.denser = 1
             self.lines = 15
             self.fontsize = 7
@@ -2170,23 +1999,6 @@ def form_0(xg, yg, form_0, form_0_eqn=None, fig=None, subplots=False, sub_axis_l
             that got here not by input but by ext. alg.
             '''
             return self.form_0_str
-        
-        # define a method to add a subplot
-        def add_subplot(self, order):
-            '''
-            Takes in one argument, as as matplotlib add_subplot
-            It determines the shape of the subplot structure and which axis is
-            being set (eg. 231 gives a set of plots 2 rows by 3 columns
-            and this sets the first axis in that configuration)
-            Adds a subplot to the figure that this form occupies
-            Returns nothing, saves the subplot axis to the axis self param.
-            '''
-            # chck if the correct option was chosen to allow for this:
-            if type(self.axis) != list:
-                raise ValueError('Error, set up the object allowing for subplots')
-            else:
-                sub_axis = self.figure.add_subplot(order)
-                self.axis.append(sub_axis)
         
         # define a method to change figure size
         def fig_size(self, n, m):
@@ -2282,7 +2094,7 @@ def form_0(xg, yg, form_0, form_0_eqn=None, fig=None, subplots=False, sub_axis_l
         
         
         # define a fucntion to plot a zero form when button is pressed.
-        def plot(self, keep=True, subplot_index=None):
+        def plot(self, axis):
             '''
             Finilises the plotting
             Uses the attribues of the object as set originally and as customised
@@ -2295,20 +2107,8 @@ def form_0(xg, yg, form_0, form_0_eqn=None, fig=None, subplots=False, sub_axis_l
             '''
             
             # for ease of later writting:
-            # from self, get axis
-            # depending on if subplots are wanted:
-            if type(self.axis) != list:
-                axis = self.axis
-            else:
-                axis = self.axis[subplot_index]
-            
-            # check if user wants to clear first:
-            if keep is True:
-                pass
-            else:
-                axis.clear()
-            
-            form_0 = self.form_0  # from self, get 2-form
+            # from self, get 2-form
+            form_0 = self.form_0
             
             # set all insignificant values to zero:
             form_0[np.abs(form_0) < 1e-15] = 0
@@ -2364,13 +2164,11 @@ def form_0(xg, yg, form_0, form_0_eqn=None, fig=None, subplots=False, sub_axis_l
                 axis.clabel(CS, inline=self.inline_bool, fontsize=self.fontsize)
         
         # define a method to compute the exterior derivative
-        def ext_d(self, pass_on_figure=False):
+        def ext_d(self):
             '''
-            Takes in 1 argument:
-            -- pass on figure: Determies if figure should be passed onto the
-               new object if it is to be created
-            Returns 1 form object
+            Takes in no argument
             computes the exterior derivative and returns it as the 1-form object
+            Returns 1 form object
             '''
             
             # first make sure that the string has been supplied
@@ -2400,26 +2198,16 @@ def form_0(xg, yg, form_0, form_0_eqn=None, fig=None, subplots=False, sub_axis_l
                     form_1_y_str = '(' + str(form_1_y_str) + ')* np.ones(np.shape(self.yg))'
                 form_1_x = eval(form_1_x_str)
                 form_1_y = eval(form_1_y_str)
-                # supply these to the 1-form object function
-                if pass_on_figure is True:
-                    if self.subplots is False:
-                        result_1_form = form_1(self.xg, self.yg, form_1_x, form_1_y, form_1_x_unformated, form_1_y_unformated, fig=self.figure, subplots=False)
-                    elif self.subplots is True:
-                        result_1_form = form_1(self.xg, self.yg, form_1_x, form_1_y, form_1_x_unformated, form_1_y_unformated, fig=self.figure, subplots=True, sub_axis_list=self.axis)
-                    return result_1_form
-                elif pass_on_figure is False:
-                    result_1_form = form_1(self.xg, self.yg, form_1_x, form_1_y, form_1_x_unformated, form_1_y_unformated)
-                else:
-                     raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                
+                # supply these to the 1-form object function and return object
+                result_1_form = form_1(self.xg, self.yg, form_1_x, form_1_y, form_1_x_unformated, form_1_y_unformated)
                 return result_1_form
         
         # deifne a method to complete the exterior derivative numerically
-        def num_ext_d(self, edge_order=1, pass_on_figure=False):
+        def num_ext_d(self, edge_order=1):
             '''
-            Takes in 2 arguments
+            Takes in 1 argument:
             -- edge_order: determines order same as in numpy gradient {1 or 2}
-            -- pass on figure: Determies if figure should be passed onto the
-               new object if it is to be created
             
             Return 1 object - 1-form
             computes the exterior derivative numerically only
@@ -2430,24 +2218,17 @@ def form_0(xg, yg, form_0, form_0_eqn=None, fig=None, subplots=False, sub_axis_l
             
             # from numpy gradient, get the gradient array
             fy, fx = np.gradient(form_0, edge_order=edge_order)
+            
             # supply these to the 1-form object function
-            if pass_on_figure is True:
-                if self.subplots is False:
-                    result_1_form = form_1(self.xg, self.yg, fx, fy, fig=self.figure, subplots=False)
-                elif self.subplots is True:
-                    result_1_form = form_1(self.xg, self.yg, fx, fy, fig=self.figure, subplots=True, sub_axis_list=self.axis)
-            elif pass_on_figure is False:
-                result_1_form = form_1(self.xg, self.yg, fx, fy)
-            else:
-                raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+            result_1_form = form_1(self.xg, self.yg, fx, fy)
             
             # return the new object to user
             return result_1_form
         
         # deinfe a method for Hodge of a 0-form
-        def Hodge(self, numerical_only=True, pass_on_figure=False):
+        def Hodge(self, numerical_only=True):
             '''
-            Takes in two bool arguments:
+            Takes in one bool argument:
             
             numerical_only
             Determines if the calculation should be numerical or analytic
@@ -2458,40 +2239,25 @@ def form_0(xg, yg, form_0, form_0_eqn=None, fig=None, subplots=False, sub_axis_l
             It calulates the Hodge on R^2 by the standard definition:
             1* = (dx^dy)
             
-            pass_on_figure
-            Determies if figure should be passed onto the new object
-            if it is to be created
-            
             returns a 2-form
+            
             '''
             # distinguish between doing it numerically and alaytically
             if numerical_only is True:
                 # check if equations have been given:
                 # if they have, doing it only numerically would create
                 # a mismatch, avoid that
-                if self.form_0_str == None:
-                    pass
-                else:
-                    # equations have been given, a mismatch may occur
-                    # warn the user
-                    print('Warning: You supplied equations, doing it numerically only will result in a mismacth between numerical values and equations')
+                if self.form_0_str != None:
+                    print('Warning: You supplied equations, doing it numerically only will lose these')
+                
                 # now complete the process numerically
-                # pass these in to the object to create a new one:
-                if pass_on_figure is False:
-                    new_object = form_2(self.xg, self.yg, self.form_0, self.form_0_str)  # N.B no equations to supply
-                elif pass_on_figure is True:
-                     new_object = form_2(self.xg, self.yg, self.form_0, self.form_0_str, fig=self.figure, subplots=self.subplots, sub_axis_list=self.axis)
-                else:
-                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
-                # return the new one to the user:
+                # pass these in to the object to create a new one and return
+                new_object = form_2(self.xg, self.yg, self.form_0)  # N.B no equations to supply
                 return new_object
             
             elif numerical_only is False:
                 # can only be done if equations have been given, check:
-                if self.form_0_str == None:
-                    # ERROR
-                    raise TypeError('Error: You need to supply the 2-form equation to do this, look at \'give_eqn\' method')
-                else:
+                if self.form_0_str != None:
                     # some equations are there, compute the Hodge on these:
                     # Note: Upto user to make sure their equations match their
                     # numerical input, unless using give eqn, then its updates
@@ -2514,18 +2280,13 @@ def form_0(xg, yg, form_0, form_0_eqn=None, fig=None, subplots=False, sub_axis_l
                     
                     # return object, depending on option for figure passage:
                     # pass these in to the object to create a new one:
-                    if pass_on_figure is True:
-                        if self.subplots is False:
-                            new_object = form_2(self.xg, self.yg, form_2_result, form_2_eq=form_2_str_unformated, fig=self.figure, subplots=False)
-                        if self.subplots is True:
-                            new_object = form_2(self.xg, self.yg, form_2_result, form_2_eq=form_2_str_unformated, fig=self.figure, subplots=True, sub_axis_list=self.axis)
-                    elif pass_on_figure is False:
-                        new_object = form_2(self.xg, self.yg, form_2_result, form_2_eq=form_2_str_unformated)
-                    else:
-                        raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                    new_object = form_2(self.xg, self.yg, form_2_result, form_2_eq=form_2_str_unformated)
                     
                     # return the new one to the user:
                     return new_object
+                else:
+                    # ERROR
+                    raise TypeError('You need to supply the 2-form equation to do this, look at \'give_eqn\' method')
             else:
                 # Error
                 raise ValueError('ERROR: Invalid input for \'numerical_only\'')
@@ -2546,7 +2307,7 @@ function to create a vector field object and define methods for it
 
 # define a function that will set up a vector field object that can be customised and
 # plotted
-def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None):
+def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
     '''
     defines a vector field object and returns it to user
     Takes 9 arguments, these are the 2 grids in 2D, which muse be square
@@ -2563,60 +2324,18 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
     # define the 1-form object and all its methods
     class field_set_up():
         # set up all variables
-        def __init__(self, xg, yg, F_x, F_y, deltafactor=10, fig_size=[7, 7]):
+        def __init__(self, xg, yg, F_x, F_y):
             self.xg = xg
             self.yg = yg
             self.F_x = F_x
             self.F_y = F_y
-            
-            # Changing up the way we create figures and axes to make the process more general.
-            # User can provide a figure and a specified axis to plot the vector field object
-            # Else, by default, a new figure will be provided
-            
-            if fig == None:
-                self.figure = plt.figure(figsize=(fig_size[0], fig_size[1]))
-                
-                # If no figure is provided, the axis for plotting must be on the new figure
-                
-                self.axis = self.figure.gca()
-                
-                # if ax == None:
-                #     self.axis = self.figure.gca()
-                # else: 
-                #     self.axis = ax
-                    
-            else:
-                self.figure = fig
-                if ax == None:
-                    self.axis = self.figure.gca()
-                else:
-                    self.axis = ax
-            
-                # if ax == None:
-                #     self.axis = self.figure.gca()
-                # else: 
-                #     self.axis = ax
-                    
-            #     if subplots is False:
-            #         self.figure = fig
-            #         self.axis  = self.figure.gca()
-            #     elif subplots is True:
-            #         if len(sub_axis_list) == 0:
-            #             self.figure = fig
-            #             self.axis = []
-            #         else:
-            #             self.figure = fig
-            #             self.axis = sub_axis_list
-            #     else:
-            #         raise TypeError('Error, incorrect input for \'subplots\'')
-            # self.subplots = subplots
-            self.pt_den = len(xg[:, 0])# + 1  # assume square grids
+            self.pt_den = len(xg[:, 0])  # + 1 , assume square grids
             self.orientation = 'mid'
             self.scale = 1
             self.color = 'black'
             self.logarithmic_scale_bool = 0
             self.scale_bool = True
-            self.delta_factor = deltafactor
+            self.delta_factor = 10
             if F_x_eqn is not None:
                 self.str_x = str(simplify(F_x_eqn))  # to start with, use rmust change to access some methods
                 # Note, the string must be given with x and y as variables
@@ -2669,23 +2388,6 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
             that got here not by input but by ext. alg.
             '''
             return self.str_x, self.str_y
-        
-        # define a method to add a subplot
-        # def add_subplot(self, order):
-        #     '''
-        #     Takes in one argument, as matplotlib add_subplot
-        #     It determines the shape of the subplot structure and which axis is
-        #     being set (eg. 231 gives a set of plots 2 rows by 3 columns
-        #     and this sets the first axis in that configuration)
-        #     Adds a subplot to the figure that this form occupies
-        #     Returns nothing, saves the subplot axis to the axis self param.
-        #     '''
-        #     # chck if the correct option was chosen to allow for this:
-        #     if type(self.axis) != list:
-        #         raise ValueError('Error, set up the object allowing for subplots')
-        #     else:
-        #         sub_axis = self.figure.add_subplot(order)
-        #         self.axis.append(sub_axis)
         
         # define a method to change figure size
         def fig_size(self, n, m):
@@ -2782,34 +2484,17 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
                 self.F_y = eval(str_y_l)
         
         # define a method to plot the vector field using quiver
-        def plot(self, keep=True):
+        def plot(self, axis):
             '''
             Finilises the plotting
             Uses the attribues of the object as set originally and as customised
             with methods to create a plot of the 1-form
-            Takes in 2 arguments:
-            --- \'keep\', which allows the user to plot
-            on top of the previous pltos they created without clearing axis
-            When its set to False, the axis are cleared first
-            Default is True.
-            --- \' subplot_index \', default set to None, can be input if
-            the user has selected subplots to be allowed when creating the
-            object. Determines which aixs to draw on, indecies are in order
-            that they were added to the object
+            Takes in 1 argument:
+            --- axis - matplotlib axes instance, plots on these
+            
+            No Returns    
+            
             '''
-            
-            # from self, get axis
-            # depending on if subplots are wanted:
-            # if type(self.axis) != list:
-            #     axis = self.axis
-            # else:
-            #     axis = self.axis[subplot_index]
-            
-            # depending on input, clear the axis or don't
-            if keep is True:
-                pass
-            else:
-                self.axis.clear()
             
             # get the lengths of x and y from their grids
             x_len = len(self.xg[:, 0])
@@ -2822,8 +2507,8 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
             
             # adjust axis limits based on that.
             ax_L = L + L/self.delta_factor
-            self.axis.set_xlim(-ax_L + x0, ax_L + x0)
-            self.axis.set_ylim(-ax_L + y0, ax_L + y0)
+            axis.set_xlim(-ax_L + x0, ax_L + x0)
+            axis.set_ylim(-ax_L + y0, ax_L + y0)
             
             # for arrows to work, with nan and infs
             # make a local variable of F_x and F_y
@@ -2856,16 +2541,29 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
             elif self.scale_bool is True:
                 ScaleFactor = max_size/(0.9*(2*L/self.pt_den))
             
-            
-            self.axis.quiver(self.xg, self.yg, F_x_local, F_y_local, pivot=self.orientation, scale=ScaleFactor, scale_units='xy', color=self.color) 
+            # plot using matplotlib quiver
+            axis.quiver(self.xg, self.yg, F_x_local, F_y_local, pivot=self.orientation, scale=ScaleFactor, scale_units='xy', color=self.color) 
         
-        def zoom(self, target=[0, 0], zoom=2, dpd=9, d_length=0.3, fig=None, ax=None, inset=False):
+        
+        def zoom(self, target=[0, 0], zoom=2, dpd=9, inset=False, axis=None, insize=0.3):
             '''
             Create a new window which displays the field zoomed at a certain point
             User gives arguments
             Target: Determines the zoom location, coordinates
             Zoom: +ve float, determines zooming amount
             dpd: +int, determines how many points on each axis
+            
+            inset - bool - if true, zoomed field plotted on given axis
+            axis - matplotlib axes instance - axis to plot on if instance it True
+            insize - float - size of inset as fraction of total figure
+            
+            
+            Returns:
+            --------
+            if inset is False:
+                zoomed in VF object
+            if inset is True, inset axis and zoomed in VF object in this order.
+            
             '''
             
             # Requires user to provide eqn of the 1-form they are zooming on.
@@ -2874,475 +2572,507 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
                 # ERROR
                 raise TypeError('No equation provided')
             else:
-                
-                # Target coordinates
-                x_m = target[0]
-                y_m = target[1]
-                
-                # Get the size of the original VF
-                L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
-                
-                # Zoom axis range
-                d_range = L/zoom
-                
-                # Size of the inset plot (default as 0.3)
-                d_length = 0.3 
-                
-                # Set up zoom window grids
-                dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
-                dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
-                dxg, dyg = np.meshgrid(dx, dy)
-                
-                # Create variables for the user provided equation strings
-                u_str = self.str_x
-                v_str = self.str_y
-                
-                # Check if the equations provided contain x and y terms
-                if u_str.find('x') & u_str.find('y') == -1:
-                    u_str = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+            
+                # Zoom must be one or greater
+                if zoom < 1:
+                    raise ValueError('Zoom must be greater than one')
                 else:
-                    u_str = u_str.replace('x', 'dxg')
-                    u_str = u_str.replace('y', 'dyg')
-          
-                if v_str.find('x') & v_str.find('y') == -1:
-                    v_str = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
-                else:
-                    v_str = v_str.replace('x', 'dxg')
-                    v_str = v_str.replace('y', 'dyg')
                     
-                # Generate arrays for the components of the zoom field
-                u_zoom = eval(u_str)
-                v_zoom = eval(v_str)
-                
-                
-                if inset == True:
-                    # Create inset axis in the current axis.
-                    q = 0.92
-                    zoom_inset_ax = self.axis.inset_axes([0.5*(1 + q*x_m/L - d_length), 0.5*(1 + q*y_m/L - d_length), d_length, d_length])
-                    zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom, fig = self.figure, ax = zoom_inset_ax)
-                else:
-                    if fig == None:  
-                        # Create new figure for the zoomed field
-                        zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom) 
+                    if insize > 1 or insize < 0:
+                        raise ValueError('Insize must be +ve and less than one')
                     else:
-                        # Plot on the specified figure and axis 
-                        zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom, fig = fig, ax = ax)
-
-                # elif pass_on_figure is True:
-                #     if self.subplots is False:
-                #         zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom, fig=self.figure, subplots=False)
-                #     elif self.subplots is True:
-                #         zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom, fig=self.figure, subplots=True, sub_axis_list=self.axis)
-                
-                # else:
-                #     raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
-                
-                return zoom_vf
+                        
+                        # If no inset, set the size of the zoom axis to allow normal plotting
+                        if inset == False:
+                            insize = 1
+                            
+                        # Target coordinates
+                        x_m = target[0]
+                        y_m = target[1]
+                        
+                        # Get the size of the original VF
+                        Lx = 0.5*(self.xg[0,-1] - self.xg[0,0])
+                        Ly = 0.5*(self.yg[-1,0] - self.yg[0,0])
+                        
+                        # Zoom axis range
+                        d_range_x = insize*Lx/zoom
+                        d_range_y = insize*Ly/zoom
+                        
+                        # Set up zoom window grids
+                        dx = np.linspace(-d_range_x + x_m, d_range_x + x_m, dpd)
+                        dy = np.linspace(-d_range_y + y_m, d_range_y + y_m, dpd)
+                        dxg, dyg = np.meshgrid(dx, dy)
+                        
+                        # Create variables for the user provided equation strings
+                        u_str = self.str_x
+                        v_str = self.str_y
+                        
+                        # Check if the equations provided contain x and y terms
+                        if u_str.find('x') & u_str.find('y') == -1:
+                            u_str = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                        else:
+                            u_str = u_str.replace('x', 'dxg')
+                            u_str = u_str.replace('y', 'dyg')
+                  
+                        if v_str.find('x') & v_str.find('y') == -1:
+                            v_str = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
+                        else:
+                            v_str = v_str.replace('x', 'dxg')
+                            v_str = v_str.replace('y', 'dyg')
+                            
+                        # Generate arrays for the components of the zoom field
+                        u_zoom = eval(u_str)
+                        v_zoom = eval(v_str)
+                        
+                        # from that create VF instance
+                        zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom, self.str_x, self.str_y)
+                        
+                        q = 1
+                        
+                        xi = (q*x_m - self.xg[0,0])/(2*Lx)
+                        yi = (q*y_m - self.yg[0,0])/(2*Ly)
+                        
+                        # depending on preferances, return to user and plot
+                        if inset == True:
+                            if axis != None:
+                                # Create inset axis in the current axis.
+                                
+                                zoom_inset_ax = axis.inset_axes([(xi - 0.5*insize), (yi - 0.5*insize), insize, insize])
+                                zoom_vf.plot(zoom_inset_ax)
+                                
+                                # return the zoomed on axis
+                                # also return zoomed in form in case user wants that.
+                                return zoom_inset_ax, zoom_vf
+                            else:
+                                raise ValueError('Cannot inset without supplied axis')
+                        else:
+                            # inset is false, just return the new zoomed in instance
+                            return zoom_vf
             
-        # def zoom_inset(self, target=[0,0], zoom=2, dpd=9):
-        #     '''
-        #     Zoom, but display in an inset plot
-        #     '''
-            
-        #     # Requires user to provide eqn of the 1-form they are zooming on.
-            
-        #     if self.str_x == None or self.str_y == None:
-        #         # ERROR
-        #         raise TypeError('Error: No equation provided')
-        #     else:
-                
-        #         # Target coordinates
-        #         x_m = target[0]
-        #         y_m = target[1]
-                
-        #         # Get the size of the original VF
-        #         L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
-                
-        #         # Range of the points in the new zoomed grid
-        #         # Assumes the original VF is centred on (0,0)
-        #         d_range = L/zoom
-                
-        #         # Size of the inset plot (default as 0.3)
-        #         d_length = 0.3
-
-        #         # Set up zoom window grids
-        #         dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
-        #         dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
-        #         dxg, dyg = np.meshgrid(dx, dy)
-                
-        #         # Create variables for the user provided equation strings
-        #         u_str = self.str_x
-        #         v_str = self.str_y
-                
-        #         # Check if the equations provided contain x and y terms
-        #         if u_str.find('x') & u_str.find('y') == -1:
-        #             u_str = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
-        #         else:
-        #             u_str = u_str.replace('x', 'dxg')
-        #             u_str = u_str.replace('y', 'dyg')
-          
-        #         if v_str.find('x') & v_str.find('y') == -1:
-        #             v_str = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
-        #         else:
-        #             v_str = v_str.replace('x', 'dxg')
-        #             v_str = v_str.replace('y', 'dyg')
-                    
-        #         # Generate arrays for the components of the zoom field
-        #         u_zoom = eval(u_str)
-        #         v_zoom = eval(v_str)
-                
-        #         # Specify the position and the size of the inset plot
-        #         # [x0, y0, width, height], (x0,y0) are coords of the lower left corner
-        #         # Given as fraction of the main plot size. (e.g. 0,0,0.5,0.5 covers the bottom left quadrant)
-        #         q = 0.92
-        #         zoom_inset_ax = self.axis.inset_axes([0.5*(1 + q*x_m/L - d_length), 0.5*(1 + q*y_m/L - d_length), d_length, d_length])
-                
-        #         zoom_vf_inset = vector_field(dxg, dyg, u_zoom, v_zoom, ax = zoom_inset_ax)
-                
-        #         zoom_vf_inset.plot()
-        #         # Now the inset axis is here, need to plot the zoomed field in the new axis.
-                
-        #         # if pass_on_figure is False:
-        #         #     # New figure
-        #         #     zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom)
-        #         # elif pass_on_figure is True:
-        #         #     if self.subplots is False:
-        #         #         zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom, fig=self.figure, subplots=False)
-        #         #     elif self.subplots is True:
-        #         #         zoom_vf = vector_field(dxg, dyg, u_zoom, v_zoom, fig=self.figure, subplots=True, sub_axis_list=self.axis)
-        #         # else:
-        #         #     raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
-                
-                
-                
-        #         # return zoom_vf
-            
-        def DF(self, target=[0,0], zoom=2, dpd=9, fig=None, ax=None, inset=False):
+        def DF(self, target=[0, 0], zoom=2, dpd=9, inset=False, axis=None, insize=0.3):
             '''
             Creates new vector field object at a target location, showing the derivative field at this point.
             User gives arguments:
             Target - derivative plot location
             Zoom - Magnification level
             dpd - New plot point density
+            
+            inset - bool - if true, field deriv is plotted on given axis
+            axis - matplotlib axes instance - axis to plot on if instance it True
+            
+            Returns:
+            --------
+            if inset is False:
+                deriv VF object
+            if inset is True, inset axis and deriv VF object in this order.
+            
             '''
             if self.str_x == None or self.str_y == None:
                 # ERROR
                 raise TypeError('Error: No equation provided')
             else:
-                
-                # Target coordinates
-                x_m = target[0]
-                y_m = target[1]
-                
-                # Get the size of the original VF
-                L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
-                
-                # Zoom axis range
-                d_range = L/zoom
-                
-                # Size of the inset plot (default as 0.3)
-                d_length = 0.3  
-                
-                # Set up zoom window grids
-                dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
-                dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
-                dxg, dyg = np.meshgrid(dx, dy)
-                
-                # Create variables for the user provided equation strings
-                u_str = self.str_x
-                v_str = self.str_y
-
-                # Create string to evaluate the field at the target location
-                u_str_point = u_str.replace('x', 'x_m')
-                u_str_point = u_str_point.replace('y', 'y_m')
-                
-                v_str_point = v_str.replace('x', 'x_m')
-                v_str_point = v_str_point.replace('y', 'y_m')
-                
-                # Check if the equations provided contain x and y terms
-                if u_str.find('x') & u_str.find('y') == -1:
-                    u_str_grid = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                 # Zoom must be one or greater
+                if zoom < 1:
+                    raise ValueError('Zoom must be greater than one')
                 else:
-                    u_str_grid = u_str.replace('x', 'dxg')
-                    u_str_grid = u_str_grid.replace('y', 'dyg')
-          
-                if v_str.find('x') & v_str.find('y') == -1:
-                    v_str_grid = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
-                else:
-                    v_str_grid = v_str.replace('x', 'dxg')
-                    v_str_grid = v_str_grid.replace('y', 'dyg')
                     
-                # Generate arrays for the components of the derivative field          
-                U = eval(u_str_grid) - eval(u_str_point)
-                V = eval(v_str_grid) - eval(v_str_point)
-                
-                if inset == True:
-                    # Create inset axis in the current axis.
-                    q = 0.92
-                    zoom_inset_ax = self.axis.inset_axes([0.5*(1 + q*x_m/L - d_length), 0.5*(1 + q*y_m/L - d_length), d_length, d_length])
-                    DF_vf = vector_field(dxg, dyg, U, V, fig = self.figure, ax = zoom_inset_ax)
-                else:
-                    if fig == None:  
-                        # Create new figure for the zoomed field
-                        DF_vf = vector_field(dxg, dyg, U, V) 
+                    if insize > 1 or insize < 0:
+                        raise ValueError('Insize must be +ve and less than one')
                     else:
-                        # Plot on the specified figure and axis 
-                        DF_vf = vector_field(dxg, dyg, U, V, fig = fig, ax = ax)
+                        
+                        # If no inset, set the size of the zoom axis to allow normal plotting
+                        if inset == False:
+                            insize = 1
                 
-                return DF_vf
+                        # Target coordinates
+                        x_m = target[0]
+                        y_m = target[1]
+                        
+                        # Get the size of the original VF
+                        Lx = 0.5*(self.xg[0,-1] - self.xg[0,0])
+                        Ly = 0.5*(self.yg[-1,0] - self.yg[0,0])
+                        
+                        # Zoom axis range
+                        d_range_x = insize*Lx/zoom
+                        d_range_y = insize*Ly/zoom
+                        
+                        # Set up zoom window grids
+                        dx = np.linspace(-d_range_x + x_m, d_range_x + x_m, dpd)
+                        dy = np.linspace(-d_range_y + y_m, d_range_y + y_m, dpd)
+                        dxg, dyg = np.meshgrid(dx, dy)
+                        
+                        # Create variables for the user provided equation strings
+                        u_str = self.str_x
+                        v_str = self.str_y
+        
+                        # Create string to evaluate the field at the target location
+                        u_str_point = u_str.replace('x', 'x_m')
+                        u_str_point = u_str_point.replace('y', 'y_m')
+                        
+                        v_str_point = v_str.replace('x', 'x_m')
+                        v_str_point = v_str_point.replace('y', 'y_m')
+                        
+                        # Check if the equations provided contain x and y terms
+                        if u_str.find('x') & u_str.find('y') == -1:
+                            u_str_grid = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                        else:
+                            u_str_grid = u_str.replace('x', 'dxg')
+                            u_str_grid = u_str_grid.replace('y', 'dyg')
+                  
+                        if v_str.find('x') & v_str.find('y') == -1:
+                            v_str_grid = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
+                        else:
+                            v_str_grid = v_str.replace('x', 'dxg')
+                            v_str_grid = v_str_grid.replace('y', 'dyg')
+                            
+                        # Generate arrays for the components of the derivative field          
+                        U = eval(u_str_grid) - eval(u_str_point)
+                        V = eval(v_str_grid) - eval(v_str_point)
+                        
+                        # from that create VF instance
+                        deriv_vf = vector_field(dxg, dyg, U, V, self.str_x, self.str_y)
+                        
+                        q = 1
+                        
+                        # Coordinates for plotting the inset axis
+                        xi = (q*x_m - self.xg[0,0])/(2*Lx)
+                        yi = (q*y_m - self.yg[0,0])/(2*Ly)
+                        
+                        # depending on preferances, return to user and plot
+                        if inset == True:
+                            if axis != None:
+                                # Create inset axis in the current axis.
+                                
+                                deriv_inset_ax = axis.inset_axes([(xi - 0.5*insize), (yi - 0.5*insize), insize, insize])
+                                deriv_vf.plot(deriv_inset_ax)
+                                
+                                # return the zoomed on axis
+                                # also return zoomed in form in case user wants that.
+                                return deriv_inset_ax, deriv_vf
+                            else:
+                                raise ValueError('Cannot inset without supplied axis')
+                        else:
+                            # inset is false, just return the new zoomed in instance
+                            return deriv_vf
+        
             
-        def Div(self, target=[0,0], zoom=2, dpd=9, fig=None, ax=None, inset=False):
+        def Div(self, target=[0,0], zoom=2, dpd=9, inset=False, axis=None, insize=0.3):
             '''
             Creates new vector field object at a target location, showing the Divergence of the field at this point.
             User gives arguments:
             Target - derivative plot location
             Zoom - Magnification level
             dpd - New plot point density
+            
+            inset - bool - if true, field div is plotted on given axis
+            axis - matplotlib axes instance - axis to plot on if instance it True
+            
+            Returns:
+            --------
+            if inset is False:
+                div VF object
+            if inset is True, inset axis and div VF object in this order.
+            
             '''
             if self.str_x == None or self.str_y == None:
                 # ERROR
                 raise TypeError('Error: No equation provided')
             else:
-                
-                # Target coordinates
-                x_m = target[0]
-                y_m = target[1]
-                
-                # Get the size of the original VF
-                L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
-                
-                # Zoom axis range
-                d_range = L/zoom
-                
-                # Size of the inset plot (default as 0.3)
-                d_length = 0.3 
-                
-                # Set up zoom window grids
-                dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
-                dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
-                dxg, dyg = np.meshgrid(dx, dy)
-                
-                # Create variables for the user provided equation strings
-                u_str = self.str_x
-                v_str = self.str_y
-
-                # Create string to evaluate the field at the target location
-                u_str_point = u_str.replace('x', 'x_m')
-                u_str_point = u_str_point.replace('y', 'y_m')
-                
-                v_str_point = v_str.replace('x', 'x_m')
-                v_str_point = v_str_point.replace('y', 'y_m')
-                
-                # Check if the equations provided contain x and y terms
-                if u_str.find('x') & u_str.find('y') == -1:
-                    u_str_grid = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                 # Zoom must be one or greater
+                if zoom < 1:
+                    raise ValueError('Zoom must be greater than one')
                 else:
-                    u_str_grid = u_str.replace('x', 'dxg')
-                    u_str_grid = u_str_grid.replace('y', 'dyg')
-          
-                if v_str.find('x') & v_str.find('y') == -1:
-                    v_str_grid = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
-                else:
-                    v_str_grid = v_str.replace('x', 'dxg')
-                    v_str_grid = v_str_grid.replace('y', 'dyg')
                     
-                # Generate arrays for the components of the derivative field          
-                U = eval(u_str_grid) - eval(u_str_point)
-                V = eval(v_str_grid) - eval(v_str_point)
-                
-                # =============================================================================
-                # Geometric Divergence Method - See Documentation                
-                # =============================================================================
-                
-                U_div = np.zeros(shape=(dpd, dpd))
-                V_div = np.zeros(shape=(dpd, dpd))
-                
-                # Looping Constant
-                N = dpd - 1
-        
-                # get number of points in quadrant
-                if dpd % 2 == 1:
-                    quad_x = int(dpd/2)
-                    quad_y = int((dpd+1)/2)
-                else:
-                    quad_x = int(dpd/2)
-                    quad_y = int(dpd/2)
-                    
-                for i in range(quad_x):
-                    # get the l number, for projection of j on radial / i on tangent
-                    l = i - 0.5*N
-                    
-                    # INNER LOOP
-                    for j in range(quad_y):
-                        # get the k number of projection: i on radial / j on tangent
-                        k = j - 0.5*N
-                        
-                        # get the commuting parts of V and W for each square corner
-                        # (x and y components of the subtracted field)
-                        U_comm_1 = 0.25*(2*U[i, j] + V[j, N-i] - V[N-j, i])
-                        U_comm_2 = 0.25*(2*U[j, N-i] + V[N-i, N-j] - V[i, j])
-                        U_comm_3 = 0.25*(2*U[N-i, N-j] + V[N-j, i] - V[j, N-i])
-                        U_comm_4 = 0.25*(2*U[N-j, i] + V[i, j] - V[N-i, N-j])
-                        
-                        V_comm_1 = 0.25*(2*V[i, j] - U[j, N-i] + U[N-j, i])
-                        V_comm_2 = 0.25*(2*V[j, N-i] - U[N-i, N-j] + U[i, j])
-                        V_comm_3 = 0.25*(2*V[N-i, N-j] - U[N-j, i] + U[j, N-i])
-                        V_comm_4 = 0.25*(2*V[N-j, i] - U[i, j] + U[N-i, N-j])
-                        
-                        # gte a normalisation factor from l and k
-                        A = k**2 + l**2
-                        
-                        U_div[i, j] = (U_comm_1*k + V_comm_1*l)*k/A
-                        V_div[i, j] = (U_comm_1*k + V_comm_1*l)*l/A
-                        U_div[j, N-i] = (U_comm_2*l + V_comm_2*(-k))*l/A
-                        V_div[j, N-i] = (U_comm_2*l + V_comm_2*(-k))*(-k)/A
-                        U_div[N-i, N-j] = (U_comm_3*(-k) + V_comm_3*(-l))*(-k)/A
-                        V_div[N-i, N-j] = (U_comm_3*(-k) + V_comm_3*(-l))*(-l)/A
-                        U_div[N-j, i] = (U_comm_4*(-l) + V_comm_4*k)*(-l)/A
-                        V_div[N-j, i] = (U_comm_4*(-l) + V_comm_4*k)*k/A
-                
-                if inset == True:
-                    # Create inset axis in the current axis.
-                    q = 0.92
-                    zoom_inset_ax = self.axis.inset_axes([0.5*(1 + q*x_m/L - d_length), 0.5*(1 + q*y_m/L - d_length), d_length, d_length])
-                    Div_vf = vector_field(dxg, dyg, U_div, V_div, fig = self.figure, ax = zoom_inset_ax)
-                else:
-                    if fig == None:  
-                        # Create new figure for the zoomed field
-                        Div_vf = vector_field(dxg, dyg, U_div, V_div) 
+                    if insize > 1 or insize < 0:
+                        raise ValueError('Insize must be +ve and less than one')
                     else:
-                        # Plot on the specified figure and axis 
-                        Div_vf = vector_field(dxg, dyg, U_div, V_div, fig = fig, ax = ax)
+                        
+                        # If no inset, set the size of the zoom axis to allow normal plotting
+                        if inset == False:
+                            insize = 1
                 
-                return Div_vf
+                        # Target coordinates
+                        x_m = target[0]
+                        y_m = target[1]
+                        
+                        # Get the size of the original VF# Get the size of the original VF
+                        Lx = 0.5*(self.xg[0,-1] - self.xg[0,0])
+                        Ly = 0.5*(self.yg[-1,0] - self.yg[0,0])
+                        
+                        # Zoom axis range
+                        d_range_x = insize*Lx/zoom
+                        d_range_y = insize*Ly/zoom
+                        
+                        # Set up zoom window grids
+                        dx = np.linspace(-d_range_x + x_m, d_range_x + x_m, dpd)
+                        dy = np.linspace(-d_range_y + y_m, d_range_y + y_m, dpd)
+                        dxg, dyg = np.meshgrid(dx, dy)
+                        
+                        # Create variables for the user provided equation strings
+                        u_str = self.str_x
+                        v_str = self.str_y
+        
+                        # Create string to evaluate the field at the target location
+                        u_str_point = u_str.replace('x', 'x_m')
+                        u_str_point = u_str_point.replace('y', 'y_m')
+                        
+                        v_str_point = v_str.replace('x', 'x_m')
+                        v_str_point = v_str_point.replace('y', 'y_m')
+                        
+                        # Check if the equations provided contain x and y terms
+                        if u_str.find('x') & u_str.find('y') == -1:
+                            u_str_grid = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                        else:
+                            u_str_grid = u_str.replace('x', 'dxg')
+                            u_str_grid = u_str_grid.replace('y', 'dyg')
+                  
+                        if v_str.find('x') & v_str.find('y') == -1:
+                            v_str_grid = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
+                        else:
+                            v_str_grid = v_str.replace('x', 'dxg')
+                            v_str_grid = v_str_grid.replace('y', 'dyg')
+                            
+                        # Generate arrays for the components of the derivative field          
+                        U = eval(u_str_grid) - eval(u_str_point)
+                        V = eval(v_str_grid) - eval(v_str_point)
+                        
+                        # =============================================================================
+                        # Geometric Divergence Method - See Documentation                
+                        # =============================================================================
+                        
+                        U_div = np.zeros(shape=(dpd, dpd))
+                        V_div = np.zeros(shape=(dpd, dpd))
+                        
+                        # Looping Constant
+                        N = dpd - 1
+                
+                        # get number of points in quadrant
+                        if dpd % 2 == 1:
+                            quad_x = int(dpd/2)
+                            quad_y = int((dpd+1)/2)
+                        else:
+                            quad_x = int(dpd/2)
+                            quad_y = int(dpd/2)
+                            
+                        for i in range(quad_x):
+                            # get the l number, for projection of j on radial / i on tangent
+                            l = i - 0.5*N
+                            
+                            # INNER LOOP
+                            for j in range(quad_y):
+                                # get the k number of projection: i on radial / j on tangent
+                                k = j - 0.5*N
+                                
+                                # get the commuting parts of V and W for each square corner
+                                # (x and y components of the subtracted field)
+                                U_comm_1 = 0.25*(2*U[i, j] + V[j, N-i] - V[N-j, i])
+                                U_comm_2 = 0.25*(2*U[j, N-i] + V[N-i, N-j] - V[i, j])
+                                U_comm_3 = 0.25*(2*U[N-i, N-j] + V[N-j, i] - V[j, N-i])
+                                U_comm_4 = 0.25*(2*U[N-j, i] + V[i, j] - V[N-i, N-j])
+                                
+                                V_comm_1 = 0.25*(2*V[i, j] - U[j, N-i] + U[N-j, i])
+                                V_comm_2 = 0.25*(2*V[j, N-i] - U[N-i, N-j] + U[i, j])
+                                V_comm_3 = 0.25*(2*V[N-i, N-j] - U[N-j, i] + U[j, N-i])
+                                V_comm_4 = 0.25*(2*V[N-j, i] - U[i, j] + U[N-i, N-j])
+                                
+                                # gte a normalisation factor from l and k
+                                A = k**2 + l**2
+                                
+                                U_div[i, j] = (U_comm_1*k + V_comm_1*l)*k/A
+                                V_div[i, j] = (U_comm_1*k + V_comm_1*l)*l/A
+                                U_div[j, N-i] = (U_comm_2*l + V_comm_2*(-k))*l/A
+                                V_div[j, N-i] = (U_comm_2*l + V_comm_2*(-k))*(-k)/A
+                                U_div[N-i, N-j] = (U_comm_3*(-k) + V_comm_3*(-l))*(-k)/A
+                                V_div[N-i, N-j] = (U_comm_3*(-k) + V_comm_3*(-l))*(-l)/A
+                                U_div[N-j, i] = (U_comm_4*(-l) + V_comm_4*k)*(-l)/A
+                                V_div[N-j, i] = (U_comm_4*(-l) + V_comm_4*k)*k/A
+                        
+                        
+                       # from that create VF instance
+                        div_vf = vector_field(dxg, dyg, U_div, V_div, self.str_x, self.str_y)
+                        
+                        q = 1
+                        
+                        # Coordinates for plotting the inset axis
+                        xi = (q*x_m - self.xg[0,0])/(2*Lx)
+                        yi = (q*y_m - self.yg[0,0])/(2*Ly)
+                        
+                        # depending on preferances, return to user and plot
+                        if inset == True:
+                            if axis != None:
+                                # Create inset axis in the current axis.
+                                
+                                div_inset_ax = axis.inset_axes([(xi - 0.5*insize), (yi - 0.5*insize), insize, insize])
+                                div_vf.plot(div_inset_ax)
+                                
+                                # return the zoomed on axis
+                                # also return zoomed in form in case user wants that.
+                                return div_inset_ax, div_vf
+                            else:
+                                raise ValueError('Cannot inset without supplied axis')
+                        else:
+                            # inset is false, just return the new zoomed in instance
+                            return div_vf
             
-        def Curl(self, target=[0,0], zoom=2, dpd=9, fig=None, ax=None, inset=False):
+        def Curl(self, target=[0,0], zoom=2, dpd=9, inset=False, axis=None, insize=0.3):
             '''
             Creates new vector field object at a target location, showing local rotation (Curl)
             User gives arguments:
             Target - derivative plot location
             Zoom - Magnification level
             dpd - New plot point density
+            
+            inset - bool - if true, field curl is plotted on given axis
+            axis - matplotlib axes instance - axis to plot on if instance it True
+            
+            Returns:
+            --------
+            if inset is False:
+                div VF object
+            if inset is True, inset axis and curl VF object in this order.
+            
             '''
             if self.str_x == None or self.str_y == None:
                 # ERROR
                 raise TypeError('Error: No equation provided')
             else:
-                
-                # Target coordinates
-                x_m = target[0]
-                y_m = target[1]
-                
-                # Get the size of the original VF
-                L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
-                
-                # Zoom axis range
-                d_range = L/zoom
-                
-                # Size of the inset plot (default as 0.3)
-                d_length = 0.3 
-                
-                # Set up zoom window grids
-                dx = np.linspace(-d_range + x_m, d_range + x_m, dpd)
-                dy = np.linspace(-d_range + y_m, d_range + y_m, dpd)
-                dxg, dyg = np.meshgrid(dx, dy)
-                
-                # Create variables for the user provided equation strings
-                u_str = self.str_x
-                v_str = self.str_y
-
-                # Create string to evaluate the field at the target location
-                u_str_point = u_str.replace('x', 'x_m')
-                u_str_point = u_str_point.replace('y', 'y_m')
-                
-                v_str_point = v_str.replace('x', 'x_m')
-                v_str_point = v_str_point.replace('y', 'y_m')
-                
-                # Check if the equations provided contain x and y terms
-                if u_str.find('x') & u_str.find('y') == -1:
-                    u_str_grid = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                 # Zoom must be one or greater
+                if zoom < 1:
+                    raise ValueError('Zoom must be greater than one')
                 else:
-                    u_str_grid = u_str.replace('x', 'dxg')
-                    u_str_grid = u_str_grid.replace('y', 'dyg')
-          
-                if v_str.find('x') & v_str.find('y') == -1:
-                    v_str_grid = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
-                else:
-                    v_str_grid = v_str.replace('x', 'dxg')
-                    v_str_grid = v_str_grid.replace('y', 'dyg')
                     
-                # Generate arrays for the components of the derivative field          
-                U = eval(u_str_grid) - eval(u_str_point)
-                V = eval(v_str_grid) - eval(v_str_point)
-                
-                # =============================================================================
-                # Geometric Curl Method - See Documentation                
-                # =============================================================================
-                
-                U_curl = np.zeros(shape=(dpd, dpd))
-                V_curl = np.zeros(shape=(dpd, dpd))
-                
-                # Looping Constant
-                N = dpd - 1
-        
-                # Quadrant Points
-                if dpd % 2 == 1:
-                    quad_x = int(dpd/2)
-                    quad_y = int((dpd+1)/2)
-                else:
-                    quad_x = int(dpd/2)
-                    quad_y = int(dpd/2)
-                    
-                for i in range(quad_x):
-                    # get the l number, for projection of j on radial / i on tangent
-                    l = i - 0.5*N
-                    
-                    # INNER LOOP
-                    for j in range(quad_y):
-                        # get the k number of projection: i on radial / j on tangent
-                        k = j - 0.5*N
-                        
-                        # get the commuting parts of V and W for each square corner
-                        # (x and y components of the subtracted field)
-                        U_comm_1 = 0.25*(2*U[i, j] + V[j, N-i] - V[N-j, i])
-                        U_comm_2 = 0.25*(2*U[j, N-i] + V[N-i, N-j] - V[i, j])
-                        U_comm_3 = 0.25*(2*U[N-i, N-j] + V[N-j, i] - V[j, N-i])
-                        U_comm_4 = 0.25*(2*U[N-j, i] + V[i, j] - V[N-i, N-j])
-                        
-                        V_comm_1 = 0.25*(2*V[i, j] - U[j, N-i] + U[N-j, i])
-                        V_comm_2 = 0.25*(2*V[j, N-i] - U[N-i, N-j] + U[i, j])
-                        V_comm_3 = 0.25*(2*V[N-i, N-j] - U[N-j, i] + U[j, N-i])
-                        V_comm_4 = 0.25*(2*V[N-j, i] - U[i, j] + U[N-i, N-j])
-                        
-                        # gte a normalisation factor from l and k
-                        A = k**2 + l**2
-                        
-                        U_curl[i, j] = (U_comm_1*l + V_comm_1*(-k))*l/A
-                        V_curl[i, j] = (U_comm_1*l + V_comm_1*(-k))*(-k)/A
-                        U_curl[j, N-i] = (U_comm_2*(-k) + V_comm_2*(-l))*(-k)/A
-                        V_curl[j, N-i] = (U_comm_2*(-k) + V_comm_2*(-l))*(-l)/A
-                        U_curl[N-i, N-j] = (U_comm_3*(-l) + V_comm_3*k)*(-l)/A
-                        V_curl[N-i, N-j] = (U_comm_3*(-l) + V_comm_3*k)*k/A
-                        U_curl[N-j, i] = (U_comm_4*k + V_comm_4*l)*k/A
-                        V_curl[N-j, i] = (U_comm_4*k + V_comm_4*l)*l/A
-                    
-                if inset == True:
-                    # Create inset axis in the current axis.
-                    q = 0.92
-                    zoom_inset_ax = self.axis.inset_axes([0.5*(1 + q*x_m/L - d_length), 0.5*(1 + q*y_m/L - d_length), d_length, d_length])
-                    Curl_vf = vector_field(dxg, dyg, U_curl, V_curl, fig = self.figure, ax = zoom_inset_ax)
-                else:
-                    if fig == None:  
-                        # Create new figure for the zoomed field
-                        Curl_vf = vector_field(dxg, dyg, U_curl, V_curl) 
+                    if insize > 1 or insize < 0:
+                        raise ValueError('Insize must be +ve and less than one')
                     else:
-                        # Plot on the specified figure and axis 
-                        Curl_vf = vector_field(dxg, dyg, U_curl, V_curl, fig = fig, ax = ax)
+                        
+                        # If no inset, set the size of the zoom axis to allow normal plotting
+                        if inset == False:
+                            insize = 1
                 
-                return Curl_vf
+                        # Target coordinates
+                        x_m = target[0]
+                        y_m = target[1]
+                        
+                        # Get the size of the original VF# Get the size of the original VF
+                        Lx = 0.5*(self.xg[0,-1] - self.xg[0,0])
+                        Ly = 0.5*(self.yg[-1,0] - self.yg[0,0])
+                        
+                        # Zoom axis range
+                        d_range_x = insize*Lx/zoom
+                        d_range_y = insize*Ly/zoom
+                        
+                        # Set up zoom window grids
+                        dx = np.linspace(-d_range_x + x_m, d_range_x + x_m, dpd)
+                        dy = np.linspace(-d_range_y + y_m, d_range_y + y_m, dpd)
+                        dxg, dyg = np.meshgrid(dx, dy)
+                        
+                        # Create variables for the user provided equation strings
+                        u_str = self.str_x
+                        v_str = self.str_y
+        
+                        # Create string to evaluate the field at the target location
+                        u_str_point = u_str.replace('x', 'x_m')
+                        u_str_point = u_str_point.replace('y', 'y_m')
+                        
+                        v_str_point = v_str.replace('x', 'x_m')
+                        v_str_point = v_str_point.replace('y', 'y_m')
+                        
+                        # Check if the equations provided contain x and y terms
+                        if u_str.find('x') & u_str.find('y') == -1:
+                            u_str_grid = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                        else:
+                            u_str_grid = u_str.replace('x', 'dxg')
+                            u_str_grid = u_str_grid.replace('y', 'dyg')
+                  
+                        if v_str.find('x') & v_str.find('y') == -1:
+                            v_str_grid = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
+                        else:
+                            v_str_grid = v_str.replace('x', 'dxg')
+                            v_str_grid = v_str_grid.replace('y', 'dyg')
+                            
+                        # Generate arrays for the components of the derivative field          
+                        U = eval(u_str_grid) - eval(u_str_point)
+                        V = eval(v_str_grid) - eval(v_str_point)
+                        
+                        # =============================================================================
+                        # Geometric Curl Method - See Documentation                
+                        # =============================================================================
+                        
+                        U_curl = np.zeros(shape=(dpd, dpd))
+                        V_curl = np.zeros(shape=(dpd, dpd))
+                        
+                        # Looping Constant
+                        N = dpd - 1
+                
+                        # Quadrant Points
+                        if dpd % 2 == 1:
+                            quad_x = int(dpd/2)
+                            quad_y = int((dpd+1)/2)
+                        else:
+                            quad_x = int(dpd/2)
+                            quad_y = int(dpd/2)
+                            
+                        for i in range(quad_x):
+                            # get the l number, for projection of j on radial / i on tangent
+                            l = i - 0.5*N
+                            
+                            # INNER LOOP
+                            for j in range(quad_y):
+                                # get the k number of projection: i on radial / j on tangent
+                                k = j - 0.5*N
+                                
+                                # get the commuting parts of V and W for each square corner
+                                # (x and y components of the subtracted field)
+                                U_comm_1 = 0.25*(2*U[i, j] + V[j, N-i] - V[N-j, i])
+                                U_comm_2 = 0.25*(2*U[j, N-i] + V[N-i, N-j] - V[i, j])
+                                U_comm_3 = 0.25*(2*U[N-i, N-j] + V[N-j, i] - V[j, N-i])
+                                U_comm_4 = 0.25*(2*U[N-j, i] + V[i, j] - V[N-i, N-j])
+                                
+                                V_comm_1 = 0.25*(2*V[i, j] - U[j, N-i] + U[N-j, i])
+                                V_comm_2 = 0.25*(2*V[j, N-i] - U[N-i, N-j] + U[i, j])
+                                V_comm_3 = 0.25*(2*V[N-i, N-j] - U[N-j, i] + U[j, N-i])
+                                V_comm_4 = 0.25*(2*V[N-j, i] - U[i, j] + U[N-i, N-j])
+                                
+                                # gte a normalisation factor from l and k
+                                A = k**2 + l**2
+                                
+                                U_curl[i, j] = (U_comm_1*l + V_comm_1*(-k))*l/A
+                                V_curl[i, j] = (U_comm_1*l + V_comm_1*(-k))*(-k)/A
+                                U_curl[j, N-i] = (U_comm_2*(-k) + V_comm_2*(-l))*(-k)/A
+                                V_curl[j, N-i] = (U_comm_2*(-k) + V_comm_2*(-l))*(-l)/A
+                                U_curl[N-i, N-j] = (U_comm_3*(-l) + V_comm_3*k)*(-l)/A
+                                V_curl[N-i, N-j] = (U_comm_3*(-l) + V_comm_3*k)*k/A
+                                U_curl[N-j, i] = (U_comm_4*k + V_comm_4*l)*k/A
+                                V_curl[N-j, i] = (U_comm_4*k + V_comm_4*l)*l/A
+                            
+                        # from that create VF instance
+                        curl_vf = vector_field(dxg, dyg, U_curl, V_curl, self.str_x, self.str_y)
+                        
+                        q = 1
+                        
+                        # Coordinates for plotting the inset axis
+                        xi = (q*x_m - self.xg[0,0])/(2*Lx)
+                        yi = (q*y_m - self.yg[0,0])/(2*Ly)
+                        
+                        # depending on preferances, return to user and plot
+                        if inset == True:
+                            if axis != None:
+                                # Create inset axis in the current axis.
+                                
+                                curl_inset_ax = axis.inset_axes([(xi - 0.5*insize), (yi - 0.5*insize), insize, insize])
+                                curl_vf.plot(curl_inset_ax)
+                                
+                                # return the zoomed on axis
+                                # also return zoomed in form in case user wants that.
+                                return curl_inset_ax, curl_vf
+                            else:
+                                raise ValueError('Cannot inset without supplied axis')
+                        else:
+                            # inset is false, just return the new zoomed in instance
+                            return curl_vf
         
         # define a method to change a supplied Vector filed to the 1-form
-        def formalise(self, pass_on_figure=False, g=[['1', '0'], ['0', '1']]):
+        def formalise(self, g=[['1', '0'], ['0', '1']]):
             '''
             Passes in everything it can (all it has been supplied)
             to the 1-form object.
@@ -3355,9 +3085,6 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
             via meshgrid, if it is supplied as strings, needs to be in terms of
             x and y, and contain no special funtions, apart from ones imported
             here automatically and listed in the documentation #!!!
-            Apart form the metric, takes in pass_on_figure:
-                ----determines if figure from this object is to be
-                passed on to the 1-form object.
             
             Returns a single object (1-form object)
             '''
@@ -3444,29 +3171,12 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
             else:
                 pass
 
-            # based on what was given into the Vector field, return a 1-form object with these parameters
+            # based on what was given into the Vector field
+            # return a 1-form object with these parameters
             if analytics:
-                if pass_on_figure is False:
-                    # supply these to the 1-form object creator
-                    result_form = form_1(self.xg, self.yg, form_x, form_y, x_str_form, y_str_form)
-                elif pass_on_figure is True:
-                    if self.subplots is False:
-                        result_form = form_1(self.xg, self.yg, form_x, form_y, x_str_form, y_str_form, fig=self.figure, subplots=False)
-                    elif self.subplots is True:
-                        result_form = form_1(self.xg, self.yg, form_x, form_y, x_str_form, y_str_form, fig=self.figure, subplots=True, sub_axis_list=self.axis)
-                else:
-                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                result_form = form_1(self.xg, self.yg, form_x, form_y, x_str_form, y_str_form)
             elif not analytics:
-                if pass_on_figure is False:
-                    # supply these to the 1-form object creator
-                    result_form = form_1(self.xg, self.yg, form_x, form_y)
-                elif pass_on_figure is True:
-                    if self.subplots is False:
-                        result_form = form_1(self.xg, self.yg, form_x, form_y, fig=self.figure, subplots=False)
-                    elif self.subplots is True:
-                        result_form = form_1(self.xg, self.yg, form_x, form_y, fig=self.figure, subplots=True, sub_axis_list=self.axis)
-                else:
-                    raise ValueError('Error, Incorrect input for \' pass_on_figure \'')
+                result_form = form_1(self.xg, self.yg, form_x, form_y)
         
             # return the found object
             return result_form
@@ -3475,5 +3185,3 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None, fig=None, ax=None
     v_object = field_set_up(xg, yg, F_x, F_y)
     # return it to user to store
     return v_object
-
-

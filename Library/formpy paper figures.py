@@ -1,18 +1,7 @@
-import formpy1 as fp
+import formpy as fp
 import numpy as np
 import matplotlib.pyplot as plt
 
-
-<<<<<<< HEAD
-# 1-form plot and zooming on it
-
-
-# %%
-
-# 2-form plot with zoom inset
-
-
-=======
 # All use the examples:
 # u = yg*np.sin(xg)
 # v = -xg*np.cos(yg)
@@ -21,6 +10,7 @@ import matplotlib.pyplot as plt
 # %%
 
 # 1-form plot and zooming on it
+
 r = np.linspace(-5, 5, 31)
 xg, yg = np.meshgrid(r, r)
 
@@ -73,7 +63,6 @@ zoomed_form.plot(zoomed_ax)
 # 2-form plot with zoom inset
 
 
->>>>>>> Attempt-at-changing-all-figures-and-axis-supplies
 # %%
 
 # Example of exterior derivative
@@ -123,8 +112,6 @@ Showcasing
 # %%
 
 # Example showing proof of Stokes theorem
-<<<<<<< HEAD
-=======
 
 
 # %%
@@ -135,24 +122,10 @@ Showcasing
 # %%
 
 # 2D BH example (?)
->>>>>>> Attempt-at-changing-all-figures-and-axis-supplies
 
 
 # %%
 
-<<<<<<< HEAD
-# electric/magnetic fields examples
-
-
-# %%
-
-# 2D BH example (?)
-
-
-# %%
-
-=======
->>>>>>> Attempt-at-changing-all-figures-and-axis-supplies
 # d^2 (any 0-form) = 0
 
 
