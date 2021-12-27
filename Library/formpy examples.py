@@ -1012,7 +1012,7 @@ metric = [['1', '0'],
           ['0', '(x**2 + y**2)']]
 
 # via this, set up a 1-form
-form_1_obj = vf1.formalise(g=metric)
+form_1_obj = vf1.contravariant(g=metric)
 
 # plot it
 form_1_obj.plot(ax2)
@@ -1052,7 +1052,7 @@ metric = [[np.ones(np.shape(xg)), np.zeros(np.shape(xg))],
           [np.zeros(np.shape(xg)), yg**2 + xg**2]]
 
 # via this, set up a 1-form
-form_1_obj = vf1.formalise(g=metric)
+form_1_obj = vf1.contravariant(g=metric)
 
 # plot it
 form_1_obj.plot(ax2)
@@ -1105,7 +1105,7 @@ metric = [['1', '0'],
           ['0', 'x**2 + y**2']]
 
 # via this, get the VF
-vf = form1.vectorise(g=metric)
+vf = form1.covariant(g=metric)
 
 # plot vector field
 vf.plot(ax2)
@@ -1121,7 +1121,7 @@ metric = [[np.ones(np.shape(xg)), np.zeros(np.shape(xg))],
           [np.zeros(np.shape(xg)), yg**2 + xg**2]]
 
 # via this, get the VF
-vf2 = form1.vectorise(g=metric)
+vf2 = form1.covariant(g=metric)
 
 # plot it
 vf2.plot(ax3)
@@ -1171,7 +1171,7 @@ metric = [[np.ones(np.shape(xg)), np.zeros(np.shape(xg))],
           [np.zeros(np.shape(xg)), xg**2 + yg**2]]  # polar transformation
 
 # via this, get the 1-form
-form_1_obj = vf1.formalise(g=metric)
+form_1_obj = vf1.contravariant(g=metric)
 
 # plot it
 form_1_obj.plot(ax2)
@@ -1217,7 +1217,7 @@ metric = [['1', '0'],
           ['0', 'x**2 + y**2']]
 
 # find the VF
-vf = form1.vectorise(g=metric)
+vf = form1.covariant(g=metric)
 
 # plot it
 vf.plot(ax2)

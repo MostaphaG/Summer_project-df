@@ -1178,7 +1178,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                 return result_form
         
         # define a method to change a supplied Vector filed to the 1-form
-        def vectorise(self, g=[['1', '0'], ['0', '1']]):
+        def covariant(self, g=[['1', '0'], ['0', '1']]):
             '''
             Passes in everything it can (all it has been supplied)
             to the VF object.
@@ -2934,7 +2934,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             '''
             if self.str_x == None or self.str_y == None:
                 # ERROR
-                raise TypeError('Error: No equation provided')
+                raise TypeError('Error: No equation provided, despite being numerical, equations needed for zooming and changing density of inset via dpd')
             else:
                  # Zoom must be one or greater
                 if zoom < 1:
@@ -2946,8 +2946,8 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                     else:
                         
                         # If no inset, set the size of the zoom axis to allow normal plotting
-                        if inset == False:
-                            insize = 1
+                        if not isinstance(inset, float) and not isinstance(inset, int):
+                            insize = 0.4
                 
                         # Target coordinates
                         x_m = target[0]
@@ -3072,7 +3072,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                             return curl_vf
         
         # define a method to change a supplied Vector filed to the 1-form
-        def formalise(self, g=[['1', '0'], ['0', '1']]):
+        def contravariant(self, g=[['1', '0'], ['0', '1']]):
             '''
             Passes in everything it can (all it has been supplied)
             to the 1-form object.
