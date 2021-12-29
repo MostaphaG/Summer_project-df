@@ -97,12 +97,15 @@ ax3 = fig.add_subplot(133)
 ax1.set_aspect('equal')
 ax1.set_xlabel(r'$x$')
 ax1.set_ylabel(r'$y$')
+ax1.set_title(r'$1-form \ with \ zoom=1 \ inset$')
 ax2.set_aspect('equal')
 ax2.set_xlabel(r'$x$')
 ax2.set_ylabel(r'$y$')
+ax2.set_title(r'$1-form \ with \ zoom=2 \ inset$')
 ax3.set_aspect('equal')
 ax3.set_xlabel(r'$x$')
 ax3.set_ylabel(r'$y$')
+ax3.set_title(r'$1-form \ with \ zoom=10 \ inset$')
 
 # plot 1-form on all
 form1.plot(ax1)
@@ -112,17 +115,17 @@ form1.plot(ax3)
 # zoom on each and plot
 
 # ax1
-zoomed_ax, zoomed_form = form1.zoom(target=[2, 3.5], zoom=1, dpd=7, inset=True, axis=ax1)
+zoomed_ax, zoomed_form = form1.zoom(target=[2, 3], zoom=1, dpd=7, inset=True, axis=ax1)
 zoomed_form.colour('r')
 zoomed_form.plot(zoomed_ax)
 
 # ax2
-zoomed_ax, zoomed_form = form1.zoom(target=[2, 3.5], zoom=10, dpd=7, inset=True, axis=ax2)
+zoomed_ax, zoomed_form = form1.zoom(target=[2, 3], zoom=2, dpd=7, inset=True, axis=ax2)
 zoomed_form.colour('r')
 zoomed_form.plot(zoomed_ax)
 
 # ax3
-zoomed_ax, zoomed_form = form1.zoom(target=[2, 3.5], zoom=100, dpd=7, inset=True, axis=ax3)
+zoomed_ax, zoomed_form = form1.zoom(target=[2, 3], zoom=10, dpd=7, inset=True, axis=ax3)
 zoomed_form.colour('r')
 zoomed_form.plot(zoomed_ax)
 
@@ -130,6 +133,27 @@ zoomed_form.plot(zoomed_ax)
 
 # 2-form plot with zoom inset
 
+v = np.linspace(-6, 6, 31)
+xg, yg = np.meshgrid(v, v)
+zooming = 1.2
+u = yg*np.sin(xg)
+v = -xg*np.cos(yg)
+form = u*v
+form2 = fp.form_2(xg, yg, form)
+form2.give_eqn('-y*x*sin(x)*cos(y)')
+
+# set up a figure and axis to plot it and its inset
+fig = plt.figure()
+ax = fig.gca()
+ax.set_aspect('equal')
+ax.tick_params(labelsize=14)
+ax.set_xlabel(r'$x$', fontsize=16)
+ax.set_ylabel(r'$y$', fontsize=16)
+ax.set_title(r'$2-form \ with \ zoom={:.1f} \ inset$'.format(zooming), fontsize=16)
+
+form2.plot(ax)
+
+zoomed_ax, form2_zoomed = form2.zoom(target=[2.5, 3], zoom=zooming, dpd=9, inset=True, axis=ax)
 
 # %%
 
