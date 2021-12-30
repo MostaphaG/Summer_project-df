@@ -2145,14 +2145,14 @@ def form_0(xg, yg, form_0, form_0_eqn=None):
                     
                     # deal with sinularities that appear on evaluated points
                     isnan_arr = np.isnan(form_0_contour)
-                    for i in range(len(xg[0, :])):
-                        for j in range(len(yg[:, 0])):
+                    for i in range(len(contour_x_grid[0, :])):
+                        for j in range(len(contour_y_grid[:, 0])):
                             # set to zero points that are not defined or inf
-                            if isnan_arr[i, j] or abs(form_0_contour[i, j]) == np.inf  or abs(form_0_contour[i, j]) > 1e15:
+                            if isnan_arr[i, j] or abs(form_0_contour[i, j]) == np.inf or abs(form_0_contour[i, j]) > 1e15:
                                 # colour this region as a red dot, not square to
-                                # not confuse with nigh mag 2-forms in stacks. or worse, in
+                                # not confuse with high mag 2-forms in stacks. or worse, in
                                 # blocks
-                                circ = patch.Circle((self.xg[i, j], self.yg[i, j]), L*self.fract/3, color='red')
+                                circ = patch.Circle((contour_x_grid[i, j], contour_y_grid[i, j]), L*0.05/3, color='red')
                                 axis.add_patch(circ)
                                 form_0_contour[i, j] = 0
                     
@@ -2160,6 +2160,19 @@ def form_0(xg, yg, form_0, form_0_eqn=None):
                     CS = axis.contour(contour_x_grid, contour_y_grid, form_0_contour, levels=self.lines)
                     axis.clabel(CS, inline=self.inline_bool, fontsize=self.fontsize)
             else:
+                # deal with sinularities that appear on evaluated points
+                isnan_arr = np.isnan(form_0)
+                for i in range(len(self.xg[0, :])):
+                    for j in range(len(self.yg[:, 0])):
+                        # set to zero points that are not defined or inf
+                        if isnan_arr[i, j] or abs(form_0[i, j]) == np.inf or abs(form_0[i, j]) > 1e15:
+                            # colour this region as a red dot, not square to
+                            # not confuse with high mag 2-forms in stacks. or worse, in
+                            # blocks
+                            circ = patch.Circle((self.xg[i, j], self.yg[i, j]), L*0.05/3, color='red')
+                            axis.add_patch(circ)
+                            form_0[i, j] = 0
+                
                 # set up the contour plot with given grids
                 CS = axis.contour(self.xg, self.yg, form_0, levels=self.lines)
                 axis.clabel(CS, inline=self.inline_bool, fontsize=self.fontsize)

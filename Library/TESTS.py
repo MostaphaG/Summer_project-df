@@ -70,6 +70,57 @@ ax.set_aspect('equal')
 form_obj.plot(ax)
 
 
+# set up a similar VF to test
+
+
+VF = fp.vector_field(xg, yg, F_x, F_y)
+
+# set up a plot to put these on:
+fig1 = plt.figure(figsize=(6, 6))
+ax1 = fig1.gca()
+ax1.set_xlabel(r'$x$')
+ax1.set_ylabel(r'$y$')
+ax1.set_aspect('equal')
+
+# plot
+VF.plot(ax1)
+
+
+# Similarly with 2-form
+
+form_obj2 = fp.form_2(xg, yg, F_x*F_y)
+
+# set up a plot to put these on:
+fig2 = plt.figure(figsize=(6, 6))
+ax2 = fig2.gca()
+ax2.set_xlabel(r'$x$')
+ax2.set_ylabel(r'$y$')
+ax2.set_aspect('equal')
+
+# plot
+form_obj2.plot(ax2)
+# %%
+# Similarly with 0-form
+
+form_obj0 = fp.form_0(xg, yg, F_x*F_y)
+form_obj0.density_increase(5)
+form_obj0.give_eqn('x*y/(x**2 + y**2)**(1.5)')
+
+# set up a plot to put these on:
+fig3 = plt.figure(figsize=(6, 6))
+ax3 = fig3.gca()
+ax3.set_xlabel(r'$x$')
+ax3.set_ylabel(r'$y$')
+ax3.set_aspect('equal')
+
+# plot
+form_obj0.plot(ax3)
+
+
+'''
+Messy with all the figures, I know, but its just for quick tests for singularities
+'''
+
 # %%
 
 '''
