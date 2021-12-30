@@ -396,7 +396,7 @@ ax.set_aspect('equal')
 vf1.plot(ax)
 
 # find local deriv and plot as inset
-D_inset_ax, D_vf1 = vf1.DF((3, 3), 5, 9, inset=True, axis=ax)
+D_inset_ax, D_vf1 = vf1.deriv((3, 3), 5, 9, inset=True, axis=ax)
 
 #%%
 
@@ -421,7 +421,7 @@ ax.set_aspect('equal')
 vf1.plot(ax)
 
 # plot inset with its div, with new changed properties.
-dif_axis, div_field = vf1.Div((0,2), 100, 13, inset=True, axis=ax)
+dif_axis, div_field = vf1.div((0,2), 100, 13, inset=True, axis=ax)
 #div_field.autoscale()
 div_field.plot(dif_axis)
 
@@ -448,7 +448,7 @@ ax.set_aspect('equal')
 
 vf1.plot(ax)
 
-curl_inset_ax, curl_field = vf1.Curl((0,2), 4, 13, inset=True, axis=ax)
+curl_inset_ax, curl_field = vf1.curl((0,2), 4, 13, inset=True, axis=ax)
 # curl_field.autoscale()
 curl_field.plot(curl_inset_ax)
 

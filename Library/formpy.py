@@ -2675,7 +2675,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                             # inset is false, just return the new zoomed in instance
                             return zoom_vf
             
-        def DF(self, target=[0, 0], zoom=2, dpd=9, inset=False, axis=None, insize=0.3):
+        def deriv(self, target=[0, 0], zoom=2, dpd=9, inset=False, axis=None, insize=0.3):
             '''
             Creates new vector field object at a target location, showing the derivative field at this point.
             User gives arguments:
@@ -2782,7 +2782,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                             return deriv_vf
         
             
-        def Div(self, target=[0,0], zoom=2, dpd=9, inset=False, axis=None, insize=0.3):
+        def div(self, target=[0,0], zoom=2, dpd=9, inset=False, axis=None, insize=0.3):
             '''
             Creates new vector field object at a target location, showing the Divergence of the field at this point.
             User gives arguments:
@@ -2940,7 +2940,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                             # inset is false, just return the new zoomed in instance
                             return div_vf
             
-        def Curl(self, target=[0,0], zoom=2, dpd=9, inset=False, axis=None, insize=0.3):
+        def curl(self, target=[0,0], zoom=2, dpd=9, inset=False, axis=None, insize=0.3):
             '''
             Creates new vector field object at a target location, showing local rotation (Curl)
             User gives arguments:

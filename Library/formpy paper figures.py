@@ -36,15 +36,15 @@ ax1.set_title(r'$VF \ with \ Zoom \ Inset$')
 ax2.set_aspect('equal')
 ax2.set_xlabel(r'$x$')
 ax2.set_ylabel(r'$y$')
-ax2.set_title(r'$VF \ with \ DF \ Inset$')
+ax2.set_title(r'$VF \ with \ derivative \ Inset$')
 ax3.set_aspect('equal')
 ax3.set_xlabel(r'$x$')
 ax3.set_ylabel(r'$y$')
-ax3.set_title(r'$VF \ with \ Div \ Inset$')
+ax3.set_title(r'$VF \ with \ div \ Inset$')
 ax4.set_aspect('equal')
 ax4.set_xlabel(r'$x$')
 ax4.set_ylabel(r'$y$')
-ax4.set_title(r'$VF \ with \ Curl \ Inset$')
+ax4.set_title(r'$VF \ with \ curl \ Inset$')
 
 # plot VF on all
 VF.plot(ax1)
@@ -61,17 +61,17 @@ zoomed_VF.colour('r')
 zoomed_VF.plot(zoomed_ax1)
 
 # ax2
-df_ax1, df_VF = VF.DF(target=[2, 3], zoom=2, dpd=7, inset=True, axis=ax2)
+df_ax1, df_VF = VF.deriv(target=[2, 3], zoom=2, dpd=7, inset=True, axis=ax2)
 df_VF.colour('r')
 df_VF.plot(df_ax1)
 
 # ax3
-div_ax1, div_VF = VF.Div(target=[2, 3], zoom=2, dpd=7, inset=True, axis=ax3)
+div_ax1, div_VF = VF.div(target=[2, 3], zoom=2, dpd=7, inset=True, axis=ax3)
 div_VF.colour('r')
 div_VF.plot(div_ax1)
 
 # ax4
-curl_ax1, curl_VF = VF.Curl(target=[2, 3], zoom=2, dpd=7, inset=True, axis=ax4)
+curl_ax1, curl_VF = VF.curl(target=[2, 3], zoom=2, dpd=7, inset=True, axis=ax4)
 curl_VF.colour('r')
 curl_VF.plot(curl_ax1)
 
@@ -91,9 +91,8 @@ form1.give_eqn('y*sin(x)','-x*cos(y)')
 
 # set up siubplots for different zooming in values
 fig = plt.figure(figsize=(13, 7))
-ax1 = fig.add_subplot(131)
-ax2 = fig.add_subplot(132)
-ax3 = fig.add_subplot(133)
+ax1 = fig.add_subplot(121)
+ax2 = fig.add_subplot(122)
 ax1.set_aspect('equal')
 ax1.set_xlabel(r'$x$')
 ax1.set_ylabel(r'$y$')
@@ -102,15 +101,10 @@ ax2.set_aspect('equal')
 ax2.set_xlabel(r'$x$')
 ax2.set_ylabel(r'$y$')
 ax2.set_title(r'$1-form \ with \ zoom=2 \ inset$')
-ax3.set_aspect('equal')
-ax3.set_xlabel(r'$x$')
-ax3.set_ylabel(r'$y$')
-ax3.set_title(r'$1-form \ with \ zoom=10 \ inset$')
 
 # plot 1-form on all
 form1.plot(ax1)
 form1.plot(ax2)
-form1.plot(ax3)
 
 # zoom on each and plot
 
@@ -121,11 +115,6 @@ zoomed_form.plot(zoomed_ax)
 
 # ax2
 zoomed_ax, zoomed_form = form1.zoom(target=[2, 3], zoom=2, dpd=7, inset=True, axis=ax2)
-zoomed_form.colour('r')
-zoomed_form.plot(zoomed_ax)
-
-# ax3
-zoomed_ax, zoomed_form = form1.zoom(target=[2, 3], zoom=10, dpd=7, inset=True, axis=ax3)
 zoomed_form.colour('r')
 zoomed_form.plot(zoomed_ax)
 
