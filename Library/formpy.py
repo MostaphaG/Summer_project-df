@@ -433,7 +433,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             for i in range(x_len):
                 for j in range(y_len):
                     # set to zero points that are not defined or inf
-                    if isnan_arr[i, j] is True:
+                    if isnan_arr[i, j]:
                         #colour this region as a shaded square
                         rect = patch.Rectangle((self.xg[i, j] - dist_points/2, yg[i, j]  - dist_points/2), dist_points, dist_points, color='#B5B5B5')
                         axis.add_patch(rect)
@@ -1512,7 +1512,7 @@ def form_2(xg, yg, form2, form_2_eq=None):
             for i in range(x_len):
                 for j in range(y_len):
                     # set to zero points that are not defined or inf
-                    if isnan_arr[i, j] is True or abs(form2[i, j]) == np.inf  or abs(form2[i, j]) > 1e15:
+                    if isnan_arr[i, j] or abs(form2[i, j]) == np.inf  or abs(form2[i, j]) > 1e15:
                         # colour this region as a red dot, not square to
                         # not confuse with nigh mag 2-forms in stacks. or worse, in
                         # blocks
@@ -2519,10 +2519,11 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             
             # prevent any magnitudes from being inf or nan
             # only here, need to do it to u and v not just mag
-            isnan_arr = np.isnan(F_x_local)
+            isnan_arrx = np.isnan(F_x_local)
+            isnan_arry = np.isnan(F_y_local)
             for i in range(x_len):
                 for j in range(y_len):
-                    if isnan_arr[i,j] or isnan(F_y_local[i,j]) == True or abs(F_x_local[i, j]) == np.inf or abs(F_y_local[i, j]) == np.inf or abs(F_y_local[i, j]) > 1e15 or abs(F_x_local[i, j]) > 1e15:
+                    if isnan_arrx[i,j] or isnan_arry[i,j] or abs(F_x_local[i, j]) == np.inf or abs(F_y_local[i, j]) == np.inf or abs(F_y_local[i, j]) > 1e15 or abs(F_x_local[i, j]) > 1e15:
                         F_x_local[i,j] = F_y_local[i,j] = 0
             
             

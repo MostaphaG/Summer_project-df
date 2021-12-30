@@ -45,6 +45,30 @@ yi = (y_m - yg[0,0])/y_range
 q = 0.92
 inax = ax.inset_axes([(xi - q*0.5*insize), (yi - q*0.5*insize), insize, insize])
 
+# %%
+
+'''
+Central force check
+'''
+
+# set up needed parameters
+v = np.linspace(-4, 4, 21)
+xg, yg = np.meshgrid(v, v)
+
+F_x = xg/((xg**2 + yg**2)**(1.5))
+F_y = yg/((xg**2 + yg**2)**(1.5))
+form_obj = fp.form_1(xg, yg, F_x, F_y)
+
+# set up a plot to put these on:
+fig = plt.figure(figsize=(6, 6))
+ax = fig.gca()
+ax.set_xlabel(r'$x$')
+ax.set_ylabel(r'$y$')
+ax.set_aspect('equal')
+
+# plot
+form_obj.plot(ax)
+
 
 # %%
 
