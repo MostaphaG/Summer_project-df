@@ -472,12 +472,17 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             R = mag/max_size
             
             # logarithmic attempt
-            if self.logarithmic_scale_bool == 1:
-                log_a = 1000000
-                R = np.where(R<=1/log_a, 1/log_a, R)  # Remove the values less than critical for log
-                R = log(log_a*R)/log(log_a)
+            if self.logarithmic_scale_bool == True:
+                # Add 1 to each magnitude
+                mag1 = mag + 1
+                # Calculate the appropriate scaling factor
+                a = max_size**(1/self.s_max)
+                # Take log(base=a) of mag1
+                logmag1 = np.log(mag1)/np.log(a)
+                # Re-assign R
+                R = logmag1/np.max(logmag1)    
             else:
-                pass
+                R = mag/max_size
 
             # define tigonometirc shifts
             I_sin = np.sin(angles)
