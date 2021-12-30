@@ -1480,7 +1480,7 @@ def form_2(xg, yg, form2, form_2_eq=None):
             '''
             
             
-            form2 = self.form_2  # from self, get 2-form too
+            form2 = self.form_2 * 1  # from self, get 2-form too
             
             # set all insignificant values to zero:
             form2[np.abs(form2) < 1e-12] = 0
@@ -1548,7 +1548,7 @@ def form_2(xg, yg, form2, form_2_eq=None):
             
             max_size = np.max(mag)   # careful with singularities, else ---> nan
 
-            if self.logarithmic_scale_bool == True:
+            if self.logarithmic_scale_bool:
                 # Add 1 to each magnitude
                 mag1 = mag + 1
                 # Calculate the appropriate scaling factor
