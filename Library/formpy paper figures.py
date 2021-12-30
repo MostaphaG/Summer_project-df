@@ -100,7 +100,7 @@ zoomed_VF.plot(zoomed_ax)
 
 # 1-form plot and zooming on it
 
-r = np.linspace(-5, 5, 31)
+r = np.linspace(-5, 5, 23)
 xg, yg = np.meshgrid(r, r)
 
 u = yg*np.sin(xg)
@@ -115,13 +115,15 @@ fig = plt.figure(figsize=(13, 7))
 ax1 = fig.add_subplot(121)
 ax2 = fig.add_subplot(122)
 ax1.set_aspect('equal')
-ax1.set_xlabel(r'$x$')
-ax1.set_ylabel(r'$y$')
-ax1.set_title(r'$1-form \ with \ zoom=1 \ inset$')
+ax1.set_xlabel(r'$x$', fontsize=18)
+ax1.set_ylabel(r'$y$', fontsize=18)
+ax1.set_title(r'$1-form \ with \ zoom=1 \ inset$', fontsize=18)
+ax1.tick_params(labelsize=16)
 ax2.set_aspect('equal')
-ax2.set_xlabel(r'$x$')
-ax2.set_ylabel(r'$y$')
-ax2.set_title(r'$1-form \ with \ zoom=2 \ inset$')
+ax2.set_xlabel(r'$x$', fontsize=18)
+ax2.set_ylabel(r'$y$', fontsize=18)
+ax2.set_title(r'$1-form \ with \ zoom=2 \ inset$', fontsize=18)
+ax2.tick_params(labelsize=16)
 
 # plot 1-form on all
 form1.plot(ax1)

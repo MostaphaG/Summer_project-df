@@ -99,7 +99,7 @@ ax2.set_aspect('equal')
 
 # plot
 form_obj2.plot(ax2)
-# %%
+
 # Similarly with 0-form
 
 form_obj0 = fp.form_0(xg, yg, F_x*F_y)
@@ -178,34 +178,32 @@ def stackplot(axis, xg, yg, F_x, F_y, s_max=6, s_min=2, color='green', w_head=1/
     # find direction of each arrow
     angles = np.arctan2(F_y, F_x)   # theta defined from positive x axis ccw
     
-    # find regions ON GRID that are nan or inf as a bool array
-    #bool_array = undef_region(mag)
-    # deal with infs and nans in mag
+    
     isnan_arr = np.isnan(mag)
-    indexes = np.vstack(np.nonzero(isnan_arr))
-    if indexes.size != 0:
-        for i in indexes[:, 0]:
-            for j in indexes[:, 1]:
+    for i in range(x_len):
+        for j in range(y_len):
+            # set to zero points that are not defined or inf
+            if isnan_arr[i, j]:
+                #colour this region as a shaded square
                 rect = patch.Rectangle((xg[i, j] - dist_points/2, yg[i, j]  - dist_points/2), dist_points, dist_points, color='#B5B5B5')
                 axis.add_patch(rect)
                 mag[i, j] = 0
-    for i in range(x_len):
-        for j in range(y_len):
             if abs(mag[i, j]) == np.inf  or abs(mag[i, j]) > 1e15:
                 # colour this point as a big red dot
                 circ = patch.Circle((xg[i, j], yg[i, j]), L*fract/3, color='red')
                 axis.add_patch(circ)
                 mag[i, j] = 0
-    
+
 #    isnan_arr = np.isnan(mag)
-#    for i in range(x_len):
-#        for j in range(y_len):
-#            # set to zero points that are not defined or inf
-#            if isnan_arr[i, j] is True:
-#                #colour this region as a shaded square
+#    indexes = np.vstack(np.nonzero(isnan_arr))
+#    if indexes.size != 0:
+#        for i in indexes[:, 0]:
+#            for j in indexes[:, 1]:
 #                rect = patch.Rectangle((xg[i, j] - dist_points/2, yg[i, j]  - dist_points/2), dist_points, dist_points, color='#B5B5B5')
 #                axis.add_patch(rect)
 #                mag[i, j] = 0
+#    for i in range(x_len):
+#        for j in range(y_len):
 #            if abs(mag[i, j]) == np.inf  or abs(mag[i, j]) > 1e15:
 #                # colour this point as a big red dot
 #                circ = patch.Circle((xg[i, j], yg[i, j]), L*fract/3, color='red')
@@ -351,7 +349,7 @@ def stackplot(axis, xg, yg, F_x, F_y, s_max=6, s_min=2, color='green', w_head=1/
                     axis.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color = color))
             else:
                 pass
-
+# %%
 # ############################################################################
 # Run it and precisely time
 # ############################################################################
@@ -363,8 +361,8 @@ start = time.perf_counter()
 r = np.linspace(-5, 5, 41)
 xg, yg = np.meshgrid(r, r)
 
-F_x = np.sin(xg+yg)**2
-F_y = np.exp(xg) + yg
+F_x = 1/np.sin(xg+yg)
+F_y = np.exp(xg) + 1/yg
 
 fig = plt.figure()
 ax = fig.gca()
