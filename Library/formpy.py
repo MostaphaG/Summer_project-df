@@ -1543,20 +1543,25 @@ def form_2(xg, yg, form2, form_2_eq=None):
             # of the arrow and with an arrowhead on top.
             # #########################################################################
             # find the maximum magnitude for scaling
-            max_size = np.max(abs(form2))   # careful with singularities, else ---> nan
             
-            # find the relative magnitude of vectors to maximum, as an array
-            R = abs(form2)/max_size
+            mag = abs(form2)
             
-            # logarithmic attempt on 2-forms:
-            if self.logarithmic_scale_bool == 1:
-                log_a = 1000000
-                R = np.where(R<=1/log_a, 1/log_a, R)  # Remove the values less than critical for log
-                R = log(log_a*R)/log(log_a)
+            max_size = np.max(mag)   # careful with singularities, else ---> nan
+
+            if self.logarithmic_scale_bool == True:
+                # Add 1 to each magnitude
+                mag1 = mag + 1
+                # Calculate the appropriate scaling factor
+                a = max_size**(1/self.s_max)
+                # Take log(base=a) of mag1
+                logmag1 = np.log(mag1)/np.log(a)
+                # Re-assign R
+                R = logmag1/np.max(logmag1)    
             else:
-                pass
-            
-            
+                # find the relative magnitude of vectors to maximum, as an array
+                R = mag/max_size
+
+
             # Now, for both values of theta, complete plotting:
             for theta in angles:
                 # define tigonometirc shifts

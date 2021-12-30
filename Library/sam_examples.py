@@ -29,3 +29,18 @@ f1.log_scaling()
 f1.plot(ax2)
 
 #%%
+
+r = np.linspace(-5, 5, 21)
+xg, yg = np.meshgrid(r, r)
+
+z = np.exp(xg**2+yg**2)
+
+fig1=plt.figure(figsize=(12,6))
+ax1 = fig1.add_subplot(121)
+ax2 = fig1.add_subplot(122)
+
+f2 = fp.form_2(xg,yg,z)
+f2.plot(ax1)
+
+f2.log_scaling()
+f2.plot(ax2)
