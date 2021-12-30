@@ -217,18 +217,29 @@ def stack_plot(xg, yg, axis, F_x, F_y, s_max, L, pt_den, fract, arrows=False, st
     # Define scaling factor
     ScaleFactor = max_size/(0.9*(2*L/pt_den))
 
-    
-    
     # find the relative magnitude of vectors to maximum, as an array
     R = mag/max_size
     
-    # logarithmic attempt
+    # # logarithmic attempt
+    # if logartmic_scale_bool == 1:
+    #     log_a = 1000000
+    #     R = np.where(R<=1/log_a, 1/log_a, R)  # Remove the values less than critical for log
+    #     R = log(log_a*R)/log(log_a)
+    # else:
+    #     pass
+    
     if logartmic_scale_bool == 1:
-        log_a = 1000000
-        R = np.where(R<=1/log_a, 1/log_a, R)  # Remove the values less than critical for log
-        R = log(log_a*R)/log(log_a)
+        # Add 1 to each magnitude
+        mag1 = mag + 1
+        # Calculate the appropriate scaling factor
+        a = max_size**(1/s_max)
+        # Take log(base=a) of mag1
+        logmag1 = np.log(mag1)/np.log(a)
+        # Re-assign R
+        R = logmag1/np.max(logmag1)    
     else:
-        pass
+        # find the relative magnitude of vectors to maximum, as an array
+        R = mag/max_size
     
     if ascale.get() == 0:
         ScaleFactor = scale
