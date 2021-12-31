@@ -178,6 +178,45 @@ zoomed_ax, form2_zoomed = form2.zoom(target=[2.5, 3], zoom=zooming, dpd=9, inset
 # Example of interior derivative
 # Perhaps Lorentz force if it ends up working
 
+# NB working with muI/2pi = 1
+
+# set up the 2-form
+v = np.linspace(-5, 5, 23)
+xg, yg = np.meshgrid(v, v)
+
+form = -xg/np.sqrt(xg**2 + yg**2)
+form2 = fp.form_2(xg, yg, form)
+form2.give_eqn('-x/sqrt(x**2 + y**2)')
+
+# define the VF definining the velocity
+u = xg*1
+v = yg*1
+VF = fp.vector_field(xg, yg, u, v)
+VF.give_eqn('x', 'y')
+
+# set up figure and axis
+fig = plt.figure()
+ax1 = fig.add_subplot(221)
+ax2 = fig.add_subplot(222)
+ax3 = fig.add_subplot(223)
+ax4 = fig.add_subplot(224)
+for i in [1, 2, 3, 4]:
+    exec('ax' + str(i) + '.set_aspect(\'equal\')')
+    exec('ax' + str(i) + '.set_xlabel(r\'$x$\')')
+    exec('ax' + str(i) + '.set_ylabel(r\'$y$\')')
+
+# plot form and VF
+form2.plot(ax1)
+VF.plot(ax2)
+
+# find numerical and analytical interior derivative and plot
+num_int = form2.interior_d(VF, numerical_only=True)
+ana_int = form2.interior_d(VF, numerical_only=False)
+
+# plot these
+num_int.plot(ax3)
+ana_int.plot(ax4)
+
 
 # %%
 
