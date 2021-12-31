@@ -184,15 +184,15 @@ zoomed_ax, form2_zoomed = form2.zoom(target=[2.5, 3], zoom=zooming, dpd=9, inset
 v = np.linspace(-5, 5, 23)
 xg, yg = np.meshgrid(v, v)
 
-form = -xg/np.sqrt(xg**2 + yg**2)
+form = -xg/xg**2 + yg**2
 form2 = fp.form_2(xg, yg, form)
-form2.give_eqn('-x/sqrt(x**2 + y**2)')
+form2.give_eqn('-x/(x**2 + y**2)')
 
 # define the VF definining the velocity
-u = xg*1
-v = yg*1
+u = np.zeros(np.shape(xg))
+v = np.ones(np.shape(xg))
 VF = fp.vector_field(xg, yg, u, v)
-VF.give_eqn('x', 'y')
+VF.give_eqn('0', '1')
 
 # set up figure and axis
 fig = plt.figure()
@@ -211,12 +211,57 @@ VF.plot(ax2)
 
 # find numerical and analytical interior derivative and plot
 num_int = form2.interior_d(VF, numerical_only=True)
-ana_int = form2.interior_d(VF, numerical_only=False)
 
 # plot these
 num_int.plot(ax3)
-ana_int.plot(ax4)
 
+# use cross product:
+ax4.quiver(xg, yg, -xg/(xg**2 + yg**2), 1/(xg**2 + yg**2))
+
+# %%
+
+# Trying Lorentz with treating d\rho as normal 1-form, not radial for cont. phi
+
+rho = np.linspace(0, 5, 23)
+z = np.linspace(0, 5, 23)
+rhog, zg = np.meshgrid(rho, z)
+
+form = 1/rhog
+form2 = fp.form_2(rhog, zg, form)
+form2.give_eqn('1/x')
+
+# define the VF definining the velocity
+u = np.zeros(np.shape(xg))
+v = np.ones(np.shape(xg))
+VF = fp.vector_field(rhog, zg, u, v)
+VF.give_eqn('0', '1')
+
+fig = plt.figure()
+ax1 = fig.add_subplot(221)
+ax2 = fig.add_subplot(222)
+ax3 = fig.add_subplot(223)
+ax4 = fig.add_subplot(224)
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
+ax3.set_aspect('equal')
+ax4.set_aspect('equal')
+
+form2.plot(ax1)
+
+VF.plot(ax2)
+
+# find numerical and analytical interior derivative and plot
+num_int = form2.interior_d(VF, numerical_only=True)
+
+# plot these
+num_int.plot(ax3)
+
+# use cross product:
+VF_c = fp.vector_field(rhog, zg, -1/rhog, np.zeros(np.shape(xg)))
+VF.give_eqn('-1/x', '0')
+
+VF_c.log_scaling()
+VF_c.plot(ax4)
 
 # %%
 

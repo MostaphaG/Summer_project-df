@@ -2542,12 +2542,33 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             
             # prevent any magnitudes from being inf or nan
             # only here, need to do it to u and v not just mag
+            
+            # find the distance between neightbouring points on the grid
+            dist_points = self.xg[0, 1] - self.xg[0, 0]
+            
+            # deal with infs and nans in mag
             isnan_arrx = np.isnan(F_x_local)
             isnan_arry = np.isnan(F_y_local)
             for i in range(x_len):
                 for j in range(y_len):
-                    if isnan_arrx[i,j] or isnan_arry[i,j] or abs(F_x_local[i, j]) == np.inf or abs(F_y_local[i, j]) == np.inf or abs(F_y_local[i, j]) > 1e15 or abs(F_x_local[i, j]) > 1e15:
+                    # set to zero points that are not defined or inf
+                    if isnan_arrx[i, j] or isnan_arry[i, j]:
+                        #colour this region as a shaded square
+                        rect = patch.Rectangle((self.xg[i, j] - dist_points/2, yg[i, j]  - dist_points/2), dist_points, dist_points, color='#B5B5B5')
+                        axis.add_patch(rect)
                         F_x_local[i,j] = F_y_local[i,j] = 0
+                    if abs(F_x_local[i, j]) == np.inf or abs(F_y_local[i, j]) == np.inf or abs(F_y_local[i, j]) > 1e15 or abs(F_x_local[i, j]) > 1e15:
+                        # colour this point as a big red dot
+                        circ = patch.Circle((self.xg[i, j], self.yg[i, j]), L*0.05/3, color='red')
+                        axis.add_patch(circ)
+                        F_x_local[i,j] = F_y_local[i,j] = 0
+#            isnan_arrx = np.isnan(F_x_local)
+#            isnan_arry = np.isnan(F_y_local)
+#            for i in range(x_len):
+#                for j in range(y_len):
+#                    if isnan_arrx[i,j] or isnan_arry[i,j] or abs(F_x_local[i, j]) == np.inf or abs(F_y_local[i, j]) == np.inf or abs(F_y_local[i, j]) > 1e15 or abs(F_x_local[i, j]) > 1e15:
+#                        
+#                        F_x_local[i,j] = F_y_local[i,j] = 0
             
             
             # set all insignificant values to zero:
