@@ -231,20 +231,28 @@ form2 = fp.form_2(rhog, zg, form)
 form2.give_eqn('1/x')
 
 # define the VF definining the velocity
-u = np.zeros(np.shape(xg))
-v = np.ones(np.shape(xg))
+u = np.zeros(np.shape(zg))
+v = np.ones(np.shape(zg))
 VF = fp.vector_field(rhog, zg, u, v)
 VF.give_eqn('0', '1')
 
-fig = plt.figure()
+fig = plt.figure(figsize=(12, 12))
 ax1 = fig.add_subplot(221)
 ax2 = fig.add_subplot(222)
 ax3 = fig.add_subplot(223)
 ax4 = fig.add_subplot(224)
-ax1.set_aspect('equal')
-ax2.set_aspect('equal')
-ax3.set_aspect('equal')
-ax4.set_aspect('equal')
+
+for i in [1, 2, 3, 4]:
+    exec('ax' + str(i) + '.set_aspect(\'equal\')')
+    if i == 3 or i == 4:
+        exec('ax' + str(i) + '.set_xlabel(r\'$x$\')')
+    if i == 1 or i == 3:
+        exec('ax' + str(i) + '.set_ylabel(r\'$y$\')')
+
+ax1.set_title(r'$Magnetic \ 2-form \ from \ wire$')
+ax2.set_title(r'$veclocity \ vector \ field$')
+ax3.set_title(r'$1-form \ Lorentz \ Force$')
+ax4.set_title(r'$Vector \ field \ force$')
 
 form2.plot(ax1)
 
@@ -257,7 +265,7 @@ num_int = form2.interior_d(VF, numerical_only=True)
 num_int.plot(ax3)
 
 # use cross product:
-VF_c = fp.vector_field(rhog, zg, -1/rhog, np.zeros(np.shape(xg)))
+VF_c = fp.vector_field(rhog, zg, -1/rhog, np.zeros(np.shape(zg)))
 VF.give_eqn('-1/x', '0')
 
 VF_c.log_scaling()

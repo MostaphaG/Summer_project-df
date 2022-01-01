@@ -2512,7 +2512,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             '''
             Finilises the plotting
             Uses the attribues of the object as set originally and as customised
-            with methods to create a plot of the 1-form
+            with methods to create a plot of the VF
             Takes in 1 argument:
             --- axis - matplotlib axes instance, plots on these
             

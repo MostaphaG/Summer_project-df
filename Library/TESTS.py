@@ -377,4 +377,27 @@ stop = time.perf_counter()
 print('time to run: {:f}'.format(stop-start))
 
 
+# %%
+
+# testing the red dots on 1-form
+
+r = np.linspace(0, 1, 25)
+xg, yg = np.meshgrid(r, r)
+
+u = -1/xg
+v = np.zeros(np.shape(xg))
+
+form1 = fp.form_1(xg, yg,u , v)
+fig = plt.figure()
+ax = fig.gca()
+form1.plot(ax)
+
+
+
+
+
+
+
+
+
 
