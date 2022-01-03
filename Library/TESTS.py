@@ -418,10 +418,10 @@ form2.plot(ax1)
 VF.plot(ax2)
 
 # find numerical and analytical interior derivative and plot
-num_int = form2.interior_d(VF, numerical_only=False)
+ana_int = form2.interior_d(VF, numerical_only=False)
 
 # plot these
-num_int.plot(ax3)
+ana_int.plot(ax3)
 
 # use cross product:
 VF_c = fp.vector_field(rhog, zg, -1/rhog, np.zeros(np.shape(zg)))
