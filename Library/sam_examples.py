@@ -18,7 +18,7 @@ xg, yg = np.meshgrid(r, r)
 u = np.exp(xg*yg)
 v = np.sin(yg)
 
-fig1 = plt.figre(figsize=(12, 6))
+fig1 = plt.figure(figsize=(12, 6))
 ax1 = fig1.add_subplot(121)
 ax2 = fig1.add_subplot(122)
 
@@ -47,7 +47,7 @@ f2.plot(ax2)
 
 #%%
 
-# Test whether the curl is dodgy 
+# Test whether the curl is dodgy
 
 import formpy as fp
 import numpy as np
@@ -133,10 +133,10 @@ ax3 = fig1.add_subplot(133)
 vf1.plot(ax1)
 vf1.give_eqn('y*sin(x)', '-x*cos(y)')
 
-vf1d = vf1.div((1,1), 20, 10)
+vf1d = vf1.div((1,1), 20, 6)
 vf1d.plot(ax2)
 
-vf1c = vf1.curl((1,1), 20, 10)
+vf1c = vf1.curl((1,1), 20, 20)
 vf1c.plot(ax3)
 
 # Seems to work okay
