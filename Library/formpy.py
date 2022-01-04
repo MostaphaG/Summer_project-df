@@ -13,31 +13,26 @@ from matplotlib import patches as patch
 from numpy import sin, cos, tan, sqrt, log, arctan, arcsin, arccos, tanh
 from numpy import sinh, cosh, arcsinh, arccosh, arctanh, exp, pi, e
 
-# define some functions that are not very important to user but are useful
-# for other functions we write:
-# deifne a fucntion to check number parity
-#def parity(x):
-#    '''
-#    return True when number provided is even and False when it is odd. Checks
-#    integers only, and not arrays.
-#    '''
-#    if x % 2 == 1:
-#        result = False
-#    elif x % 2 == 0:
-#        result = True
-#    return result
-
-
 # define function that sets the recursion constant for the loop to plot stacks
 # pre-define the displacements from mid point needed
 # c is the Truth value from parity (odd or even number n)
 def G(s, n, c):
     '''
-    Takes in 3 arguments:
-    2 numbers: det number of sheets to draw, and which one is to be drawn now
-    1: int bool, as 0 or 1, defines parity.
+    G(s, n, c)
+    
     defines coefficints needed to displace stack sheets along direction perp.
     to form, depending  on how many are to be plotted
+    
+    Parameters:
+    --------
+    s - det. number of sheets to draw
+    n - which sheet is sequence one is to be drawn now
+    c - int bool, as 0 or 1, defines parity of n
+    
+    Returns:
+    --------
+    coefficient to fractional sheet displacement
+    
     '''
     if c == 0:
         return ((2*s + 1)/(2*(n-1)))
@@ -45,12 +40,30 @@ def G(s, n, c):
         return (s/(n-1))
 
 
-# define a function that will find the 2-form from given expressions
+# define a function that will analytically find the 2-form from given expressions
 # in a given number of dimensions and in terms of given coordinate symbols
 def find_2_form(expressions, coords, xg, yg, zg=None, m=2):
+    '''
+    find_2_form(expressions, coords, xg, yg, zg=None, m=2)
     
-    # from the grids, find pt_den
-    # again, assume that they are square
+    finds the analytical 2 form via sympy experssion handling
+    
+    Parameters:
+    ---------------
+    expressions - list of sympy experssions for the 1 form scaling fucntions
+    coords - list of coordinate names as strings, that were used in experssions
+    xg, yg - grids
+    zg - possible grid
+    m - number of dimensions
+    
+    Returns:
+    ---------------
+    form_2  - numerical 2-form on given grids
+    result  - analytical, unformatted 2-form equation
+    ext_ds  - found matrix of derrivatives
+    '''
+    
+    # from the grids, find pt_den, assume that they are square
     pt_den = len(xg[:, 0])
     
     # define a sympy expression for string 0
@@ -83,8 +96,7 @@ def find_2_form(expressions, coords, xg, yg, zg=None, m=2):
     
     # merge the results into a 2-form (for 2-form on R^2, the result is a single component (dx^xy))
     # do so by adding opposite elements along the diagonal ( / ) components of ext_ds
-    # this  includes taking elemets with switched i and j
-    
+    # this includes taking elemets with switched i and j
     
     # set up a variable to count pairs (pairs because we are forming 2-forms):
     pair = 0
@@ -106,10 +118,12 @@ def find_2_form(expressions, coords, xg, yg, zg=None, m=2):
                 pass
             else:
                 result[pair, 0] += temp1
+            
             # update the result row counter
             pair += 1
     
     # create a local result, that will be used to evaluate the resulting string
+    # and format it
     loc_res = result + ''
     
     # format string in each result row
@@ -119,14 +133,15 @@ def find_2_form(expressions, coords, xg, yg, zg=None, m=2):
         loc_res[d, 0] = loc_res[d, 0].replace('y', 'yg')
         loc_res[d, 0] = loc_res[d, 0].replace('z', 'zg')
         
-        # check against constant result, to be of correct shape before eval
+        # check against constant result, to be of correct shape before eval is used
         if loc_res[d, 0].find('x') & loc_res[d, 0].find('y') == -1:
             loc_res[d, 0] = '(' + str(loc_res[d, 0]) + ')* np.ones(np.shape(xg))'
         if loc_res[d, 0].find('x') & loc_res[d, 0].find('y') == -1:
             loc_res[d, 0] = '(' + str(loc_res[d, 0]) + ')* np.ones(np.shape(yg))'
 
-    # set up a vector to store the 2-form numerically, from xg and yg
-    # Note - need pt_den m times.
+    # set up a vector to store the 2-form numerically, from xg and yg and possibly further
+    # Note - need pt_den being supplied m times.
+    # not overall generalised, as not needed past m=3.
     if m == 2:
         form_2 = np.empty((1, pt_den, pt_den))
         form_2[0, :, :] = eval(loc_res[0, 0])
