@@ -46,7 +46,7 @@ VF.plot(ax2)
 # zoom on each and plot
 
 # ax1
-zoomed_ax1, zoomed_VF = VF.zoom(target=[2, 3], mag=2, dpd=7, inset=True, axis=ax1, insize=0.25)
+zoomed_ax1, zoomed_VF = VF.zoom(target=[2, 3], mag=1.25, dpd=7, inset=True, axis=ax1, insize=0.25)
 zoomed_VF.colour('r')
 zoomed_ax1.set_yticks(np.linspace(zoomed_VF.yg[0, 0], zoomed_VF.yg[-1, 0], 4))
 zoomed_ax1.set_xticks(np.linspace(zoomed_VF.xg[0, 0], zoomed_VF.xg[0, -1], 4))
@@ -55,7 +55,7 @@ plt.setp(zoomed_ax1.get_xticklabels(), rotation=45, ha="right", rotation_mode="a
 zoomed_VF.plot(zoomed_ax1)
 
 # ax2
-df_ax1, df_VF = VF.deriv(target=[2, 3], mag=2, dpd=7, inset=True, axis=ax2, insize=0.25)
+df_ax1, df_VF = VF.deriv(target=[2, 3], mag=1.25, dpd=7, inset=True, axis=ax2, insize=0.25)
 df_VF.colour('r')
 df_ax1.set_yticks(np.linspace(df_VF.yg[0, 0], df_VF.yg[-1, 0], 4))
 df_ax1.set_xticks(np.linspace(df_VF.xg[0, 0], df_VF.xg[0, -1], 4))
@@ -217,16 +217,16 @@ for i in [1, 2, 3, 4]:
         exec('ax' + str(i) + '.set_ylabel(r\'$y$\')')
 
 ax1.set_title(r'$Magnetic \ 2-form \ from \ wire$')
-ax2.set_title(r'$veclocity \ vector \ field$')
+ax2.set_title(r'$veclocity \ \vec{v}$')
 ax3.set_title(r'$1-form \ Lorentz \ Force$')
-ax4.set_title(r'$Vector \ field \ force$')
+ax4.set_title(r'$\vec{F}$')
 
 form2.plot(ax1)
 
 VF.plot(ax2)
 
 # find numerical and analytical interior derivative and plot
-num_int = form2.interior_d(VF, numerical_only=True)
+num_int = form2.interior_d(VF, numerical_only=False)
 
 # plot these
 num_int.plot(ax3)
