@@ -262,7 +262,7 @@ ax.set_aspect('equal')
 
 vf1.plot(ax)
 
-zoom_axis, zoom_vf = vf1.zoom((2, 2), zoom=3, dpd=9, inset=True, axis=ax)
+zoom_axis, zoom_vf = vf1.zoom((2, 2), mag=3, dpd=9, inset=True, axis=ax)
 
 #%%
 
@@ -313,7 +313,7 @@ ax.set_aspect('equal')
 field.plot(ax)
 
 # zoom, but put down as inset, with customisations.
-zoomed_axis, zoomed_field = field.zoom(target=[2, 2], zoom=10, dpd=9, inset=True, axis=ax)
+zoomed_axis, zoomed_field = field.zoom(target=[2, 2], mag=10, dpd=9, inset=True, axis=ax)
 zoomed_field.colour('r')
 zoomed_field.plot(zoomed_axis)
 
@@ -339,7 +339,7 @@ ax.set_aspect('equal')
 form1.plot(ax)
 
 # zoom
-zoomed_ax, zoomed_form = form1.zoom(target=[2, 2], zoom=10, dpd=7, inset=True, axis=ax)
+zoomed_ax, zoomed_form = form1.zoom(target=[2, 2], mag=10, dpd=7, inset=True, axis=ax)
 
 
 # %%
@@ -363,7 +363,7 @@ ax.set_aspect('equal')
 
 form2.plot(ax)
 
-zoomed_ax, form2_zoomed = form2.zoom(target=[2, -3], zoom=10, dpd=9, inset=True, axis=ax)
+zoomed_ax, form2_zoomed = form2.zoom(target=[2, -3], mag=10, dpd=9, inset=True, axis=ax)
 
 # %%
 

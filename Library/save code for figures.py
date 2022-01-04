@@ -57,21 +57,21 @@ VF.plot(ax4)
 # zoom on each and plot
 
 # ax1
-zoomed_ax1, zoomed_VF = VF.zoom(target=[2, 3], zoom=2, dpd=7, inset=True, axis=ax1)
+zoomed_ax1, zoomed_VF = VF.zoom(target=[2, 3], mag=2, dpd=7, inset=True, axis=ax1)
 zoomed_VF.colour('r')
 zoomed_VF.plot(zoomed_ax1)
 
 # ax2
-df_ax1, df_VF = VF.deriv(target=[2, 3], zoom=2, dpd=7, inset=True, axis=ax2)
+df_ax1, df_VF = VF.deriv(target=[2, 3], mag=2, dpd=7, inset=True, axis=ax2)
 df_VF.colour('r')
 df_VF.plot(df_ax1)
 
 # ax3
-div_ax1, div_VF = VF.div(target=[2, 3], zoom=2, dpd=7, inset=True, axis=ax3)
+div_ax1, div_VF = VF.div(target=[2, 3], mag=2, dpd=7, inset=True, axis=ax3)
 div_VF.colour('r')
 div_VF.plot(div_ax1)
 
 # ax4
-curl_ax1, curl_VF = VF.curl(target=[2, 3], zoom=2, dpd=7, inset=True, axis=ax4)
+curl_ax1, curl_VF = VF.curl(target=[2, 3], mag=2, dpd=7, inset=True, axis=ax4)
 curl_VF.colour('r')
 curl_VF.plot(curl_ax1)

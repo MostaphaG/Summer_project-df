@@ -46,7 +46,7 @@ VF.plot(ax2)
 # zoom on each and plot
 
 # ax1
-zoomed_ax1, zoomed_VF = VF.zoom(target=[2, 3], zoom=2, dpd=7, inset=True, axis=ax1, insize=0.25)
+zoomed_ax1, zoomed_VF = VF.zoom(target=[2, 3], mag=2, dpd=7, inset=True, axis=ax1, insize=0.25)
 zoomed_VF.colour('r')
 zoomed_ax1.set_yticks(np.linspace(zoomed_VF.yg[0, 0], zoomed_VF.yg[-1, 0], 4))
 zoomed_ax1.set_xticks(np.linspace(zoomed_VF.xg[0, 0], zoomed_VF.xg[0, -1], 4))
@@ -55,7 +55,7 @@ plt.setp(zoomed_ax1.get_xticklabels(), rotation=45, ha="right", rotation_mode="a
 zoomed_VF.plot(zoomed_ax1)
 
 # ax2
-df_ax1, df_VF = VF.deriv(target=[2, 3], zoom=2, dpd=7, inset=True, axis=ax2, insize=0.25)
+df_ax1, df_VF = VF.deriv(target=[2, 3], mag=2, dpd=7, inset=True, axis=ax2, insize=0.25)
 df_VF.colour('r')
 df_ax1.set_yticks(np.linspace(df_VF.yg[0, 0], df_VF.yg[-1, 0], 4))
 df_ax1.set_xticks(np.linspace(df_VF.xg[0, 0], df_VF.xg[0, -1], 4))
@@ -84,12 +84,12 @@ ax2 = fig.add_subplot(122)
 ax1.set_aspect('equal')
 ax1.set_xlabel(r'$x$', fontsize=18)
 ax1.set_ylabel(r'$y$', fontsize=18)
-ax1.set_title(r'$1-form \ with \ zoom=1 \ inset$', fontsize=18)
+ax1.set_title(r'$1-form \ with \ mag=1 \ inset$', fontsize=18)
 ax1.tick_params(labelsize=16)
 ax2.set_aspect('equal')
 ax2.set_xlabel(r'$x$', fontsize=18)
 ax2.set_ylabel(r'$y$', fontsize=18)
-ax2.set_title(r'$1-form \ with \ zoom=2 \ inset$', fontsize=18)
+ax2.set_title(r'$1-form \ with \ mag=2 \ inset$', fontsize=18)
 ax2.tick_params(labelsize=16)
 
 # plot 1-form on all
@@ -99,12 +99,12 @@ form1.plot(ax2)
 # zoom on each and plot
 
 # ax1
-zoomed_ax, zoomed_form = form1.zoom(target=[2, 3], zoom=1, dpd=7, inset=True, axis=ax1)
+zoomed_ax, zoomed_form = form1.zoom(target=[2, 3], mag=1, dpd=7, inset=True, axis=ax1)
 zoomed_form.colour('r')
 zoomed_form.plot(zoomed_ax)
 
 # ax2
-zoomed_ax, zoomed_form = form1.zoom(target=[2, 3], zoom=2, dpd=7, inset=True, axis=ax2)
+zoomed_ax, zoomed_form = form1.zoom(target=[2, 3], mag=2, dpd=7, inset=True, axis=ax2)
 zoomed_form.colour('r')
 zoomed_form.plot(zoomed_ax)
 
@@ -128,11 +128,11 @@ ax.set_aspect('equal')
 ax.tick_params(labelsize=14)
 ax.set_xlabel(r'$x$', fontsize=16)
 ax.set_ylabel(r'$y$', fontsize=16)
-ax.set_title(r'$2-form \ with \ zoom={:.1f} \ inset$'.format(zooming), fontsize=16)
+ax.set_title(r'$2-form \ with \ mag={:.1f} \ inset$'.format(zooming), fontsize=16)
 
 form2.plot(ax)
 
-zoomed_ax, form2_zoomed = form2.zoom(target=[2.5, 3], zoom=zooming, dpd=9, inset=True, axis=ax)
+zoomed_ax, form2_zoomed = form2.zoom(target=[2.5, 3], mag=zooming, dpd=9, inset=True, axis=ax)
 
 # %%
 

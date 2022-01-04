@@ -69,7 +69,7 @@ ax2 = fig1.add_subplot(122)
 vf1.plot(ax1)
 vf1.give_eqn('y*sin(x)', '-x*cos(y)')
 
-vf1z = vf1.curl(target=(1,0), zoom=5)
+vf1z = vf1.curl(target=(1,0), mag=5)
 vf1z.plot(ax2)
 
 U = vf1z.F_x
