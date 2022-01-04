@@ -23,17 +23,20 @@ VF = fp.vector_field(xg, yg, u, v)
 VF.give_eqn('y*sin(x)','-x*cos(y)')
 
 # set up subplots for different zooming in values
-fig = plt.figure(figsize=(10, 10))
-ax1 = fig.add_subplot(121)
-ax2 = fig.add_subplot(122)
+fig = plt.figure(figsize=(6, 12))
+fig.tight_layout()
+ax1 = fig.add_subplot(211)
+ax2 = fig.add_subplot(212)
 
 ax1.set_aspect('equal')
-ax1.set_xlabel(r'$x$', fontsize=18)
-ax1.set_ylabel(r'$y$', fontsize=18)
-ax1.set_title(r'$VF \ with \ Zoom \ Inset$', fontsize=18)
+ax1.set_ylabel(r'$y$', fontsize=16)
+ax1.set_title(r'$VF \ with \ Zoom \ Inset$', fontsize=16)
 ax2.set_aspect('equal')
-ax2.set_xlabel(r'$x$', fontsize=18)
-ax2.set_title(r'$VF \ with \ derivative \ Inset$', fontsize=18)
+ax2.set_xlabel(r'$x$', fontsize=16)
+ax2.set_ylabel(r'$y$', fontsize=16)
+ax2.set_title(r'$VF \ with \ derivative \ Inset$', fontsize=16)
+
+plt.subplots_adjust(left=0.06, bottom=0.06, right=0.94, top=0.94, wspace=0.2)
 
 # plot VF on all
 VF.plot(ax1)
@@ -43,58 +46,22 @@ VF.plot(ax2)
 # zoom on each and plot
 
 # ax1
-zoomed_ax1, zoomed_VF = VF.zoom(target=[2, 3], zoom=2, dpd=7, inset=True, axis=ax1)
+zoomed_ax1, zoomed_VF = VF.zoom(target=[2, 3], zoom=2, dpd=7, inset=True, axis=ax1, insize=0.25)
 zoomed_VF.colour('r')
-zoomed_ax1.set_yticks(np.linspace(zoomed_VF.yg[0, 0], zoomed_VF.yg[-1, 0], 5))
-zoomed_ax1.set_xticks(np.linspace(zoomed_VF.xg[0, 0], zoomed_VF.xg[0, -1], 5))
+zoomed_ax1.set_yticks(np.linspace(zoomed_VF.yg[0, 0], zoomed_VF.yg[-1, 0], 4))
+zoomed_ax1.set_xticks(np.linspace(zoomed_VF.xg[0, 0], zoomed_VF.xg[0, -1], 4))
+#zoomed_ax1.tick_params(axis='x', rotation=45)
+plt.setp(zoomed_ax1.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
 zoomed_VF.plot(zoomed_ax1)
 
 # ax2
-df_ax1, df_VF = VF.deriv(target=[2, 3], zoom=2, dpd=7, inset=True, axis=ax2)
+df_ax1, df_VF = VF.deriv(target=[2, 3], zoom=2, dpd=7, inset=True, axis=ax2, insize=0.25)
 df_VF.colour('r')
-df_ax1.set_yticks(np.linspace(df_VF.yg[0, 0], df_VF.yg[-1, 0], 5))
-df_ax1.set_xticks(np.linspace(df_VF.xg[0, 0], df_VF.xg[0, -1], 5))
+df_ax1.set_yticks(np.linspace(df_VF.yg[0, 0], df_VF.yg[-1, 0], 4))
+df_ax1.set_xticks(np.linspace(df_VF.xg[0, 0], df_VF.xg[0, -1], 4))
+#df_ax1.tick_params(axis='x', rotation=45)
+plt.setp(df_ax1.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
 df_VF.plot(df_ax1)
-
-# %%
-'''
-
-Code to present example in paper
-
-'''
-
-
-# Set up the Vector Field
-r = np.linspace(-5, 5, 21)
-xg, yg = np.meshgrid(r, r)
-u = yg*np.sin(xg)  # components
-v = -xg*np.cos(yg)
-VF = fp.vector_field(xg, yg, u, v)  # initialise instance
-VF.give_eqn('y*sin(x)','-x*cos(y)')  # supply equations
-
-# set figure
-fig = plt.figure(figsize=(10, 10))
-ax = fig.gca()
-ax.set_aspect('equal')
-ax.set_xlabel(r'$x$')
-ax.set_ylabel(r'$y$')
-
-# plot field
-VF.plot(ax)
-
-# zoom onto it
-zoomed_ax, zoomed_VF = VF.zoom(target=[2, 3], zoom=1.25, dpd=7,
-                               inset=True, axis=ax, insize=0.25)
-
-# customise
-zoomed_VF.colour('r')
-zoomed_ax.set_yticks(np.linspace(zoomed_VF.yg[0, 0], zoomed_VF.yg[-1, 0], 5))
-zoomed_ax.set_xticks(np.linspace(zoomed_VF.xg[0, 0], zoomed_VF.xg[0, -1], 5))
-
-# replot inset
-zoomed_VF.plot(zoomed_ax)
-
-
 
 # %%
 
