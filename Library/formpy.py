@@ -20,8 +20,8 @@ def G(s, n, c):
     '''
     G(s, n, c)
     
-    defines coefficints needed to displace stack sheets along direction perp.
-    to form, depending  on how many are to be plotted
+    Defines coefficints needed to displace stack sheets along direction perp.
+    to form, depending  on how many are to be plotted.
     
     Parameters:
     --------
@@ -31,7 +31,7 @@ def G(s, n, c):
     
     Returns:
     --------
-    coefficient to fractional sheet displacement
+    Coefficient to fractional sheet displacement.
     
     '''
     if c == 0:
@@ -46,7 +46,7 @@ def find_2_form(expressions, coords, xg, yg, zg=None, m=2):
     '''
     find_2_form(expressions, coords, xg, yg, zg=None, m=2)
     
-    finds the analytical 2 form via sympy experssion handling
+    Finds the analytical 2 form using sympy experssion handling.
     
     Parameters:
     ---------------
@@ -167,18 +167,49 @@ function to create a 1-form object and define methods for it
 # plotted
 def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
     '''
-    defines a 1-form object and returns it to user
-    Takes 9 arguments, these are the 2 grids in 2D, which muse be square
-    and of equal sizes. Then 2 arguments for the dx component and dy component
-    based on the same grids
-    Then 2 equations, for x and y (not always needed)
-    Then, can supply a figure if user doesn't wat this object
-    to create a new one for itself
-    Can also supply a bool input to define if subplots are to be allowed
-    these can be added using a method (add_subplot)
-    also, user can supply sub_axis_list, to provide the axis they have set
-    these only work if a figure has been supplied and if subplots is True
+    form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None)
+    
+    Defines a 1-form object and returns it to user. 
+    
+    Parameters:
+    ---------------
+    xg - grid of x values (2D numpy array)
+    yg - grid of y values (2D numpy array)
+    F_x - grid of x field components (2D numpy array)
+    F_y - grid of y field components (2D numpy array)
+    F_x_eqn - expression for x field component f(x,y) (string)
+    F_y_eqn - expression for y field component f(x,y) (string)
+    
+    Returns:
+    ---------------
+    form_1_object - 
+    
+    Methods:
+    ---------------
+    give_eqn
+    return_string
+    colour
+    arrow_heads
+    head_width
+    head_height
+    orient
+    log_scaling
+    autoscale
+    max_sheets
+    sheet_size
+    surround_space
+    same_range_density
+    plot
+    ext_d
+    num_ext_d
+    Hodge
+    wedge_analytical
+    wedge_num
+    zoom 
+    interior_d
+    contravariant
     '''
+    
     # define the 1-form object and all its methods
     class form_set_up():
         # set up all variables
@@ -982,12 +1013,12 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             return result_form
             
         
-        def zoom(self, target=[0, 0], zoom=2, dpd=9, inset=False, axis=None, insize=0.3):
+        def zoom(self, target=[0, 0], mag=2, dpd=9, inset=False, axis=None, insize=0.3):
             '''
             Create a new window which displays the field zoomed at a certain point
             User gives arguments
             Target: Determines the zoom location, coordinates
-            Zoom: +ve float, determines zooming amount
+            mag: +ve float, determines zooming amount
             dpd: +int, determines how many points on each axis
             inset - bool - determines if zoom is to plotted as an inset
                     if True, need to also give axis on which to plot
@@ -1006,11 +1037,11 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             
             if self.form_1_str_x == None or self.form_1_str_y == None:
                 # ERROR
-                raise TypeError('Error: No equation provided')
+                raise TypeError('No equation provided')
             else:
                  # Zoom must be one or greater
-                if zoom < 1:
-                    raise ValueError('Zoom must be greater than one')
+                if mag < 1:
+                    raise ValueError('Mag must be greater than one')
                 else:
                     
                     if insize > 1 or insize < 0:
@@ -1030,8 +1061,8 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                         Ly = 0.5*(self.yg[-1, 0] - self.yg[0, 0])
                         
                         # Zoom axis range
-                        d_range_x = insize*Lx/zoom
-                        d_range_y = insize*Ly/zoom
+                        d_range_x = insize*Lx/mag
+                        d_range_y = insize*Ly/mag
                         
                         # Set up zoom window grids
                         dx = np.linspace(-d_range_x + x_m, d_range_x + x_m, dpd)
@@ -1197,7 +1228,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                 return result_form
         
         # define a method to change a supplied Vector filed to the 1-form
-        def covariant(self, g=[['1', '0'], ['0', '1']]):
+        def contravariant(self, g=[['1', '0'], ['0', '1']]):
             '''
             Passes in everything it can (all it has been supplied)
             to the VF object.
@@ -1735,13 +1766,13 @@ def form_2(xg, yg, form2, form_2_eq=None):
                 raise ValueError('ERROR: Invalid input for \'numerical_only\'')
     
         # define a method to create a zoomed in 2-form
-        def zoom(self, target=[0, 0], zoom=2, dpd=9, inset=False, axis=None, insize=0.3):
+        def zoom(self, target=[0, 0], mag=2, dpd=9, inset=False, axis=None, insize=0.3):
             
             '''
             Creates a new window which displays the 2-form zoomed at a certain point
             User gives arguments:
             Target: Determines the zoom location, coordinates
-            Zoom: +ve float, determines zooming amount
+            mag: +ve float, determines zooming amount
             dpd: +int, determines how many points on each axis
             
             inset - bool - determies if the zoom is plotted on the given axis
@@ -1760,11 +1791,11 @@ def form_2(xg, yg, form2, form_2_eq=None):
             # Requires user to provide eqn of the 1-form they are zooming on.
             if self.form_2_str == None:
                 # ERROR
-                raise TypeError('Error: No equation provided')
+                raise TypeError('No equation provided')
             else:
                  # Zoom must be one or greater
-                if zoom < 1:
-                    raise ValueError('Zoom must be greater than one')
+                if mag < 1:
+                    raise ValueError('Mag must be greater than one')
                 else:
                     
                     if insize > 1 or insize < 0:
@@ -1784,8 +1815,8 @@ def form_2(xg, yg, form2, form_2_eq=None):
                         Ly = 0.5*(self.yg[-1, 0] - self.yg[0, 0])
                         
                         # Zoom axis range
-                        d_range_x = insize*Lx/zoom
-                        d_range_y = insize*Ly/zoom
+                        d_range_x = insize*Lx/mag
+                        d_range_y = insize*Ly/mag
                         
                         # Set up zoom window grids
                         dx = np.linspace(-d_range_x + x_m, d_range_x + x_m, dpd)
@@ -2607,12 +2638,12 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             axis.quiver(self.xg, self.yg, F_x_local, F_y_local, pivot=self.orientation, scale=ScaleFactor, scale_units='xy', color=self.color) 
         
         
-        def zoom(self, target=[0, 0], zoom=2, dpd=9, inset=False, axis=None, insize=0.3):
+        def zoom(self, target=[0, 0], mag=2, dpd=9, inset=False, axis=None, insize=0.3):
             '''
             Create a new window which displays the field zoomed at a certain point
             User gives arguments
             Target: Determines the zoom location, coordinates
-            Zoom: +ve float, determines zooming amount
+            mag: +ve float, determines zooming amount
             dpd: +int, determines how many points on each axis
             
             inset - bool - if true, zoomed field plotted on given axis
@@ -2636,7 +2667,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             else:
             
                 # Zoom must be one or greater
-                if zoom < 1:
+                if mag < 1:
                     raise ValueError('Zoom must be greater than one')
                 else:
                     
@@ -2657,8 +2688,8 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                         Ly = 0.5*(self.yg[-1,0] - self.yg[0,0])
                         
                         # Zoom axis range
-                        d_range_x = insize*Lx/zoom
-                        d_range_y = insize*Ly/zoom
+                        d_range_x = insize*Lx/mag
+                        d_range_y = insize*Ly/mag
                         
                         # Set up zoom window grids
                         dx = np.linspace(-d_range_x + x_m, d_range_x + x_m, dpd)
@@ -2711,12 +2742,12 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                             # inset is false, just return the new zoomed in instance
                             return zoom_vf
             
-        def deriv(self, target=[0, 0], zoom=2, dpd=9, inset=False, axis=None, insize=0.3):
+        def deriv(self, target=[0, 0], mag=2, dpd=9, inset=False, axis=None, insize=0.3):
             '''
             Creates new vector field object at a target location, showing the derivative field at this point.
             User gives arguments:
             Target - derivative plot location
-            Zoom - Magnification level
+            mag - Magnification level
             dpd - New plot point density
             
             inset - bool - if true, field deriv is plotted on given axis
@@ -2731,10 +2762,10 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             '''
             if self.str_x == None or self.str_y == None:
                 # ERROR
-                raise TypeError('Error: No equation provided')
+                raise TypeError('No equation provided')
             else:
                  # Zoom must be one or greater
-                if zoom < 1:
+                if mag < 1:
                     raise ValueError('Zoom must be greater than one')
                 else:
                     
@@ -2755,8 +2786,8 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                         Ly = 0.5*(self.yg[-1,0] - self.yg[0,0])
                         
                         # Zoom axis range
-                        d_range_x = insize*Lx/zoom
-                        d_range_y = insize*Ly/zoom
+                        d_range_x = insize*Lx/mag
+                        d_range_y = insize*Ly/mag
                         
                         # Set up zoom window grids
                         dx = np.linspace(-d_range_x + x_m, d_range_x + x_m, dpd)
@@ -2818,7 +2849,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                             return deriv_vf
         
             
-        def div(self, target=[0,0], zoom=2, dpd=9, inset=False, axis=None, insize=0.3):
+        def div(self, target=[0,0], mag=2, dpd=9, inset=False, axis=None, insize=0.3):
             '''
             Creates new vector field object at a target location, showing the Divergence of the field at this point.
             User gives arguments:
@@ -2838,10 +2869,10 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             '''
             if self.str_x == None or self.str_y == None:
                 # ERROR
-                raise TypeError('Error: No equation provided')
+                raise TypeError('No equation provided')
             else:
                  # Zoom must be one or greater
-                if zoom < 1:
+                if mag < 1:
                     raise ValueError('Zoom must be greater than one')
                 else:
                     
@@ -2862,8 +2893,8 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                         Ly = 0.5*(self.yg[-1,0] - self.yg[0,0])
                         
                         # Zoom axis range
-                        d_range_x = insize*Lx/zoom
-                        d_range_y = insize*Ly/zoom
+                        d_range_x = insize*Lx/mag
+                        d_range_y = insize*Ly/mag
                         
                         # Set up zoom window grids
                         dx = np.linspace(-d_range_x + x_m, d_range_x + x_m, dpd)
@@ -2976,7 +3007,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                             # inset is false, just return the new zoomed in instance
                             return div_vf
             
-        def curl(self, target=[0,0], zoom=2, dpd=9, inset=False, axis=None, insize=0.3):
+        def curl(self, target=[0,0], mag=2, dpd=9, inset=False, axis=None, insize=0.3):
             '''
             Creates new vector field object at a target location, showing local rotation (Curl)
             User gives arguments:
@@ -2996,10 +3027,10 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             '''
             if self.str_x == None or self.str_y == None:
                 # ERROR
-                raise TypeError('Error: No equation provided, despite being numerical, equations needed for zooming and changing density of inset via dpd')
+                raise TypeError('No equation provided')
             else:
                  # Zoom must be one or greater
-                if zoom < 1:
+                if mag < 1:
                     raise ValueError('Zoom must be greater than one')
                 else:
                     
@@ -3134,7 +3165,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                             return curl_vf
         
         # define a method to change a supplied Vector filed to the 1-form
-        def contravariant(self, g=[['1', '0'], ['0', '1']]):
+        def covariant(self, g=[['1', '0'], ['0', '1']]):
             '''
             Passes in everything it can (all it has been supplied)
             to the 1-form object.
@@ -3211,7 +3242,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                 
             else:
                 # Inconsistant metric components
-                raise TypeError('Metric components are inconcisstant')
+                raise TypeError('Metric components are inconsistent')
             
             # from vector field components, get 1-form components by the metric
             # first, do so numerically, as this must always happen
