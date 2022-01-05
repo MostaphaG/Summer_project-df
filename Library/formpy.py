@@ -227,7 +227,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
     
     # define the 1-form object and all its methods
     class form_set_up():
-        # set up all variables
+        # initialise self
         def __init__(self, xg, yg, F_x, F_y):
             self.xg = xg
             self.yg = yg
@@ -235,7 +235,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             self.F_y = F_y
             self.s_max = 6
             self.s_min = 1
-            self.pt_den = len(xg[:, 0])# + 1  # assume square grids
+            self.pt_den = len(xg[:, 0])  # assumes square grids
             self.fract = 0.05
             self.scale = 1
             self.w_head = 1/8
@@ -244,10 +244,11 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             self.color = 'green'
             self.logarithmic_scale_bool = 0
             self.delta_factor = 10
-            
+            # define equations, if given:
+            # user must change to access some methods, methods will indicate when needed
+            # Note, the string must be given with x and y as variables
             if F_x_eqn is not None:
-                self.form_1_str_x = str(simplify(F_x_eqn))  # to start with, use rmust change to access some methods
-                # Note, the string must be given with x and y as variables
+                self.form_1_str_x = str(simplify(F_x_eqn))
             else:
                 self.form_1_str_x = None
             
@@ -255,27 +256,34 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                 self.form_1_str_y = str(simplify(F_y_eqn))
             else:
                 self.form_1_str_y = None
-            
+        
         # #####################################################################
-        # write some methods that will allow the user to chenge some of the
-        # above variables
+        # write customising methods
         # #####################################################################
         
         # define a mehtod to allow user to supply the string equation
-        # of the 0-form
+        # of the 1-form
         def give_eqn(self, equation_str_x, equation_str_y):
             '''
-            Takes in 1-argument, string
-            This must be the equation of the supplied numerical 0-form
-            It must be in terms of x and y.
-            Has to be given, for some methods to be calculatable.
+            This must be the equation of the supplied numerical 1-form
+            it re-evaluates the numerical values to match the new equations
+            
+            Has to be given, for some methods to be calculatable
+            Methods will indicate when needed
+            
+            Parameters:
+            ---------------
+            equation_str_x - string of the dx component, with x and y as variables
+            equation_str_y - string of the dy component, with x and y as variables
+            
+            Returns: None
+            
             '''
             # set equation parameters to simplified inputs
             self.form_1_str_x = str(simplify(equation_str_x))
             self.form_1_str_y = str(simplify(equation_str_y))
             # make the values match automatically to limit how often mismatch occurs
-            # substitute these into the equation:
-            # but keep it local
+            # substitute these into the equation, but keep it local: 
             str_x = self.form_1_str_x + ''
             str_y = self.form_1_str_y + ''
             str_x = str_x.replace('x', '(self.xg)')
@@ -288,7 +296,9 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                 str_x = '(' + str(str_x) + ')* np.ones(np.shape(self.xg))'
             if str_y.find('x') & str_y.find('y') == -1:
                 str_y = '(' + str(str_y) + ')* np.ones(np.shape(self.yg))'
-            # re-evaluate the 2-form numerically
+            # re-evaluate the 2-form numerically, warn user if changed
+            if not ((self.F_x is eval(str_x)) and (self.F_y is eval(str_y))):
+                print('Warning: Equations did not exactly match numerical values, and these were change to agree with equations')
             self.F_x = eval(str_x)
             self.F_y = eval(str_y)
         

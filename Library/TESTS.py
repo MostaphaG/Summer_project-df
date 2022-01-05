@@ -437,12 +437,13 @@ VF_c.plot(ax4)
 v = np.linspace(-5, 5, 26)
 xg, yg = np.meshgrid(v, v)
 
-F_x = xg*yg
-F_y = np.sin(yg)
+F_x = xg
+F_y = yg
 
 form_obj = fp.form_1(xg, yg, F_x, F_y)
-form_obj.s_min = 3
+form_obj.s_min = 1
 form_obj.colour('#AFAFAF')
+form_obj.give_eqn('x', 'sin(y)')
 
 fig = plt.figure()
 ax = fig.gca()
