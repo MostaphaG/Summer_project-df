@@ -3120,8 +3120,8 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                         Ly = 0.5*(self.yg[-1,0] - self.yg[0,0])
                         
                         # Zoom axis range
-                        d_range_x = insize*Lx/zoom
-                        d_range_y = insize*Ly/zoom
+                        d_range_x = insize*Lx/mag
+                        d_range_y = insize*Ly/mag
                         
                         # Set up zoom window grids
                         dx = np.linspace(-d_range_x + x_m, d_range_x + x_m, dpd)
