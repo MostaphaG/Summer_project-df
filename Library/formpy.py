@@ -2707,7 +2707,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             axis.quiver(self.xg, self.yg, F_x_local, F_y_local, pivot=self.orientation, scale=ScaleFactor, scale_units='xy', color=self.color) 
         
         
-        def zoom(self, target=[0, 0], mag=2, dpd=9, inset=False, axis=None, insize=0.3):
+        def zoom(self, target=[0, 0], mag=2, dpd=9, inset=True, axis=None, insize=0.3):
             '''
             Create a new window which displays the field zoomed at a certain point
             User gives arguments

@@ -251,9 +251,9 @@ ax4 = fig.add_subplot(224)
 for i in [1, 2, 3, 4]:
     exec('ax' + str(i) + '.set_aspect(\'equal\')')
     if i == 3 or i == 4:
-        exec('ax' + str(i) + '.set_xlabel(r\'$x$\')')
+        exec('ax' + str(i) + '.set_xlabel(r\'$ \\rho $\')')
     if i == 1 or i == 3:
-        exec('ax' + str(i) + '.set_ylabel(r\'$y$\')')
+        exec('ax' + str(i) + '.set_ylabel(r\'$z$\')')
 
 ax1.set_title(r'$Magnetic \ 2-form \ from \ wire$')
 ax2.set_title(r'$veclocity \ \vec{v}$')
