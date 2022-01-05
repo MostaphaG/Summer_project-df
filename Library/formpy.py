@@ -404,25 +404,35 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             '''
             self.s_max = maximum
         
-        # define method to change fraction of sheetsize w.r.t graoh size:
+        # define method to change fraction of sheetsize w.r.t graph size:
         def sheet_size(self, fraction):
             '''
-            Takes a single argument, float
-            Changes the size of stack in direction perp. to form
-            it is done in in terms of the fraction of graph size
-            the graph size is extracted form maximum values of grid
-            Grids are assumed to be square and origin centered.
+            Changes the size of stack in direction perp. to form.
+            It is done in in terms of the fraction of graph size
+            Note, not strictly needed, can change it by instance.fract(fraction)
+            
+            Parmaeters:
+            ---------------
+            fraction - float/int - size of stack in terms of the fraction of graph size
+            
+            Returns: None
             '''
             self.fract = fraction
         
         # define a method to change spare spacing around figure
         def surround_space(self, delta_denominator):
             '''
-            Takes in one argument, float or int
             Sets the extra blank space around the domain of grids in axis
-            The input number defines the denominator or fraction to use
-            eg. supplying 3 will make the white space 1/3 of the width
-            of the domain of the grid.
+            Note, not strictly needed, can change it by instance.delta_factor(delta_denominator)
+            
+            Parmaeters:
+            ---------------
+            delta_denominator - float/int - denominator or fraction to use
+                eg. supplying 3 will make the white space 1/3 of the width
+                    of the domain of the grid.
+            
+            Returns: None
+            
             '''
             self.delta_factor = delta_denominator
         
@@ -430,9 +440,14 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
         # requires string input of 1-form:
         def same_range_density(self, points_number):
             '''
-            takes in one argument, requires the string equation to be
-            supplied
             Changes the desnity of points in the same range to the input value
+            Requires the string equation to be supplied to not 'extrapolate'
+            
+            Parameters:
+            --------------
+            points_number - new number of points to use per axis
+            
+            Returns: None
             '''
             if self.form_1_str_x == None or self.form_1_str_y == None:
                 # Error
