@@ -431,9 +431,24 @@ VF_c.log_scaling()
 VF_c.plot(ax4)
 
 
+# %%
 
 
+v = np.linspace(-5, 5, 26)
+xg, yg = np.meshgrid(v, v)
 
+F_x = xg*yg
+F_y = np.sin(yg)
+
+form_obj = fp.form_1(xg, yg, F_x, F_y)
+form_obj.s_min = 3
+form_obj.colour('#AFAFAF')
+
+fig = plt.figure()
+ax = fig.gca()
+ax.set_aspect('equal')
+
+form_obj.plot(ax)
 
 
 

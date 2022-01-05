@@ -163,8 +163,6 @@ function to create a 1-form object and define methods for it
 '''
 
 
-# define a function taht will set up a 1-form object that can be customised and
-# plotted
 def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
     '''
     form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None)
@@ -175,14 +173,32 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
     ---------------
     xg - grid of x values (2D numpy array)
     yg - grid of y values (2D numpy array)
-    F_x - grid of x field components (2D numpy array)
-    F_y - grid of y field components (2D numpy array)
-    F_x_eqn - expression for x field component f(x,y) (string)
-    F_y_eqn - expression for y field component f(x,y) (string)
+    F_x - grid of dx form components (2D numpy array)
+    F_y - grid of dy form components (2D numpy array)
+    F_x_eqn - expression for dx form component f(x,y) (string)
+    F_y_eqn - expression for dy form component f(x,y) (string)
+    
     
     Returns:
     ---------------
-    form_1_object - 
+    form_1_object - instance of the 1-form class
+    
+    
+    Instance variables:
+    ---------------
+    xg, yg, F_x, F_y
+    s_max - int - maximum number of sheets per stack
+    s_min - int - minimum number of sheets to draw per stack
+    pt_den - int - number of points on grids, extracted from grids, assumes square grid
+    fract - float/int - length of sheet in stack as fraction of whole plot size
+    scale - float/int - constant multpilier to change scaling
+    w_head - float/int - width of arrowghead on stack as size of sheet
+    h_head - float/int - height of arrowghead on stack as size of sheet
+    arrowheads - bool - determines of arrowheads showld be drawnon stacks
+    color - str - colour to draw stacks with, can be Hex when using '#FFFFFF'
+    logarithmic_scale_bool - bool - determines if log scaling is used
+    delta_factor - float/int - determined size of blank boarder in figure, as fraction of whole plot size
+    
     
     Methods:
     ---------------
@@ -192,9 +208,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
     arrow_heads
     head_width
     head_height
-    orient
     log_scaling
-    autoscale
     max_sheets
     sheet_size
     surround_space
@@ -208,6 +222,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
     zoom 
     interior_d
     contravariant
+    
     '''
     
     # define the 1-form object and all its methods
@@ -219,17 +234,15 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             self.F_x = F_x
             self.F_y = F_y
             self.s_max = 6
-            self.s_min = 2
+            self.s_min = 1
             self.pt_den = len(xg[:, 0])# + 1  # assume square grids
             self.fract = 0.05
-            self.orientation = 'mid'
             self.scale = 1
             self.w_head = 1/8
             self.h_head = 1/4
             self.arrowheads = True
             self.color = 'green'
             self.logarithmic_scale_bool = 0
-            self.scale_bool = True
             self.delta_factor = 10
             
             if F_x_eqn is not None:
@@ -325,16 +338,6 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             '''
             self.h_head = float(high)
         
-        # change orientation:
-        def orient(self, string):
-            '''
-            Takes one input, needs to be a string understood by matplotlib
-            quiver to orient arrows
-            eg. 'tip', 'tail', 'mid' etc.
-            Orients arrows on quiver plot depending on this
-            '''
-            self.orientation = str(string)
-        
         # change boolean that det. if to sclae logarithmically
         def log_scaling(self):
             '''
@@ -344,16 +347,6 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             The form object is initialised with this as False
             '''
             self.logarithmic_scale_bool = not self.logarithmic_scale_bool
-        
-        # define a method to be able to change bool that det. if arrows autoscale
-        def autoscale(self):
-            '''
-            Takes no arguments
-            Changes the boolean that determines if arrows are autoscaled
-            Whenever it is called, it changes that boolean to opposite
-            The form object is initialised with this as False
-            '''
-            self.scale_bool = not self.scale_bool
         
         # define methods to change s_max
         def max_sheets(self, maximum):
@@ -518,7 +511,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             R = mag/max_size
             
             # logarithmic attempt
-            if self.logarithmic_scale_bool == True:
+            if self.logarithmic_scale_bool:
                 # Add 1 to each magnitude
                 mag1 = mag + 1
                 # Calculate the appropriate scaling factor
@@ -561,7 +554,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                 for j in range(y_len):
                     
                     # Label each element with the number of stacks required: linear scaling
-                    for t in range(1, self.s_max+1):
+                    for t in range(self.s_min, self.s_max+1):
                         if (t-1)/self.s_max <= R[i, j] <= t/self.s_max:
                             R_int[i, j] = t
                     
