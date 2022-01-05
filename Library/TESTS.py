@@ -436,16 +436,17 @@ VF_c.plot(ax4)
 
 # Test s_min
 
-v = np.linspace(-5, 5, 26)
+v = np.linspace(-5, 5, 21)
 xg, yg = np.meshgrid(v, v)
 
 F_x = xg
 F_y = yg
 
 form_obj = fp.form_1(xg, yg, F_x, F_y)
-form_obj.s_min = 1
+form_obj.s_min = 4
+form_obj.max_sheets(12)
 form_obj.colour('#AFAFAF')
-form_obj.give_eqn('x', 'sin(y)')
+form_obj.give_eqn('x', 'y')
 
 fig = plt.figure()
 ax = fig.gca()
@@ -474,7 +475,8 @@ form_obj = fp.form_1(xg, yg, F_x, F_y)
 
 form_obj.colour('blue')
 form_obj.head_width(0.3)
-form_obj.max_sheets(6)
+form_obj.s_min = 2
+form_obj.max_sheets(7)
 form_obj.sheet_size(0.03)
 form_obj.surround_space(6)
 

@@ -509,10 +509,6 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             ax_Ly = Ly + Ly/self.delta_factor
             axis.set_xlim(-ax_Lx + x0, ax_Lx + x0)
             axis.set_ylim(-ax_Ly + y0, ax_Ly + y0)
-            print(ax_Lx)
-            print(ax_Ly)
-            print(Lx)
-            print(Ly)
             
             # find the distance between neightbouring points on the grid
             dist_points = self.xg[0, 1] - self.xg[0, 0]
