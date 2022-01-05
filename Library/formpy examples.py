@@ -33,7 +33,6 @@ form_obj = fp.form_1(xg, yg, F_x, F_y)
 
 form_obj.colour('blue')
 form_obj.head_width(0.3)
-form_obj.orient('tail')
 form_obj.max_sheets(6)
 form_obj.sheet_size(0.03)
 form_obj.surround_space(6)

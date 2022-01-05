@@ -434,6 +434,8 @@ VF_c.plot(ax4)
 # %%
 
 
+# Test s_min
+
 v = np.linspace(-5, 5, 26)
 xg, yg = np.meshgrid(v, v)
 
@@ -451,6 +453,38 @@ ax.set_aspect('equal')
 
 form_obj.plot(ax)
 
+# %%
 
+# tets girds off origin and not square for 1-form
+
+
+# set up needed parameters
+x = np.linspace(-2, 6, 21)
+y = np.linspace(-3, 2, 31)
+xg, yg = np.meshgrid(x, y)
+
+F_x = 10*xg*yg
+F_y = 1/(np.sin(yg))
+
+# PLOT, note, it will create a figure for user
+# we probably don't want that, otherwise we would have to make this
+# a method to the matplotlib object, which might mean we need to play with
+# their library, which I suppose we can't.
+form_obj = fp.form_1(xg, yg, F_x, F_y)
+
+form_obj.colour('blue')
+form_obj.head_width(0.3)
+form_obj.max_sheets(6)
+form_obj.sheet_size(0.03)
+form_obj.surround_space(6)
+
+# set up a plot to put these on:
+fig = plt.figure(figsize=(6, 6))
+ax = fig.gca()
+ax.set_xlabel(r'$x$')
+ax.set_ylabel(r'$y$')
+ax.set_aspect('equal')
+
+form_obj.plot(ax)
 
 

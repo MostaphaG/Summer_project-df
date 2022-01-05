@@ -454,12 +454,12 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                 raise ValueError('Error: You need to supply the 1-form equation to do this, look at \'give_eqn\' method')
             else:
                 # redefine the grids
-                v = np.linspace(-self.xg[0, -1], self.xg[0, -1], points_number)
-                self.xg, self.yg = np.meshgrid(v, v)
-                # based on these change other, dependant variables
+                x = np.linspace(-self.xg[0, -1], self.xg[0, -1], points_number)
+                y = np.linspace(-self.yg[0, -1], self.yg[0, -1], points_number)
+                self.xg, self.yg = np.meshgrid(x, y)
+                # based on these change other dependant variables
                 self.pt_den = len(self.xg[:, 0])
-                # substitute these into the equation:
-                # but keep it local
+                # substitute these into the equation, but keep it local:
                 str_x = self.form_1_str_x + ''
                 str_y = self.form_1_str_y + ''
                 str_x = str_x.replace('x', '(self.xg)')
@@ -467,30 +467,31 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                 str_y = str_y.replace('x', '(self.xg)')
                 str_y = str_y.replace('y', '(self.yg)')
                 
-                # cehck against constant forms, to have correct shape
+                # check against constant forms, to have correct array shape
                 if str_x.find('x') & str_x.find('y') == -1:
                     str_x = '(' + str(str_x) + ')* np.ones(np.shape(self.xg))'
                 if str_y.find('x') & str_y.find('y') == -1:
                     str_y = '(' + str(str_y) + ')* np.ones(np.shape(self.yg))'
             
-                # re-evaluate the 2-form numerically
+                # re-evaluate the 1-form numerically
                 self.F_x = eval(str_x)
                 self.F_y = eval(str_y)
         
         # #####################################################################
-        # Write more complicated methods. That will use this form object
-        # eg. plot, exterior derivative, Hodge etc.
+        # More useful methods (plotting, zooming and ext. alg.)
         # #####################################################################
         
         # define a fucntion that will use the set up 1-form and plot it
-        # stcakplot: but it takes the above defined variables:
         def plot(self, axis):
             '''
-            Finilises the plotting
             Uses the attribues of the object as set originally and as customised
             with methods to create a plot of the 1-form
-            Takes in 1 argument:
-                axis: matplotlib axes that the plot it to be put on
+            
+            Parameters:
+            -------------
+            axis: matplotlib axes that the plot it to be put on
+            
+            Returns: None
             '''
             
             # get the lengths of x and y from their grids
@@ -498,13 +499,20 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             y_len = len(self.yg[0, :])
             
             # Extract L from the x and y grids. Assumes they are square.
-            L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
-            x0 = self.xg[0,0] + L
-            y0 = self.yg[0,0] + L
+            Lx = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+            Ly = 0.5*(self.yg[-1, 0] - self.yg[0, 0])
+            L = 0.5*(Lx + Ly)  # average, needed for stack sizes only
+            x0 = self.xg[0, 0] + Lx
+            y0 = self.yg[0, 0] + Ly
             
-            ax_L = L + L/self.delta_factor
-            axis.set_xlim(-ax_L + x0, ax_L + x0)
-            axis.set_ylim(-ax_L + y0, ax_L + y0)
+            ax_Lx = Lx + Lx/self.delta_factor
+            ax_Ly = Ly + Ly/self.delta_factor
+            axis.set_xlim(-ax_Lx + x0, ax_Lx + x0)
+            axis.set_ylim(-ax_Ly + y0, ax_Ly + y0)
+            print(ax_Lx)
+            print(ax_Ly)
+            print(Lx)
+            print(Ly)
             
             # find the distance between neightbouring points on the grid
             dist_points = self.xg[0, 1] - self.xg[0, 0]
