@@ -141,8 +141,37 @@ vf1c.plot(ax3)
 
 # Seems to work okay
 
+# %%
 
+# s_min testing
 
+import formpy as fp
+import numpy as np
+import matplotlib.pyplot as plt
+import timeit
+
+r = np.linspace(-5, 5, 21)
+x,y = np.meshgrid(r, r)
+u = y*np.sin(x)
+v = -x*np.cos(y)
+z = np.cos(x)*np.sin(1/y)
+
+F1 = fp.form_1(x,y,u,v)
+F2 = fp.form_2(x,y,z)
+
+fig1 = plt.figure(figsize=(18,6))
+ax1 = fig1.add_subplot(131)
+ax2 = fig1.add_subplot(132)
+ax3 = fig1.add_subplot(133)
+
+F1.s_max = 10
+F1.s_min = 1
+
+F2.s_max = 10
+F2.s_min = 4
+
+F1.plot(ax1)
+F2.plot(ax2)
 
 
 

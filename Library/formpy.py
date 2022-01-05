@@ -188,7 +188,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
     ---------------
     xg, yg, F_x, F_y
     s_max - int - maximum number of sheets per stack
-    s_min - int - minimum number of sheets to draw per stack
+    s_min - int - minimum number of sheets per stack
     pt_den - int - number of points on grids, extracted from grids, assumes square grid
     fract - float/int - length of sheet in stack as fraction of whole plot size
     scale - float/int - constant multpilier to change scaling
@@ -578,7 +578,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             #ScaleFactor = max_size/(0.9*(2*L/self.pt_den))
             
             # find the relative magnitude of vectors to maximum, as an array
-            R = mag/max_size
+            # R = mag/max_size
             
             # logarithmic attempt
             if self.logarithmic_scale_bool:
@@ -619,14 +619,19 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             P_sh3x = self.xg + (s_L*self.h_head)*I_cos
             P_sh3y = self.yg + (s_L*self.h_head)*I_sin
             
+            # Create array of the number of sheets per stack for each stack
+            for i in range(self.s_max - self.s_min + 1):
+                t = self.s_max - i
+                R_int[R <= t/self.s_max] = t
+            
             # loop over each arrow coordinate in x and y
             for i in range(x_len):
                 for j in range(y_len):
                     
-                    # Label each element with the number of stacks required: linear scaling
-                    for t in range(self.s_min, self.s_max+1):
-                        if (t-1)/self.s_max <= R[i, j] <= t/self.s_max:
-                            R_int[i, j] = t
+                    # # Label each element with the number of stacks required: linear scaling
+                    # for t in range(self.s_min, self.s_max+1):
+                    #     if (t-1)/self.s_max <= R[i, j] <= t/self.s_max:
+                    #         R_int[i, j] = t
                     
                     # set a varible for current considered magnitude as it is reused
                     # avoids extracting from R many times.
@@ -1683,6 +1688,11 @@ def form_2(xg, yg, form2, form_2_eq=None):
                 B_x = self.xg - (s_L/2)*I_sin
                 B_y = self.yg + (s_L/2)*I_cos
                 
+                
+                for i in range(self.s_max - self.s_min + 1):
+                    t = self.s_max - i
+                    R_int[R <= t/self.s_max] = t
+
                 # loop over each arrow coordinate in x and y
                 for i in range(x_len):
                     for j in range(y_len):
@@ -1696,10 +1706,10 @@ def form_2(xg, yg, form2, form_2_eq=None):
                         else:
                             color_index = 2
                         
-                        # linear scaling
-                        for t in range(self.s_min, self.s_max+2):
-                            if (t-2)/self.s_max <= R[i, j] <= (t-1)/self.s_max:
-                                R_int[i, j] = t
+                        # # linear scaling
+                        # for t in range(self.s_min, self.s_max+2):
+                        #     if (t-2)/self.s_max <= R[i, j] <= (t-1)/self.s_max:
+                        #         R_int[i, j] = t
                         
                         # set a varible for current considered magnitude as it is reused
                         # avoids extracting from R many times.
