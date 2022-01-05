@@ -299,71 +299,108 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             # re-evaluate the 2-form numerically, warn user if changed
             if not ((self.F_x is eval(str_x)) and (self.F_y is eval(str_y))):
                 print('Warning: Equations did not exactly match numerical values, and these were change to agree with equations')
+            
             self.F_x = eval(str_x)
             self.F_y = eval(str_y)
         
         # deifne a function to return the string equations to the user
         def return_string(self):
             '''
-            Takes in no arguments, returns the unformatted strings back to user
-            This is done in case user wants to access strings
-            that got here not by input but by ext. alg.
+            Returns unformatted strings for component equations back to user
+            Done in case user wants to access strings that got here by ext. alg.
+            
+            Parmateres: None
+            Returns: None
+            
             '''
             return self.form_1_str_x, self.form_1_str_y
         
         # change colour
         def colour(self, color):
             '''
-            Takes input of a single string.String must be formatted
-            as to be accepted by maplotlib colors
-            changes the colour of plotted stacks.
+            Changes the colour that stacks plot in
+            Note, not strictly needed, can change it by instance.color(colour)
+            
+            Parmaeters:
+            -------------
+            color - string - string to define a colour of stacks
+                        can be any matplotlib understood colour or Hex in #FFFFFF
+            
+            Returns: None
             '''
             self.color = str(color)
         
         # change arrowsheads
         def arrow_heads(self):
             '''
-            Takes no arguments.
             Changes the boolean that determines if arrowheads are plotted
             on stacks. Whenever it is called, it changes that boolean to opposite
             The form object is initialised with this as True
+            Note, not strictly needed, can change it by instance.arrowheads(bool)
+            
+            Parmaeters: None
+            Returns: None
             '''
             self.arrowheads = not self.arrowheads
         
         # change w_head
         def head_width(self, wide):
             '''
-            Takes one argument, needs to be a float or int.
             Sets the width of the arrowhead on a stacks to the desired float
             as a fraction of the stack length in the direction perp. to form
+            Note, not strictly needed, can change it by instance.w_head(width)
+            
+            Parmaeters:
+            ---------------
+            wide - float/int - Sets the width as a fraction of the stack length
+            
+            Returns: None
+            
             '''
             self.w_head = float(wide)
         
         # change h_head
         def head_height(self, high):
             '''
-            Takes one argument, needs to be a float or int.
             Sets the height of the arrowhead on a stacks to the desired float
             as a fraction of the stack length in the direction parall. to form
+            Note, not strictly needed, can change it by instance.h_head(height)
+            
+            Parmaeters:
+            ---------------
+            high - float/int - Sets the height as a fraction of the stack length
+            
+            Returns: None
+            
             '''
             self.h_head = float(high)
         
         # change boolean that det. if to sclae logarithmically
         def log_scaling(self):
             '''
-            Takes no arguments
             Changes the boolean that determines if scaling is logarithmic
             Whenever it is called, it changes that boolean to opposite
             The form object is initialised with this as False
+            Note, not strictly needed, can change it by instance.logarithmic_scale_bool(bool)
+            
+            Parmaeters: None
+            Returns: None
             '''
             self.logarithmic_scale_bool = not self.logarithmic_scale_bool
         
         # define methods to change s_max
         def max_sheets(self, maximum):
             '''
-            Takes one argument, must be int
             Changes maximum number of sheets to draw on a stack.
             These still scale relative to max magnitude.
+            Note, not strictly needed, can change it by instance.s_max(maximum)
+            
+            Parmaeters:
+            ---------------
+            maximum - int - Max number of sheets to plot per stack
+            
+            Returns: None
+            
             '''
             self.s_max = maximum
         
