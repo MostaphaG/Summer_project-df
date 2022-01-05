@@ -138,7 +138,7 @@ zoomed_ax, form2_zoomed = form2.zoom(target=[2.5, 3], mag=zooming, dpd=9, inset=
 
 # Exterior derivative 
 
- # Set up figures and axes for plotting
+# Set up figures and axes for plotting
 fig1 = plt.figure(figsize=(8,8))
 fig2 = plt.figure(figsize=(8,8))
 fig3 = plt.figure(figsize=(8,8))
@@ -179,50 +179,51 @@ F.plot(ax4)
 z1 = F.curl(target=(2,0), mag=10, dpd=7, inset=True, axis=ax4, insize=0.3)
 z2 = F.curl(target=(-2,3), mag=10, dpd=7, inset=True, axis=ax4, insize=0.3)
 
+
 # %%
 
-# Example of interior derivative
-# Perhaps Lorentz force if it ends up working
+# Alternative ext deriv example
 
-# NB working with muI/2pi = 1
+ # Set up figures and axes for plotting
+fig = plt.figure(figsize=(6, 12))
+plt.subplots_adjust(left=0.06, bottom=0.06, right=0.94, top=0.94, wspace=0.2)
+ax1 = fig.add_subplot(211)
+ax2 = fig.add_subplot(212)
 
-# set up the 2-form
-v = np.linspace(-5, 5, 23)
-xg, yg = np.meshgrid(v, v)
+ax1.set_aspect('equal')
+ax1.set_ylabel(r'$y$', fontsize=16)
+ax1.set_title(r'$0-form \ \Phi(x, y) \ Yukawa \ Potential$', fontsize=16)
+ax2.set_aspect('equal')
+ax2.set_xlabel(r'$x$', fontsize=16)
+ax2.set_ylabel(r'$y$', fontsize=16)
+ax2.set_title(r'$1-form \ d \Phi$', fontsize=16)
 
-form = -xg/xg**2 + yg**2
-form2 = fp.form_2(xg, yg, form)
-form2.give_eqn('-x/(x**2 + y**2)')
+# 0F setup
+r = np.linspace(-5, 5, 21)
+xg, yg = np.meshgrid(r, r)
+phi = 1/np.sqrt(xg**2 + yg**2) * np.exp(-1*np.sqrt(xg**2 + yg**2))
 
-# define the VF definining the velocity
-u = np.zeros(np.shape(xg))
-v = np.ones(np.shape(xg))
-VF = fp.vector_field(xg, yg, u, v)
-VF.give_eqn('0', '1')
+# Create object and provide component expressions
+form0 = fp.form_0(xg, yg, phi)
+form0.give_eqn('1/(x**2 + y**2) * e**(-sqrt(x**2 + y**2))')
+#form0.density_increase(2)
+form0.lines_number(50)
 
-# set up figure and axis
-fig = plt.figure()
-ax1 = fig.add_subplot(221)
-ax2 = fig.add_subplot(222)
-ax3 = fig.add_subplot(223)
-ax4 = fig.add_subplot(224)
-for i in [1, 2, 3, 4]:
-    exec('ax' + str(i) + '.set_aspect(\'equal\')')
-    exec('ax' + str(i) + '.set_xlabel(r\'$x$\')')
-    exec('ax' + str(i) + '.set_ylabel(r\'$y$\')')
+# Exterior derivative (analytical)
+d_f0_a = form0.ext_d()
 
-# plot form and VF
-form2.plot(ax1)
-VF.plot(ax2)
+figure = plt.figure()
+axis = figure.gca()
+d_f0_a.plot(axis)
 
-# find numerical and analytical interior derivative and plot
-num_int = form2.interior_d(VF, numerical_only=True)
+# Exterior derivative (numerical)
+d_f0_n = form0.num_ext_d()
+d_f0_n.log_scaling()
 
-# plot these
-num_int.plot(ax3)
+# Plot
+form0.plot(ax1)
+d_f0_n.plot(ax2)
 
-# use cross product:
-ax4.quiver(xg, yg, -xg/(xg**2 + yg**2), 1/(xg**2 + yg**2))
 
 # %%
 
