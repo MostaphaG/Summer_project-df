@@ -40,3 +40,48 @@ zoomed_VF.plot(zoomed_ax)
 import formpy as fp
 import numpy as np
 import matplotlib.pyplot as plt
+
+# Example code for exterior derivative of Yukawa 0-form
+
+# Set up the 0-form
+r = np.linspace(-1, 1, 27)
+xg, yg = np.meshgrid(r, r)  # axis grids
+rg = np.sqrt(xg**2 + yg**2)
+scalar = 1/rg * np.exp(-rg)  # scalar funtion
+f0 = fp.form_0(xg, yg, scalar)  # initialise instance
+f0.give_eqn('1/sqrt(x**2 + y**2) * e**(-sqrt(x**2 + y**2))')  # supply equation
+
+# get 1-form via exterior derivative and customise
+dphi = f0.ext_d()
+dphi.log_scaling()
+dphi.sheet_size(0.04)
+
+# customise 0-from to plot
+f0.lines_number(50)  # number of level lines
+f0.density_increase(3)
+
+# set up figure and axis
+fig = plt.figure(figsize=(10, 10))
+ax1 = fig.add_subplot(121)
+ax2 = fig.add_subplot(122)
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
+
+# plot
+f0.plot(ax1)
+dphi.plot(ax2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
