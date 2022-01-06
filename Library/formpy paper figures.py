@@ -199,30 +199,30 @@ ax2.set_ylabel(r'$y$', fontsize=16)
 ax2.set_title(r'$1-form \ d \Phi$', fontsize=16)
 
 # 0F setup
-r = np.linspace(-5, 5, 21)
+r = np.linspace(-1, 1, 21)
 xg, yg = np.meshgrid(r, r)
 phi = 1/np.sqrt(xg**2 + yg**2) * np.exp(-1*np.sqrt(xg**2 + yg**2))
 
 # Create object and provide component expressions
 form0 = fp.form_0(xg, yg, phi)
-form0.give_eqn('1/(x**2 + y**2) * e**(-sqrt(x**2 + y**2))')
-#form0.density_increase(2)
-form0.lines_number(50)
+form0.give_eqn('1/sqrt(x**2 + y**2) * e**(-sqrt(x**2 + y**2))')
 
 # Exterior derivative (analytical)
-d_f0_a = form0.ext_d()
-
-figure = plt.figure()
-axis = figure.gca()
-d_f0_a.plot(axis)
+#d_f0_n = form0.num_ext_d()
+#figure = plt.figure()
+#axis = figure.gca()
+#d_f0_a.plot(axis)
 
 # Exterior derivative (numerical)
-d_f0_n = form0.num_ext_d()
-d_f0_n.log_scaling()
+d_f0_a = form0.ext_d()
+d_f0_a.log_scaling()
+d_f0_a.sheet_size(0.04)
 
 # Plot
+form0.lines_number(40)
+form0.density_increase(3)
 form0.plot(ax1)
-d_f0_n.plot(ax2)
+d_f0_a.plot(ax2)
 
 
 # %%
