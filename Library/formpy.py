@@ -408,12 +408,12 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
         def sheet_size(self, fraction):
             '''
             Changes the size of stack in direction perp. to form.
-            It is done in in terms of the fraction of graph size
+            It is done in in terms of the fraction of plot size
             Note, not strictly needed, can change it by instance.fract(fraction)
             
             Parmaeters:
             ---------------
-            fraction - float/int - size of stack in terms of the fraction of graph size
+            fraction - float/int - size of stack in terms of the fraction of plot size
             
             Returns: None
             '''
@@ -451,11 +451,11 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             '''
             if self.form_1_str_x == None or self.form_1_str_y == None:
                 # Error
-                raise ValueError('Error: You need to supply the 1-form equation to do this, look at \'give_eqn\' method')
+                raise ValueError('Error: You need to supply the 1-form equation to do this, see \'give_eqn\' method')
             else:
                 # redefine the grids
-                x = np.linspace(-self.xg[0, -1], self.xg[0, -1], points_number)
-                y = np.linspace(-self.yg[0, -1], self.yg[0, -1], points_number)
+                x = np.linspace(self.xg[0,0], self.xg[0, -1], points_number)
+                y = np.linspace(self.yg[0,0], self.yg[-1, 0], points_number)
                 self.xg, self.yg = np.meshgrid(x, y)
                 # based on these change other dependant variables
                 self.pt_den = len(self.xg[:, 0])
@@ -1563,8 +1563,9 @@ def form_2(xg, yg, form2, form_2_eq=None):
                 raise TypeError('Error: You need to supply the 2-form equation to do this, look at \'give_eqn\' method')
             else:
                 # redefine the grids
-                v = np.linspace(-self.xg[0, -1], self.xg[0, -1], points_number)
-                self.xg, self.yg = np.meshgrid(v, v)
+                x = np.linspace(self.xg[0,0], self.xg[0,-1], points_number)
+                y = np.linspace(self.yg[0,0], self.xg[-1,0], points_number)
+                self.xg, self.yg = np.meshgrid(x, y)
                 # based on these change other, dependant variables
                 self.pt_den = len(self.xg[:, 0])
                 self.fract = 2/(self.pt_den - 1)
@@ -2226,8 +2227,9 @@ def form_0(xg, yg, form_0, form_0_eqn=None):
                 raise TypeError('Error: You need to supply the 0-form equation to do this, look at \'give_eqn\' method')
             else:
                 # redefine the grids
-                v = np.linspace(-self.xg[0, -1], self.xg[0, -1], points_number)
-                self.xg, self.yg = np.meshgrid(v, v)
+                x = np.linspace(self.xg[0,0], self.xg[0,-1], points_number)
+                y = np.linspace(self.yg[0,0], self.yg[-1,0], points_number)
+                self.xg, self.yg = np.meshgrid(x,y)
                 # based on these change other, dependant variables
                 self.pt_den = len(self.xg[:, 0])
                 # substitute these into the equation:
@@ -2630,8 +2632,9 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                 raise ValueError('Error: You need to supply the 1-form equation to do this, look at \'give_eqn\' method')
             else:
                 # redefine the grids
-                v = np.linspace(-self.xg[0, -1], self.xg[0, -1], points_number)
-                self.xg, self.yg = np.meshgrid(v, v)
+                x = np.linspace(self.xg[0,0], self.xg[0,-1], points_number)
+                y = np.linspace(self.yg[0,0], self.yg[-1,0], points_number)
+                self.xg, self.yg = np.meshgrid(x,y)
                 # based on these change other, dependant variables
                 self.pt_den = len(self.xg[:, 0])
                 # substitute these into the equation:

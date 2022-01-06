@@ -173,8 +173,38 @@ F2.s_min = 4
 F1.plot(ax1)
 F2.plot(ax2)
 
+# %%
 
+#  1-form customisation testing
 
+import formpy as fp
+import numpy as np
+import matplotlib.pyplot as plt
+import timeit
+
+r = np.linspace(-5, 5, 20)
+x,y = np.meshgrid(r, r)
+u = y*np.sin(x)
+v = -x*np.cos(y)
+# z = np.cos(x)*np.sin(1/y)
+
+F1 = fp.form_1(x,y,u,v)
+F1.give_eqn('y*sin(x)', '-x*cos(y)')
+
+fig1 = plt.figure(figsize=(8,8))
+ax1 = fig1.add_subplot(111)
+
+# F1.colour('b')
+# F1.arrow_heads()
+# F1.head_width(0.5)
+# F1.head_height(0.5)
+# F1.log_scaling()
+# F1.max_sheets(10)
+# F1.sheet_size(0.02)
+# F1.surround_space(20)
+F1.same_range_density(40)
+
+F1.plot(ax1)
 
 
 
