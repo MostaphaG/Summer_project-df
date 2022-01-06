@@ -168,7 +168,7 @@ form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y)
 
 form_1_obj.plot(ax1)
 
-star_1_form = form_1_obj.Hodge(numerical_only=True, keep_object=False)
+star_1_form = form_1_obj.num_hodge(keep_object=False)
 star_1_form.plot(ax2)
 
 
@@ -603,7 +603,7 @@ ax.set_aspect('equal')
 form_1_obj.plot(ax)
 
 # now find wedge of it with a different form
-form_wedged_2 = form_1_obj.wedge_analytical(('1/y**2', 'x**2'))
+form_wedged_2 = form_1_obj.wedge(('1/y**2', 'x**2'))
 
 # plot it on separate axis
 axw.set_xlabel(r'$x$')
@@ -635,14 +635,14 @@ ax2 = fig.add_subplot(122)
 form_1_obj.plot(ax1)
 
 # now find wedge of it with a different form
-form_wedged_2 = form_1_obj.wedge_num(form_1_second=(1/yg**2, xg**3))
-
+form_wedged_2 = form_1_obj.num_wedge(form_1_second=(1/yg**2, xg**3))
+    
 # plot it
 form_wedged_2.plot(ax2)
 
 # %%
 
-# Testing the Hodge of a 1-form
+# Testing the hodge of a 1-form
 
 # set up grids and 1-form
 v = np.linspace(-4.5, 4.5, 21)
@@ -662,8 +662,8 @@ ax.set_aspect('equal')
 # plot the 1-form
 form_1_obj.plot(ax)
 
-# compute the Hodge and replot
-form_1_obj.Hodge(numerical_only=False, keep_object=True)
+# compute the hodge and replot
+form_1_obj.hodge(keep_object=True)
 
 plt.pause(1)
 ax.clear()
@@ -673,8 +673,8 @@ ax.set_aspect('equal')
 
 form_1_obj.plot(ax)
 
-# compute the Hodge again, now set to a new form and noe numerically
-form_1_obj_2H = form_1_obj.Hodge(numerical_only=True, keep_object=False)
+# compute the hodge again, now set to a new form and noe numerically
+form_1_obj_2H = form_1_obj.num_hodge(keep_object=False)
 
 # replot
 plt.pause(1)
@@ -686,7 +686,7 @@ form_1_obj_2H.plot(ax)
 
 # %%
 
-# Example of 2-form Hodge
+# Example of 2-form hodge
 
 # set up 2-form
 v = np.linspace(-6, 6, 21)
@@ -704,19 +704,19 @@ form_obj.plot(ax1)
 # supply equations
 form_obj.give_eqn('x*y')
 
-# complete analytical Hodge and plot
-form_0 = form_obj.Hodge(numerical_only=False)
+# complete analytical hodge and plot
+form_0 = form_obj.hodge()
 form_0.plot(ax2)
 
-# complete numerical Hodge, wait and replot
-form_0 = form_obj.Hodge(numerical_only=True)
+# complete numerical hodge, wait and replot
+form_0 = form_obj.num_hodge()
 plt.pause(2)
 ax2.clear()
 form_0.plot(ax2)  # should observe no difference (and do)
 
 # %%
 
-# Testing Hodge of a 0-form
+# Testing hodge of a 0-form
 
 # set up grids and 0-form
 v = np.linspace(-4.5, 4.5, 11)
@@ -736,12 +736,12 @@ ax4 = fig.add_subplot(224)
 form_0_obj.plot(ax1)
 form_0_obj.plot(ax3)
 
-# compute the Hodge analytically and plot the resulting 2-form
-form_2_ana = form_0_obj.Hodge(numerical_only=True)
+# compute the hodge analytically and plot the resulting 2-form
+form_2_ana = form_0_obj.hodge()
 form_2_ana.plot(ax2)
 
 # supply equations and do it analytically
-form_2_num = form_0_obj.Hodge(numerical_only=False)
+form_2_num = form_0_obj.num_hodge()
 form_2_num.plot(ax4)
 
 
@@ -781,9 +781,9 @@ form_obj1.plot(ax1)
 vf.plot(ax2)
 
 # complete interior derivative, with object, with equations and without any input:
-form_0_i_1 = form_obj1.interior_d(vector_field=vf, numerical_only=False)
-form_0_i_2 = form_obj1.interior_d(numerical_only=False)
-form_0_i_3 = form_obj1.interior_d(('cos(y)', 'sin(x)'), numerical_only=False)
+form_0_i_1 = form_obj1.interior_d(vector_field=vf)
+form_0_i_2 = form_obj1.interior_d()
+form_0_i_3 = form_obj1.interior_d(('cos(y)', 'sin(x)'))
 
 # plot each
 form_0_i_1.plot(ax3)
@@ -823,9 +823,9 @@ form_obj1.plot(ax1)
 vf.plot(ax2)
 
 # complete int deriv. with object, arrays and with no input:
-form_0_i_1 = form_obj1.interior_d(vector_field=vf, numerical_only=True)
-form_0_i_2 = form_obj1.interior_d(numerical_only=True)
-form_0_i_3 = form_obj1.interior_d((u, v), numerical_only=True)
+form_0_i_1 = form_obj1.num_interior_d(vector_field=vf)
+form_0_i_2 = form_obj1.num_interior_d()
+form_0_i_3 = form_obj1.num_interior_d((u, v))
 
 # plot each
 form_0_i_1.plot(ax3)
@@ -870,9 +870,9 @@ vf = fp.vector_field(xg, yg, u, v)
 vf.plot(ax2)
 
 # complete int deriv. with object, arrays and with no input:
-form_1_i_1 = form_obj2.interior_d(vector_field=vf, numerical_only=True)
-form_1_i_2 = form_obj2.interior_d(numerical_only=True)
-form_1_i_3 = form_obj2.interior_d((u, v), numerical_only=True)
+form_1_i_1 = form_obj2.num_interior_d(vector_field=vf)
+form_1_i_2 = form_obj2.num_interior_d()
+form_1_i_3 = form_obj2.num_interior_d((u, v))
 
 # plot each
 form_1_i_1.plot(ax3)
@@ -927,9 +927,9 @@ vf.give_eqn('cos(y)', 'sin(x)')
 vf.plot(ax2)
 
 # complete int deriv. with object, arrays and with no input:
-form_1_i_1 = form_obj2.interior_d(vector_field=vf, numerical_only=False)
-form_1_i_2 = form_obj2.interior_d(numerical_only=False)
-form_1_i_3 = form_obj2.interior_d(('cos(y)', 'sin(x)'), numerical_only=False)
+form_1_i_1 = form_obj2.interior_d(vector_field=vf)
+form_1_i_2 = form_obj2.interior_d()
+form_1_i_3 = form_obj2.interior_d(('cos(y)', 'sin(x)'))
 
 # plot each
 form_1_i_1.plot(ax3)
@@ -1170,13 +1170,13 @@ metric = [[np.ones(np.shape(xg)), np.zeros(np.shape(xg))],
           [np.zeros(np.shape(xg)), xg**2 + yg**2]]  # polar transformation
 
 # via this, get the 1-form
-form_1_obj = vf1.contravariant(g=metric)
+form_1_obj = vf1.covariant(g=metric)
 
 # plot it
 form_1_obj.plot(ax2)
 
 # get the interioir deriv of that w.r.t intial VF
-zero_form = form_1_obj.interior_d(vector_field=vf1, numerical_only=True)
+zero_form = form_1_obj.num_interior_d(vector_field=vf1)
 
 # plot it
 zero_form.plot(ax3)
@@ -1216,13 +1216,13 @@ metric = [['1', '0'],
           ['0', 'x**2 + y**2']]
 
 # find the VF
-vf = form1.covariant(g=metric)
+vf = form1.contravariant(g=metric)
 
 # plot it
 vf.plot(ax2)
 
 # find the interior derivative of 1-form wrt that VF
-zero_form = form1.interior_d(vector_field=vf, numerical_only=False)
+zero_form = form1.interior_d(vector_field=vf)
 
 # plot it:
 zero_form.plot(ax3)
@@ -1348,9 +1348,9 @@ vf = fp.vector_field(xg, yg, u, v)
 vf.plot(ax2)
 
 # complete int deriv. with object, arrays and with no input:
-form_0_i_1 = form_obj1.interior_d(vector_field=vf, numerical_only=True)
-form_0_i_2 = form_obj1.interior_d(numerical_only=True)
-form_0_i_3 = form_obj1.interior_d((u, v), numerical_only=True)
+form_0_i_1 = form_obj1.num_interior_d(vector_field=vf)
+form_0_i_2 = form_obj1.num_interior_d()
+form_0_i_3 = form_obj1.num_interior_d((u, v))
 
 # plot each
 form_0_i_1.plot(ax3)
@@ -1406,10 +1406,10 @@ vf.give_eqn('1', '3')
 vf.plot(ax2)
 
 # complete int deriv. with object, arrays and with no input:
-form_1_i_1 = form_obj2.interior_d(vector_field=vf, numerical_only=False)
-form_1_i_2 = form_obj2.interior_d(numerical_only=False)
-form_1_i_3 = form_obj2.interior_d(('10', 'pi'), numerical_only=False)
-form_1_i_4 = form_obj2.interior_d(vector_field=vf, numerical_only=True)
+form_1_i_1 = form_obj2.interior_d(vector_field=vf)
+form_1_i_2 = form_obj2.interior_d()
+form_1_i_3 = form_obj2.interior_d(('10', 'pi'))
+form_1_i_4 = form_obj2.num_interior_d(vector_field=vf)
 
 # plot each
 form_1_i_1.plot(ax3)
@@ -1464,10 +1464,10 @@ vf.give_eqn('1', 'x')
 vf.plot(ax2)
 
 # complete int deriv. with object, arrays and with no input:
-form_1_i_1 = form_obj2.interior_d(vector_field=vf, numerical_only=False)
-form_1_i_2 = form_obj2.interior_d(numerical_only=False)
-form_1_i_3 = form_obj2.interior_d(('10', 'pi'), numerical_only=False)
-form_1_i_4 = form_obj2.interior_d(vector_field=vf, numerical_only=True)
+form_1_i_1 = form_obj2.interior_d(vector_field=vf)
+form_1_i_2 = form_obj2.interior_d()
+form_1_i_3 = form_obj2.interior_d(('10', 'pi'))
+form_1_i_4 = form_obj2.num_interior_d(vector_field=vf)
 
 # plot each
 form_1_i_1.plot(ax3)

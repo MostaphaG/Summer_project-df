@@ -270,7 +270,7 @@ form2.plot(ax1)
 VF.plot(ax2)
 
 # find numerical and analytical interior derivative and plot
-num_int = form2.interior_d(VF, numerical_only=False)
+num_int = form2.interior_d(VF)
 
 # plot these
 num_int.plot(ax3)
