@@ -508,3 +508,18 @@ ax.set_ylabel(r'$y$')
 ax.set_aspect('equal')
 
 form_obj.plot(ax)
+
+# %%
+
+p = np.linspace(-4, 4, 23)
+q = np.linspace(0, 4, 23)
+x, y = np.meshgrid(p, q)
+
+
+u = np.ones(np.shape(x))
+v = np.tanh(x)*(np.cosh(x))**(2/3)
+fp1 = fp.form_1(x,y,u,v)
+
+plt.figure(1,figsize=(6,6))
+ax = plt.axes()
+fp1.plot(ax)
