@@ -1499,13 +1499,20 @@ def form_2(xg, yg, form2, form_2_eq=None):
             return self.form_2_str
         
         # change colour list
-        def colour(self, colours):
+        def colours(self, colour_list):
             '''
-            Takes input of a single string. String must be formatted
+            Takes input of a list of three string. String must be formatted
             as to be accepted by maplotlib colors
-            changes the colour of plotted stacks.
+            changes the colours for 2-form orientation.
+            Order: [clockwise, counterclosckwise, zero]
             '''
-            self.colour_list = str(colours)
+            
+            # make sure input was a list of strings:
+            if not(isinstance(colour_list[0], str) and isinstance(colour_list[1], str) and isinstance(colour_list[2], str)):
+                raise TypeError('Wrongly formatted string list, chech required inputs')
+            
+            # change stored colour list
+            self.colour_list = colour_list
         
         # change boolean that det. if to sclae logarithmically
         def log_scaling(self):

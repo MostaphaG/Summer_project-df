@@ -490,3 +490,21 @@ ax.set_aspect('equal')
 form_obj.plot(ax)
 
 
+# %%
+
+# Changing colours for 2-form
+
+v = np.linspace(-6, 6, 21)
+xg, yg = np.meshgrid(v, v)
+form_2 = xg*yg
+form_obj = fp.form_2(xg, yg, form_2)
+form_obj.colours(['orange', 'blue', 'black'])
+
+# Create a figure and axis to plot it on
+fig = plt.figure()
+ax = fig.gca()
+ax.set_xlabel(r'$x$')
+ax.set_ylabel(r'$y$')
+ax.set_aspect('equal')
+
+form_obj.plot(ax)
