@@ -192,6 +192,7 @@ ax2 = fig.add_subplot(212)
 
 ax1.set_yticks(np.linspace(-1, 1, 5))
 ax2.set_yticks(np.linspace(-1, 1, 5))
+
 ax1.tick_params(labelsize=14)
 ax1.set_aspect('equal')
 ax1.set_ylabel(r'$y$', fontsize=16)
@@ -350,7 +351,25 @@ Showcasing, Perhaps most for an Appendix?
 
 # %%
 
-# 2D BH example (?)
+# 2D BH example
+p = np.linspace(-4, 4, 23)
+q = np.linspace(0, 4, 23)
+x, y = np.meshgrid(p, q)
+
+u = np.ones(np.shape(x))
+v = np.tanh(x)*(np.cosh(x))**(2/3)
+fp1 = fp.form_1(x, y, u, v)
+
+fig = plt.figure(figsize=(6, 6))
+ax = fig.gca()
+
+ax.tick_params(labelsize=14)
+ax.set_aspect('equal')
+ax.set_ylabel(r'$y$', fontsize=16)
+ax.set_title(r'$x$', fontsize=16)
+
+
+fp1.plot(ax)
 
 
 # %%
