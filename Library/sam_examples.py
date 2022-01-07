@@ -182,7 +182,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import timeit
 
-r = np.linspace(-5, 5, 20)
+r = np.linspace(0, 5, 20)
 x,y = np.meshgrid(r, r)
 u = y*np.sin(x)
 v = -x*np.cos(y)
@@ -202,7 +202,7 @@ ax1 = fig1.add_subplot(111)
 # F1.max_sheets(10)
 # F1.sheet_size(0.02)
 # F1.surround_space(20)
-F1.same_range_density(40)
+F1.same_range_density(30)
 
 F1.plot(ax1)
 
