@@ -871,11 +871,11 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
         
         
         # define a method to Hodge it
-        def hodge(self, keep_object=True):
+        def hodge(self, keep_object=False):
             '''
             Takes in one bool argument:
             2) determines if the result should be returned as a new 1-form or
-                if the current one need to be changed. Default is True
+                if the current one need to be changed. Default is False
             
             It calulates the Hodge on R^2 by the standard definition:
             dx -> dy and dy -> -dx
@@ -925,11 +925,11 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                     raise ValueError('Error, Invalid input for \'keep_object\'')
         
         
-        def num_hodge(self, keep_object=True):
+        def num_hodge(self, keep_object=False):
             '''
             Takes in one bool argument:
             2) determines if the result should be returned as a new 1-form or
-                if the current one need to be changed. Default is True
+                if the current one need to be changed. Default is False
             
             It calulates the Hodge on R^2 by the standard definition:
             dx -> dy and dy -> -dx
