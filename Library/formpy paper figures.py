@@ -286,6 +286,28 @@ VF_c.plot(ax4)
 
 # Hodge Example
 
+# 1F setup
+r = np.linspace(-5, 5, 21)
+x, y = np.meshgrid(r, r)
+
+# Black hole field
+
+u = -2*x*((x**2+y**2)**(-1.5))*(1-(2/np.sqrt(x**2+y**2)))**(-2)
+v = -2*y*((x**2+y**2)**(-1.5))*(1-(2/np.sqrt(x**2+y**2)))**(-2)
+
+f1 = fp.form_1(x, y, u, v)
+f1.log_scaling()
+f1.max_sheets(10)
+
+fig1 = plt.figure(figsize=(10,5))
+ax1 = fig1.add_subplot(121)
+ax2 = fig1.add_subplot(122)
+
+f1.plot(ax1)
+
+f1hodge = f1.num_hodge(keep_object=False)
+
+f1hodge.plot(ax2)
 
 # %%
 
