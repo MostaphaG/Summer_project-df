@@ -71,17 +71,37 @@ ax2.set_aspect('equal')
 f0.plot(ax1)
 dphi.plot(ax2)
 
+# %%
 
+# 2D Black hole
 
+import formpy as fp
+import numpy as np
+import matplotlib.pyplot as plt
 
+# set up grids
+x = np.linspace(-4, 4, 26)
+t = np.linspace(0, 4, 19)
+xg, tg = np.meshgrid(x, t)
 
+# set up 1-form
+u = np.ones(np.shape(xg))
+v = np.tanh(xg)*(np.cosh(xg))**(2/3)
+f1 = fp.form_1(xg, tg, u, v)
 
+# set up figure and axis
+fig = plt.figure(figsize=(6, 12))
+ax1 = fig.add_subplot(211)
+ax2 = fig.add_subplot(212)
+ax1.set_ylabel(r'$t$')
+ax2.set_ylabel(r'$t$')
+ax2.set_xlabel(r'$x$')
 
+# Hodge the result
+f1_star = f1.num_hodge(keep_object=False)
 
-
-
-
-
-
+# plot each
+f1.plot(ax1)
+f1_star.plot(ax2)
 
 
