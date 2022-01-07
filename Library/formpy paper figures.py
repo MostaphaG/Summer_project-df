@@ -367,12 +367,12 @@ ax2 = fig.add_subplot(212, adjustable='box')
 
 ax1.tick_params(labelsize=14)
 #ax1.set_aspect('equal')
-ax1.set_ylabel(r'$t$', fontsize=16)
+ax1.set_ylabel(r'$t$', rotation=0, labelpad=10, fontsize=16)
 ax1.set_title(r'$2D \ Black \ Hole \ frame \ field \ \omega$', fontsize=16)
 
 ax2.tick_params(labelsize=14)
 #ax2.set_aspect('equal')
-ax2.set_ylabel(r'$t$', fontsize=16)
+ax2.set_ylabel(r'$t$', rotation=0, labelpad=10, fontsize=16)
 ax2.set_xlabel(r'$x$', fontsize=16)
 ax2.set_title(r'$\star \omega$', fontsize=16)
 
