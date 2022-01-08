@@ -1787,11 +1787,11 @@ def form_2(xg, yg, form2, form_2_eq=None):
                                 s += 1
         
         # define a fucntion to Hodge the 2-form (into a 0-form)
-        def hodge(self):
+        def num_hodge(self):
             '''
             Takes in no arguments
-            Does the hodge analuically based on instance provieded equations
-            changes the equations AND the numerical answers
+            Does the hodge numerically based on instance provieded arrays
+            If equations were provided, it will lose them.
             
             It calulates the Hodge on R^2 by the standard definition:
             *(dx^dy) = 1
@@ -1814,11 +1814,11 @@ def form_2(xg, yg, form2, form_2_eq=None):
             return new_object
         
         
-        def num_hodge(self):
+        def hodge(self):
             '''
             Takes in no arguments
-            Does the hodge numerically based on instance provieded arrays
-            If equations were provided, it will lose them.
+            Does the hodge analuically based on instance provieded equations
+            changes the equations AND the numerical answers
             
             It calulates the Hodge on R^2 by the standard definition:
             *(dx^dy) = 1
@@ -2403,17 +2403,16 @@ def form_0(xg, yg, form_0, form_0_eqn=None):
             return result_1_form
         
         # deinfe a method for Hodge of a 0-form
-        def hodge(self):
+        def num_hodge(self):
             '''
             Takes in no arguments
             
             It calulates the Hodge on R^2 by the standard definition:
             1* = (dx^dy)
-            Does so analytically via instance provided equtions
-            changes the equations AND the numerical answers
+            Does so numerically via instance provided arrays
+            IF equations were given, this method will lose them
             
             returns a 2-form
-            
             '''
             # check if equations have been given:
             # if they have, doing it only numerically would create
@@ -2426,16 +2425,17 @@ def form_0(xg, yg, form_0, form_0_eqn=None):
             new_object = form_2(self.xg, self.yg, self.form_0)  # N.B no equations to supply
             return new_object
         
-        def num_hodge(self):
+        def hodge(self):
             '''
             Takes in no arguments
             
             It calulates the Hodge on R^2 by the standard definition:
             1* = (dx^dy)
-            Does so numerically via instance provided arrays
-            IF equations were given, this method will lose them
+            Does so analytically via instance provided equtions
+            changes the equations AND the numerical answers
             
             returns a 2-form
+            
             '''
             # can only be done if equations have been given, check:
             if self.form_0_str != None:
@@ -2473,7 +2473,6 @@ def form_0(xg, yg, form_0, form_0_eqn=None):
     form_0_object = form_set_up(xg, yg, form_0)
     # return it to user to store
     return form_0_object
-
 
 # %%
 

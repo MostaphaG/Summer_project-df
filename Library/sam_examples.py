@@ -206,6 +206,38 @@ F1.same_range_density(30)
 
 F1.plot(ax1)
 
+# %% Script to find the laplacian of a given function (0-form)
 
+import formpy as fp
+import numpy as np
+import matplotlib.pyplot as plt
+import timeit
 
+r = np.linspace(-2,2,20)
+x,y = np.meshgrid(r, r)
+# u = y*np.sin(x)
+# v = -x*np.cos(y)
+z = y*np.sin(x)
 
+fig1 = plt.figure(figsize=(12,6))
+ax1 = fig1.add_subplot(121)
+ax2 = fig1.add_subplot(122)
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
+# ax3 = fig1.add_subplot(133)
+
+f = fp.form_0(x,y,z)
+f.give_eqn('(x**2+y**2)**(-0.5)')
+f.plot(ax1)
+
+df = f.ext_d()
+# df.plot(ax2)
+
+hdf = df.hodge()
+# hdf.plot(ax3)
+
+dhdf = hdf.ext_d()
+
+hdhdf = dhdf.hodge()
+
+hdhdf.plot(ax2)
