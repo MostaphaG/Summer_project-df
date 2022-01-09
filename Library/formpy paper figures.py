@@ -234,13 +234,15 @@ d_f0_a.plot(ax2)
 
 # Trying Lorentz with treating d\rho as normal 1-form, not radial for cont. phi
 
-rho = np.linspace(0, 5, 23)
-z = np.linspace(0, 5, 23)
+rho = np.linspace(0, 1, 23)
+z = np.linspace(0, 1, 23)
 rhog, zg = np.meshgrid(rho, z)
 
 form = 1/rhog
 form2 = fp.form_2(rhog, zg, form)
 form2.give_eqn('1/x')
+form2.max_sheets(8)
+form2.log_scaling()
 
 # define the VF definining the velocity
 u = np.zeros(np.shape(zg))
