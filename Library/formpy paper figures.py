@@ -249,6 +249,7 @@ u = np.zeros(np.shape(zg))
 v = np.ones(np.shape(zg))
 VF = fp.vector_field(rhog, zg, u, v)
 VF.give_eqn('0', '1')
+VF.log_scaling()
 
 fig = plt.figure(figsize=(12, 12))
 ax1 = fig.add_subplot(221)
@@ -276,6 +277,7 @@ VF.plot(ax2)
 num_int = form2.interior_d(VF)
 
 # plot these
+num_int.log_scaling()
 num_int.plot(ax3)
 
 # use cross product:
@@ -317,38 +319,11 @@ f1hodge.plot(ax2)
 # Wedge example
 
 
-# %%
-
-# Subplot example
-# Could do:
-# Combo of ext. alg. operations
-# Comparison between numerical and analaytical operations for some method
-    # (Not great figure though, showing two same plots)
-
-
-
-
 
 # %%
 
 # Example of metric:
 # polar or hyperbolic metric, VF, 1-form and the interior deriv of the 2
-
-
-# %%
-
-'''
-Showcasing, Perhaps most for an Appendix?
-'''
-
-# %%
-
-# Example showing proof of Stokes theorem
-
-
-# %%
-
-# electric/magnetic fields examples
 
 
 # %%
@@ -392,5 +367,13 @@ f1_star.plot(ax2)
 # d^2 (any 0-form) = 0
 
 
+# %%
+
+# electric/magnetic fields examples
+
+
+# %%
+
+# Example showing proof of Stokes theorem
 
 
