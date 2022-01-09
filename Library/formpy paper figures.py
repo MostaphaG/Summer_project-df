@@ -331,10 +331,10 @@ ax3.tick_params(labelsize=14)
 
 
 # set up first 1-form
-u1 = np.ones(np.shape(xg))
-v1 = np.ones(np.shape(yg))
+u1 = -yg
+v1 = xg
 form11 = fp.form_1(xg, yg, u1, v1)
-form11.give_eqn('1', '1')
+form11.give_eqn('-y', 'x')
 
 # and second
 u2 = yg*np.sin(xg)
@@ -359,16 +359,15 @@ form2.plot(ax3)
 from matplotlib import cm
 
 # set up grids
-r = np.linspace(-4.5, 4.5, 21)
+r = np.linspace(-2, 2, 21)
 xg, yg = np.meshgrid(r, r)
 
 # set up figure and subplots
 
-fig = plt.figure(figsize=(18, 6))
+fig = plt.figure(figsize=(12, 6))
 # plt.subplots_adjust(left=0.06, bottom=0.06, right=0.94, top=0.94, wspace=0.3)
-ax1 = fig.add_subplot(131)
-ax2 = fig.add_subplot(132)
-ax3 = fig.add_subplot(133)
+ax1 = fig.add_subplot(121)
+ax2 = fig.add_subplot(122)
 
 #fig = plt.figure(figsize=(6, 18))
 #plt.subplots_adjust(left=0.06, bottom=0.06, right=0.94, top=0.94, wspace=0.3)
@@ -380,17 +379,16 @@ ax1.set_aspect('equal')
 ax1.set_title(r'$Starting \ VF \ v^{i}$', fontsize=16)
 ax1.set_xlabel(r'$x$', fontsize=16)
 ax1.set_ylabel(r'$y$', fontsize=16)
+ax1.set_yticks(np.linspace(-2, 2, 5))
+ax1.set_xticks(np.linspace(-2, 2, 5))
 ax1.tick_params(labelsize=14)
 
 ax2.set_aspect('equal')
 ax2.set_title(r'$v_{i} = g_{ij} v^{j}$', fontsize=16)
 ax2.set_xlabel(r'$x$', fontsize=16)
+ax2.set_yticks(np.linspace(-2, 2, 5))
+ax2.set_xticks(np.linspace(-2, 2, 5))
 ax2.tick_params(labelsize=14)
-
-ax3.set_aspect('equal')
-ax3.set_title(r'$\iota_{v^{i}}(v_{i})$', fontsize=16)
-ax3.set_xlabel(r'$x$', fontsize=16)
-ax3.tick_params(labelsize=14)
 
 # set up the VF
 u = np.ones(np.shape(xg))
@@ -409,18 +407,7 @@ metric = [['1', '0'],
 form1 = VF.covariant(g=metric)
 
 # plot it
-form1.log_scaling()
 form1.plot(ax2)
-
-# find the interior derivative of 1-form wrt that VF
-zero_form = form1.interior_d(vector_field=VF)
-
-# plot it:
-zero_form.lines_number(30)
-zero_form.density_increase(3)
-zero_form.cmap = cm.magma
-zero_form.labels()
-zero_form.plot(ax3)
 
 
 # %%
