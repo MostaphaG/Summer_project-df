@@ -290,63 +290,47 @@ VF_c.plot(ax4)
 # Wedge example
 
 # set up grids
-r = np.linspace(-5, 5, 21)
+r = np.linspace(-2, 2, 23)
 xg, yg = np.meshgrid(r, r)
 
 # set up figure and subplots
 fig = plt.figure(figsize=(18, 6))
-ax1 = fig.add_subplot(131)
-ax2 = fig.add_subplot(132)
-ax3 = fig.add_subplot(133)
+ax1 = fig.add_subplot(121)
+ax2 = fig.add_subplot(122)
 
-#fig = plt.figure(figsize=(6, 18))
+#fig = plt.figure(figsize=(6, 12))
 #plt.subplots_adjust(left=0.06, bottom=0.06, right=0.94, top=0.94, wspace=0.3)
-#ax1 = fig.add_subplot(311)
-#ax2 = fig.add_subplot(312)
-#ax3 = fig.add_subplot(313)
-
-#fig = plt.figure(figsize=(6, 18))
-#plt.subplots_adjust(left=0.06, bottom=0.06, right=0.94, top=0.94, wspace=0.3)
-#ax1 = fig.add_subplot(311)
-#ax2 = fig.add_subplot(312)
-#ax3 = fig.add_subplot(313)
+#ax1 = fig.add_subplot(211)
+#ax2 = fig.add_subplot(212)
 
 ax1.set_aspect('equal')
-ax1.set_title(r'$First \ 1-form \ \alpha_{i}$', fontsize=16)
+ax1.set_title(r'$1-form \ \alpha$', fontsize=16)
 ax1.set_xlabel(r'$x$', fontsize=16)
 ax1.set_ylabel(r'$y$', fontsize=16)
 ax1.tick_params(labelsize=14)
 
 ax2.set_aspect('equal')
-ax2.set_title(r'$Second \ 1-form \ \beta_{j}$', fontsize=16)
+ax2.set_title(r'$Wedge \ \alpha \wedge \star \alpha$', fontsize=16)
 ax2.set_xlabel(r'$x$', fontsize=16)
 ax2.tick_params(labelsize=14)
 
-ax3.set_aspect('equal')
-ax3.set_title(r'$Wedge \ \alpha_{i} \wedge \beta_{j}$', fontsize=16)
-ax3.set_xlabel(r'$x$', fontsize=16)
-ax3.tick_params(labelsize=14)
-
 
 # set up first 1-form
-u1 = -yg
-v1 = xg
+u1 = np.ones(np.shape(xg))
+v1 = np.tanh(xg)*(np.cosh(xg))**(2/3)
 form11 = fp.form_1(xg, yg, u1, v1)
-form11.give_eqn('-y', 'x')
+form11.give_eqn('1', '-tanh(x)**2 * cosh(x)**(4/3)')
 
-# and second
-u2 = yg*np.sin(xg)
-v2 = -xg*np.cos(yg)
-form12 = fp.form_1(xg, yg, u2, v2)
-form12.give_eqn('y*sin(x)', '-x*cos(y)')
+# and second via the Hodge
+form12 = form11.hodge()
 
 # wegde them:
 form2 = form11.wedge(form_1_second=form12)
 
 # plot
 form11.plot(ax1)
-form12.plot(ax2)
-form2.plot(ax3)
+form2.log_scaling()
+form2.plot(ax2)
 
 
 # %%
