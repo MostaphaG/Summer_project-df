@@ -523,3 +523,24 @@ fp1 = fp.form_1(x,y,u,v)
 plt.figure(1,figsize=(6,6))
 ax = plt.axes()
 fp1.plot(ax)
+
+# %%
+
+# Testing default colours in 2-forms
+
+v = np.linspace(-6, 6, 21)
+xg, yg = np.meshgrid(v, v)
+form_2 = np.ones(np.shape(xg))
+form_obj = fp.form_2(xg, yg, form_2)
+
+# Create a figure and axis to plot it on
+fig = plt.figure()
+ax = fig.gca()
+ax.set_xlabel(r'$x$')
+ax.set_ylabel(r'$y$')
+ax.set_aspect('equal')
+
+form_obj.plot(ax)
+
+# Should be positive in dx/\dy therefore counterclockwise, this is red.
+# And it is.

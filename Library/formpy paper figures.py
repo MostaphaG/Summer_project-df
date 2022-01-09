@@ -235,10 +235,11 @@ d_f0_a.plot(ax2)
 rho = np.linspace(0, 1, 23)
 z = np.linspace(0, 1, 23)
 rhog, zg = np.meshgrid(rho, z)
+q = 1
 
-form = 1/rhog
+form = -1/rhog  # minus to define horizontal then vertical as in dx/\dy
 form2 = fp.form_2(rhog, zg, form)
-form2.give_eqn('1/x')
+form2.give_eqn('-1/x')
 form2.max_sheets(8)
 form2.log_scaling()
 
@@ -274,9 +275,14 @@ VF.plot(ax2)
 # find numerical and analytical interior derivative and plot
 num_int = form2.interior_d(VF)
 
+# add the minus as in the F equation
+Force = num_int
+Force.F_x *= -q
+Force.F_y *= -q
+
 # plot these
-num_int.log_scaling()
-num_int.plot(ax3)
+Force.log_scaling()
+Force.plot(ax3)
 
 # use cross product:
 VF_c = fp.vector_field(rhog, zg, -1/rhog, np.zeros(np.shape(zg)))
