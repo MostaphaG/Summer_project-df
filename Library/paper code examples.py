@@ -41,6 +41,44 @@ import formpy as fp
 import numpy as np
 import matplotlib.pyplot as plt
 
+# Example code for 1-form zooming
+
+# Set up the 1-form
+r = np.linspace(-5, 5, 21)
+xg, yg = np.meshgrid(r, r)  # axis grids
+u = yg*np.sin(xg)
+v = -xg*np.cos(yg)   # components
+f1 = fp.form_1(xg, yg, u, v)  # initialise instance
+f1.give_eqn('y*sin(x)', '-x*cos(y)')  # supply equations to it
+
+# set up figure
+fig = plt.figure(figsize=(6, 6))
+ax = fig.gca()
+ax.set_aspect('equal')
+ax.set_xlabel(r'$x$')
+ax.set_ylabel(r'$y$')
+
+# plot the 1-form
+f1.plot(ax)
+
+# zoom onto it
+ax_zoom, form_zoom = f1.zoom(target=[2, 3], mag=1, dpd=7,
+                             inset=True, axis=ax, insize=0.3)
+
+# customise insset plot
+form_zoom.colour('r')
+ax_zoom.set_yticks(np.linspace(form_zoom.yg[0, 0], form_zoom.yg[-1, 0], 5))
+ax_zoom.set_xticks(np.linspace(form_zoom.xg[0, 0], form_zoom.xg[0, -1], 5))
+
+# replot it
+form_zoom.plot(ax_zoom)
+
+# %%
+
+import formpy as fp
+import numpy as np
+import matplotlib.pyplot as plt
+
 # Example code for exterior derivative of Yukawa 0-form
 
 # Set up the axis grids
