@@ -8,6 +8,7 @@ from sympy import diff, simplify
 from sympy.parsing.sympy_parser import parse_expr
 from math import isnan
 from matplotlib import patches as patch
+from matplotlib import cm
 
 # input many numpy functions to deal with user input
 from numpy import sin, cos, tan, sqrt, log, arctan, arcsin, arccos, tanh
@@ -2108,7 +2109,6 @@ def form_0(xg, yg, form_0, form_0_eqn=None):
             self.yg = yg
             self.form_0 = form_0
             self.pt_den = len(xg[:, 0])  # + 1  # assume square grids
-            self.logarithmic_scale_bool = 0
             self.delta_factor = 10
             self.denser = 1
             self.lines = 15
@@ -2121,6 +2121,7 @@ def form_0(xg, yg, form_0, form_0_eqn=None):
             # Note, the string must be given with x and y as variables
             self.form_0_contour = None  # Initialise with that, will be changed, if user
             # gets contour plot with new density.
+            self.cmap = cm.viridis
         
         # #####################################################################
         # Define basic methods to customise this object
@@ -2318,7 +2319,7 @@ def form_0(xg, yg, form_0, form_0_eqn=None):
                                 form_0_contour[i, j] = 0
                     
                     # set up the contour plot
-                    CS = axis.contour(contour_x_grid, contour_y_grid, form_0_contour, levels=self.lines)
+                    CS = axis.contour(contour_x_grid, contour_y_grid, form_0_contour, levels=self.lines, cmap=self.cmap)
                     axis.clabel(CS, inline=self.inline_bool, fontsize=self.fontsize)
             else:
                 # deal with sinularities that appear on evaluated points

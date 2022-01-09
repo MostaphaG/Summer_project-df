@@ -289,33 +289,6 @@ VF_c.plot(ax4)
 
 # %%
 
-# Hodge Example
-
-# 1F setup
-r = np.linspace(-5, 5, 21)
-x, y = np.meshgrid(r, r)
-
-# Black hole field
-
-u = -2*x*((x**2+y**2)**(-1.5))*(1-(2/np.sqrt(x**2+y**2)))**(-2)
-v = -2*y*((x**2+y**2)**(-1.5))*(1-(2/np.sqrt(x**2+y**2)))**(-2)
-
-f1 = fp.form_1(x, y, u, v)
-f1.log_scaling()
-f1.max_sheets(10)
-
-fig1 = plt.figure(figsize=(10,5))
-ax1 = fig1.add_subplot(121)
-ax2 = fig1.add_subplot(122)
-
-f1.plot(ax1)
-
-f1hodge = f1.num_hodge(keep_object=False)
-
-f1hodge.plot(ax2)
-
-# %%
-
 # Wedge example
 
 
@@ -324,6 +297,72 @@ f1hodge.plot(ax2)
 
 # Example of metric:
 # polar or hyperbolic metric, VF, 1-form and the interior deriv of the 2
+
+from matplotlib import cm
+
+# set up grids
+r = np.linspace(-4.5, 4.5, 21)
+xg, yg = np.meshgrid(r, r)
+
+# set up figure and subplots
+
+fig = plt.figure(figsize=(18, 6))
+plt.subplots_adjust(left=0.06, bottom=0.06, right=0.94, top=0.94, wspace=0.3)
+ax1 = fig.add_subplot(131)
+ax2 = fig.add_subplot(132)
+ax3 = fig.add_subplot(133)
+
+#fig = plt.figure(figsize=(6, 18))
+#plt.subplots_adjust(left=0.06, bottom=0.06, right=0.94, top=0.94, wspace=0.3)
+#ax1 = fig.add_subplot(311)
+#ax2 = fig.add_subplot(312)
+#ax3 = fig.add_subplot(313)
+
+ax1.set_aspect('equal')
+ax1.set_title(r'$Starting \ VF \ v^{i}$', fontsize=16)
+ax1.set_xlabel(r'$x$', fontsize=16)
+ax1.set_ylabel(r'$y$', fontsize=16)
+ax1.tick_params(labelsize=14)
+
+ax2.set_aspect('equal')
+ax2.set_title(r'$v_{i} = g_{ij} v^{j}$', fontsize=16)
+ax2.set_xlabel(r'$x$', fontsize=16)
+ax2.tick_params(labelsize=14)
+
+ax3.set_aspect('equal')
+ax3.set_title(r'$\iota_{v^{i}}(v_{i})$', fontsize=16)
+ax3.set_xlabel(r'$x$', fontsize=16)
+ax3.tick_params(labelsize=14)
+
+# set up the VF
+u = np.ones(np.shape(xg))
+v = np.ones(np.shape(xg))
+VF = fp.vector_field(xg, yg, u, v)
+VF.give_eqn('1', '1')
+
+# plot it
+VF.plot(ax1)
+
+# set up the metric in strings
+metric = [['1', '0'],
+          ['0', '-tanh(x)**2 * cosh(x)**(4/3)']]
+
+# find the 1-form
+form1 = VF.covariant(g=metric)
+
+# plot it
+form1.log_scaling()
+form1.plot(ax2)
+
+# find the interior derivative of 1-form wrt that VF
+zero_form = form1.interior_d(vector_field=VF)
+
+# plot it:
+zero_form.lines_number(30)
+zero_form.density_increase(3)
+zero_form.cmap = cm.magma
+zero_form.labels()
+zero_form.plot(ax3)
 
 
 # %%
@@ -361,6 +400,33 @@ f1_star.sheet_size(0.04)
 f1.plot(ax1)
 f1_star.plot(ax2)
 
+# %%
+
+
+# Hodge Example previous option
+
+# 1F setup
+r = np.linspace(-5, 5, 21)
+x, y = np.meshgrid(r, r)
+
+# Black hole field
+
+u = -2*x*((x**2+y**2)**(-1.5))*(1-(2/np.sqrt(x**2+y**2)))**(-2)
+v = -2*y*((x**2+y**2)**(-1.5))*(1-(2/np.sqrt(x**2+y**2)))**(-2)
+
+f1 = fp.form_1(x, y, u, v)
+f1.log_scaling()
+f1.max_sheets(10)
+
+fig1 = plt.figure(figsize=(10,5))
+ax1 = fig1.add_subplot(121)
+ax2 = fig1.add_subplot(122)
+
+f1.plot(ax1)
+
+f1hodge = f1.num_hodge(keep_object=False)
+
+f1hodge.plot(ax2)
 
 # %%
 
