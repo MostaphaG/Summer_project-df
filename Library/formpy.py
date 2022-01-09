@@ -992,8 +992,8 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                     to_wedge_y_2_str = form_1_second[1]
             else:
                 # object supplied, get numericals
-                to_wedge_x_2_str = form_1_second.F_x
-                to_wedge_y_2_str = form_1_second.F_y
+                to_wedge_x_2_str = form_1_second.form_1_str_x
+                to_wedge_y_2_str = form_1_second.form_1_str_y
             
             # first, find the result of the 2-form
             # this if, in terms of the above commented fields:
