@@ -378,6 +378,7 @@ ax2.set_title(r'$\star \omega$', fontsize=16)
 
 # Hodge the result
 f1_star = f1.num_hodge(keep_object=False)
+f1_star.sheet_size(0.04)
 
 # plot
 f1.plot(ax1)

@@ -912,18 +912,17 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
                 form_1_y = eval(new_str_y)
                 
                 # depending on keep_object, return:
-                if keep_object is True:
+                if keep_object:
                     self.F_x = form_1_x
                     self.F_y = form_1_y
                     self.form_1_str_x = form_1_x_unformated
                     self.form_1_str_y = form_1_y_unformated
-                elif keep_object is False:
+                elif not keep_object:
                     new_object = form_1(self.xg, self.yg, form_1_x, form_1_y, F_x_eqn=form_1_x_unformated, F_y_eqn=form_1_y_unformated)
                     # return the new one to the user:
                     return new_object
                 else:
                     raise ValueError('Error, Invalid input for \'keep_object\'')
-        
         
         def num_hodge(self, keep_object=False):
             '''
@@ -947,21 +946,20 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             
             # now complete the process numerically save as instructed
             # check keep_object:
-            if keep_object is True:
+            if keep_object:
                 # change the object self properties accoringly
                 new_x = -self.F_y
                 new_y = self.F_x
                 self.F_x = new_x
                 self.F_y = new_y
-            elif keep_object is False:
+            elif not keep_object:
                 # pass these in to the object to create a new one:
                 # N.B no equations to supply
                 new_object = form_1(self.xg, self.yg, -self.F_y, self.F_x)
                 # return the new one to the user:
                 return new_object
             else:
-                raise ValueError('Error, Invalid input for \'keep_object\'')   
-        
+                raise ValueError('Error, Invalid input for \'keep_object\'')
         
         # define a fucntion to compute a wedge product of two 1 forms
         def wedge(self, form_1_second):

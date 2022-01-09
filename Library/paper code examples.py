@@ -77,11 +77,11 @@ dphi.plot(ax2)
 
 # %%
 
-# 2D Black hole
-
 import formpy as fp
 import numpy as np
 import matplotlib.pyplot as plt
+
+# 2D Black hole
 
 # set up grids
 x = np.linspace(-4, 4, 26)
