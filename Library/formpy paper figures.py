@@ -112,7 +112,7 @@ zoomed_form.plot(zoomed_ax)
 
 v = np.linspace(-6, 6, 31)
 xg, yg = np.meshgrid(v, v)
-zooming = 1.2
+zooming = 1.5
 u = yg*np.sin(xg)
 v = -xg*np.cos(yg)
 form = u*v
@@ -126,11 +126,14 @@ ax.set_aspect('equal')
 ax.tick_params(labelsize=14)
 ax.set_xlabel(r'$x$', fontsize=16)
 ax.set_ylabel(r'$y$', fontsize=16)
-ax.set_title(r'$2-form \ with \ mag={:.1f} \ inset$'.format(zooming), fontsize=16)
+#ax.set_title(r'$2-form \ with \ mag={:.1f} \ inset$'.format(zooming), fontsize=16)
 
 form2.plot(ax)
 
 zoomed_ax, form2_zoomed = form2.zoom(target=[2.5, 3], mag=zooming, dpd=9, inset=True, axis=ax)
+
+zoomed_ax.set_yticks(np.linspace(form2_zoomed.yg[0, 0], form2_zoomed.yg[-1, 0], 5))
+zoomed_ax.set_xticks(np.linspace(form2_zoomed.xg[0, 0], form2_zoomed.xg[0, -1], 5))
 
 # %%
 
