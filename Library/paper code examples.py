@@ -62,16 +62,16 @@ ax.set_ylabel(r'$y$')
 f1.plot(ax)
 
 # zoom onto it
-ax_zoom, form_zoom = f1.zoom(target=[2, 3], mag=1, dpd=7,
+ax_zoom, f_zoom = f1.zoom(target=[2, 3], mag=1, dpd=7,
                              inset=True, axis=ax, insize=0.3)
 
 # customise insset plot
-form_zoom.colour('r')
-ax_zoom.set_yticks(np.linspace(form_zoom.yg[0, 0], form_zoom.yg[-1, 0], 5))
-ax_zoom.set_xticks(np.linspace(form_zoom.xg[0, 0], form_zoom.xg[0, -1], 5))
+f_zoom.colour('r')
+ax_zoom.set_yticks(np.linspace(f_zoom.yg[0, 0], f_zoom.yg[-1, 0], 5))
+ax_zoom.set_xticks(np.linspace(f_zoom.xg[0, 0], f_zoom.xg[0, -1], 5))
 
 # replot it
-form_zoom.plot(ax_zoom)
+f_zoom.plot(ax_zoom)
 
 # %%
 
