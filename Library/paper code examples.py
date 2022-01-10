@@ -140,7 +140,7 @@ ax2.set_ylabel(r'$t$')
 ax2.set_xlabel(r'$x$')
 
 # Hodge the result
-f1_star = f1.num_hodge(keep_object=False)
+f1_star = f1.num_hodge()
 
 # plot each
 f1.plot(ax1)
