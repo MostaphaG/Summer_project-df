@@ -2741,6 +2741,36 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             # find the maximum magnitude for scaling
             max_size = np.max(mag)   # careful with singularities, else ---> nan
             
+            # # logarithmic attempt
+            # if self.logarithmic_scale_bool:
+            #     # Add 1 to each magnitude
+            #     mag1 = mag + 1
+            #     # Calculate the appropriate scaling factor
+            #     a = max_size**(1/self.s_max)
+            #     # Take log(base=a) of mag1
+            #     logmag1 = np.log(mag1)/np.log(a)
+            #     # Re-assign R
+            #     R = logmag1/np.max(logmag1)    
+            # else:
+            #     R = mag/max_size
+            
+            if self.logarithmic_scale_bool == True:
+                
+                mag1 = mag + 1
+                
+                min_size = np.min(mag1)
+                
+                unorm = F_x_local/mag1
+                vnorm = F_y_local/mag1
+                
+                logsf = np.log(mag1/min_size)
+                
+                F_x_local = logsf*unorm
+                F_y_local = logsf*vnorm
+                
+                mag = np.sqrt(F_x_local**2 + F_y_local**2)
+                max_size = np.max(mag)
+                
             # deal with requested autoscaling
             if self.scale_bool is False:
                 ScaleFactor = self.scale
