@@ -241,3 +241,38 @@ dhdf = hdf.ext_d()
 hdhdf = dhdf.hodge()
 
 hdhdf.plot(ax2)
+
+# %% Log scaling for VF
+
+import formpy as fp
+import numpy as np
+import matplotlib.pyplot as plt
+import timeit
+
+r = np.linspace(-2, 2, 25)
+x,y = np.meshgrid(r, r)
+
+u = x*(x**2 + y**2)**(-3)
+v = y*(x**2 + y**2)**(-3)
+
+fig1 = plt.figure(figsize=(12,12))
+ax1 = fig1.add_subplot(221)
+ax2 = fig1.add_subplot(222)
+ax3 = fig1.add_subplot(223)
+ax4 = fig1.add_subplot(224)
+
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
+ax3.set_aspect('equal')
+ax4.set_aspect('equal')
+
+VF = fp.vector_field(x,y,u,v)
+VF.plot(ax1)
+VF.log_scaling()
+VF.plot(ax3)
+
+F1 = fp.form_1(x,y,u,v)
+F1.plot(ax2)
+F1.log_scaling()
+F1.plot(ax4)
+

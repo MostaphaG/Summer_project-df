@@ -248,7 +248,7 @@ u = np.zeros(np.shape(zg))
 v = np.ones(np.shape(zg))
 VF = fp.vector_field(rhog, zg, u, v)
 VF.give_eqn('0', '1')
-VF.log_scaling()
+# VF.log_scaling()
 
 fig = plt.figure(figsize=(12, 12))
 ax1 = fig.add_subplot(221)
