@@ -71,7 +71,7 @@ form_obj.plot(ax)
 # wait, then change some properties and redraw
 plt.pause(3)
 form_obj.give_eqn('x*y')
-form_obj.same_range_density(18)
+form_obj.set_density(18)
 ax.clear()
 ax.set_xlabel(r'$x$')
 ax.set_ylabel(r'$y$')
@@ -224,7 +224,7 @@ form_0_obj.plot(ax1)
 
 # supply equation and change its density
 form_0_obj.give_eqn('x**2 + 3*y')
-form_0_obj.same_range_density(31)
+form_0_obj.set_density(31)
 form_0_obj.levels(20)
 
 # plot that changed 0-form object on second axis set
@@ -499,7 +499,7 @@ form_1_obj = form_0_obj.ext_d()  # this supplies the 1-form with equations too
 form_1_obj.plot(ax2)
 
 # change its density and plot on last axis pair
-form_1_obj.same_range_density(26)
+form_1_obj.set_density(26)
 form_1_obj.sheet_size(0.04)
 form_1_obj.plot(ax3)
 
@@ -539,7 +539,7 @@ form_2_obj = form_1_obj.ext_d()  # this supplies the 2-form with equations too
 form_2_obj.plot(ax2)
 
 # change its density and plot on last axis set
-form_2_obj.same_range_density(26)
+form_2_obj.set_density(26)
 form_2_obj.max_sheets(10)
 form_2_obj.plot(ax3)
 
@@ -1264,7 +1264,7 @@ form_obj1.plot(ax1)
 
 # give equations and plot then
 form_obj1.give_eqn('0', '3')
-form_obj1.same_range_density(16)
+form_obj1.set_density(16)
 
 form_obj1.plot(ax2)
 

@@ -202,7 +202,7 @@ ax1 = fig1.add_subplot(111)
 # F1.max_sheets(10)
 # F1.sheet_size(0.02)
 # F1.surround_space(20)
-F1.same_range_density(30)
+F1.set_density(30)
 
 F1.plot(ax1)
 

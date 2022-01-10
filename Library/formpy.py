@@ -213,7 +213,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
     max_sheets
     sheet_size
     surround_space
-    same_range_density
+    set_density
     plot
     ext_d
     num_ext_d
@@ -439,7 +439,7 @@ def form_1(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
         
         # define a method to change the density of grids in same range
         # requires string input of 1-form:
-        def same_range_density(self, points_number):
+        def set_density(self, points_number):
             '''
             Changes the desnity of points in the same range to the input value
             Requires the string equation to be supplied to not 'extrapolate'
@@ -1558,7 +1558,7 @@ def form_2(xg, yg, form2, form_2_eq=None):
         
         # define a method to change the density of grids in same range
         # requires string input of 1-form:
-        def same_range_density(self, points_number):
+        def set_density(self, points_number):
             '''
             takes in one argument, requires the string equation to be
             supplied
@@ -2228,7 +2228,7 @@ def form_0(xg, yg, form_0, form_0_eqn=None):
         # technically not so needed here as all plotting is done with denser
         # which is similar enough. But it might be useful to change
         # the grids as stored and not just locally for a plot
-        def same_range_density(self, points_number):
+        def set_density(self, points_number):
             '''
             takes in one argument, requires the string equation to be
             supplied
@@ -2632,7 +2632,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
         
         # define a method to change the density of grids in same range
         # requires string input of 1-form:
-        def same_range_density(self, points_number):
+        def set_density(self, points_number):
             '''
             takes in one argument, requires the string equation to be
             supplied
