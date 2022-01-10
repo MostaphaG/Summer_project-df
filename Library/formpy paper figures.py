@@ -296,11 +296,11 @@ VF_c.plot(ax4)
 # Wedge example
 
 # set up grids
-r = np.linspace(-2, 2, 23)
+r = np.linspace(-5, 5, 23)
 xg, yg = np.meshgrid(r, r)
 
 # set up figure and subplots
-fig = plt.figure(figsize=(18, 6))
+fig = plt.figure(figsize=(12, 6))
 ax1 = fig.add_subplot(121)
 ax2 = fig.add_subplot(122)
 
@@ -322,10 +322,18 @@ ax2.tick_params(labelsize=14)
 
 
 # set up first 1-form
-u1 = np.ones(np.shape(xg))
-v1 = np.tanh(xg)*(np.cosh(xg))**(2/3)
+#u1 = np.ones(np.shape(xg))
+#v1 = np.tanh(xg)*(np.cosh(xg))**(2/3)
+#form11 = fp.form_1(xg, yg, u1, v1)
+#form11.give_eqn('1', '-tanh(x)**2 * cosh(x)**(4/3)')
+
+u1 = yg*np.sin(xg)
+v1 = -xg*np.cos(yg)
+
 form11 = fp.form_1(xg, yg, u1, v1)
-form11.give_eqn('1', '-tanh(x)**2 * cosh(x)**(4/3)')
+form11.sheet_size(0.04)
+form11.give_eqn('y*sin(x)','-x*cos(y)')
+
 
 # and second via the Hodge
 form12 = form11.hodge()
