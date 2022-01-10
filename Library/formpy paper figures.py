@@ -21,6 +21,7 @@ v = -xg*np.cos(yg)
 
 VF = fp.vector_field(xg, yg, u, v)
 VF.give_eqn('y*sin(x)','-x*cos(y)')
+#VF.colour('#000BB9')
 
 # set up subplots for different zooming in values
 fig = plt.figure(figsize=(12, 6))
