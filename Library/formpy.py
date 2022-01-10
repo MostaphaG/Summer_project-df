@@ -2754,7 +2754,7 @@ def vector_field(xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
             # else:
             #     R = mag/max_size
             
-            if self.logarithmic_scale_bool == True:
+            if self.logarithmic_scale_bool:
                 
                 mag1 = mag + 1
                 
