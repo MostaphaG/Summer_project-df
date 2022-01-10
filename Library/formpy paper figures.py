@@ -73,6 +73,7 @@ v = -xg*np.cos(yg)
 form1 = fp.form_1(xg, yg, u, v)
 form1.sheet_size(0.04)
 form1.give_eqn('y*sin(x)','-x*cos(y)')
+#form1.colour('#8B14F3')
 
 # set up siubplots for different zooming in values
 fig = plt.figure(figsize=(6, 12))
@@ -99,11 +100,13 @@ form1.plot(ax2)
 # ax1
 zoomed_ax, zoomed_form = form1.zoom(target=[2, 3], mag=1, dpd=7, inset=True, axis=ax1)
 zoomed_form.colour('r')
+#zoomed_form.colour('#0E7951')
 zoomed_form.plot(zoomed_ax)
 
 # ax2
 zoomed_ax, zoomed_form = form1.zoom(target=[2, 3], mag=2, dpd=7, inset=True, axis=ax2)
 zoomed_form.colour('r')
+#zoomed_form.colour('#0E7951')
 zoomed_form.plot(zoomed_ax)
 
 # %%
