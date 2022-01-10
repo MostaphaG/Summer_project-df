@@ -87,7 +87,7 @@ v = np.linspace(-4.5, 4.5, 11)
 xg, yg = np.meshgrid(v, v)
 form_0 = np.cos(xg*yg)
 form_obj = fp.form_0(xg, yg, form_0)
-form_obj.lines_number(4)
+form_obj.levels(4)
 # form_obj.density_increase(20)  # demonstation of an error
 
 # Create a figure and axis to plot it on
@@ -104,7 +104,7 @@ form_obj.plot(ax)
 plt.pause(2)
 form_obj.give_eqn('cos(x*y)')
 form_obj.density_increase(25)
-form_obj.lines_number(15)
+form_obj.levels(15)
 ax.clear()
 ax.set_xlabel(r'$x$')
 ax.set_ylabel(r'$y$')
@@ -225,7 +225,7 @@ form_0_obj.plot(ax1)
 # supply equation and change its density
 form_0_obj.give_eqn('x**2 + 3*y')
 form_0_obj.same_range_density(31)
-form_0_obj.lines_number(20)
+form_0_obj.levels(20)
 
 # plot that changed 0-form object on second axis set
 form_0_obj.plot(ax2)
@@ -473,7 +473,7 @@ form_0 = np.cos(xg*yg)
 form_0_obj = fp.form_0(xg, yg, form_0)
 form_0_obj.give_eqn('cos(x*y)')
 form_0_obj.density_increase(25)
-form_0_obj.lines_number(15)
+form_0_obj.levels(15)
 
 # set up figure to plot on
 fig = plt.figure(figsize=(7, 7))

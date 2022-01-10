@@ -99,7 +99,7 @@ dphi.log_scaling()
 dphi.sheet_size(0.04)
 
 # customise 0-from to plot
-f0.lines_number(50)  # number of level lines
+f0.levels(50)  # number of level lines
 f0.density_increase(3)  # more definition
 
 # set up figure and axis

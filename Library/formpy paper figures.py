@@ -222,8 +222,8 @@ d_f0_a.log_scaling()
 d_f0_a.sheet_size(0.04)
 
 # Plot
-form0.lines_number(40)
-form0.density_increase(3)
+form0.levels(60)
+form0.density_increase(4)
 form0.plot(ax1)
 d_f0_a.plot(ax2)
 

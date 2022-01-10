@@ -544,3 +544,27 @@ form_obj.plot(ax)
 
 # Should be positive in dx/\dy therefore counterclockwise, this is red.
 # And it is.
+
+# %%
+
+# plotting a 0-form with custom levels
+
+# set up
+v = np.linspace(-4.5, 4.5, 11)
+xg, yg = np.meshgrid(v, v)
+form_0 = 1/np.sqrt(xg**2 + yg**2) * np.exp(-1*np.sqrt(xg**2 + yg**2))
+form_obj = fp.form_0(xg, yg, form_0)
+form_obj.levels([0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 2])
+form_obj.give_eqn('1/sqrt(x**2 + y**2) * e**(-sqrt(x**2 + y**2))')
+form_obj.density_increase(10)
+form_obj.labels()
+
+# Create a figure and axis to plot it on
+fig = plt.figure()
+ax = fig.gca()
+ax.set_xlabel(r'$x$')
+ax.set_ylabel(r'$y$')
+ax.set_aspect('equal')
+
+form_obj.plot(ax)
+

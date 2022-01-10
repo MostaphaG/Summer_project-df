@@ -2194,13 +2194,19 @@ def form_0(xg, yg, form_0, form_0_eqn=None):
             '''
             self.denser = factor
         
-        def lines_number(self, number):
+        def levels(self, values):
             '''
-            Takes 1 int argument
-            changes number of contour lines that get drawn
+            Takes 1 argument: values - int or list
+            if int: changes number of contour lines that get drawn
+                    the values are ste automatically by matplotlib
+            if list: sets values to draw level lines at, must ascent
+            
             supplied to contour plot from matplotlib via levels
             '''
-            self.lines = number
+            if isinstance(values, int) or isinstance(values, list):
+                self.lines = values
+            else:
+                raise TypeError('Require input to be integer or list, if you used a numpy array try: list(your_array)')
         
         def fonts_size(self, size):
             '''
