@@ -43,7 +43,7 @@ VF.plot(ax2)
 # zoom on each and plot
 
 # ax1
-zoomed_ax1, zoomed_VF = VF.zoom(target=[2, 3], mag=1.25, dpd=7, inset=True, axis=ax1, insize=0.25)
+zoomed_ax1, zoomed_VF = VF.zoom(target=[2, 3], mag=1.5, dpd=7, inset=True, axis=ax1, insize=0.3)
 zoomed_VF.colour('r')
 zoomed_ax1.set_yticks(np.linspace(zoomed_VF.yg[0, 0], zoomed_VF.yg[-1, 0], 5))
 zoomed_ax1.set_xticks(np.linspace(zoomed_VF.xg[0, 0], zoomed_VF.xg[0, -1], 5))
@@ -52,7 +52,7 @@ plt.setp(zoomed_ax1.get_xticklabels(), rotation=45, ha="right", rotation_mode="a
 zoomed_VF.plot(zoomed_ax1)
 
 # ax2
-df_ax1, df_VF = VF.deriv(target=[2, 3], mag=1.25, dpd=7, inset=True, axis=ax2, insize=0.25)
+df_ax1, df_VF = VF.deriv(target=[2, 3], mag=1.5, dpd=7, inset=True, axis=ax2, insize=0.3)
 df_VF.colour('r')
 df_ax1.set_yticks(np.linspace(df_VF.yg[0, 0], df_VF.yg[-1, 0], 5))
 df_ax1.set_xticks(np.linspace(df_VF.xg[0, 0], df_VF.xg[0, -1], 5))
