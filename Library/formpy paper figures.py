@@ -394,10 +394,11 @@ ax2.set_xticks(np.linspace(-2, 2, 5))
 ax2.tick_params(labelsize=14)
 
 # set up the VF
-u = np.ones(np.shape(xg))
-v = np.ones(np.shape(xg))
+u = xg + 2*yg
+v = 3*xg - 4*yg
 VF = fp.vector_field(xg, yg, u, v)
-VF.give_eqn('1', '1')
+VF.give_eqn('x + 2*y', '3*x - 4*y')
+VF.log_scaling()
 
 # plot it
 VF.plot(ax1)
@@ -410,6 +411,7 @@ metric = [['1', '0'],
 form1 = VF.covariant(g=metric)
 
 # plot it
+form1.log_scaling()
 form1.plot(ax2)
 
 
