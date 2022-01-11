@@ -276,3 +276,25 @@ F1.plot(ax2)
 F1.log_scaling()
 F1.plot(ax4)
 
+# %% 0 -form log scaling
+
+import formpy as fp
+import numpy as np
+import matplotlib.pyplot as plt
+
+r = np.linspace(-2, 2, 25)
+x,y = np.meshgrid(r, r)
+
+u = x*(x**2 + y**2)**(-1.5)
+
+fig1 = plt.figure(figsize=(10,5))
+ax1 = fig1.add_subplot(121)
+ax2 = fig1.add_subplot(122)
+
+F0 = fp.form_0(x,y,u)
+F0.give_eqn('x*(x**2 + y**2)**(-1.5)')
+F0.plot(ax1)
+
+F0.density_increase(5)
+F0.levels(1)
+F0.plot(ax2)

@@ -567,4 +567,3 @@ ax.set_ylabel(r'$y$')
 ax.set_aspect('equal')
 
 form_obj.plot(ax)
-

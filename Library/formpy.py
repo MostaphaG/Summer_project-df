@@ -2180,15 +2180,42 @@ class form_0():
         '''
         Takes 1 argument: values - int or list
         if int: changes number of contour lines that get drawn
-                the values are ste automatically by matplotlib
-        if list: sets values to draw level lines at, must ascent
+                the values are set automatically by matplotlib
+        if list: sets values to draw level lines (ascending order)
         
         supplied to contour plot from matplotlib via levels
         '''
+        
         if isinstance(values, int) or isinstance(values, list):
             self.lines = values
         else:
             raise TypeError('Require input to be integer or list, if you used a numpy array try: list(your_array)')
+        
+        N = 30
+        f_max = np.max(self.form_0)
+        f_min = np.min(self.form_0)
+        f_range = f_max - f_min
+        # Linearly spaced levels between the min and max values
+        linear_levels = list(np.linspace(f_min, f_max, 30))
+        
+        mag = np.abs(self.form_0)
+        mag_max = np.max(mag)
+        mag_min = np.min(mag)
+        
+        
+        if mag_min == f_min:
+            c = 1
+        else:
+            c = 0
+            
+        
+        # Number of orders of magnitude difference between the min and max values
+        OM = np.log10(mag_max/mag_min)
+        
+        log_range = np.log10(mag_max/mag_min)
+        log_levels = list( + np.logspace(np.log10(mag_min), np.log10(mag_max), num=30, base=10))
+
+        self.lines = log_levels
     
     def fonts_size(self, size):
         '''
@@ -2264,12 +2291,13 @@ class form_0():
         form_0[np.abs(form_0) < 1e-15] = 0
         
         # find L based on the origin of given grid is
-        L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
-        x0 = self.xg[0,0] + L
-        y0 = self.yg[0,0] + L
+        Lx = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+        Ly = 0.5*(self.yg[-1, 0] - self.yg[0, 0])
+        x0 = self.xg[0,0] + Lx
+        y0 = self.yg[0,0] + Ly
         
         # rescale axis
-        ax_L = L + L/self.delta_factor
+        ax_L = Lx + Lx/self.delta_factor
         axis.set_xlim(-ax_L + x0, ax_L + x0)
         axis.set_ylim(-ax_L + y0, ax_L + y0)
         
@@ -2282,7 +2310,7 @@ class form_0():
                 # get the supplied form as a string
                 zero_form_str = str(simplify(self.form_0_str))
                 # set up grids for contours
-                contour_x, contour_y = np.linspace(-L, L, self.pt_den*self.denser), np.linspace(-L, L, self.pt_den*self.denser)
+                contour_x, contour_y = np.linspace(self.xg[0,0] , self.xg[0,-1] , self.pt_den*self.denser), np.linspace(self.yg[0,0] , self.yg[-1,0], self.pt_den*self.denser)
                 contour_x_grid, contour_y_grid = np.meshgrid(contour_x, contour_y)
                 # format the given ftring
                 zero_form_str = zero_form_str.replace('x', 'contour_x_grid')
@@ -2302,7 +2330,7 @@ class form_0():
                             # colour this region as a red dot, not square to
                             # not confuse with high mag 2-forms in stacks. or worse, in
                             # blocks
-                            circ = patch.Circle((contour_x_grid[i, j], contour_y_grid[i, j]), L*0.05/3, color='red')
+                            circ = patch.Circle((contour_x_grid[i, j], contour_y_grid[i, j]), Lx*0.05/3, color='red')
                             axis.add_patch(circ)
                             form_0_contour[i, j] = 0
                 
@@ -2319,7 +2347,7 @@ class form_0():
                         # colour this region as a red dot, not square to
                         # not confuse with high mag 2-forms in stacks. or worse, in
                         # blocks
-                        circ = patch.Circle((self.xg[i, j], self.yg[i, j]), L*0.05/3, color='red')
+                        circ = patch.Circle((self.xg[i, j], self.yg[i, j]), Lx*0.05/3, color='red')
                         axis.add_patch(circ)
                         form_0[i, j] = 0
             
@@ -2716,33 +2744,15 @@ class vector_field():
         # find the maximum magnitude for scaling
         max_size = np.max(mag)   # careful with singularities, else ---> nan
         
-        # # logarithmic attempt
-        # if self.logarithmic_scale_bool:
-        #     # Add 1 to each magnitude
-        #     mag1 = mag + 1
-        #     # Calculate the appropriate scaling factor
-        #     a = max_size**(1/self.s_max)
-        #     # Take log(base=a) of mag1
-        #     logmag1 = np.log(mag1)/np.log(a)
-        #     # Re-assign R
-        #     R = logmag1/np.max(logmag1)    
-        # else:
-        #     R = mag/max_size
-        
+        # Rescale components if log scaling is selected
         if self.logarithmic_scale_bool:
-            
             mag1 = mag + 1
-            
             min_size = np.min(mag1)
-            
             unorm = F_x_local/mag1
             vnorm = F_y_local/mag1
-            
             logsf = np.log(mag1/min_size)
-            
             F_x_local = logsf*unorm
             F_y_local = logsf*vnorm
-            
             mag = np.sqrt(F_x_local**2 + F_y_local**2)
             max_size = np.max(mag)
             
