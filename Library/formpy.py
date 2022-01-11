@@ -1559,7 +1559,7 @@ class form_2():
         else:
             # redefine the grids
             x = np.linspace(self.xg[0,0], self.xg[0,-1], points_number)
-            y = np.linspace(self.yg[0,0], self.xg[-1,0], points_number)
+            y = np.linspace(self.yg[0,0], self.yg[-1,0], points_number)
             self.xg, self.yg = np.meshgrid(x, y)
             # based on these change other, dependant variables
             self.pt_den = len(self.xg[:, 0])
