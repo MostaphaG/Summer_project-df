@@ -640,3 +640,80 @@ f1c.plot(ax3)
 f3a = f1.wedge(f2)
 f3b = f1.wedge('x*y*cos(x*y)', degree=2)
 
+
+# %%
+
+# Same numerically on 1-form
+
+v = np.linspace(-2, 2, 23)
+xg, yg = np.meshgrid(v, v)
+u = xg*yg
+v = np.sin(xg*yg)
+f1 = fp.form_1(xg, yg, u, v)
+
+f1a = fp.form_1(xg, yg, u*v, v)
+
+f0 = fp.form_0(xg, yg, u,)
+
+f2 = fp.form_2(xg, yg, v)
+
+'''
+1-form/\1-form
+'''
+
+f2a = f1.num_wedge(f1a)
+f2b = f1.num_wedge(('x*y*sin(x*y)', 'sin(x*y)'))
+f2c = f1.num_wedge((xg*yg*np.sin(xg*yg), np.sin(xg*yg)))
+f2d = f1.num_wedge()
+#f2d = f1.wedge(('13'))
+
+# plot the working ones
+fig = plt.figure()
+ax1 = fig.add_subplot(141)
+ax2 = fig.add_subplot(142)
+ax3 = fig.add_subplot(143)
+ax4 = fig.add_subplot(144)
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
+ax3.set_aspect('equal')
+ax4.set_aspect('equal')
+
+f2a.plot(ax1)
+f2b.plot(ax2)
+f2c.plot(ax3)
+f2d.plot(ax4)
+
+'''
+1-form/\0-form
+'''
+
+f1a = f1.num_wedge(f0)
+f1b = f1.num_wedge('x*y*sin(x*y)', degree=0)
+f1c = f1.num_wedge((xg*yg*np.sin(xg*yg)), degree=0)
+#f1d = f1.wedge(('13', 'x'))
+f1d = f1.num_wedge()
+
+# plot the working ones
+fig1 = plt.figure()
+ax1 = fig1.add_subplot(141)
+ax2 = fig1.add_subplot(142)
+ax3 = fig1.add_subplot(143)
+ax4 = fig1.add_subplot(144)
+
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
+ax3.set_aspect('equal')
+ax4.set_aspect('equal')
+
+f1a.plot(ax1)
+f1b.plot(ax2)
+f1c.plot(ax3)
+f1d.plot(ax4)
+
+'''
+1-form/\2-form
+'''
+
+f3a = f1.num_wedge(f2)
+f3b = f1.num_wedge('x*y*cos(x*y)', degree=2)
+
