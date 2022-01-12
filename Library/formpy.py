@@ -2176,6 +2176,12 @@ class form_0():
         self.lines = 15
         self.fontsize = 7
         self.inline_bool = True
+        
+        # Log scaling parameters
+        self.log_bool = False
+        self.N = 30
+        self.base = 10
+        
         if form_0_eqn is not None:
             self.form_0_str = str(simplify(form_0_eqn))  # to start with, use rmust change to access some methods
         else:
@@ -2271,31 +2277,66 @@ class form_0():
         else:
             raise TypeError('Require input to be integer or list, if you used a numpy array try: list(your_array)')
         
-        N = 30
-        f_max = np.max(self.form_0)
-        f_min = np.min(self.form_0)
-        f_range = f_max - f_min
-        # Linearly spaced levels between the min and max values
-        linear_levels = list(np.linspace(f_min, f_max, 30))
+        # N = 30
+        # f_max = np.max(self.form_0)
+        # f_min = np.min(self.form_0)
+        # f_range = f_max - f_min
+        # # Linearly spaced levels between the min and max values
+        # linear_levels = list(np.linspace(f_min, f_max, 30))
         
-        mag = np.abs(self.form_0)
-        mag_max = np.max(mag)
-        mag_min = np.min(mag)
+        # mag = np.abs(self.form_0)
+        # mag_max = np.max(mag)
+        # mag_min = np.min(mag)
         
         
-        if mag_min == f_min:
-            c = 1
-        else:
-            c = 0
-            
+        # if mag_min == f_min:
+        #     c = 1
+        # else:
+        #     c = 0
         
-        # Number of orders of magnitude difference between the min and max values
-        OM = np.log10(mag_max/mag_min)
+        # # Number of orders of magnitude difference between the min and max values
+        # OM = np.log10(mag_max/mag_min)
         
-        log_range = np.log10(mag_max/mag_min)
-        log_levels = list( + np.logspace(np.log10(mag_min), np.log10(mag_max), num=30, base=10))
+        # log_range = np.log10(mag_max/mag_min)
+        # log_levels = list( + np.logspace(np.log10(mag_min), np.log10(mag_max), num=30, base=10))
+        
+        # Required number of levels
+        # N = 30
+        
+        # # Calculate linear set of levels
+        # f_max = np.max(self.form_0)
+        # f_min = np.min(self.form_0)
+        # linear_levels = list(np.linspace(f_min, f_max, 30))
 
-        self.lines = log_levels
+        # # Calculate log scaled set of levels
+        # mag = np.abs(self.form_0)
+        # mag_max = np.max(mag)
+        # mag_min = np.min(mag[np.nonzero(mag)])
+        
+        # # Calculate the orders of magnitude between the min and max values in the array
+        # p = np.log10(abs(f_max)/mag_min)
+        # n = np.log10(abs(f_min)/mag_min)
+        
+        # # Determine how many lines are needed above and below mag_min
+        # p_levels = round(N*p/(p+n))
+        # n_levels = round(N*n/(p+n))
+        
+        # # Create levels above and below mag_min
+        # lev1 = np.logspace(np.log10(mag_min), np.log10(abs(f_max)), num=p_levels, base=10)
+        # lev2 = np.logspace(np.log10(mag_min), np.log10(abs(f_min)) , num=n_levels, base=10)
+        
+        # lev2 = -1*np.flip(lev2)
+        
+        # # Put the two lists together to give the final array of levels
+        # log_levels = list(np.append(lev2,lev1))
+
+        # self.lines = log_levels
+        
+    def log_scaling(self, N=30, base=10):
+        
+        self.N = N
+        self.base = base
+        self.log_bool = not self.log_bool
     
     def fonts_size(self, size):
         '''
@@ -2400,40 +2441,136 @@ class form_0():
                     form_0_contour = eval(zero_form_str)*np.ones(np.shape(contour_x_grid))
                 else:
                     form_0_contour = eval(zero_form_str)
-                
-                # deal with sinularities that appear on evaluated points
-                isnan_arr = np.isnan(form_0_contour)
-                for i in range(len(contour_x_grid[0, :])):
-                    for j in range(len(contour_y_grid[:, 0])):
-                        # set to zero points that are not defined or inf
-                        if isnan_arr[i, j] or abs(form_0_contour[i, j]) == np.inf or abs(form_0_contour[i, j]) > 1e15:
-                            # colour this region as a red dot, not square to
-                            # not confuse with high mag 2-forms in stacks. or worse, in
-                            # blocks
-                            circ = patch.Circle((contour_x_grid[i, j], contour_y_grid[i, j]), Lx*0.05/3, color='red')
-                            axis.add_patch(circ)
-                            form_0_contour[i, j] = 0
-                
-                # set up the contour plot
-                CS = axis.contour(contour_x_grid, contour_y_grid, form_0_contour, levels=self.lines, cmap=self.cmap)
-                axis.clabel(CS, inline=self.inline_bool, fontsize=self.fontsize)
+                    
+                form_0 = form_0_contour
+                xg = contour_x_grid
+                yg = contour_y_grid
         else:
-            # deal with sinularities that appear on evaluated points
-            isnan_arr = np.isnan(form_0)
-            for i in range(len(self.xg[0, :])):
-                for j in range(len(self.yg[:, 0])):
-                    # set to zero points that are not defined or inf
-                    if isnan_arr[i, j] or abs(form_0[i, j]) == np.inf or abs(form_0[i, j]) > 1e15:
-                        # colour this region as a red dot, not square to
-                        # not confuse with high mag 2-forms in stacks. or worse, in
-                        # blocks
-                        circ = patch.Circle((self.xg[i, j], self.yg[i, j]), Lx*0.05/3, color='red')
-                        axis.add_patch(circ)
-                        form_0[i, j] = 0
+            xg = self.xg
+            yg = self.yg
+    
+        # if self.denser != 1:
+        #     if self.form_0_str == None:
+        #         # This cannot be done if a string has not been supplied
+        #         # ERROR
+        #         raise TypeError('Error: You need to supply the 0-form equation to do this, look at \'give_eqn\' method')
+        #     else:
+        #         # get the supplied form as a string
+        #         zero_form_str = str(simplify(self.form_0_str))
+        #         # set up grids for contours
+        #         contour_x, contour_y = np.linspace(self.xg[0,0] , self.xg[0,-1] , self.pt_den*self.denser), np.linspace(self.yg[0,0] , self.yg[-1,0], self.pt_den*self.denser)
+        #         contour_x_grid, contour_y_grid = np.meshgrid(contour_x, contour_y)
+        #         # format the given ftring
+        #         zero_form_str = zero_form_str.replace('x', 'contour_x_grid')
+        #         zero_form_str = zero_form_str.replace('y', 'contour_y_grid')
+        #         # evaluate bearing in mind zeros
+        #         if zero_form_str.find('contour_x_grid') & zero_form_str.find('contour_y_grid') == -1:
+        #             form_0_contour = eval(zero_form_str)*np.ones(np.shape(contour_x_grid))
+        #         else:
+        #             form_0_contour = eval(zero_form_str)
+                
+        # deal with sinularities that appear on evaluated points
+        isnan_arr = np.isnan(form_0)
+        for i in range(len(xg[0, :])):
+            for j in range(len(yg[:, 0])):
+                # set to zero points that are not defined or inf
+                if isnan_arr[i, j] or abs(form_0[i, j]) == np.inf or abs(form_0[i, j]) > 1e15:
+                    # colour this region as a red dot, not square to
+                    # not confuse with high mag 2-forms in stacks. or worse, in
+                    # blocks
+                    circ = patch.Circle((xg[i, j], yg[i, j]), Lx*0.05/3, color='red')
+                    axis.add_patch(circ)
+                    form_0[i, j] = 0
+        
+        # set up the contour plot
+        f_max = np.max(form_0)
+        f_min = np.min(form_0)
+        
+        if self.log_bool == True:
+
+            # Calculate log scaled set of levels
+            mag = np.abs(form_0)
+            mag_max = np.max(mag)
+            mag_min = np.min(mag[np.nonzero(mag)])
             
-            # set up the contour plot with given grids
-            CS = axis.contour(self.xg, self.yg, form_0, levels=self.lines)
-            axis.clabel(CS, inline=self.inline_bool, fontsize=self.fontsize)
+            # Calculate the orders of magnitude between the min and max values in the array
+            p = np.log10(abs(f_max)/mag_min)
+            n = np.log10(abs(f_min)/mag_min)
+            
+            # Determine how many lines are needed above and below mag_min
+            p_levels = round(self.N*p/(p+n))
+            n_levels = round(self.N*n/(p+n))
+            
+            # Create levels above and below mag_min
+            lev1 = np.logspace(np.log10(mag_min), np.log10(abs(f_max)), num=p_levels, base=self.base)
+            lev2 = np.logspace(np.log10(mag_min), np.log10(abs(f_min)) , num=n_levels, base=self.base)
+            
+            lev2 = -1*np.flip(lev2)
+            
+            # Put the two lists together to give the final array of levels
+            log_levels = list(np.append(lev2,lev1))
+    
+            self.lines = log_levels
+        else:
+            # If log scaling is not selected, lines are chosen based on .levels()
+            pass
+        
+        CS = axis.contour(xg, yg, form_0, levels=self.lines, cmap=self.cmap)
+        axis.clabel(CS, inline=self.inline_bool, fontsize=self.fontsize)
+        
+        
+        # else:
+        #     # deal with sinularities that appear on evaluated points
+        #     isnan_arr = np.isnan(form_0)
+        #     for i in range(len(self.xg[0, :])):
+        #         for j in range(len(self.yg[:, 0])):
+        #             # set to zero points that are not defined or inf
+        #             if isnan_arr[i, j] or abs(form_0[i, j]) == np.inf or abs(form_0[i, j]) > 1e15:
+        #                 # colour this region as a red dot, not square to
+        #                 # not confuse with high mag 2-forms in stacks. or worse, in
+        #                 # blocks
+        #                 circ = patch.Circle((self.xg[i, j], self.yg[i, j]), Lx*0.05/3, color='red')
+        #                 axis.add_patch(circ)
+        #                 form_0[i, j] = 0
+            
+        #     # set up the contour plot with given grids
+            
+        #     N = 30
+        #     f_max = np.max(form_0)
+        #     f_min = np.min(form_0)
+            
+        #     if self.log_bool == True:
+        #         # Calculate log scaled set of levels
+        #         mag = np.abs(form_0)
+        #         mag_max = np.max(mag)
+        #         mag_min = np.min(mag[np.nonzero(mag)])
+                
+        #         # Calculate the orders of magnitude between the min and max values in the array
+        #         p = np.log10(abs(f_max)/mag_min)
+        #         n = np.log10(abs(f_min)/mag_min)
+                
+        #         # Determine how many lines are needed above and below mag_min
+        #         p_levels = round(N*p/(p+n))
+        #         n_levels = round(N*n/(p+n))
+                
+        #         # Create levels above and below mag_min
+        #         lev1 = np.logspace(np.log10(mag_min), np.log10(abs(f_max)), num=p_levels, base=10)
+        #         lev2 = np.logspace(np.log10(mag_min), np.log10(abs(f_min)) , num=n_levels, base=10)
+                
+        #         lev2 = -1*np.flip(lev2)
+                
+        #         # Put the two lists together to give the final array of levels
+        #         log_levels = list(np.append(lev2,lev1))
+        
+        #         self.lines = log_levels
+        #     else:
+                
+        #         lin_levels = list(np.linspace(f_min, f_max, N))
+                
+        #         self.lines = lin_levels
+            
+        #     CS = axis.contour(self.xg, self.yg, form_0, levels=self.lines)
+        #     axis.clabel(CS, inline=self.inline_bool, fontsize=self.fontsize)
     
     # define a method to compute the exterior derivative
     def ext_d(self):

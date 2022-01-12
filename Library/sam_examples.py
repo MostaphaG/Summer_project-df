@@ -295,6 +295,6 @@ F0 = fp.form_0(x,y,u)
 F0.give_eqn('x*(x**2 + y**2)**(-1.5)')
 F0.plot(ax1)
 
-F0.density_increase(5)
-F0.levels(1)
+F0.density_increase(2)
+F0.log_scaling(N=20, base=3)
 F0.plot(ax2)
