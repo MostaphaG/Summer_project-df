@@ -965,12 +965,39 @@ class form_1():
     # define a fucntion to compute a wedge product of two 1 forms
     def wedge(self, form_second=None, degree=1, keep_object=False):
         '''
-        Takes in 2 arguments, for the strings of the other form to
-        wedge with this one as a tuple or as a 1-form object with equations
-        If none are gievn, does wedge with (1, 1)
+        Parameters:
+        ----------------
+        form_second - the form to wedge the 1-form with.
+                    Can be supplied as a FormPy instance, a tuple of equations,
+                    or a single string equation depending on what form is to be
+                    wedged.
+                    To wedge with 1-form, supply 1-form instance, or tuple of
+                    component equations as strings in terms of x and y.
+                    To wedge with 0-form or 2-form, supply corresponding
+                    instances or a single equation. When using equations,
+                    to distinguish between them, provide parmater 'degree'.
+                    If nothing is supplied, a (1, 1) 1-form is assumed
+        degree - default is 1. Only used when a single string is supplied
+                    as form_second, to distinguish betwen 0-form and 2-form
+                    for 0-form, degree=0, for 2-form, degree=2.
+                    Determines what form is to be wegded with the
+                    given 1-form.
+        keep_object - bool -default=False - only used when 1-form is wedged
+                    with a 0-form. If False, a new object is created as 
+                    a result of the wedge. If True, the 1-form acted on
+                    is modified to be the result of the wedge. 
+        
         To do so here, strings for the form must be supplied.
         Computes the Wedge product using strings, ANALYTICALLY
-        Returns a 2-form object
+        
+        Returns:
+        --------------
+        Wedged with 0-form returns a 1-form object if keep_object is False
+                    (default), and returns nothing when it is True
+        Wedged with a 1-form, returns a 2-form instance
+        Wedged with a 2-form, operation makes a 3-form, which on R^2 is
+                    always = zero, only message displays.
+        
         '''
         # first, get all entries out, save as string for these to display when
         # window is opened again
