@@ -780,7 +780,75 @@ f2d.plot(ax4)
 
 # %%
 
-# Testing some 2-form errors
+# TESTING 0-form wegdges analytically
+
+v = np.linspace(-2, 2, 23)
+xg, yg = np.meshgrid(v, v)
+
+u = xg*yg
+v = np.sin(xg*yg)
+
+f0 = fp.form_0(xg, yg, v, 'sin(x*y)')
+
+# another 0-form
+f0a = fp.form_0(xg, yg, u, 'x*y')
+
+f1 = fp.form_1(xg, yg, u, v, 'x*y', 'sin(x*y)')
+
+# another one
+f1a = fp.form_1(xg, yg, u*v, v, 'x*y*sin(x*y)', 'sin(x*y)')
+
+# set up 2-form
+f2 = fp.form_2(xg, yg, v, 'sin(x*y)')
+
+f0a = f0.wedge(f0)
+f0b = f0.wedge(f0a)
+f1a = f0.wedge(f1)
+f1b = f0.wedge(f1a)
+f2a = f0.wedge(f2)
+
+f0c = f0.wedge('x + y')
+f0d = f0.wedge()
+f1c = f0.wedge(('x**2', 'y**2'))
+f1d = f0.wedge()
+f2b = f0.wedge('x + 2*y')
+f2c = f0.wedge()
+
+# %%
+
+# TESTING 0-form wegdges numerically
+
+v = np.linspace(-2, 2, 23)
+xg, yg = np.meshgrid(v, v)
+
+u = xg*yg
+v = np.sin(xg*yg)
+
+f0 = fp.form_0(xg, yg, v, 'sin(x*y)')
+
+# another 0-form
+f0a = fp.form_0(xg, yg, u, 'x*y')
+
+f1 = fp.form_1(xg, yg, u, v, 'x*y', 'sin(x*y)')
+
+# another one
+f1a = fp.form_1(xg, yg, u*v, v, 'x*y*sin(x*y)', 'sin(x*y)')
+
+# set up 2-form
+f2 = fp.form_2(xg, yg, v, 'sin(x*y)')
+
+f0a = f0.wedge(f0)
+f0b = f0.wedge(f0a)
+f1a = f0.wedge(f1)
+f1b = f0.wedge(f1a)
+f2a = f0.wedge(f2)
+
+f0c = f0.wedge('x + y')
+f0d = f0.wedge()
+f1c = f0.wedge(('x**2', 'y**2'))
+f1d = f0.wedge()
+f2b = f0.wedge('x + 2*y')
+f2c = f0.wedge()
 
 
 
