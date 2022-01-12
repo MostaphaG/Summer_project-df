@@ -241,6 +241,7 @@ class form_1():
         self.arrowheads = True
         self.color = 'green'
         self.logarithmic_scale_bool = 0
+        # self.base = 10
         self.delta_factor = 10
         # define equations, if given:
         # user must change to access some methods, methods will indicate when needed
@@ -385,6 +386,7 @@ class form_1():
         Returns: None
         '''
         self.logarithmic_scale_bool = not self.logarithmic_scale_bool
+        # self.base = base
     
     # define methods to change s_max
     def max_sheets(self, maximum):
@@ -538,7 +540,7 @@ class form_1():
                 # set to zero points that are not defined or inf
                 if isnan_arr[i, j]:
                     #colour this region as a shaded square
-                    rect = patch.Rectangle((self.xg[i, j] - dist_points/2, yg[i, j]  - dist_points/2), dist_points, dist_points, color='#B5B5B5')
+                    rect = patch.Rectangle((self.xg[i, j] - dist_points/2, self.yg[i, j]  - dist_points/2), dist_points, dist_points, color='#B5B5B5')
                     axis.add_patch(rect)
                     mag[i, j] = 0
                 if abs(mag[i, j]) == np.inf  or abs(mag[i, j]) > 1e15:
@@ -579,9 +581,10 @@ class form_1():
             # Add 1 to each magnitude
             mag1 = mag + 1
             # Calculate the appropriate scaling factor
-            a = max_size**(1/self.s_max)
+            # a = max_size**(1/self.s_max)
+            # a = self.base
             # Take log(base=a) of mag1
-            logmag1 = np.log(mag1)/np.log(a)
+            logmag1 = np.log(mag1)
             # Re-assign R
             R = logmag1/np.max(logmag1)    
         else:
@@ -1514,6 +1517,7 @@ class form_2():
         self.fract = 2/((self.pt_den - 1))
         self.colour_list = ['red', 'blue', 'grey']
         self.logarithmic_scale_bool = 0
+        # self.base = 10
         self.delta_factor = 10
         if form_2_eq is not None:
             self.form_2_str = str(simplify(form_2_eq))  # to start with, user must change to access some methods
@@ -1584,6 +1588,7 @@ class form_2():
         The form object is initialised with this as False (as 0)
         '''
         self.logarithmic_scale_bool = not self.logarithmic_scale_bool
+        # self.base = base
     
     # define methods to change s_max
     def max_sheets(self, maximum):
@@ -1746,9 +1751,10 @@ class form_2():
             # Add 1 to each magnitude
             mag1 = mag + 1
             # Calculate the appropriate scaling factor
-            a = max_size**(1/self.s_max)
+            # a = max_size**(1/self.s_max)
+            # a = self.base
             # Take log(base=a) of mag1
-            logmag1 = np.log(mag1)/np.log(a)
+            logmag1 = np.log(mag1)
             # Re-assign R
             R = logmag1/np.max(logmag1)    
         else:
@@ -2180,7 +2186,7 @@ class form_0():
         # Log scaling parameters
         self.log_bool = False
         self.N = 30
-        self.base = 10
+        # self.base= 10
         
         if form_0_eqn is not None:
             self.form_0_str = str(simplify(form_0_eqn))  # to start with, use rmust change to access some methods
@@ -2332,10 +2338,10 @@ class form_0():
 
         # self.lines = log_levels
         
-    def log_scaling(self, N=30, base=10):
+    def log_scaling(self, N=30):
         
         self.N = N
-        self.base = base
+        # self.base = base
         self.log_bool = not self.log_bool
     
     def fonts_size(self, size):
@@ -2494,16 +2500,27 @@ class form_0():
             mag_min = np.min(mag[np.nonzero(mag)])
             
             # Calculate the orders of magnitude between the min and max values in the array
-            p = np.log10(abs(f_max)/mag_min)
-            n = np.log10(abs(f_min)/mag_min)
+            if f_max == 0 or f_max == -0:
+                p = 0
+            else:
+                p = np.log10(abs(f_max)/mag_min)
+                
+            if f_min == 0 or f_min == -0:
+                n = 0
+            else:
+                n = np.log10(abs(f_min)/mag_min)
             
             # Determine how many lines are needed above and below mag_min
             p_levels = round(self.N*p/(p+n))
             n_levels = round(self.N*n/(p+n))
             
             # Create levels above and below mag_min
-            lev1 = np.logspace(np.log10(mag_min), np.log10(abs(f_max)), num=p_levels, base=self.base)
-            lev2 = np.logspace(np.log10(mag_min), np.log10(abs(f_min)) , num=n_levels, base=self.base)
+            # lev1 = np.logspace(np.log10(mag_min)/np.log10(self.base), np.log10(abs(f_max))/np.log10(self.base), num=p_levels, base=self.base)
+            # lev2 = np.logspace(np.log10(mag_min)/np.log10(self.base), np.log10(abs(f_min))/np.log10(self.base), num=n_levels, base=self.base)
+            
+            lev1 = np.logspace(np.log10(mag_min), np.log10(abs(f_max)), num=p_levels, base=10)
+            lev2 = np.logspace(np.log10(mag_min), np.log10(abs(f_min)), num=n_levels, base=10)
+            
             
             lev2 = -1*np.flip(lev2)
             
@@ -2736,6 +2753,7 @@ class vector_field():
         self.scale = 1
         self.color = 'black'
         self.logarithmic_scale_bool = 0
+        # self.base = 10
         self.scale_bool = True
         self.delta_factor = 10
         if F_x_eqn is not None:
@@ -2828,6 +2846,7 @@ class vector_field():
         The form object is initialised with this as False
         '''
         self.logarithmic_scale_bool = not self.logarithmic_scale_bool
+        # self.base = base
     
     # define a method to be able to change bool that det. if arrows autoscale
     def autoscale(self):
@@ -2904,12 +2923,13 @@ class vector_field():
         y_len = len(self.yg[0, :])
         
         # Extract L from the x and y grids. Assumes they are square.
-        L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
-        x0 = self.xg[0,0] + L
-        y0 = self.yg[0,0] + L
+        Lx = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+        Ly = 0.5*(self.yg[-1, 0] - self.yg[0, 0])
+        x0 = self.xg[0,0] + Lx
+        y0 = self.yg[0,0] + Ly
         
         # adjust axis limits based on that.
-        ax_L = L + L/self.delta_factor
+        ax_L = Lx + Lx/self.delta_factor
         axis.set_xlim(-ax_L + x0, ax_L + x0)
         axis.set_ylim(-ax_L + y0, ax_L + y0)
         
@@ -2938,7 +2958,7 @@ class vector_field():
                     F_x_local[i,j] = F_y_local[i,j] = 0
                 if abs(F_x_local[i, j]) == np.inf or abs(F_y_local[i, j]) == np.inf or abs(F_y_local[i, j]) > 1e15 or abs(F_x_local[i, j]) > 1e15:
                     # colour this point as a big red dot
-                    circ = patch.Circle((self.xg[i, j], self.yg[i, j]), L*0.05/3, color='red')
+                    circ = patch.Circle((self.xg[i, j], self.yg[i, j]), Lx*0.05/3, color='red')
                     axis.add_patch(circ)
                     F_x_local[i,j] = F_y_local[i,j] = 0
 #            isnan_arrx = np.isnan(F_x_local)
@@ -2967,7 +2987,7 @@ class vector_field():
             min_size = np.min(mag1)
             unorm = F_x_local/mag1
             vnorm = F_y_local/mag1
-            logsf = np.log(mag1/min_size)
+            logsf = np.log10(mag1/min_size)
             F_x_local = logsf*unorm
             F_y_local = logsf*vnorm
             mag = np.sqrt(F_x_local**2 + F_y_local**2)
@@ -2977,7 +2997,7 @@ class vector_field():
         if self.scale_bool is False:
             ScaleFactor = self.scale
         elif self.scale_bool is True:
-            ScaleFactor = max_size/(0.9*(2*L/self.pt_den))
+            ScaleFactor = max_size/(0.9*(2*Lx/self.pt_den))
         
         # plot using matplotlib quiver
         axis.quiver(self.xg, self.yg, F_x_local, F_y_local, pivot=self.orientation, scale=ScaleFactor, scale_units='xy', color=self.color) 
