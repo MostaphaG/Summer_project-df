@@ -653,7 +653,7 @@ f1 = fp.form_1(xg, yg, u, v)
 
 f1a = fp.form_1(xg, yg, u*v, v)
 
-f0 = fp.form_0(xg, yg, u,)
+f0 = fp.form_0(xg, yg, u)
 
 f2 = fp.form_2(xg, yg, v)
 
@@ -689,7 +689,7 @@ f2d.plot(ax4)
 
 f1a = f1.num_wedge(f0)
 f1b = f1.num_wedge('x*y*sin(x*y)', degree=0)
-f1c = f1.num_wedge((xg*yg*np.sin(xg*yg)), degree=0)
+f1c = f1.num_wedge(xg*yg*np.sin(xg*yg), degree=0)
 #f1d = f1.wedge(('13', 'x'))
 f1d = f1.num_wedge()
 
@@ -716,4 +716,72 @@ f1d.plot(ax4)
 
 f3a = f1.num_wedge(f2)
 f3b = f1.num_wedge('x*y*cos(x*y)', degree=2)
+
+
+# %%
+
+# TESTING 2-form wegdges analytically
+
+v = np.linspace(-2, 2, 23)
+xg, yg = np.meshgrid(v, v)
+
+f2 = fp.form_2(xg, yg, np.sin(xg*yg), 'sin(x*y)')
+
+f0 = fp.form_0(xg, yg, xg*yg)
+f0.give_eqn('x*y')
+
+f2a = f2.wedge(f0)
+f2b = f2.wedge('x**2')
+f2c = f2.wedge()
+
+fig1 = plt.figure()
+ax1 = fig1.add_subplot(131)
+ax2 = fig1.add_subplot(132)
+ax3 = fig1.add_subplot(133)
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
+ax3.set_aspect('equal')
+
+f2a.plot(ax1)
+f2b.plot(ax2)
+f2c.plot(ax3)
+
+# %%
+
+# TESTING 2-form wegdges numerically
+
+v = np.linspace(-2, 2, 23)
+xg, yg = np.meshgrid(v, v)
+
+f2 = fp.form_2(xg, yg, np.sin(xg*yg))
+
+f0 = fp.form_0(xg, yg, xg*yg)
+
+f2a = f2.num_wedge(f0)
+f2b = f2.num_wedge('x**2')
+f2c = f2.num_wedge(yg**2)
+f2d = f2.num_wedge()
+
+fig1 = plt.figure()
+ax1 = fig1.add_subplot(141)
+ax2 = fig1.add_subplot(142)
+ax3 = fig1.add_subplot(143)
+ax4 = fig1.add_subplot(144)
+
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
+ax3.set_aspect('equal')
+ax4.set_aspect('equal')
+
+f2a.plot(ax1)
+f2b.plot(ax2)
+f2c.plot(ax3)
+f2d.plot(ax4)
+
+# %%
+
+# Testing some 2-form errors
+
+
+
 
