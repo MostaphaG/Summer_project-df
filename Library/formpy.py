@@ -2493,43 +2493,53 @@ class form_0():
         f_min = np.min(form_0)
         
         if self.log_bool == True:
-
-            # Calculate log scaled set of levels
-            mag = np.abs(form_0)
-            mag_max = np.max(mag)
-            mag_min = np.min(mag[np.nonzero(mag)])
             
-            # Calculate the orders of magnitude between the min and max values in the array
-            if f_max == 0 or f_max == -0:
-                p = 0
-            else:
-                p = np.log10(abs(f_max)/mag_min)
+            # neg_index = form_0 < 0
+            mag1 = np.abs(form_0) + 1
+            logmag = np.log10(mag1)
+            
+            for i in range(len(xg[:,0])):
+                for j in range(len(yg[0,:])):
+                    if form_0[i,j] < 0 :
+                        logmag[i,j] *= -1
+        
+            form_0 = logmag
+            
+            # # Calculate log scaled set of levels
+            # mag = np.abs(form_0)
+            # mag_max = np.max(mag)
+            # mag_min = np.min(mag[np.nonzero(mag)])
+            
+            # # Calculate the orders of magnitude between the min and max values in the array
+            # if f_max == 0 or f_max == -0:
+            #     p = 0
+            # else:
+            #     p = np.log10(abs(f_max)/mag_min)
                 
-            if f_min == 0 or f_min == -0:
-                n = 0
-            else:
-                n = np.log10(abs(f_min)/mag_min)
+            # if f_min == 0 or f_min == -0:
+            #     n = 0
+            # else:
+            #     n = np.log10(abs(f_min)/mag_min)
             
-            # Determine how many lines are needed above and below mag_min
-            p_levels = round(self.N*p/(p+n))
-            n_levels = round(self.N*n/(p+n))
+            # # Determine how many lines are needed above and below mag_min
+            # p_levels = round(self.N*p/(p+n))
+            # n_levels = round(self.N*n/(p+n))
             
-            # Create levels above and below mag_min
-            # lev1 = np.logspace(np.log10(mag_min)/np.log10(self.base), np.log10(abs(f_max))/np.log10(self.base), num=p_levels, base=self.base)
-            # lev2 = np.logspace(np.log10(mag_min)/np.log10(self.base), np.log10(abs(f_min))/np.log10(self.base), num=n_levels, base=self.base)
+            # # Create levels above and below mag_min
+            # # lev1 = np.logspace(np.log10(mag_min)/np.log10(self.base), np.log10(abs(f_max))/np.log10(self.base), num=p_levels, base=self.base)
+            # # lev2 = np.logspace(np.log10(mag_min)/np.log10(self.base), np.log10(abs(f_min))/np.log10(self.base), num=n_levels, base=self.base)
             
-            lev1 = np.logspace(np.log10(mag_min), np.log10(abs(f_max)), num=p_levels, base=10)
-            lev2 = np.logspace(np.log10(mag_min), np.log10(abs(f_min)), num=n_levels, base=10)
+            # lev1 = np.logspace(np.log10(mag_min), np.log10(abs(f_max)), num=p_levels, base=10)
+            # lev2 = np.logspace(np.log10(mag_min), np.log10(abs(f_min)), num=n_levels, base=10)
             
             
-            lev2 = -1*np.flip(lev2)
+            # lev2 = -1*np.flip(lev2)
             
-            # Put the two lists together to give the final array of levels
-            log_levels = list(np.append(lev2,lev1))
+            # # Put the two lists together to give the final array of levels
+            # log_levels = list(np.append(lev2,lev1))
     
-            self.lines = log_levels
+            # self.lines = log_levels
         else:
-            # If log scaling is not selected, lines are chosen based on .levels()
             pass
         
         CS = axis.contour(xg, yg, form_0, levels=self.lines, cmap=self.cmap)

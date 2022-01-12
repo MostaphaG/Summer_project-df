@@ -202,7 +202,7 @@ ax1 = fig1.add_subplot(111)
 # F1.max_sheets(10)
 # F1.sheet_size(0.02)
 # F1.surround_space(20)
-F1.set_density(30)
+# F1.set_density(30)
 
 F1.plot(ax1)
 
@@ -266,16 +266,16 @@ ax2.set_aspect('equal')
 # ax3.set_aspect('equal')
 # ax4.set_aspect('equal')
 
-VF = fp.vector_field(x,y,u,v)
-VF.log_scaling(base=10)
-VF.plot(ax1)
-VF.base = 5
-VF.plot(ax2)
+# VF = fp.vector_field(x,y,u,v)
+# VF.log_scaling(base=10)
+# VF.plot(ax1)
+# VF.base = 5
+# VF.plot(ax2)
 
-# F1 = fp.form_1(x,y,u,v)
-# F1.plot(ax2)
-# F1.log_scaling(base=20)
-# F1.plot(ax4)
+F1 = fp.form_1(x,y,u,v)
+F1.plot(ax1)
+F1.log_scaling()
+F1.plot(ax2)
 
 # %% 0 -form log scaling
 
@@ -286,7 +286,7 @@ import matplotlib.pyplot as plt
 r = np.linspace(-2, 2, 25)
 x,y = np.meshgrid(r, r)
 
-u = (x**2 + y**2)**(-1.5)
+u = x*(x**2 + y**2)**(-1.5)
 
 fig1 = plt.figure(figsize=(10,5))
 ax1 = fig1.add_subplot(121)
@@ -294,7 +294,7 @@ ax2 = fig1.add_subplot(122)
 
 F0 = fp.form_0(x,y,u)
 F0.density_increase(5)
-F0.give_eqn('(x**2 + y**2)**(-1.5)')
+F0.give_eqn('x*(x**2 + y**2)**(-1.5)')
 F0.plot(ax1)
-F0.log_scaling(N=20)
+F0.log_scaling()
 F0.plot(ax2)
