@@ -824,32 +824,38 @@ xg, yg = np.meshgrid(v, v)
 u = xg*yg
 v = np.sin(xg*yg)
 
-f0 = fp.form_0(xg, yg, v, 'sin(x*y)')
+f0 = fp.form_0(xg, yg, v)
 
 # another 0-form
-f0a = fp.form_0(xg, yg, u, 'x*y')
+f0a = fp.form_0(xg, yg, u)
 
-f1 = fp.form_1(xg, yg, u, v, 'x*y', 'sin(x*y)')
+f1 = fp.form_1(xg, yg, u, v)
 
 # another one
-f1a = fp.form_1(xg, yg, u*v, v, 'x*y*sin(x*y)', 'sin(x*y)')
+f1a = fp.form_1(xg, yg, u*v, v)
 
 # set up 2-form
-f2 = fp.form_2(xg, yg, v, 'sin(x*y)')
+f2 = fp.form_2(xg, yg, v)
 
-f0a = f0.wedge(f0)
-f0b = f0.wedge(f0a)
-f1a = f0.wedge(f1)
-f1b = f0.wedge(f1a)
-f2a = f0.wedge(f2)
+f0a = f0.num_wedge(f0)
+f0b = f0.num_wedge(f0a)
+f1a = f0.num_wedge(f1)
+f1b = f0.num_wedge(f1a)
+f2a = f0.num_wedge(f2)
 
-f0c = f0.wedge('x + y')
-f0d = f0.wedge()
-f1c = f0.wedge(('x**2', 'y**2'))
-f1d = f0.wedge()
-f2b = f0.wedge('x + 2*y')
-f2c = f0.wedge()
+f0c = f0.num_wedge(xg + yg)
+f0d = f0.num_wedge('x + y')
+f0e = f0.num_wedge()
 
+f1c = f0.num_wedge(('x**2', 'y**2'))
+f1d = f0.num_wedge((xg**2, yg**2))
+f1e = f0.num_wedge()
 
+f2b = f0.num_wedge(xg + 2*yg)
+f2c = f0.num_wedge('x + 2*y')
+f2d = f0.num_wedge()
 
-
+fig = plt.figure()
+ax = fig.gca()
+ax.set_aspect('equal')
+f1d.plot(ax)

@@ -1193,9 +1193,11 @@ class form_1():
                         new_str_y = '(' + str(new_str_y) + ')* np.ones(np.shape(self.yg))'
                     f12_x = eval(new_str_x)
                     f12_y = eval(new_str_y)
+                    order = 1
                 elif isinstance(form_second[0], np.ndarray) and isinstance(form_second[1], np.ndarray):
                     f12_x = form_second[0]
                     f12_y = form_second[1]
+                    order = 1
                 else:
                     raise ValueError('Not recognised input tuple')
             else:
@@ -3290,9 +3292,9 @@ class form_0():
         '''
         Parameters:
         ----------------
-        form_second - the form to wedge the 1-form with.
+        form_second - the form to wedge the 0-form with.
                     Can be supplied as a FormPy instance, a tuple of grids of
-                    same size and dimensions as this 1-form,
+                    same size and dimensions as this 0-form,
                     or a single grid of scaling function values depending on
                     what form is to be wedged.
                     To wedge with 1-form, supply 1-form instance, or tuple of
@@ -3300,13 +3302,13 @@ class form_0():
                     To wedge with 0-form or 2-form, supply corresponding
                     instances or a single grid. When using grids,
                     to distinguish between them, provide parmater 'degree'.
-                    If nothing is supplied, a (1, 1) 1-form is assumed
-        degree - default is 1. Only used when a single grid is supplied
+                    If nothing is supplied, a constant (=1) 0-form is assumed
+        degree - default is 0. Only used when a single grid is supplied
                     as form_second, to distinguish betwen 0-form and 2-form
                     for 0-form, degree=0, for 2-form, degree=2.
                     Determines what form is to be wegded with the
-                    given 1-form.
-        keep_object - bool -default=False - only used when 1-form is wedged
+                    given 0-form.
+        keep_object - bool -default=False - only used when 0-form is wedged
                     with a 0-form. If False, a new object is created as 
                     a result of the wedge. If True, the 1-form acted on
                     is modified to be the result of the wedge. 
@@ -3315,33 +3317,31 @@ class form_0():
         
         Returns:
         --------------
-        Wedged with 0-form returns a 1-form object if keep_object is False
+        Wedged with 0-form returns a 0-form object if keep_object is False
                     (default), and returns nothing when it is True
-        Wedged with a 1-form, returns a 2-form instance
-        Wedged with a 2-form, operation makes a 3-form, which on R^2 is
-                    always = zero, only message displays.
+        Wedged with a 1-form, returns a 1-form instance
+        Wedged with a 2-form, returns a 2-form instance
         
         '''
         
         # test if equations were given first:
-        if isinstance(self.form_1_str_x, str) or isinstance(self.form_1_str_y, str):
-            print('The first 1-form you are completing the wedge with has equations supplied, these will be lost')
+        if self.form_0_str is None:
+            print('The first 0-form you are completing the wedge with has equations supplied, these will be lost')
         
-        # set up variable to store order of supplied form, initially assume 1-form
-        order = 1
+        # set up variable to store order of supplied form, initially assume 0-form
+        order = 0
         
         # get needed second obejct grids dep. on input
         if form_second is None:
-            # none was given, do it with respect to uniform 1, 1
-            # and assume 1-form/\1-form
-            f12_x = np.ones(np.shape(self.xg))
-            f12_y = np.ones(np.shape(self.xg))
-            order = 1
+            # none was given, do it with respect to uniform = 1
+            # and assume 0-form/\0-form
+            to_wedge_0_form = np.ones(np.shape(self.xg))
+            order = 0
         elif isinstance(form_second, tuple):
             # check size to see what it is to be wedged with.
             # tuple should only be length 2 --> 1-form/\1-form
             if len(form_second) == 2:
-                # 1-form/\1-form, extract components
+                # 0-form/\1-form, extract components
                 # if numerical grids were given, take these, if equations, change to values on grids:
                 if isinstance(form_second[0], str) and isinstance(form_second[1], str):
                     new_str_x = form_second[0].replace('x', '(self.xg)')
@@ -3354,9 +3354,11 @@ class form_0():
                         new_str_y = '(' + str(new_str_y) + ')* np.ones(np.shape(self.yg))'
                     f12_x = eval(new_str_x)
                     f12_y = eval(new_str_y)
+                    order = 1
                 elif isinstance(form_second[0], np.ndarray) and isinstance(form_second[1], np.ndarray):
                     f12_x = form_second[0]
                     f12_y = form_second[1]
+                    order = 1
                 else:
                     raise ValueError('Not recognised input tuple')
             else:
@@ -3370,9 +3372,8 @@ class form_0():
             elif degree == 1:
                 raise ValueError('for degree 1, supply a 1-form, not a single grid')
             elif degree == 2:
-                # Error, gives 3 form = 0 on R2
-                order = None
-                print('This operation makes a 3-form, which on R^2 is always = zero')
+                to_wedge_2_form = form_second
+                order = 2
         
         elif isinstance(form_second, str):
             # single string, could be 0-form or 2-form, check given degree:
@@ -3385,9 +3386,13 @@ class form_0():
                     to_wedge_0_form = eval(str_0_form)
                     order = 0
             elif degree == 2:
-                # Error, gives 3 form = 0 on R2
-                order = None
-                print('This operation makes a 3-form, which on R^2 is always = zero')
+                str_2_form = form_second.replace('x', '(self.xg)')
+                str_2_form = str_2_form.replace('y', '(self.yg)')
+                if str_2_form.find('x') & str_2_form.find('y') == -1:
+                    str_2_form = '(' + str(str_2_form) + ')* np.ones(np.shape(self.xg))'
+                
+                to_wedge_2_form = eval(str_2_form)
+                order = 2
             else:
                 raise ValueError('not possible digree given or supplied one string for a 1-form')
         
@@ -3401,41 +3406,44 @@ class form_0():
             to_wedge_0_form = form_second.form_0
             order = 0
         elif isinstance(form_second, form_2):
-            order = None
-            print('This operation makes a 3-form, which on R^2 is always = zero')
+            order = 2
+            to_wedge_2_form = form_second.form_2
         else:
             raise TypeError('Supplied form to wedge with is not recognised')
         
-        # USe given inputs to evaluate the result:
+        # Use given inputs to evaluate the result:
         
-        # Deal with 1-form/\1-form:
+        # Deal with 0-form/\1-form:
         if order == 1:
-            # from these get the numerical 2-form
-            result = self.F_x * f12_y - self.F_y * f12_x
+            # first, find the result of the 1-form
+            new_form_1_x = self.form_0 * f12_x
+            new_form_1_y = self.form_0 * f12_y
             
-            # return it to user:
-            ret_object = form_2(self.xg, self.yg, result)
-            return ret_object
+            # create instance and return
+            new_object = form_1(self.xg, self.yg, new_form_1_x, new_form_1_y)
+            return new_object
         
         elif order == 0:
-            # first, find the result of the 1-form
-            new_form_1_x = to_wedge_0_form * self.F_x
-            new_form_1_y = to_wedge_0_form * self.F_y
+            # from these get the numerical 0-form
+            form_0_result = self.form_0 * to_wedge_0_form
             
             # depending on keep_object, return:
             if keep_object:
-                self.F_x = new_form_1_x
-                self.F_y = new_form_1_y
+                self.form_0 = form_0_result
             elif not keep_object:
-                new_object = form_1(self.xg, self.yg, new_form_1_x, new_form_1_y)
+                new_object = form_0(self.xg, self.yg, form_0_result)
                 # return the new one to the user:
                 return new_object
             else:
                 raise ValueError('Error, Invalid input for \'keep_object\'')
-        elif order is None:
-            # made a form that is always zero on R2, no need to make it
-            # Warning already shown, when degree was set
-            pass
+
+        elif order == 2:
+            # from these get the numerical 0-form
+            form_2_result = self.form_0 * to_wedge_2_form
+            
+            # create instance and return
+            new_object = form_2(self.xg, self.yg, form_2_result)
+            return new_object
         else:
             # should never happen, but in case
             raise ValueError('Variable change during code running, look at \'order\' parameter')
