@@ -122,3 +122,79 @@ num_int.plot(ax3)
 
 # use cross product:
 ax4.quiver(xg, yg, -xg/(xg**2 + yg**2), 1/(xg**2 + yg**2))
+
+
+# %%
+
+
+# Exterior derivative 
+
+# Set up figures and axes for plotting
+fig1 = plt.figure(figsize=(8,8))
+fig2 = plt.figure(figsize=(8,8))
+fig3 = plt.figure(figsize=(8,8))
+fig4 = plt.figure(figsize=(8,8))
+
+ax1 = fig1.gca()
+ax2 = fig2.gca()
+ax3 = fig3.gca()
+ax4 = fig4.gca()
+
+# 1F setup
+r = np.linspace(-5, 5, 21)
+xg, yg = np.meshgrid(r, r)
+u = yg*np.sin(xg)
+v = -xg*np.cos(yg)
+
+# Create object and provide component expressions
+alpha = fp.form_1(xg, yg, u, v)
+alpha.give_eqn('y*sin(x)','-x*cos(y)')
+
+# Exterior derivative (analytical)
+d_alpha1 = alpha.ext_d()
+
+# Exterior derivative (numerical)
+d_alpha2 = alpha.num_ext_d()
+
+# Plot
+alpha.plot(ax1)
+d_alpha1.plot(ax2)
+d_alpha2.plot(ax3)
+
+# Continue - use contravariant with flat metric to get the vector field equivalent 
+# and show the regions of +ve -ve curl agree with the exterior derivative
+F = alpha.contravariant()
+
+F.plot(ax4)
+ 
+z1 = F.curl(target=(2,0), mag=10, dpd=7, inset=True, axis=ax4, insize=0.3)
+z2 = F.curl(target=(-2,3), mag=10, dpd=7, inset=True, axis=ax4, insize=0.3)
+
+
+# %%
+
+
+# Hodge Example previous option
+
+# 1F setup
+r = np.linspace(-5, 5, 21)
+x, y = np.meshgrid(r, r)
+
+# Black hole field
+
+u = -2*x*((x**2+y**2)**(-1.5))*(1-(2/np.sqrt(x**2+y**2)))**(-2)
+v = -2*y*((x**2+y**2)**(-1.5))*(1-(2/np.sqrt(x**2+y**2)))**(-2)
+
+f1 = fp.form_1(x, y, u, v)
+f1.log_scaling()
+f1.max_sheets(10)
+
+fig1 = plt.figure(figsize=(10,5))
+ax1 = fig1.add_subplot(121)
+ax2 = fig1.add_subplot(122)
+
+f1.plot(ax1)
+
+f1hodge = f1.num_hodge(keep_object=False)
+
+f1hodge.plot(ax2)

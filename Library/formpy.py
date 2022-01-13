@@ -239,7 +239,7 @@ class form_1():
         self.w_head = 1/8
         self.h_head = 1/4
         self.arrowheads = True
-        self.color = 'green'
+        self.color = '#8B14F3'
         self.logarithmic_scale_bool = 0
         # self.base = 10
         self.delta_factor = 10
@@ -2541,9 +2541,8 @@ class form_0():
         self.lines = 15
         self.fontsize = 7
         self.inline_bool = True
-        
         # Log scaling parameters
-        self.log_bool = False
+        self.logarithmic_scale_bool = 0
         self.N = 30
         # self.base= 10
         
@@ -2701,7 +2700,7 @@ class form_0():
         
         self.N = N
         # self.base = base
-        self.log_bool = not self.log_bool
+        self.logarithmic_scale_bool = not self.logarithmic_scale_bool
     
     def fonts_size(self, size):
         '''
@@ -2851,7 +2850,7 @@ class form_0():
         f_max = np.max(form_0)
         f_min = np.min(form_0)
         
-        if self.log_bool == True:
+        if self.logarithmic_scale_bool:
             
             # neg_index = form_0 < 0
             mag1 = np.abs(form_0) + 1
@@ -2925,7 +2924,7 @@ class form_0():
         #     f_max = np.max(form_0)
         #     f_min = np.min(form_0)
             
-        #     if self.log_bool == True:
+        #     if self.logarithmic_scale_bool:
         #         # Calculate log scaled set of levels
         #         mag = np.abs(form_0)
         #         mag_max = np.max(mag)
