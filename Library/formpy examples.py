@@ -286,7 +286,7 @@ ax2.set_aspect('equal')
 field.plot(ax1)
 
 # zoom in, to get field, but not inset, plot on subplot ax2
-zoomed_VF = field.zoom((3, -3), 10, 9)
+zoomed_VF = field.zoom((3, -3), 10, 9, inset=False)
 zoomed_VF.surround_space(4)
 zoomed_VF.colour('r')
 
@@ -635,7 +635,7 @@ ax2 = fig.add_subplot(122)
 form_1_obj.plot(ax1)
 
 # now find wedge of it with a different form
-form_wedged_2 = form_1_obj.num_wedge(form_1_second=(1/yg**2, xg**3))
+form_wedged_2 = form_1_obj.num_wedge(form_second=(1/yg**2, xg**3))
     
 # plot it
 form_wedged_2.plot(ax2)
@@ -942,7 +942,7 @@ form_1_i_3.plot(ax5)
 # Analytically
 
 # set up grids
-v = np.linspace(-4.5, 4.5, 21)
+v = np.linspace(-1, 2, 41)
 xg, yg = np.meshgrid(v, v)
 
 # set up a figure with subplots
@@ -966,6 +966,7 @@ form_0_obj.plot(ax1)
 
 # compute the ext deriv and plot
 form_1_obj = form_0_obj.ext_d()
+form_1_obj.sheet_size(0.03)
 form_1_obj.plot(ax2)
 
 # compute next derivative and plot
@@ -1011,7 +1012,7 @@ metric = [['1', '0'],
           ['0', '(x**2 + y**2)']]
 
 # via this, set up a 1-form
-form_1_obj = vf1.contravariant(g=metric)
+form_1_obj = vf1.covariant(g=metric)
 
 # plot it
 form_1_obj.plot(ax2)
@@ -1051,7 +1052,7 @@ metric = [[np.ones(np.shape(xg)), np.zeros(np.shape(xg))],
           [np.zeros(np.shape(xg)), yg**2 + xg**2]]
 
 # via this, set up a 1-form
-form_1_obj = vf1.contravariant(g=metric)
+form_1_obj = vf1.covariant(g=metric)
 
 # plot it
 form_1_obj.plot(ax2)
@@ -1104,7 +1105,7 @@ metric = [['1', '0'],
           ['0', 'x**2 + y**2']]
 
 # via this, get the VF
-vf = form1.covariant(g=metric)
+vf = form1.contravariant(g=metric)
 
 # plot vector field
 vf.plot(ax2)
@@ -1120,7 +1121,7 @@ metric = [[np.ones(np.shape(xg)), np.zeros(np.shape(xg))],
           [np.zeros(np.shape(xg)), yg**2 + xg**2]]
 
 # via this, get the VF
-vf2 = form1.covariant(g=metric)
+vf2 = form1.contravariant(g=metric)
 
 # plot it
 vf2.plot(ax3)
@@ -1275,7 +1276,7 @@ form_obj1.plot(ax2)
 # numerically and analytically
 
 # set up grids
-v = np.linspace(-4.5, 4.5, 11)
+v = np.linspace(-4.5, 4.5, 13)
 xg, yg = np.meshgrid(v, v)
 
 # set up subplots
@@ -1297,12 +1298,12 @@ form_0_obj.plot(ax1)
 
 # supply equation and complete ext. deriv.
 form_0_obj.give_eqn('x**2 + 3*y')
-form_1_obj_num = form_0_obj.ext_d()  # this supplies the 1-form with equations too
-form_1_obj_num.plot(ax2)
+form_1_obj_ana = form_0_obj.ext_d()  # this supplies the 1-form with equations too
+form_1_obj_ana.plot(ax2)
 
 # numerical ext deriv.
-form_1_obj_ana = form_0_obj.num_ext_d()
-form_1_obj_ana.plot(ax3)
+form_1_obj_num = form_0_obj.num_ext_d()
+form_1_obj_num.plot(ax3)
 
 # %%
 
