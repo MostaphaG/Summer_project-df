@@ -13,7 +13,7 @@ setup(
   version='1.0',
   description='Differential forms and Exterior Algebra visualizer',
   long_description=open('README.txt').read() + '\n\n' + open('CHANGELOG.txt').read(),
-  url='',  
+  url='https://github.com/MostaphaG/Summer_project-df/tree/main/FormPy_Library',  
   author='Moustafa Gharamti','Maciej Jarema', 'Samuel Kirwin-Jones'
   author_email='moustafa.gharamti@nottingham.ac.uk','macusjarema@gmail.com', '1999samkj@gmail.com'
   license='MIT', 
