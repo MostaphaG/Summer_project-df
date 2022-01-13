@@ -595,21 +595,16 @@ f2 = fp.form_2(xg, yg, v, 'sin(x*y)')
 '''
 f2a = f1.wedge(f1a)
 f2b = f1.wedge(('x*y*sin(x*y)', 'sin(x*y)'))
-f2c = f1.wedge()
 #f2d = f1.wedge(('13'))
 
 # plot the working ones
 fig = plt.figure()
-ax1 = fig.add_subplot(131)
-ax2 = fig.add_subplot(132)
-ax3 = fig.add_subplot(133)
+ax1 = fig.add_subplot(121)
+ax2 = fig.add_subplot(122)
 ax1.set_aspect('equal')
 ax2.set_aspect('equal')
-ax3.set_aspect('equal')
-
 f2a.plot(ax1)
 f2b.plot(ax2)
-f2c.plot(ax3)
 
 '''
 1-form/\0-form
@@ -618,20 +613,16 @@ f2c.plot(ax3)
 f1a = f1.wedge(f0)
 f1b = f1.wedge('x*y*sin(x*y)', degree=0)
 #f1d = f1.wedge(('13', 'x'))
-f1c = f1.wedge()
 
 # plot the working ones
 fig1 = plt.figure()
-ax1 = fig1.add_subplot(131)
-ax2 = fig1.add_subplot(132)
-ax3 = fig1.add_subplot(133)
+ax1 = fig1.add_subplot(121)
+ax2 = fig1.add_subplot(122)
 ax1.set_aspect('equal')
 ax2.set_aspect('equal')
-ax3.set_aspect('equal')
 
 f1a.plot(ax1)
 f1b.plot(ax2)
-f1c.plot(ax3)
 
 '''
 1-form/\2-form
@@ -664,24 +655,20 @@ f2 = fp.form_2(xg, yg, v)
 f2a = f1.num_wedge(f1a)
 f2b = f1.num_wedge(('x*y*sin(x*y)', 'sin(x*y)'))
 f2c = f1.num_wedge((xg*yg*np.sin(xg*yg), np.sin(xg*yg)))
-f2d = f1.num_wedge()
 #f2d = f1.wedge(('13'))
 
 # plot the working ones
 fig = plt.figure()
-ax1 = fig.add_subplot(141)
-ax2 = fig.add_subplot(142)
-ax3 = fig.add_subplot(143)
-ax4 = fig.add_subplot(144)
+ax1 = fig.add_subplot(131)
+ax2 = fig.add_subplot(132)
+ax3 = fig.add_subplot(133)
 ax1.set_aspect('equal')
 ax2.set_aspect('equal')
 ax3.set_aspect('equal')
-ax4.set_aspect('equal')
 
 f2a.plot(ax1)
 f2b.plot(ax2)
 f2c.plot(ax3)
-f2d.plot(ax4)
 
 '''
 1-form/\0-form
@@ -691,24 +678,20 @@ f1a = f1.num_wedge(f0)
 f1b = f1.num_wedge('x*y*sin(x*y)', degree=0)
 f1c = f1.num_wedge(xg*yg*np.sin(xg*yg), degree=0)
 #f1d = f1.wedge(('13', 'x'))
-f1d = f1.num_wedge()
 
 # plot the working ones
 fig1 = plt.figure()
-ax1 = fig1.add_subplot(141)
-ax2 = fig1.add_subplot(142)
-ax3 = fig1.add_subplot(143)
-ax4 = fig1.add_subplot(144)
+ax1 = fig1.add_subplot(131)
+ax2 = fig1.add_subplot(132)
+ax3 = fig1.add_subplot(133)
 
 ax1.set_aspect('equal')
 ax2.set_aspect('equal')
 ax3.set_aspect('equal')
-ax4.set_aspect('equal')
 
 f1a.plot(ax1)
 f1b.plot(ax2)
 f1c.plot(ax3)
-f1d.plot(ax4)
 
 '''
 1-form/\2-form
@@ -732,19 +715,16 @@ f0.give_eqn('x*y')
 
 f2a = f2.wedge(f0)
 f2b = f2.wedge('x**2')
-f2c = f2.wedge()
+f2c = f2.wedge('x**2', degree=2)
 
 fig1 = plt.figure()
-ax1 = fig1.add_subplot(131)
-ax2 = fig1.add_subplot(132)
-ax3 = fig1.add_subplot(133)
+ax1 = fig1.add_subplot(121)
+ax2 = fig1.add_subplot(122)
 ax1.set_aspect('equal')
 ax2.set_aspect('equal')
-ax3.set_aspect('equal')
 
 f2a.plot(ax1)
 f2b.plot(ax2)
-f2c.plot(ax3)
 
 # %%
 
@@ -760,23 +740,19 @@ f0 = fp.form_0(xg, yg, xg*yg)
 f2a = f2.num_wedge(f0)
 f2b = f2.num_wedge('x**2')
 f2c = f2.num_wedge(yg**2)
-f2d = f2.num_wedge()
 
 fig1 = plt.figure()
-ax1 = fig1.add_subplot(141)
-ax2 = fig1.add_subplot(142)
-ax3 = fig1.add_subplot(143)
-ax4 = fig1.add_subplot(144)
+ax1 = fig1.add_subplot(131)
+ax2 = fig1.add_subplot(132)
+ax3 = fig1.add_subplot(133)
 
 ax1.set_aspect('equal')
 ax2.set_aspect('equal')
 ax3.set_aspect('equal')
-ax4.set_aspect('equal')
 
 f2a.plot(ax1)
 f2b.plot(ax2)
 f2c.plot(ax3)
-f2d.plot(ax4)
 
 # %%
 
@@ -808,11 +784,8 @@ f1b = f0.wedge(f1a)
 f2a = f0.wedge(f2)
 
 f0c = f0.wedge('x + y')
-f0d = f0.wedge()
 f1c = f0.wedge(('x**2', 'y**2'))
-f1d = f0.wedge()
 f2b = f0.wedge('x + 2*y')
-f2c = f0.wedge()
 
 # %%
 
@@ -845,15 +818,12 @@ f2a = f0.num_wedge(f2)
 
 f0c = f0.num_wedge(xg + yg)
 f0d = f0.num_wedge('x + y')
-f0e = f0.num_wedge()
 
 f1c = f0.num_wedge(('x**2', 'y**2'))
 f1d = f0.num_wedge((xg**2, yg**2))
-f1e = f0.num_wedge()
 
 f2b = f0.num_wedge(xg + 2*yg)
 f2c = f0.num_wedge('x + 2*y')
-f2d = f0.num_wedge()
 
 fig = plt.figure()
 ax = fig.gca()

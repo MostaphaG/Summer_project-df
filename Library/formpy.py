@@ -963,7 +963,7 @@ class form_1():
             raise ValueError('Error, Invalid input for \'keep_object\'')
     
     # define a fucntion to compute a wedge product of two 1 forms
-    def wedge(self, form_second=None, degree=1, keep_object=False):
+    def wedge(self, form_second, degree=1, keep_object=False):
         '''
         Parameters:
         ----------------
@@ -976,7 +976,6 @@ class form_1():
                     To wedge with 0-form or 2-form, supply corresponding
                     instances or a single equation. When using equations,
                     to distinguish between them, provide parmater 'degree'.
-                    If nothing is supplied, a (1, 1) 1-form is assumed
         degree - default is 1. Only used when a single string is supplied
                     as form_second, to distinguish betwen 0-form and 2-form
                     for 0-form, degree=0, for 2-form, degree=2.
@@ -1008,13 +1007,7 @@ class form_1():
         order = 1
         
         # get needed second obejct strings dep. on input
-        if form_second is None:
-            # if none was given, do it with respect to uniform 1, 1
-            # and assume 1-form/\1-form
-            to_wedge_x_2_str = '1'
-            to_wedge_y_2_str = '1'
-            order = 1
-        elif isinstance(form_second, tuple):
+        if isinstance(form_second, tuple):
             # if equations were given here take these, if numerical grids were given - error!
             # check size , should be a 1-form
             if len(form_second) == 2:
@@ -1125,7 +1118,7 @@ class form_1():
     
     
     # define a method for numerical wedge product
-    def num_wedge(self, form_second=None, degree=1, keep_object=False):
+    def num_wedge(self, form_second, degree=1, keep_object=False):
         '''
         Parameters:
         ----------------
@@ -1139,7 +1132,6 @@ class form_1():
                     To wedge with 0-form or 2-form, supply corresponding
                     instances or a single grid. When using grids,
                     to distinguish between them, provide parmater 'degree'.
-                    If nothing is supplied, a (1, 1) 1-form is assumed
         degree - default is 1. Only used when a single grid is supplied
                     as form_second, to distinguish betwen 0-form and 2-form
                     for 0-form, degree=0, for 2-form, degree=2.
@@ -1170,13 +1162,7 @@ class form_1():
         order = 1
         
         # get needed second obejct grids dep. on input
-        if form_second is None:
-            # none was given, do it with respect to uniform 1, 1
-            # and assume 1-form/\1-form
-            f12_x = np.ones(np.shape(self.xg))
-            f12_y = np.ones(np.shape(self.xg))
-            order = 1
-        elif isinstance(form_second, tuple):
+        if isinstance(form_second, tuple):
             # check size to see what it is to be wedged with.
             # tuple should only be length 2 --> 1-form/\1-form
             if len(form_second) == 2:
@@ -2282,7 +2268,7 @@ class form_2():
         return result_form
     
     # define a fucntion to compute a wedge product
-    def wedge(self, form_second=None, degree=0, keep_object=False):
+    def wedge(self, form_second, degree=0, keep_object=False):
         '''
         Parameters:
         ----------------
@@ -2295,7 +2281,6 @@ class form_2():
                     To wedge with 0-form or 2-form, supply corresponding
                     instances or a single equation. When using equations,
                     to distinguish between them, provide parmater 'degree'.
-                    If nothing is supplied, constant (=1) 0-form is assumed
         degree - default is 0. Only used when a single string is supplied
                     as form_second, to distinguish betwen 0-form and 2-form
                     for 0-form, degree=0, for 2-form, degree=2.
@@ -2328,12 +2313,7 @@ class form_2():
         order = 0
         
         # get needed second obejct strings dep. on input
-        if form_second is None:
-            # if none was given, do it with respect to uniform conatnt 0-form
-            # and assume 2-form/\0-form
-            to_wedge_0_form_str = '1'
-            order = 0
-        elif isinstance(form_second, tuple):
+        if isinstance(form_second, tuple):
             # if equations were given here take these, if numerical grids were given - error!
             # check size , should be a 1-form
             if len(form_second) == 2:
@@ -2413,7 +2393,7 @@ class form_2():
     
     
     # define a method for numerical wedge product
-    def num_wedge(self, form_second=None, degree=0, keep_object=False):
+    def num_wedge(self, form_second, degree=0, keep_object=False):
         '''
         Parameters:
         ----------------
@@ -2426,7 +2406,6 @@ class form_2():
                     To wedge with 0-form or 2-form, supply corresponding
                     instances or a single grid. When using grids,
                     to distinguish between them, provide parmater 'degree'.
-                    If nothing is supplied, constant (=1) 0-form is assumed
         degree - default is 0. Only used when a grid string is supplied
                     as form_second, to distinguish betwen 0-form and 2-form.
                     For 0-form, degree=0 and for 2-form, degree=2.
@@ -2457,12 +2436,7 @@ class form_2():
         order = 0
         
         # get needed second obejct grids dep. on input
-        if form_second is None:
-            # none was given, do it with respect to uniform 1
-            # and assume 2-form/\0-form
-            to_wedge_0_form = np.ones(np.shape(self.xg))
-            order = 0
-        elif isinstance(form_second, tuple):
+        if isinstance(form_second, tuple):
             # check size to see what it is to be wedged with.
             # tuple should only be length 2 --> 1-form/\1-form
             if len(form_second) == 2:
@@ -3115,7 +3089,7 @@ class form_0():
 
 
     # define a fucntion to compute a wedge product
-    def wedge(self, form_second=None, degree=0, keep_object=False):
+    def wedge(self, form_second, degree=0, keep_object=False):
         '''
         Parameters:
         ----------------
@@ -3128,7 +3102,6 @@ class form_0():
                     To wedge with 0-form or 2-form, supply corresponding
                     instances or a single equation. When using equations,
                     to distinguish between them, provide parmater 'degree'.
-                    If nothing is supplied, a constant (=1) 0-form is assumed
         degree - default is 0. Only used when a single string is supplied
                     as form_second, to distinguish betwen 0-form and 2-form
                     for 0-form, degree=0, for 2-form, degree=2.
@@ -3159,12 +3132,7 @@ class form_0():
         order = 0
         
         # get needed second obejct strings dep. on input
-        if form_second is None:
-            # if none was given, do it with respect to constant 0-form
-            # and assume 0-form/\0-form
-            to_wedge_0_form_str = '1'
-            order = 0
-        elif isinstance(form_second, tuple):
+        if isinstance(form_second, tuple):
             # if equations were given here take these, if numerical grids were given - error!
             # check size , should be a 1-form
             if len(form_second) == 2:
@@ -3288,7 +3256,7 @@ class form_0():
             raise ValueError('Variable change during code running, look at \'order\' parameter')
     
     # define a method for numerical wedge product
-    def num_wedge(self, form_second=None, degree=0, keep_object=False):
+    def num_wedge(self, form_second, degree=0, keep_object=False):
         '''
         Parameters:
         ----------------
@@ -3302,7 +3270,6 @@ class form_0():
                     To wedge with 0-form or 2-form, supply corresponding
                     instances or a single grid. When using grids,
                     to distinguish between them, provide parmater 'degree'.
-                    If nothing is supplied, a constant (=1) 0-form is assumed
         degree - default is 0. Only used when a single grid is supplied
                     as form_second, to distinguish betwen 0-form and 2-form
                     for 0-form, degree=0, for 2-form, degree=2.
@@ -3326,18 +3293,15 @@ class form_0():
         
         # test if equations were given first:
         if self.form_0_str is None:
+            pass
+        else:
             print('The first 0-form you are completing the wedge with has equations supplied, these will be lost')
         
         # set up variable to store order of supplied form, initially assume 0-form
         order = 0
         
         # get needed second obejct grids dep. on input
-        if form_second is None:
-            # none was given, do it with respect to uniform = 1
-            # and assume 0-form/\0-form
-            to_wedge_0_form = np.ones(np.shape(self.xg))
-            order = 0
-        elif isinstance(form_second, tuple):
+        if isinstance(form_second, tuple):
             # check size to see what it is to be wedged with.
             # tuple should only be length 2 --> 1-form/\1-form
             if len(form_second) == 2:
