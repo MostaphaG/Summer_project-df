@@ -1421,6 +1421,7 @@ form_1_i_4.plot(ax4)
 
 # %%
 
+# Interior derivative of 2-form in all inputs
 
 # set up needed parameters
 r = np.linspace(-6, 6, 21)
@@ -1475,3 +1476,148 @@ form_1_i_1.plot(ax3)
 form_1_i_2.plot(ax6)
 form_1_i_3.plot(ax5)
 form_1_i_4.plot(ax4)
+
+# %%
+
+# Double interior derivative
+# analytically
+
+# set up needed parameters
+r = np.linspace(-3, 3, 41)
+xg, yg = np.meshgrid(r, r)
+
+# set up subplots
+fig = plt.figure()
+ax1 = fig.add_subplot(221)
+ax2 = fig.add_subplot(222)
+ax3 = fig.add_subplot(223)
+ax4 = fig.add_subplot(224)
+ax1.set_aspect('equal')
+ax1.set_title(r'$Starting \ 2-form \Omega $')
+ax2.set_aspect('equal')
+ax2.set_title(r'$Starting \ VF \ v^{i}$')
+ax3.set_aspect('equal')
+ax3.set_title(r'$ analytical \ \iota_{v^{i}}(\Omega)$')
+ax4.set_aspect('equal')
+ax4.set_title(r'$ analytical \ \iota_{v^{i}}^{2}(\Omega) $')
+
+# set up form
+form2_comp = np.cos(xg**2 + yg)/np.sqrt(xg**2 + yg**2)
+form_obj2 = fp.form_2(xg, yg, form2_comp)
+form_obj2.give_eqn('cos(x**2 + y)/sqrt(x**2 + y**2)')
+
+# plot it
+form_obj2.plot(ax1)
+
+# set up a vector field object:
+u = np.ones(np.shape(xg))
+v = xg
+vf = fp.vector_field(xg, yg, u, v)
+vf.give_eqn('1', 'x')
+
+# plot it:
+vf.plot(ax2)
+
+# complete int deriv once and plot:
+form_1_i_1 = form_obj2.interior_d(vector_field=vf)
+form_1_i_1.sheet_size(0.03)
+form_1_i_1.plot(ax3)
+
+
+# again with same VF
+form_1_i_2 = form_1_i_1.interior_d(vector_field=vf)
+form_1_i_2.plot(ax4)
+
+# %%
+
+# Double interior derivative
+# numerical
+
+# set up needed parameters
+r = np.linspace(-3, 3, 41)
+xg, yg = np.meshgrid(r, r)
+
+# set up subplots
+fig = plt.figure()
+ax1 = fig.add_subplot(221)
+ax2 = fig.add_subplot(222)
+ax3 = fig.add_subplot(223)
+ax4 = fig.add_subplot(224)
+ax1.set_aspect('equal')
+ax1.set_title(r'$Starting \ 2-form \Omega $')
+ax2.set_aspect('equal')
+ax2.set_title(r'$Starting \ VF \ v^{i}$')
+ax3.set_aspect('equal')
+ax3.set_title(r'$ numerical \ \iota_{v^{i}}(\Omega)$')
+ax4.set_aspect('equal')
+ax4.set_title(r'$ numerical \ \iota_{v^{i}}^{2}(\Omega) $')
+
+# set up form
+form2_comp = (np.cos(xg**2 + 3*yg))**2/np.sqrt(xg**2 + yg**2)
+form_obj2 = fp.form_2(xg, yg, form2_comp)
+
+# plot it
+form_obj2.plot(ax1)
+
+# set up a vector field object:
+u = np.ones(np.shape(xg))
+v = xg
+vf = fp.vector_field(xg, yg, u, v)
+
+# plot it:
+vf.plot(ax2)
+
+# complete int deriv once and plot:
+form_1_i_1 = form_obj2.num_interior_d(vector_field=vf)
+form_1_i_1.sheet_size(0.03)
+form_1_i_1.plot(ax3)
+
+# again with same VF
+form_1_i_2 = form_1_i_1.num_interior_d(vector_field=vf)
+form_1_i_2.plot(ax4)
+
+# %%
+
+# 0-form wedge examples
+# Wedge a single 1-form into different obnjects, 0-from, 1-form and then 2-form
+
+# grids and initial 0-form
+v = np.linspace(-2, 2, 23)
+xg, yg = np.meshgrid(v, v)
+f0 = fp.form_0(xg, yg, yg*np.sin(xg*yg))
+
+# 1-form 
+f1 = fp.form_1(xg, yg, xg*yg, np.sin(xg))
+
+# 2-form, by 0-from Hodge
+f2 = f0.num_hodge()
+
+# figre and axis + visuals
+fig = plt.figure()
+ax1 = fig.add_subplot(221)
+ax2 = fig.add_subplot(222)
+ax3 = fig.add_subplot(223)
+ax4 = fig.add_subplot(224)
+ax1.set_aspect('equal')
+ax1.set_title(r'$Starting \ 0-form \Phi $')
+ax2.set_aspect('equal')
+ax2.set_title(r'$\Phi \wedge \Phi$')
+ax3.set_aspect('equal')
+ax3.set_title(r'$ \Phi \wedge \alpha \ 1-form$')
+ax4.set_aspect('equal')
+ax4.set_title(r'$ \Phi \wedge \star \Phi $')
+
+# plot starting 0-form
+f0.plot(ax1)
+
+# wedge with itself and plot:
+f0f0 = f0.num_wedge(f0)
+f0f0.plot(ax2)
+
+# wedge with 1-form and plot
+f0f1 = f0.num_wedge(f1)
+f0f1.plot(ax3)
+
+# wedge with it's Hodge and plot
+f0f2 = f0.num_wedge(f2)
+f0f2.plot(ax4)
