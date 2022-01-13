@@ -3012,7 +3012,7 @@ class form_0():
         '''
         
         # from numpy gradient, get the gradient array
-        fy, fx = np.gradient(form_0, edge_order=edge_order)
+        fy, fx = np.gradient(self.form_0, edge_order=edge_order)
         
         # supply these to the 1-form object function
         result_1_form = form_1(self.xg, self.yg, fx, fy)
