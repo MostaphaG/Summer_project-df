@@ -3042,16 +3042,13 @@ class form_0():
         # can only be done if equations have been given, check:
         if self.form_0_str != None:
             # some equations are there, compute the Hodge on these:
-            # Note: Upto user to make sure their equations match their
-            # numerical input, unless using give eqn, then its updates
-            # numerical values to match
             
-            # get numerical solutions, evaulated on local
-            # strings changed to relate to the self grids
-            # need to uspply these unformatted, so save those:
+            # get numerical solutions, evaulated on local strings
+            # to relate parameter to the self grids and keep strings, because
+            # need to supply these unformatted:
             form_2_str_unformated = self.form_0_str + '' 
             string_2_form = self.form_0_str  # to be formated
-            # from these strings, get the numerical 0-form:
+            # from these strings, get the numerical 2-form:
             string_2_form = string_2_form.replace('x', '(self.xg)')
             string_2_form = string_2_form.replace('y', '(self.yg)')
             
@@ -3061,16 +3058,12 @@ class form_0():
             # evaulated numerically
             form_2_result = eval(string_2_form)
             
-            # return object, depending on option for figure passage:
-            # pass these in to the object to create a new one:
+            # create and return object
             new_object = form_2(self.xg, self.yg, form_2_result, form_2_eq=form_2_str_unformated)
-            
-            # return the new one to the user:
             return new_object
         else:
             # ERROR
             raise TypeError('You need to supply the 2-form equation to do this, look at \'give_eqn\' method')
-
 
     # define a fucntion to compute a wedge product
     def wedge(self, form_second, degree=0, keep_object=False):

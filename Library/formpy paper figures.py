@@ -297,7 +297,7 @@ form11.give_eqn('y*sin(x)','-x*cos(y)')
 form12 = form11.hodge()
 
 # wegde them:
-form2 = form11.wedge(form_1_second=form12)
+form2 = form11.wedge(form_second=form12)
 
 # plot
 form11.plot(ax1)
