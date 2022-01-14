@@ -2725,9 +2725,17 @@ class form_0():
     # the grids as stored and not just locally for a plot
     def set_density(self, points_number):
         '''
-        takes in one argument, requires the string equation to be
-        supplied
+        set_density(points_number)
+        
         Changes the desnity of points in the same range to the input value
+        requires the string equation to be supplied
+        Only creates grids with same number of points of each axis.
+        
+        Parameters:
+        ---------------
+        points_number -number of points to evaluate on
+        
+        Returns: none
         '''
         if self.form_0_str == None:
             # Error
@@ -2751,30 +2759,20 @@ class form_0():
             self.form_0 = eval(str_0)
     
     # #####################################################################
-    # Write more complicated methods. That will use this form object
-    # eg. plot, exterior derivative, Hodge etc.
+    # Write more useful methods plot, exterior derivative, Hodge etc.
     # #####################################################################
     
-    
-    # define a fucntion to plot a zero form when button is pressed.
+    # define a fucntion to plot a zero form pressed.
     def plot(self, axis):
         '''
         Finilises the plotting
         Uses the attribues of the object as set originally and as customised
         with methods to create a plot of the 2-form.
-        Can take one parameter: bool. Default is True
-        determines if axis should be cleared before plotting.
-        Another parameter it takes:
-            index of subplot on which to plot it, if object was set up with
-            axis
+        
+        parametes:
+        -------------
+        axis - matplotlib axis that 0-form will be plotted on
         '''
-        
-        # for ease of later writting:
-        # from self, get 2-form
-        form_0 = self.form_0
-        
-        # set all insignificant values to zero:
-        form_0[np.abs(form_0) < 1e-15] = 0
         
         # find L based on the origin of given grid is
         Lx = 0.5*(self.xg[0, -1] - self.xg[0, 0])
@@ -2787,6 +2785,7 @@ class form_0():
         axis.set_xlim(-ax_L + x0, ax_L + x0)
         axis.set_ylim(-ax_L + y0, ax_L + y0)
         
+        # cehck requests as to density of lines
         if self.denser != 1:
             if self.form_0_str == None:
                 # This cannot be done if a string has not been supplied
@@ -2811,28 +2810,13 @@ class form_0():
                 xg = contour_x_grid
                 yg = contour_y_grid
         else:
+            form_0 = self.form_0
             xg = self.xg
             yg = self.yg
-    
-        # if self.denser != 1:
-        #     if self.form_0_str == None:
-        #         # This cannot be done if a string has not been supplied
-        #         # ERROR
-        #         raise TypeError('Error: You need to supply the 0-form equation to do this, look at \'give_eqn\' method')
-        #     else:
-        #         # get the supplied form as a string
-        #         zero_form_str = str(simplify(self.form_0_str))
-        #         # set up grids for contours
-        #         contour_x, contour_y = np.linspace(self.xg[0,0] , self.xg[0,-1] , self.pt_den*self.denser), np.linspace(self.yg[0,0] , self.yg[-1,0], self.pt_den*self.denser)
-        #         contour_x_grid, contour_y_grid = np.meshgrid(contour_x, contour_y)
-        #         # format the given ftring
-        #         zero_form_str = zero_form_str.replace('x', 'contour_x_grid')
-        #         zero_form_str = zero_form_str.replace('y', 'contour_y_grid')
-        #         # evaluate bearing in mind zeros
-        #         if zero_form_str.find('contour_x_grid') & zero_form_str.find('contour_y_grid') == -1:
-        #             form_0_contour = eval(zero_form_str)*np.ones(np.shape(contour_x_grid))
-        #         else:
-        #             form_0_contour = eval(zero_form_str)
+        
+        
+        # set all insignificant values to zero:
+        form_0[np.abs(form_0) < 1e-15] = 0
                 
         # deal with sinularities that appear on evaluated points
         isnan_arr = np.isnan(form_0)
