@@ -3,9 +3,10 @@ from setuptools import setup, find_packages
 classifiers = [
   'Development Status :: 5 - Production/Stable',
   'Intended Audience :: Education',
+  'Intended Audience :: End Users/Desktop',
   'Intended Audience :: Developors',
   'Operating System :: MacOS :: MacOS X',
-  'Operating System :: Microsoft :: Windows :: Windows 10',
+  'Operating System :: Microsoft :: Windows',
   'License :: OSI Approved :: MIT License',
   'Programming Language :: Python :: 3'
 ]
