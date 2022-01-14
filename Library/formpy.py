@@ -172,17 +172,14 @@ class form_1():
     
     Parameters:
     ---------------
-    xg - grid of x values (2D numpy array)
-    yg - grid of y values (2D numpy array)
-    F_x - grid of dx form components (2D numpy array)
-    F_y - grid of dy form components (2D numpy array)
+    xg - grid of x values (2D numpy.ndarray)
+    yg - grid of y values (2D numpy.ndarray)
+    F_x - grid of dx form components (2D numpy.ndarray)
+    F_y - grid of dy form components (2D numpy.ndarray)
+    
+    Optional:
     F_x_eqn - expression for dx form component f(x,y) (string)
     F_y_eqn - expression for dy form component f(x,y) (string)
-    
-    
-    Returns:
-    ---------------
-    form_1_object - instance of the 1-form class
     
     
     Instance variables:
@@ -195,11 +192,11 @@ class form_1():
     scale - float/int - constant multpilier to change scaling
     w_head - float/int - width of arrowghead on stack as size of sheet
     h_head - float/int - height of arrowghead on stack as size of sheet
-    arrowheads - bool - determines of arrowheads showld be drawnon stacks
+    arrowheads - bool - determines of arrowheads showld be drawn on stacks
     color - str - colour to draw stacks with, can be Hex when using '#FFFFFF'
     logarithmic_scale_bool - bool - determines if log scaling is used
-    delta_factor - float/int - determined size of blank boarder in figure, as fraction of whole plot size
-    
+    delta_factor - float/int - determined size of blank boarder in figure
+                                as fraction of whole plot size
     
     Methods:
     ---------------
@@ -225,7 +222,7 @@ class form_1():
     contravariant
     
     '''
-    # initialise self
+    
     def __init__(self, xg, yg, F_x, F_y, F_x_eqn=None, F_y_eqn=None):
         self.xg = xg
         self.yg = yg
@@ -233,7 +230,6 @@ class form_1():
         self.F_y = F_y
         self.s_max = 6
         self.s_min = 1
-        self.pt_den = len(xg[:, 0])  # assumes square grids
         self.fract = 0.05
         self.scale = 1
         self.w_head = 1/8
@@ -241,10 +237,9 @@ class form_1():
         self.arrowheads = True
         self.color = '#8B14F3'
         self.logarithmic_scale_bool = 0
-        # self.base = 10
         self.delta_factor = 10
-        # define equations, if given:
-        # user must change to access some methods, methods will indicate when needed
+        # define equations if given:
+        # user must change to access some methods, will indicate when needed
         # Note, the string must be given with x and y as variables
         if F_x_eqn is not None:
             self.form_1_str_x = str(simplify(F_x_eqn))
@@ -264,10 +259,18 @@ class form_1():
     # of the 1-form
     def give_eqn(self, equation_str_x, equation_str_y):
         '''
-        This must be the equation of the supplied numerical 1-form
-        it re-evaluates the numerical values to match the new equations
+        give_eqn(equation_str_x, equation_str_y)
         
-        Has to be given, for some methods to be calculatable
+        This must be the equation of the supplied numerical 1-form
+        in terms of variables x and y.
+        All formatting is as in numpy, but no library calling in string
+        exception - exponential - call it as e**(expression)
+        
+        it re-evaluates the numerical values to match the new equations
+        A warning is shown if any differences are detected, not rigorous though
+        Will often show for most minor changes
+        
+        Has to be given, for some methods to be computable
         Methods will indicate when needed
         
         Parameters:
@@ -289,16 +292,17 @@ class form_1():
         str_x = str_x.replace('y', '(self.yg)')
         str_y = str_y.replace('x', '(self.xg)')
         str_y = str_y.replace('y', '(self.yg)')
-        
         # check against constant forms, to have correct shape
         if str_x.find('x') & str_x.find('y') == -1:
             str_x = '(' + str(str_x) + ')* np.ones(np.shape(self.xg))'
         if str_y.find('x') & str_y.find('y') == -1:
             str_y = '(' + str(str_y) + ')* np.ones(np.shape(self.yg))'
+        
         # re-evaluate the 2-form numerically, warn user if changed
         if not ((self.F_x is eval(str_x)) and (self.F_y is eval(str_y))):
             print('Warning: Equations did not exactly match numerical values, and these were change to agree with equations')
         
+        # evaluate formatted equations and save
         self.F_x = eval(str_x)
         self.F_y = eval(str_y)
     
@@ -443,6 +447,9 @@ class form_1():
         Changes the desnity of points in the same range to the input value
         Requires the string equation to be supplied to not 'extrapolate'
         
+        Only creates 2 axis with same number of points each
+        cannot be used for any custom grids
+        
         Parameters:
         --------------
         points_number - new number of points to use per axis
@@ -457,8 +464,6 @@ class form_1():
             x = np.linspace(self.xg[0,0], self.xg[0, -1], points_number)
             y = np.linspace(self.yg[0,0], self.yg[-1, 0], points_number)
             self.xg, self.yg = np.meshgrid(x, y)
-            # based on these change other dependant variables
-            self.pt_den = len(self.xg[:, 0])
             # substitute these into the equation, but keep it local:
             str_x = self.form_1_str_x + ''
             str_y = self.form_1_str_y + ''
@@ -498,26 +503,28 @@ class form_1():
         x_len = len(self.xg[:, 0])
         y_len = len(self.yg[0, :])
         
-        # Extract L from the x and y grids. Assumes they are square.
+        # Extract L from the x and y grids
         Lx = 0.5*(self.xg[0, -1] - self.xg[0, 0])
         Ly = 0.5*(self.yg[-1, 0] - self.yg[0, 0])
         L = 0.5*(Lx + Ly)  # average, needed for stack sizes only
         x0 = self.xg[0, 0] + Lx
         y0 = self.yg[0, 0] + Ly
         
+        # reset axis limits
         ax_Lx = Lx + Lx/self.delta_factor
         ax_Ly = Ly + Ly/self.delta_factor
         axis.set_xlim(-ax_Lx + x0, ax_Lx + x0)
         axis.set_ylim(-ax_Ly + y0, ax_Ly + y0)
         
         # find the distance between neightbouring points on the grid
+        # for drawing extra arefacts
         dist_points = self.xg[0, 1] - self.xg[0, 0]
         
         # define an empty array of magnitudes, to then fill with integer rel. mags
         R_int = np.zeros(shape=((x_len), (y_len)))
     
         # #########################################################################
-        # get variables needed for the initial, simplified stack plot
+        # get variables needed for the initial stack plot
         # #########################################################################
         
         # set all insignificant values to zero:
@@ -531,15 +538,15 @@ class form_1():
         angles = np.arctan2(self.F_y, self.F_x)   # theta defined from positive x axis ccw
         
         # find regions ON GRID that are nan or inf as a bool array
-        #bool_array = undef_region(mag)
         
         # deal with infs and nans in mag
+        # set to zero points that are not defined or inf
+        # and mark them on axis
         isnan_arr = np.isnan(mag)
         for i in range(x_len):
             for j in range(y_len):
-                # set to zero points that are not defined or inf
                 if isnan_arr[i, j]:
-                    #colour this region as a shaded square
+                    # colour this region as a shaded square
                     rect = patch.Rectangle((self.xg[i, j] - dist_points/2, self.yg[i, j]  - dist_points/2), dist_points, dist_points, color='#B5B5B5')
                     axis.add_patch(rect)
                     mag[i, j] = 0
@@ -553,40 +560,24 @@ class form_1():
         # use the the direction of arrows to define stack properties
         # #########################################################################
         
-        # s_L and sheet_L are defined the same? 
-        
         # define length of sheet as a fraction of total graph scale
-        # sheet_L = L * self.fract
-        # set up the max, total height of stack (along arrow)
-        
+        # this also sets max, total height of stack (along its direction)
         s_L = self.fract * L
         
         # #########################################################################
-        # define the stacks based on geometrical arguments
-        # to be perp. to arrow. shifted parallel to it, their density porp to mag
-        # of the arrow and with an arrowhead on top.
+        # define stack based on geometrical arguments
+        # sheets perp. to hypothetical arrow, shifted along it
+        # their density porp to mag, + arrowhead on top
         # #########################################################################
         
         # find the maximum magnitude for scaling
-        max_size = np.max(mag)   # careful with singularities, else ---> nan
+        max_size = np.max(mag)
         
-        # Define scaling factor
-        #ScaleFactor = max_size/(0.9*(2*L/self.pt_den))
-        
-        # find the relative magnitude of vectors to maximum, as an array
-        # R = mag/max_size
-        
-        # logarithmic attempt
+        # setrelative scaling, linear or logarithmic
         if self.logarithmic_scale_bool:
-            # Add 1 to each magnitude
             mag1 = mag + 1
-            # Calculate the appropriate scaling factor
-            # a = max_size**(1/self.s_max)
-            # a = self.base
-            # Take log(base=a) of mag1
             logmag1 = np.log(mag1)
-            # Re-assign R
-            R = logmag1/np.max(logmag1)    
+            R = logmag1/np.max(logmag1)  # Re-assign R
         else:
             R = mag/max_size
 
@@ -594,6 +585,7 @@ class form_1():
         I_sin = np.sin(angles)
         I_cos = np.cos(angles)
         
+        # precalculate heavy operations
         # define the points that set out a line of the stack sheet (middle line)
         A_x = self.xg + (s_L/2)*I_sin
         A_y = self.yg - (s_L/2)*I_cos
@@ -608,7 +600,7 @@ class form_1():
         p_sh3x = self.xg + (s_L*0.5 + s_L*self.h_head)*I_cos
         p_sh3y = self.yg + (s_L*0.5 + s_L*self.h_head)*I_sin
         
-        # define these for when there is only 1 line in the stack plot:
+        #  special case, when there is only 1 line in the stack plot:
         P_sh1x = self.xg + (s_L*self.w_head)*I_sin
         P_sh1y = self.yg - (s_L*self.w_head)*I_cos
         P_sh2x = self.xg - (s_L*self.w_head)*I_sin
@@ -616,34 +608,28 @@ class form_1():
         P_sh3x = self.xg + (s_L*self.h_head)*I_cos
         P_sh3y = self.yg + (s_L*self.h_head)*I_sin
         
-        # Create array of the number of sheets per stack for each stack
+        # array of number of sheets for each stack
         for i in range(self.s_max - self.s_min + 1):
             t = self.s_max - i
             R_int[R <= t/self.s_max] = t
         
-        # loop over each arrow coordinate in x and y
+        # loop over each coordinate plotting
         for i in range(x_len):
             for j in range(y_len):
-                
-                # # Label each element with the number of stacks required: linear scaling
-                # for t in range(self.s_min, self.s_max+1):
-                #     if (t-1)/self.s_max <= R[i, j] <= t/self.s_max:
-                #         R_int[i, j] = t
-                
-                # set a varible for current considered magnitude as it is reused
+                # varible for current considered magnitude as it is reused
                 # avoids extracting from R many times.
                 n = R_int[i, j]
                 
-                #if axis_check == 1 and click_opt_int > 1 and i == i_m and j == j_m:
+                # do not plot anything if magnitude is exactly zero
                 if mag[i,j] == 0:
                     continue
                 
                 # deal with even number of sheets from magnitudes:
                 if n % 2 == 0:
-                    # define a parameter to loop over in the recursion equation
+                    # parameter to loop over in the recursion equation
                     s = 0
                     
-                    # Define the points for sheets required for the given magnitude
+                    # points for sheets required for the given magnitude
                     # from these define all the needed lines and plot them
                     while s <= 0.5*(n-2):  # maximum set by equations (documentation)
                         # define all the points for the 2 currently looped +- sheets in while loop
@@ -668,7 +654,7 @@ class form_1():
                     axis.add_line(Line2D((A_x[i, j], B_x[i, j]), (A_y[i, j], B_y[i, j]), linewidth=1, color=self.color))
                     
                     # then loop over the remaining lines as per the recursion formula:
-                    s = 1  # change the looping parametr to exclude already completed 0 (corr. to middle sheet here)
+                    s = 1  # exclude already completed 0
                     
                     # define all remaining sheets for the magnitude:
                     while s <= 0.5*(n-1):  # maximum set by equations (documentation)
@@ -686,21 +672,23 @@ class form_1():
                         axis.add_line(Line2D((Ax1,Bx1),(Ay1,By1), linewidth=1, color=self.color))
                         axis.add_line(Line2D((Ax2,Bx2),(Ay2,By2), linewidth=1, color=self.color))
                         
-                        # change the parameter to loop over all changes in displacement for current magnitude
+                        # update parameter
                         s += 1
-                if self.arrowheads == True:
-                    # plot lines of arrowheads from central sheet for n = 1 or on top sheet for n>1 
-                    if n > 1:   # for all lines ubt the single sheet one
+                
+                # dela with arrowheads
+                if self.arrowheads:
+                    # from central sheet for n=1 or on top sheet for n>1 
+                    if n > 1:   # for all lines but the single sheet one
                         axis.add_line(Line2D((p_sh1x[i, j],p_sh3x[i, j]),(p_sh1y[i, j],p_sh3y[i, j]), linewidth=1, color = self.color))
                         axis.add_line(Line2D((p_sh2x[i, j],p_sh3x[i, j]),((p_sh2y[i, j],p_sh3y[i, j])), linewidth=1, color = self.color))
-                    # then define it for the stacks with only 1 sheet:
                     else:
+                        # when only 1-sheet is drawn
                         axis.add_line(Line2D((P_sh1x[i, j], P_sh3x[i, j]), (P_sh1y[i, j], P_sh3y[i, j]), linewidth=1, color = self.color))
                         axis.add_line(Line2D((P_sh2x[i, j], P_sh3x[i, j]), ((P_sh2y[i, j], P_sh3y[i, j])), linewidth=1, color = self.color))
                 else:
                     pass
     
-    # define a method to find its exterior derivative
+    # method to find its exterior derivative
     def ext_d(self):
         '''
         Takes in no arguments

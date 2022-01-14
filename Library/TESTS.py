@@ -829,3 +829,24 @@ fig = plt.figure()
 ax = fig.gca()
 ax.set_aspect('equal')
 f1d.plot(ax)
+
+# %%
+
+# set up needed parameters
+v = np.linspace(-2, 2, 31)
+xg, yg = np.meshgrid(v, v)
+
+F_x = np.zeros(np.shape(xg))
+F_x[10:, :] = 1
+
+form_obj = fp.form_1(xg, yg, F_x, F_x)
+form_obj.sheet_size(0.03)
+
+# set up a plot to put these on:
+fig = plt.figure(figsize=(6, 6))
+ax = fig.gca()
+ax.set_xlabel(r'$x$')
+ax.set_ylabel(r'$y$')
+ax.set_aspect('equal')
+
+form_obj.plot(ax)
