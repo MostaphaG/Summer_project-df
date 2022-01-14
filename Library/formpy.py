@@ -2481,14 +2481,57 @@ function to create a 0-form object and define methods for it
 
 '''
 
-
 # define a function that will set up a 0-form object that can be customised and
 # plotted
 class form_0():
     '''
-    defines a 0-form object and returns it to user
-    Takes 3 arguments basic, these are the 2 grids in 2D, which muse be square
-    and of equal sizes. Then 1 argument 0-form based on the same grids.
+    
+    form_0(xg, yg, form_0, form_0_eqn=None)
+    
+    
+    Defines a 0-form object and returns it to user. 
+    
+    Parameters:
+    ---------------
+    xg - grid of x values (2D numpy.ndarray)
+    yg - grid of y values (2D numpy.ndarray)
+    form_0 - sclar form grid (2D numpy.ndarray)
+    
+    Optional:
+    form_0_eqn - expression for scalar form f(x,y) (string)
+    
+    
+    Instance variables:
+    ---------------
+    xg, yg, form_0, form_0_eqn
+    pt_den - int - number of points on grids, extracted from grids, assumes square grid
+    color - str - colour to draw stacks with, can be Hex when using '#FFFFFF'
+    logarithmic_scale_bool - bool - determines if log scaling is used
+    N - int - base for log scaling
+    delta_factor - float/int - determined size of blank boarder in figure
+                                as fraction of whole plot size
+    inline_bool - bool - if labels on contours are put on contour lines
+    denser - int, default is 1 - if equations are given, increases density
+                                of contours
+    lines - int - number of contour lines to draw
+    cmap - matplotlib colourmap - colour mapping to use
+    
+    
+    Methods:
+    ---------------
+    give_eqn
+    return_string
+    colour
+    log_scaling
+    surround_space
+    set_density
+    plot
+    ext_d
+    num_ext_d
+    hodge
+    wedge_analytical
+    wedge_num
+    
     '''
     # set up all initial, defualt variables
     def __init__(self, xg, yg, form_0, form_0_eqn=None):
@@ -2504,10 +2547,9 @@ class form_0():
         # Log scaling parameters
         self.logarithmic_scale_bool = 0
         self.N = 30
-        # self.base= 10
         
         if form_0_eqn is not None:
-            self.form_0_str = str(simplify(form_0_eqn))  # to start with, use rmust change to access some methods
+            self.form_0_str = str(simplify(form_0_eqn))  # user must change to access some methods
         else:
             self.form_0_str = None
         # Note, the string must be given with x and y as variables
@@ -2523,10 +2565,17 @@ class form_0():
     # of the 0-form
     def give_eqn(self, equation_str):
         '''
-        Takes in 1-argument, string
-        This must be the equation of the supplied numerical 0-form
-        It must be in terms of x and y.
-        Has to be given, for some methods to be calculatable.
+        
+        Allows user to supply equation to instance, if not initially done so
+        
+        Parameters:
+        ------------
+        equation_str - str - equation of the supplied numerical 0-form
+                        It must be in terms of x and y.
+                        Has to be given, for some methods to be calculatable.
+        
+        Returns: None
+        
         '''
         self.form_0_str = equation_str
         
@@ -2552,17 +2601,6 @@ class form_0():
         that got here not by input but by ext. alg.
         '''
         return self.form_0_str
-    
-    # define a method to change figure size
-    def fig_size(self, n, m):
-        '''
-        Takes two inputs, float or int numbers, sets the figure
-        size to these dimensions in inches. Uses set_size_inches from
-        matploitlib so can just use that on
-        the atribute figure, this function is here just for
-        easier nameing
-        '''
-        self.figure.set_size_inches(n, m)
     
     #define a method to change spare spacing around figure
     def surround_space(self, delta_denominator):
@@ -2657,9 +2695,12 @@ class form_0():
         # self.lines = log_levels
         
     def log_scaling(self, N=30):
-        
+        '''
+        changes bool for logscaling
+        Strats with default False
+        changes to the other option each time it is called
+        '''
         self.N = N
-        # self.base = base
         self.logarithmic_scale_bool = not self.logarithmic_scale_bool
     
     def fonts_size(self, size):

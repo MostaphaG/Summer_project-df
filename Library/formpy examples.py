@@ -96,6 +96,13 @@ form_obj = fp.form_0(xg, yg, form_0)
 form_obj.levels(4)
 # form_obj.density_increase(20)  # demonstation of an error
 
+#x = np.linspace(-2, 4, 17)
+#y = np.linspace(-3, 3, 23)
+#xg, yg = np.meshgrid(x, y)
+#form_0 = np.cos(xg*yg)
+#form_obj = fp.form_0(xg, yg, form_0)
+#form_obj.levels(4)
+
 # Create a figure and axis to plot it on
 fig = plt.figure()
 ax = fig.gca()
