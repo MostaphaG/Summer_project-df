@@ -486,6 +486,9 @@ class form_1():
     # define a fucntion that will use the set up 1-form and plot it
     def plot(self, axis):
         '''
+        
+        plot(axis)
+        
         Uses the attribues of the object as set originally and as customised
         with methods to create a plot of the 1-form
         
@@ -688,7 +691,9 @@ class form_1():
     # method to find its exterior derivative
     def ext_d(self):
         '''
-        Takes in no arguments
+        
+        ext_d()
+        
         Computes the exterior derivative and returns it
         as the 2-form object
         '''
@@ -741,12 +746,13 @@ class form_1():
     def num_ext_d(self):
         '''
         Takes in no arguments
-         
-        returns 2-form object
+        
         computes the exterior derivative numerically only
         The equations do not need to be given
         If given, they do not get passed onto the 2-form object anyway
         NUMERICAL ONLY, they will be lost!
+         
+        returns 2-form object
         '''
         
         # get steps in dx and dy:
@@ -757,10 +763,7 @@ class form_1():
         fx = self.F_x + np.zeros(np.shape(self.xg))
         fy = self.F_y + np.zeros(np.shape(self.xg))
         
-        #np.set_printoptions(True)
-        
-        # clean up F_x and F_y from nan
-        # keep inf and large values, for gradient to be found still
+        # clean up F_x and F_y from nan etc
         for i in range(len(self.xg[:, 0])):
             for j in range(len(self.yg[0, :])):
                 # correct for ill defined values
@@ -778,15 +781,8 @@ class form_1():
         dy_F_x, _ = np.gradient(fx, dx, dy)
         _, dx_F_y = np.gradient(fy, dx, dy)
         
-#            dy_F_x, _ = np.gradient(0.5*(fx + fx.transpose()), dx, dy)
-#            _, dx_F_y = np.gradient(0.5*(fy + fy.transpose()), dx, dy)
-        
-#            dy_F_x, _ = np.gradient(fx - fy, dx, dy)
-#            _, dx_F_y = np.gradient(fy - fx, dx, dy)
-        
         # from these, get the 2-form
         form_2_result = dx_F_y - dy_F_x
-        #form_2_result = 0.5*(form_2_result + form_2_result.transpose())
         
         # return 2-form object to user
         result_form = form_2(self.xg, self.yg, form_2_result)
@@ -794,13 +790,18 @@ class form_1():
         # return it to the user
         return result_form
     
-    
     # define a method to Hodge it
     def hodge(self, keep_object=False):
         '''
-        Takes in one bool argument:
-        2) determines if the result should be returned as a new 1-form or
-            if the current one need to be changed. Default is False
+        
+        hodge(keep_object=False)
+        
+        Parameters:
+        -------------
+        keep_object - determines if the result should be returned as a new
+                      1-form or if current one need to be changed.
+                      Default is False. When False, a new object is created
+                      When true, the acted on is modified.
         
         It calulates the Hodge on R^2 by the standard definition:
         dx -> dy and dy -> -dx
@@ -808,31 +809,31 @@ class form_1():
         
         returns: 1-form if keep_object is False, else returns nothing
         '''
-        # can only be done if equations have been given, check:
+        
+        # check for equations:
         if self.form_1_str_x == None or self.form_1_str_y == None:
             # ERROR
             raise TypeError('Error: You need to supply the 1-form equation to do this, look at \'give_eqn\' method')
         else:
             # some equations are there, compute the Hodge on these:
-            # Note: Upto user to make sure their equations match their
-            # numerical input
             new_str_x = '-(' + self.form_1_str_y + ')'
             new_str_y = self.form_1_str_x
             # from these, get numerical solutions, evaulated on local
             # strings changed to relate to the self grids
-            # need to uspply these unformatted, so save those:
+            # need to supply these unformatted, so save those:
             form_1_x_unformated, form_1_y_unformated = new_str_x*1, new_str_y*1
             # from these strings, get the numerical 1-form:
             new_str_x = new_str_x.replace('x', '(self.xg)')
             new_str_x = new_str_x.replace('y', '(self.yg)')
             new_str_y = new_str_y.replace('x', '(self.xg)')
             new_str_y = new_str_y.replace('y', '(self.yg)')
-            
+            # correct for constants
             if new_str_x.find('x') & new_str_x.find('y') == -1:
                 new_str_x = '(' + str(new_str_x) + ')* np.ones(np.shape(self.xg))'
             if new_str_y.find('x') & new_str_y.find('y') == -1:
                 new_str_y = '(' + str(new_str_y) + ')* np.ones(np.shape(self.yg))'
             
+            # evaluate
             form_1_x = eval(new_str_x)
             form_1_y = eval(new_str_y)
             
@@ -844,19 +845,25 @@ class form_1():
                 self.form_1_str_y = form_1_y_unformated
             elif not keep_object:
                 new_object = form_1(self.xg, self.yg, form_1_x, form_1_y, F_x_eqn=form_1_x_unformated, F_y_eqn=form_1_y_unformated)
-                # return the new one to the user:
                 return new_object
             else:
                 raise ValueError('Error, Invalid input for \'keep_object\'')
     
     def num_hodge(self, keep_object=False):
         '''
-        Takes in one bool argument:
-        2) determines if the result should be returned as a new 1-form or
-            if the current one need to be changed. Default is False
+        
+        num_hodge(keep_object=False)
+        
+        Parameters:
+        -------------
+        keep_object - determines if the result should be returned as a new
+                      1-form or if current one need to be changed.
+                      Default is False. When False, a new object is created
+                      When true, the acted on is modified.
         
         It calulates the Hodge on R^2 by the standard definition:
         dx -> dy and dy -> -dx
+        
         Does no numerically using only component arrays.
         If equations have been previously provided, this method will
         loose them
@@ -865,7 +872,7 @@ class form_1():
         '''
         # check if equations have been given:
         # if they have, doing it only numerically would create
-        # a mismatch, avoid that
+        # a mismatch, warn user
         if self.form_1_str_x != None or self.form_1_str_y != None:
             print('Warning: You supplied equations, doing it numerically only will result in a mismacth between numerical values and equations')
         
@@ -889,6 +896,9 @@ class form_1():
     # define a fucntion to compute a wedge product of two 1 forms
     def wedge(self, form_second, degree=1, keep_object=False):
         '''
+        
+        wedge(form_second, degree=1, keep_object=False)
+        
         Parameters:
         ----------------
         form_second - the form to wedge the 1-form with.
@@ -1044,6 +1054,9 @@ class form_1():
     # define a method for numerical wedge product
     def num_wedge(self, form_second, degree=1, keep_object=False):
         '''
+        
+        num_wedge(form_second, degree=1, keep_object=False)
+        
         Parameters:
         ----------------
         form_second - the form to wedge the 1-form with.
@@ -1194,6 +1207,11 @@ class form_1():
     
     def zoom(self, target=[0, 0], mag=2, dpd=9, inset=False, axis=None, insize=0.3):
         '''
+        
+        zoom(target=[0, 0], mag=2, dpd=9, inset=False, axis=None, insize=0.3)
+        
+        Parameters:
+        -------------- 
         Create a new window which displays the field zoomed at a certain point
         User gives arguments
         Target: Determines the zoom location, coordinates
@@ -1216,7 +1234,7 @@ class form_1():
         
         if self.form_1_str_x == None or self.form_1_str_y == None:
             # ERROR
-            raise TypeError('No equation provided')
+            raise TypeError('No equation provided, see \'give_eqn\' method')
         else:
              # Zoom must be one or greater
             if mag < 1:
@@ -1299,14 +1317,19 @@ class form_1():
     # with respect to a given vector field object or without.
     def interior_d(self, vector_field=None):
         '''
+        
+        interior_d(vector_field=None)
+        
         Computes the interior derivative of the 1-form
-        Takes in:
-        -- Vector_field = vector field object of formpy library to do the
-        derivative with respect to, needs equations to work with
-        nuymerical_only being False. Can also supply equations in a tuple:
-        (eqn_x, eqn_y). If using numerical only, can supply object or
-        tuple of numpy arrays (array_x, atrray_y). If nothing is supplied
-        for it, it assumes F_x = 1 and F_y = 1, with correct form and shape
+        
+        Parameters:
+        ------------------
+        Vector_field = vector field object of formpy library to do the
+            derivative with respect to, needs equations to work with
+            nuymerical_only being False. Can also supply equations in a tuple:
+            (eqn_x, eqn_y). If using numerical only, can supply object or
+            tuple of numpy arrays (array_x, atrray_y). If nothing is supplied
+            for it, it assumes F_x = 1 and F_y = 1, with correct form and shape
         
         Does no analytically using equations provided in instance
         
@@ -1362,17 +1385,22 @@ class form_1():
         # return it to the user
         return result_form
         
-    
+    # numerical interior derivaitve
     def num_interior_d(self, vector_field=None):
         '''
+        
+        num_interior_d(self, vector_field=None)
+        
         Computes the interior derivative of the 1-form
-        Takes in:
-        -- Vector_field = vector field object of formpy library to do the
-        derivative with respect to, needs equations to work with
-        nuymerical_only being False. Can also supply equations in a tuple:
-        (eqn_x, eqn_y). If using numerical only, can supply object or
-        tuple of numpy arrays (array_x, atrray_y). If nothing is supplied
-        for it, it assumes F_x = 1 and F_y = 1, with correct form and shape
+        
+        Parameters:
+        --------------
+        Vector_field = vector field object of formpy library to do the
+            derivative with respect to, needs equations to work with
+            nuymerical_only being False. Can also supply equations in a tuple:
+            (eqn_x, eqn_y). If using numerical only, can supply object or
+            tuple of numpy arrays (array_x, atrray_y). If nothing is supplied
+            for it, it assumes F_x = 1 and F_y = 1, with correct form and shape
         
         Does no numerically using arrays provided in instance
         If equations were proivided, this method will lose them
@@ -1388,17 +1416,26 @@ class form_1():
             # equations have been given, a mismatch may occur
             # warn the user
             print('Warning: You supplied equations, doing it numerically only will not pass equations to the 0-form and these will be lost')
-        # now complete the process numerically save as instructed
         
-        # Take the vector field components, checking what was input!
+        # Take the vector field components, checking what was input
         if vector_field is None:
             # if none was given, do it with respect to uniform 1, 1
             vf_x = np.ones(np.shape(self.xg))
             vf_y = np.ones(np.shape(self.yg))
         elif type(vector_field) == tuple:
-            # if equations were given, take these, is numericals were given here, break!
+            # if numerical grids were given, take these
+            # if equations were given here, evaulate them to grids
             if type(vector_field[0]) == str:
-                raise ValueError('for numerical calulation, supply VF arrays, not equations')
+                new_str_x = vector_field[0].replace('x', '(self.xg)')
+                new_str_x = new_str_x.replace('y', '(self.yg)')
+                new_str_y = vector_field[1].replace('x', '(self.xg)')
+                new_str_y = new_str_y.replace('y', '(self.yg)')
+                if new_str_x.find('x') & new_str_x.find('y') == -1:
+                    new_str_x = '(' + str(new_str_x) + ')* np.ones(np.shape(self.xg))'
+                if new_str_y.find('x') & new_str_y.find('y') == -1:
+                    new_str_y = '(' + str(new_str_y) + ')* np.ones(np.shape(self.yg))'
+                vf_x = eval(new_str_x)
+                vf_y = eval(new_str_y)
             else:
                 vf_x = vector_field[0]
                 vf_y = vector_field[1]
@@ -1415,10 +1452,13 @@ class form_1():
         
         # return it to the user
         return result_form
-
+    
     # define a method to change a supplied Vector filed to the 1-form
     def contravariant(self, g=[['1', '0'], ['0', '1']]):
         '''
+        
+        contravariant(g=[['1', '0'], ['0', '1']])
+        
         Passes in everything it can (all it has been supplied)
         to the VF object.
         Works via the ('inverse') metric on R2
@@ -1429,14 +1469,14 @@ class form_1():
         Note, if it is supplied as arrays, they must come from numpy grids
         via meshgrid, if it is supplied as strings, needs to be in terms of
         x and y, and contain no special funtions, apart from ones imported
-        here automatically and listed in the documentation #!!!
+        here automatically and listed in the documentation
         
         Returns a single object (VF object)
         '''
         
         # extract what is needed form the metric depending on what the user
         # supplied
-        # check if its has string components
+        # check if it has string components
         if type(g[0][0]) == str and type(g[0][1]) == str and type(g[1][0]) == str and type(g[1][1]) == str:
             # deal with supplied string metric
             # need to format it, correct it for constants and evaluate it's numerical equivalent
@@ -1463,7 +1503,7 @@ class form_1():
                 str_comp_11 = '(' + str(str_comp_11) + ')* np.ones(np.shape(self.yg))'
             
             # evaluate the components numerically, inputting them into a
-            # store numerical metric
+            # stored numerical metric
             comp_00 = eval(str_comp_00)
             comp_01 = eval(str_comp_01)
             comp_10 = eval(str_comp_10)
@@ -1476,22 +1516,18 @@ class form_1():
             
         elif type(g[0][0]) == np.ndarray and type(g[0][1]) == np.ndarray and type(g[1][0]) == np.ndarray and type(g[1][1]) == np.ndarray:
             # deal with the metric being supplied as components
-            # if the user has 1-form equations, warn that these can't
-            # be passed anymore, because we don't have equations for this
-            # metric
+            # if the user has 1-form equations, warn that these 
+            # will be lost, due to numerical calculations
             if self.form_1_str_x == None and self.form_1_str_y == None:
                 pass
             else:
                 print('The 1-form has equations, but the metric does not, these will be lost and the resulting VF will only have numerical values, not equations supplied')
-            # No need to do anythng more to the metric, upto the user to make sure its
-            # correctly sized, as with other code in this library
+            # No need to do anythng more to the metric
             # just rename the metric here
             g_num = g
             
-            # set up a dummy variable to store the fact that numericals were
-            # not given, not to check again later
+            # set up the dummy variable
             analytics = False
-            
         else:
             # Inconsistant metric components
             raise TypeError('Metric components are inconcisstant')
@@ -1502,7 +1538,7 @@ class form_1():
         form_y = self.F_y * g_num[1][1] + self.F_x * g_num[1][0]
         
         # if the equations were given, evaluate these analytically too:
-        # only if vector file doriginally has equations
+        # only if vector filed originally has equations
         if analytics:
             if self.form_1_str_x == None and self.form_1_str_y == None:
                 print('You supplied the metric as equations (or it was default), but did not give 1-form equations, therefore only numericals will be completed')
