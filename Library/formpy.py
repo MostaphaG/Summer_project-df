@@ -2774,13 +2774,13 @@ class form_0():
         for i in range(len(xg[0, :])):
             for j in range(len(yg[:, 0])):
                 # set to zero points that are not defined or inf
-                if isnan_arr[i, j] or abs(form_0[i, j]) == np.inf or abs(form_0[i, j]) > 1e15:
+                if isnan_arr[j, i] or abs(form_0[j, i]) == np.inf or abs(form_0[j, i]) > 1e15:
                     # colour this region as a red dot, not square to
                     # not confuse with high mag 2-forms in stacks. or worse, in
                     # blocks
-                    circ = patch.Circle((xg[i, j], yg[i, j]), Lx*0.05/3, color='red')
+                    circ = patch.Circle((xg[j, i], yg[j, i]), Lx*0.05/3, color='red')
                     axis.add_patch(circ)
-                    form_0[i, j] = 0
+                    form_0[j, i] = 0
         
         if self.logarithmic_scale_bool:
             mag1 = np.abs(form_0) + 1

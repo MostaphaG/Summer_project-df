@@ -300,3 +300,22 @@ F0.give_eqn('x*(x**2 + y**2)**(-1.5)')
 F0.plot(ax1)
 F0.log_scaling()
 F0.plot(ax2)
+
+# %%
+
+import formpy as fp
+import numpy as np
+import matplotlib.pyplot as plt
+
+x = np.linspace(-5, 5, 21)
+y = np.linspace(-3, 5, 19)
+x,y = np.meshgrid(x , y)
+
+u = yg*np.cos(xg)
+
+fig1 = plt.figure(figsize=(10,5))
+ax1 = fig1.add_subplot(121)
+ax2 = fig1.add_subplot(122)
+
+F0 = fp.form_0(xg, yg, u)
+F0.plot(ax1)
