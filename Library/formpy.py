@@ -1587,8 +1587,10 @@ class form_2():
         self.form_2 = form2
         self.s_max = 6
         self.s_min = 2
-        self.pt_den = len(xg[:, 0])  # + 1  # assume square grids
-        self.fract = 2/((self.pt_den - 1))
+        self.pt_den_x = len(xg[0, :])
+        self.pt_den_y = len(yg[:, 0])
+        self.fract_x = 2/((self.pt_den_x - 1))
+        self.fract_y = 2/((self.pt_den_y - 1))
         self.colour_list = ['red', 'blue', 'grey']
         self.logarithmic_scale_bool = 0
         # self.base = 10
@@ -1673,19 +1675,6 @@ class form_2():
         '''
         self.s_max = maximum
     
-    # define method to change fraction of sheetsize w.r.t graoh size:
-    def sheet_size(self, fraction):
-        '''
-        Takes a single argument, float
-        Changes the size of stack in direction perp. to form
-        it is done in in terms of the fraction of graph size
-        the graph size is extracted form maximum values of grid
-        Grids are assumed to be square and origin centered.
-        Note, for 2-forms, the size in directions parall. and perp.
-        are always set to be the same.
-        '''
-        self.fract = fraction
-    
     #define a method to change spare spacing around figure
     def surround_space(self, delta_denominator):
         '''
@@ -1699,23 +1688,31 @@ class form_2():
     
     # define a method to change the density of grids in same range
     # requires string input of 1-form:
-    def set_density(self, points_number):
+    def set_density2(self, points_number_x, points_number_y):
         '''
-        takes in one argument, requires the string equation to be
-        supplied
-        Changes the desnity of points in the same range to the input value
+        
+        Changes number of points on grids to given, if equations have been given
+        
+        Parameters:
+        -------------
+        points_number_x - int - number of points to put along the x axis
+        points_number_y - int - number of points to put along the y axis
+        
+        Returns: None
         '''
         if self.form_2_str == None:
             # Error
             raise TypeError('Error: You need to supply the 2-form equation to do this, look at \'give_eqn\' method')
         else:
             # redefine the grids
-            x = np.linspace(self.xg[0,0], self.xg[0,-1], points_number)
-            y = np.linspace(self.yg[0,0], self.yg[-1,0], points_number)
+            x = np.linspace(self.xg[0,0], self.xg[0,-1], points_number_x)
+            y = np.linspace(self.yg[0,0], self.yg[-1,0], points_number_y)
             self.xg, self.yg = np.meshgrid(x, y)
             # based on these change other, dependant variables
-            self.pt_den = len(self.xg[:, 0])
-            self.fract = 2/(self.pt_den - 1)
+            self.pt_den_x = len(self.xg[:, 0])
+            self.pt_den_y = len(self.yg[:, 0])
+            self.fract_x = 2/(self.pt_den_x - 1)
+            self.fract_y = 2/(self.pt_den_y - 1)
             # substitute these into the equation:
             # but keep it local
             str_2 = self.form_2_str + ''
@@ -1762,15 +1759,17 @@ class form_2():
         x_len = len(self.xg[:, 0])
         y_len = len(self.yg[0, :])
         
-        # find L based on the origin of given grid is
-        L = 0.5*(self.xg[0, -1] - self.xg[0, 0])
-        x0 = self.xg[0,0] + L
-        y0 = self.yg[0,0] + L
+        # Extract L from the x and y grids
+        Lx = 0.5*(self.xg[0, -1] - self.xg[0, 0])
+        Ly = 0.5*(self.yg[-1, 0] - self.yg[0, 0])
+        x0 = self.xg[0, 0] + Lx
+        y0 = self.yg[0, 0] + Ly
         
-        # rescale axis
-        ax_L = L + L/self.delta_factor
-        axis.set_xlim(-ax_L + x0, ax_L + x0)
-        axis.set_ylim(-ax_L + y0, ax_L + y0)
+        # reset axis limits
+        ax_Lx = Lx + Lx/self.delta_factor
+        ax_Ly = Ly + Ly/self.delta_factor
+        axis.set_xlim(-ax_Lx + x0, ax_Lx + x0)
+        axis.set_ylim(-ax_Ly + y0, ax_Ly + y0)
         
         # get the signs of the input 2-form
         form_2_sgn = np.sign(form2)
@@ -1794,7 +1793,7 @@ class form_2():
                     # colour this region as a red dot, not square to
                     # not confuse with nigh mag 2-forms in stacks. or worse, in
                     # blocks
-                    circ = patch.Circle((self.xg[i, j], self.yg[i, j]), L*self.fract/3, color='red')
+                    circ = patch.Circle((self.xg[i, j], self.yg[i, j]), L*(self.fract_x + self.fract_y)/6, color='red')
                     axis.add_patch(circ)
                     form2[i, j] = 0
                 # ALso, since we got this lop anyway
@@ -1808,7 +1807,8 @@ class form_2():
         # #########################################################################
         
         # set up the max, total height of stack (along arrow)
-        s_L = self.fract*L
+        s_L_x = self.fract_x*Lx
+        s_L_y = self.fract_y*Ly
         
         # #########################################################################
         # define the stacks based on geometrical arguments
@@ -1850,10 +1850,10 @@ class form_2():
             I_cos = np.cos(theta)
             
             # define the points that set out a line of the stack sheet (middle line)
-            A_x = self.xg + (s_L/2)*I_sin
-            A_y = self.yg - (s_L/2)*I_cos
-            B_x = self.xg - (s_L/2)*I_sin
-            B_y = self.yg + (s_L/2)*I_cos
+            A_x = self.xg + (s_L_x/2)*I_sin
+            A_y = self.yg - (s_L_y/2)*I_cos
+            B_x = self.xg - (s_L_x/2)*I_sin
+            B_y = self.yg + (s_L_y/2)*I_cos
             
             
             for i in range(self.s_max - self.s_min + 1):
@@ -1891,14 +1891,14 @@ class form_2():
                         # from these define all the needed lines and plot them
                         while s <= 0.5*(n-2):  # maximum set by equations (documentation)
                             # define all the points for the 2 currently looped +- sheets in while loop
-                            Ax1 = A_x[i, j] + G(s, n, 0)*s_L*I_cos[i, j]
-                            Ay1 = A_y[i, j] + G(s, n, 0)*s_L*I_sin[i, j]
-                            Bx1 = B_x[i, j] + G(s, n, 0)*s_L*I_cos[i, j]
-                            By1 = B_y[i, j] + G(s, n, 0)*s_L*I_sin[i, j]
-                            Ax2 = A_x[i, j] - G(s, n, 0)*s_L*I_cos[i, j]
-                            Ay2 = A_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
-                            Bx2 = B_x[i, j] - G(s, n, 0)*s_L*I_cos[i, j]
-                            By2 = B_y[i, j] - G(s, n, 0)*s_L*I_sin[i, j]
+                            Ax1 = A_x[i, j] + G(s, n, 0)*s_L_x*I_cos[i, j]
+                            Ay1 = A_y[i, j] + G(s, n, 0)*s_L_y*I_sin[i, j]
+                            Bx1 = B_x[i, j] + G(s, n, 0)*s_L_x*I_cos[i, j]
+                            By1 = B_y[i, j] + G(s, n, 0)*s_L_y*I_sin[i, j]
+                            Ax2 = A_x[i, j] - G(s, n, 0)*s_L_x*I_cos[i, j]
+                            Ay2 = A_y[i, j] - G(s, n, 0)*s_L_y*I_sin[i, j]
+                            Bx2 = B_x[i, j] - G(s, n, 0)*s_L_x*I_cos[i, j]
+                            By2 = B_y[i, j] - G(s, n, 0)*s_L_y*I_sin[i, j]
                             
                             # from these, define the 2 lines, for this run
                             axis.add_line(Line2D((Ax1, Bx1), (Ay1, By1), linewidth=0.5, color=self.colour_list[color_index]))
@@ -1917,14 +1917,14 @@ class form_2():
                         # define all remaining sheets for the magnitude:
                         while s <= 0.5*(n-1):  # maximum set by equations (documentation)
                             # define all the points for the current +- displacement in while loop
-                            Ax1 = A_x[i, j] + G(s, n, 1)*s_L*I_cos[i, j]
-                            Ay1 = A_y[i, j] + G(s, n, 1)*s_L*I_sin[i, j]
-                            Bx1 = B_x[i, j] + G(s, n, 1)*s_L*I_cos[i, j]
-                            By1 = B_y[i, j] + G(s, n, 1)*s_L*I_sin[i, j]
-                            Ax2 = A_x[i, j] - G(s, n, 1)*s_L*I_cos[i, j]
-                            Ay2 = A_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
-                            Bx2 = B_x[i, j] - G(s, n, 1)*s_L*I_cos[i, j]
-                            By2 = B_y[i, j] - G(s, n, 1)*s_L*I_sin[i, j]
+                            Ax1 = A_x[i, j] + G(s, n, 1)*s_L_x*I_cos[i, j]
+                            Ay1 = A_y[i, j] + G(s, n, 1)*s_L_y*I_sin[i, j]
+                            Bx1 = B_x[i, j] + G(s, n, 1)*s_L_x*I_cos[i, j]
+                            By1 = B_y[i, j] + G(s, n, 1)*s_L_y*I_sin[i, j]
+                            Ax2 = A_x[i, j] - G(s, n, 1)*s_L_x*I_cos[i, j]
+                            Ay2 = A_y[i, j] - G(s, n, 1)*s_L_y*I_sin[i, j]
+                            Bx2 = B_x[i, j] - G(s, n, 1)*s_L_x*I_cos[i, j]
+                            By2 = B_y[i, j] - G(s, n, 1)*s_L_y*I_sin[i, j]
                             
                             # from these, define the 2 displaced lines
                             
@@ -3396,9 +3396,15 @@ class vector_field():
     # requires string input of 1-form:
     def set_density(self, points_number):
         '''
-        takes in one argument, requires the string equation to be
-        supplied
-        Changes the desnity of points in the same range to the input value
+        Changes the size of stack in direction perp. to VF
+        It is done in in terms of the fraction of plot size
+        Note, not strictly needed, can change it by instance.fract(fraction)
+        
+        Parmaeters:
+        ---------------
+        fraction - float/int - size of stack in terms of the fraction of plot size
+        
+        Returns: None
         '''
         if self.str_x == None or self.str_y == None:
             # Error

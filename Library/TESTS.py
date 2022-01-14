@@ -850,3 +850,22 @@ ax.set_ylabel(r'$y$')
 ax.set_aspect('equal')
 
 form_obj.plot(ax)
+
+# %%
+
+# set up needed parameters
+v = np.linspace(-5, 5, 31)
+xg, yg = np.meshgrid(v, v)
+
+form_obj = fp.form_0(xg, yg, 10*np.exp(-xg**2 - yg**2))
+
+fig = plt.figure()
+ax1 = fig.add_subplot(121)
+ax2 = fig.add_subplot(122)
+ax1.set_aspect('equal')
+ax2.set_aspect('equal')
+
+form_obj.plot(ax1)
+
+form_obj.log_scaling()
+form_obj.plot(ax2)

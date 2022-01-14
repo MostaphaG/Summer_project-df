@@ -19,11 +19,18 @@ tstart = timeit.default_timer()
 # plotting a 1-form
 
 # set up needed parameters
-v = np.linspace(-6, 6, 41)
-xg, yg = np.meshgrid(v, v)
+#v = np.linspace(-6, 6, 41)
+#xg, yg = np.meshgrid(v, v)
 
-F_x = 10*xg*yg
-F_y = 1/(np.sin(yg))
+x = np.linspace(-2, 2, 42)
+y = np.linspace(-2, 2, 21)
+xg, yg = np.meshgrid(x, y)
+
+F_x = np.ones(np.shape(xg))
+F_y = np.ones(np.shape(yg))
+
+#F_x = 10*xg*yg
+#F_y = 1/(np.sin(yg))
 
 # PLOT, note, it will create a figure for user
 # we probably don't want that, otherwise we would have to make this
@@ -54,16 +61,16 @@ print(tstop-tstart)
 # plotting a 2-form
 
 # set up 2-form
-v = np.linspace(-6, 6, 21)
-xg, yg = np.meshgrid(v, v)
-form_2 = xg*yg
-form_obj = fp.form_2(xg, yg, form_2)
-
-#x = np.linspace(-1, 4, 23)
-#y = np.linspace(-2, 2, 27)
-#xg, yg = np.meshgrid(x, y)
+#v = np.linspace(-6, 6, 21)
+#xg, yg = np.meshgrid(v, v)
 #form_2 = xg*yg
 #form_obj = fp.form_2(xg, yg, form_2)
+
+x = np.linspace(-1, 4, 11)
+y = np.linspace(-2, 2, 33)
+xg, yg = np.meshgrid(x, y)
+form_2 = xg*yg
+form_obj = fp.form_2(xg, yg, form_2)
 
 # Create a figure and axis to plot it on
 fig = plt.figure()
@@ -75,33 +82,33 @@ ax.set_aspect('equal')
 form_obj.plot(ax)
 
 # wait, then change some properties and redraw
-plt.pause(3)
-form_obj.give_eqn('x*y')
-form_obj.set_density(18)
-ax.clear()
-ax.set_xlabel(r'$x$')
-ax.set_ylabel(r'$y$')
-ax.set_aspect('equal')
-form_obj.plot(ax)
+#plt.pause(3)
+#form_obj.give_eqn('x*y')
+#form_obj.set_density(18, 18)
+#ax.clear()
+#ax.set_xlabel(r'$x$')
+#ax.set_ylabel(r'$y$')
+#ax.set_aspect('equal')
+#form_obj.plot(ax)
 
 # %%
 
 # plotting a 0-form
 
 # set up
-v = np.linspace(-4.5, 4.5, 11)
-xg, yg = np.meshgrid(v, v)
-form_0 = np.cos(xg*yg)
-form_obj = fp.form_0(xg, yg, form_0)
-form_obj.levels(4)
-# form_obj.density_increase(20)  # demonstation of an error
-
-#x = np.linspace(-2, 4, 17)
-#y = np.linspace(-3, 3, 23)
-#xg, yg = np.meshgrid(x, y)
+#v = np.linspace(-4.5, 4.5, 11)
+#xg, yg = np.meshgrid(v, v)
 #form_0 = np.cos(xg*yg)
 #form_obj = fp.form_0(xg, yg, form_0)
 #form_obj.levels(4)
+# form_obj.density_increase(20)  # demonstation of an error
+
+x = np.linspace(-2, 4, 17)
+y = np.linspace(-3, 3, 23)
+xg, yg = np.meshgrid(x, y)
+form_0 = np.cos(xg*yg)
+form_obj = fp.form_0(xg, yg, form_0)
+form_obj.levels(4)
 
 # Create a figure and axis to plot it on
 fig = plt.figure()
