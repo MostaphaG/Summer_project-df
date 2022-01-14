@@ -59,6 +59,12 @@ xg, yg = np.meshgrid(v, v)
 form_2 = xg*yg
 form_obj = fp.form_2(xg, yg, form_2)
 
+#x = np.linspace(-1, 4, 23)
+#y = np.linspace(-2, 2, 27)
+#xg, yg = np.meshgrid(x, y)
+#form_2 = xg*yg
+#form_obj = fp.form_2(xg, yg, form_2)
+
 # Create a figure and axis to plot it on
 fig = plt.figure()
 ax = fig.gca()
@@ -511,8 +517,9 @@ print(form_1_obj.return_string())
 # Testing ext deriv of 1-form
 
 # set up grids and 1 form object
-v = np.linspace(-4.5, 4.5, 21)
-xg, yg = np.meshgrid(v, v)
+x = np.linspace(-3, 2, 21)
+y = np.linspace(-3, 2, 21)
+xg, yg = np.meshgrid(x, y)
 form_1_x = xg*np.cos(yg)
 form_1_y = yg*np.sin(xg)
 form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y)

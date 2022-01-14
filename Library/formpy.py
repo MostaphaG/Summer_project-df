@@ -59,13 +59,8 @@ def find_2_form(expressions, coords, xg, yg, zg=None, m=2):
     
     Returns:
     ---------------
-    form_2  - numerical 2-form on given grids
     result  - analytical, unformatted 2-form equation
-    ext_ds  - found matrix of derrivatives
     '''
-    
-    # from the grids, find pt_den, assume that they are square
-    pt_den = len(xg[:, 0])
     
     # define a sympy expression for string 0
     sympy_expr_zero = parse_expr('0*x', evaluate=False)
@@ -97,7 +92,8 @@ def find_2_form(expressions, coords, xg, yg, zg=None, m=2):
     
     # merge the results into a 2-form (for 2-form on R^2, the result is a single component (dx^xy))
     # do so by adding opposite elements along the diagonal ( / ) components of ext_ds
-    # this includes taking elemets with switched i and j
+    # this  includes taking elemets with switched i and j
+    
     
     # set up a variable to count pairs (pairs because we are forming 2-forms):
     pair = 0
@@ -119,40 +115,41 @@ def find_2_form(expressions, coords, xg, yg, zg=None, m=2):
                 pass
             else:
                 result[pair, 0] += temp1
-            
             # update the result row counter
             pair += 1
     
-    # create a local result, that will be used to evaluate the resulting string
-    # and format it
-    loc_res = result + ''
+    return result
     
-    # format string in each result row
-    for d in range(pair):
-        # format the result to be 'python understood' to be able to use the eval()
-        loc_res[d, 0] = loc_res[d, 0].replace('x', 'xg')
-        loc_res[d, 0] = loc_res[d, 0].replace('y', 'yg')
-        loc_res[d, 0] = loc_res[d, 0].replace('z', 'zg')
-        
-        # check against constant result, to be of correct shape before eval is used
-        if loc_res[d, 0].find('x') & loc_res[d, 0].find('y') == -1:
-            loc_res[d, 0] = '(' + str(loc_res[d, 0]) + ')* np.ones(np.shape(xg))'
-        if loc_res[d, 0].find('x') & loc_res[d, 0].find('y') == -1:
-            loc_res[d, 0] = '(' + str(loc_res[d, 0]) + ')* np.ones(np.shape(yg))'
-
-    # set up a vector to store the 2-form numerically, from xg and yg and possibly further
-    # Note - need pt_den being supplied m times.
-    # not overall generalised, as not needed past m=3.
-    if m == 2:
-        form_2 = np.empty((1, pt_den, pt_den))
-        form_2[0, :, :] = eval(loc_res[0, 0])
-    elif m == 3:
-        form_2 = np.empty((3, pt_den, pt_den, pt_den))
-        for d in range(3):
-            form_2[d, :, :, :] = eval(loc_res[d, 0])
-    
-    # return useful findings to the user
-    return form_2, result, ext_ds
+#    # create a local result, that will be used to evaluate the resulting string
+#    # and format it
+#    loc_res = result + ''
+#    
+#    # format string in each result row
+#    for d in range(pair):
+#        # format the result to be 'python understood' to be able to use the eval()
+#        loc_res[d, 0] = loc_res[d, 0].replace('x', 'xg')
+#        loc_res[d, 0] = loc_res[d, 0].replace('y', 'yg')
+#        loc_res[d, 0] = loc_res[d, 0].replace('z', 'zg')
+#        
+#        # check against constant result, to be of correct shape before eval is used
+#        if loc_res[d, 0].find('x') & loc_res[d, 0].find('y') == -1:
+#            loc_res[d, 0] = '(' + str(loc_res[d, 0]) + ')* np.ones(np.shape(xg))'
+#        if loc_res[d, 0].find('x') & loc_res[d, 0].find('y') == -1:
+#            loc_res[d, 0] = '(' + str(loc_res[d, 0]) + ')* np.ones(np.shape(yg))'
+#
+#    # set up a vector to store the 2-form numerically, from xg and yg and possibly further
+#    # Note - need pt_den being supplied m times.
+#    # not overall generalised, as not needed past m=3.
+#    if m == 2:
+#        form_2 = np.empty((1, pt_den, pt_den))
+#        form_2[0, :, :] = eval(loc_res[0, 0])
+#    elif m == 3:
+#        form_2 = np.empty((3, pt_den, pt_den, pt_den))
+#        for d in range(3):
+#            form_2[d, :, :, :] = eval(loc_res[d, 0])
+#    
+#    # return useful findings to the user
+#    return form_2, result, ext_ds
 
 
 # %%
@@ -714,68 +711,10 @@ class form_1():
             # set up dimensionality
             m = 2
             
+            # from these get the 2-form
+            result = find_2_form(expressions, coords, self.xg, self.yg, zg=None, m=m)
             
-            # ################## from these get the 2-form ################
-            
-            
-            # define a sympy expression for string 0
-            sympy_expr_zero = parse_expr('0*x', evaluate=False)
-            
-            # set up an array to store derrivatives.
-            ext_ds = np.empty((m, m), dtype='object')
-            
-            # set up an array to store the results
-            # in 2D only dx^dy, in 3D (m=3) (in order): dx^dy, dx^dz, dy^dz
-            result = np.empty((int((m-1)*m/2), 1), dtype='object')
-            for i in range(int((m-1)*m/2)):
-                result[i] = str(result[i])
-            
-            # loop over differentiating each, when differentiating w.r.t its coord, set to 0
-            for coord_index in range(len(coords)):
-                # loop over differentiating each component:
-                for comp_index in range(len(expressions)):
-                    # when equal set to 0, when not-differentiate:
-                    if comp_index == coord_index:
-                        ext_ds[comp_index, coord_index] = str(sympy_expr_zero)
-                    elif comp_index != coord_index:
-                        ext_ds[comp_index, coord_index] = str(diff(expressions[comp_index], coords[coord_index]))
-                    # change the signs for wedges in wrong order
-                    if comp_index < coord_index:
-                        ext_ds[comp_index, coord_index] = ' - (' + str(ext_ds[comp_index, coord_index]) + ')'
-                    elif comp_index > coord_index:
-                        ext_ds[comp_index, coord_index] = ' + ' + str(ext_ds[comp_index, coord_index])
-            
-            
-            # merge the results into a 2-form (for 2-form on R^2, the result is a single component (dx^xy))
-            # do so by adding opposite elements along the diagonal ( / ) components of ext_ds
-            # this  includes taking elemets with switched i and j
-            
-            
-            # set up a variable to count pairs (pairs because we are forming 2-forms):
-            pair = 0
-            
-            # loop over opposing elements (matching elementary 2-forms)
-            for i in range(1, m):
-                for j in range(i):
-                    # initially clear the element from its Nonetype placeholder
-                    result[pair, 0] = ''
-                    # extract opposing elements
-                    temp = ext_ds[i, j]
-                    temp1 = ext_ds[j, i]
-                    # check these against zero entries:
-                    if (temp == '0') or (temp == '-(0)') or (temp == '0*x'):
-                        pass
-                    else:
-                        result[pair, 0] += temp
-                    if (temp1 == '0') or (temp1 == '-(0)') or (temp1 == '0*x'):
-                        pass
-                    else:
-                        result[pair, 0] += temp1
-                    # update the result row counter
-                    pair += 1                
-            
-            
-            # ################### done dinfding 2-form ####################
+            # format, and evaluate
             
             # get the string of this new 2-form
             form_2_str = str(simplify(result[0][0]))
@@ -790,12 +729,9 @@ class form_1():
             form_2_str = form_2_str.replace('y', '(self.yg)')
             if form_2_str.find('x') & form_2_str.find('y') == -1:
                 form_2_str = '(' + str(form_2_str) + ')* np.ones(np.shape(self.xg))'
-            else:
-                pass
             
+            # evaluate, set up new object and return
             form_2_result = eval(form_2_str)
-            
-            # set up object to return to user
             result_form = form_2(self.xg, self.yg, form_2_result, form_2_str_loc)
             
             # return it to the user
