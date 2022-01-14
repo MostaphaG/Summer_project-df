@@ -266,16 +266,18 @@ ax2.set_aspect('equal')
 # ax3.set_aspect('equal')
 # ax4.set_aspect('equal')
 
-# VF = fp.vector_field(x,y,u,v)
-# VF.log_scaling(base=10)
-# VF.plot(ax1)
+VF = fp.vector_field(x,y,u,v)
+VF.plot(ax1)
+VF.log_scaling()
+VF.plot(ax2)
+
 # VF.base = 5
 # VF.plot(ax2)
 
-F1 = fp.form_1(x,y,u,v)
-F1.plot(ax1)
-F1.log_scaling()
-F1.plot(ax2)
+# F1 = fp.form_1(x,y,u,v)
+# F1.plot(ax1)
+# F1.log_scaling()
+# F1.plot(ax2)
 
 # %% 0 -form log scaling
 

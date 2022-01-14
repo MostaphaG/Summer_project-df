@@ -1834,7 +1834,14 @@ class form_2():
         else:
             # find the relative magnitude of vectors to maximum, as an array
             R = mag/max_size
-
+        
+        # if self.logarithmic_scale_bool:
+        #     mag1 = mag + 1 
+        #     form_2_norm = form2/mag1
+        #     logmag = np.log10(mag1)
+        #     form2 = form2_norm*logmag
+        #     mag = np.abs(form2)
+        #     max_size = np.max(mag)
 
         # Now, for both values of theta, complete plotting:
         for theta in angles:
@@ -2639,68 +2646,12 @@ class form_0():
         else:
             raise TypeError('Require input to be integer or list, if you used a numpy array try: list(your_array)')
         
-        # N = 30
-        # f_max = np.max(self.form_0)
-        # f_min = np.min(self.form_0)
-        # f_range = f_max - f_min
-        # # Linearly spaced levels between the min and max values
-        # linear_levels = list(np.linspace(f_min, f_max, 30))
-        
-        # mag = np.abs(self.form_0)
-        # mag_max = np.max(mag)
-        # mag_min = np.min(mag)
-        
-        
-        # if mag_min == f_min:
-        #     c = 1
-        # else:
-        #     c = 0
-        
-        # # Number of orders of magnitude difference between the min and max values
-        # OM = np.log10(mag_max/mag_min)
-        
-        # log_range = np.log10(mag_max/mag_min)
-        # log_levels = list( + np.logspace(np.log10(mag_min), np.log10(mag_max), num=30, base=10))
-        
-        # Required number of levels
-        # N = 30
-        
-        # # Calculate linear set of levels
-        # f_max = np.max(self.form_0)
-        # f_min = np.min(self.form_0)
-        # linear_levels = list(np.linspace(f_min, f_max, 30))
-
-        # # Calculate log scaled set of levels
-        # mag = np.abs(self.form_0)
-        # mag_max = np.max(mag)
-        # mag_min = np.min(mag[np.nonzero(mag)])
-        
-        # # Calculate the orders of magnitude between the min and max values in the array
-        # p = np.log10(abs(f_max)/mag_min)
-        # n = np.log10(abs(f_min)/mag_min)
-        
-        # # Determine how many lines are needed above and below mag_min
-        # p_levels = round(N*p/(p+n))
-        # n_levels = round(N*n/(p+n))
-        
-        # # Create levels above and below mag_min
-        # lev1 = np.logspace(np.log10(mag_min), np.log10(abs(f_max)), num=p_levels, base=10)
-        # lev2 = np.logspace(np.log10(mag_min), np.log10(abs(f_min)) , num=n_levels, base=10)
-        
-        # lev2 = -1*np.flip(lev2)
-        
-        # # Put the two lists together to give the final array of levels
-        # log_levels = list(np.append(lev2,lev1))
-
-        # self.lines = log_levels
-        
-    def log_scaling(self, N=30):
+    def log_scaling(self):
         '''
         changes bool for logscaling
-        Strats with default False
+        Default = False
         changes to the other option each time it is called
         '''
-        self.N = N
         self.logarithmic_scale_bool = not self.logarithmic_scale_bool
     
     def fonts_size(self, size):
@@ -2831,116 +2782,17 @@ class form_0():
                     axis.add_patch(circ)
                     form_0[i, j] = 0
         
-        # set up the contour plot
-        f_max = np.max(form_0)
-        f_min = np.min(form_0)
-        
         if self.logarithmic_scale_bool:
-            
-            # neg_index = form_0 < 0
             mag1 = np.abs(form_0) + 1
+            form_0_norm = form_0/(mag1)
             logmag = np.log10(mag1)
-            
-            for i in range(len(xg[:,0])):
-                for j in range(len(yg[0,:])):
-                    if form_0[i,j] < 0 :
-                        logmag[i,j] *= -1
-        
-            form_0 = logmag
-            
-            # # Calculate log scaled set of levels
-            # mag = np.abs(form_0)
-            # mag_max = np.max(mag)
-            # mag_min = np.min(mag[np.nonzero(mag)])
-            
-            # # Calculate the orders of magnitude between the min and max values in the array
-            # if f_max == 0 or f_max == -0:
-            #     p = 0
-            # else:
-            #     p = np.log10(abs(f_max)/mag_min)
-                
-            # if f_min == 0 or f_min == -0:
-            #     n = 0
-            # else:
-            #     n = np.log10(abs(f_min)/mag_min)
-            
-            # # Determine how many lines are needed above and below mag_min
-            # p_levels = round(self.N*p/(p+n))
-            # n_levels = round(self.N*n/(p+n))
-            
-            # # Create levels above and below mag_min
-            # # lev1 = np.logspace(np.log10(mag_min)/np.log10(self.base), np.log10(abs(f_max))/np.log10(self.base), num=p_levels, base=self.base)
-            # # lev2 = np.logspace(np.log10(mag_min)/np.log10(self.base), np.log10(abs(f_min))/np.log10(self.base), num=n_levels, base=self.base)
-            
-            # lev1 = np.logspace(np.log10(mag_min), np.log10(abs(f_max)), num=p_levels, base=10)
-            # lev2 = np.logspace(np.log10(mag_min), np.log10(abs(f_min)), num=n_levels, base=10)
-            
-            
-            # lev2 = -1*np.flip(lev2)
-            
-            # # Put the two lists together to give the final array of levels
-            # log_levels = list(np.append(lev2,lev1))
-    
-            # self.lines = log_levels
+            form_0 = form_0_norm*logmag
+
         else:
             pass
         
         CS = axis.contour(xg, yg, form_0, levels=self.lines, cmap=self.cmap)
         axis.clabel(CS, inline=self.inline_bool, fontsize=self.fontsize)
-        
-        
-        # else:
-        #     # deal with sinularities that appear on evaluated points
-        #     isnan_arr = np.isnan(form_0)
-        #     for i in range(len(self.xg[0, :])):
-        #         for j in range(len(self.yg[:, 0])):
-        #             # set to zero points that are not defined or inf
-        #             if isnan_arr[i, j] or abs(form_0[i, j]) == np.inf or abs(form_0[i, j]) > 1e15:
-        #                 # colour this region as a red dot, not square to
-        #                 # not confuse with high mag 2-forms in stacks. or worse, in
-        #                 # blocks
-        #                 circ = patch.Circle((self.xg[i, j], self.yg[i, j]), Lx*0.05/3, color='red')
-        #                 axis.add_patch(circ)
-        #                 form_0[i, j] = 0
-            
-        #     # set up the contour plot with given grids
-            
-        #     N = 30
-        #     f_max = np.max(form_0)
-        #     f_min = np.min(form_0)
-            
-        #     if self.logarithmic_scale_bool:
-        #         # Calculate log scaled set of levels
-        #         mag = np.abs(form_0)
-        #         mag_max = np.max(mag)
-        #         mag_min = np.min(mag[np.nonzero(mag)])
-                
-        #         # Calculate the orders of magnitude between the min and max values in the array
-        #         p = np.log10(abs(f_max)/mag_min)
-        #         n = np.log10(abs(f_min)/mag_min)
-                
-        #         # Determine how many lines are needed above and below mag_min
-        #         p_levels = round(N*p/(p+n))
-        #         n_levels = round(N*n/(p+n))
-                
-        #         # Create levels above and below mag_min
-        #         lev1 = np.logspace(np.log10(mag_min), np.log10(abs(f_max)), num=p_levels, base=10)
-        #         lev2 = np.logspace(np.log10(mag_min), np.log10(abs(f_min)) , num=n_levels, base=10)
-                
-        #         lev2 = -1*np.flip(lev2)
-                
-        #         # Put the two lists together to give the final array of levels
-        #         log_levels = list(np.append(lev2,lev1))
-        
-        #         self.lines = log_levels
-        #     else:
-                
-        #         lin_levels = list(np.linspace(f_min, f_max, N))
-                
-        #         self.lines = lin_levels
-            
-        #     CS = axis.contour(self.xg, self.yg, form_0, levels=self.lines)
-        #     axis.clabel(CS, inline=self.inline_bool, fontsize=self.fontsize)
     
     # define a method to compute the exterior derivative
     def ext_d(self):
@@ -3639,12 +3491,10 @@ class vector_field():
 #                    if isnan_arrx[i,j] or isnan_arry[i,j] or abs(F_x_local[i, j]) == np.inf or abs(F_y_local[i, j]) == np.inf or abs(F_y_local[i, j]) > 1e15 or abs(F_x_local[i, j]) > 1e15:
 #                        
 #                        F_x_local[i,j] = F_y_local[i,j] = 0
-        
-        
+
         # set all insignificant values to zero:
         F_x_local[np.abs(F_x_local) < 1e-15] = 0
         F_y_local[np.abs(F_y_local) < 1e-15] = 0
-        
         
         # find the magnitude corresponding to each point and store in mag array
         mag = np.sqrt(F_x_local**2 + F_y_local**2)
@@ -3655,12 +3505,16 @@ class vector_field():
         # Rescale components if log scaling is selected
         if self.logarithmic_scale_bool:
             mag1 = mag + 1
-            min_size = np.min(mag1)
+            # min_size = np.min(mag1)
+            
             unorm = F_x_local/mag1
             vnorm = F_y_local/mag1
-            logsf = np.log10(mag1/min_size)
-            F_x_local = logsf*unorm
-            F_y_local = logsf*vnorm
+            
+            # logsf = np.log10(mag1/min_size)
+            logmag = np.log10(mag1)
+            F_x_local = unorm*logmag
+            F_y_local = vnorm*logmag
+            
             mag = np.sqrt(F_x_local**2 + F_y_local**2)
             max_size = np.max(mag)
             
