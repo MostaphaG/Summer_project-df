@@ -12,7 +12,7 @@ classifiers = [
 ]
  
 setup(
-  name='formpy',
+  name='FormPy',
   version='1.0',
   description='Differential forms and Exterior Algebra visualizer',
   long_description=open('README.txt').read() + '\n\n' + open('CHANGELOG.txt').read(),
