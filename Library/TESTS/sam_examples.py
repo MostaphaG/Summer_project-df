@@ -7,7 +7,7 @@ Created on Thu Dec 30 14:03:11 2021
 #%%
 # Testing log scaling for 1-forms
 
-import formpy as fp
+import dformpy as fp
 import numpy as np
 import matplotlib.pyplot as plt
 import timeit
@@ -49,7 +49,7 @@ f2.plot(ax2)
 
 # Test whether the curl is dodgy
 
-import formpy as fp
+import dformpy as fp
 import numpy as np
 import matplotlib.pyplot as plt
 import timeit
@@ -112,7 +112,7 @@ elif V[0,0] == 0:
 
 # Can we div and curl using even dpd?
 
-import formpy as fp
+import dformpy as fp
 import numpy as np
 import matplotlib.pyplot as plt
 import timeit
@@ -145,7 +145,7 @@ vf1c.plot(ax3)
 
 # s_min testing
 
-import formpy as fp
+import dformpy as fp
 import numpy as np
 import matplotlib.pyplot as plt
 import timeit
@@ -177,7 +177,7 @@ F2.plot(ax2)
 
 #  1-form customisation testing
 
-import formpy as fp
+import dformpy as fp
 import numpy as np
 import matplotlib.pyplot as plt
 import timeit
@@ -208,7 +208,7 @@ F1.plot(ax1)
 
 # %% Script to find the laplacian of a given function (0-form)
 
-import formpy as fp
+import dformpy as fp
 import numpy as np
 import matplotlib.pyplot as plt
 import timeit
@@ -244,7 +244,7 @@ hdhdf.plot(ax2)
 
 # %% Log scaling for VF
 
-import formpy as fp
+import dformpy as fp
 import numpy as np
 import matplotlib.pyplot as plt
 import timeit
@@ -281,7 +281,7 @@ VF.plot(ax2)
 
 # %% 0 -form log scaling
 
-import formpy as fp
+import dformpy as fp
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -303,7 +303,7 @@ F0.plot(ax2)
 
 # %%
 
-import formpy as fp
+import dformpy as fp
 import numpy as np
 import matplotlib.pyplot as plt
 

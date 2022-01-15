@@ -902,7 +902,7 @@ class form_1():
         Parameters:
         ----------------
         form_second - the form to wedge the 1-form with.
-                    Can be supplied as a FormPy instance, a tuple of equations,
+                    Can be supplied as a DFormPy instance, a tuple of equations,
                     or a single string equation depending on what form is to be
                     wedged.
                     To wedge with 1-form, supply 1-form instance, or tuple of
@@ -1060,7 +1060,7 @@ class form_1():
         Parameters:
         ----------------
         form_second - the form to wedge the 1-form with.
-                    Can be supplied as a FormPy instance, a tuple of grids of
+                    Can be supplied as a DFormPy instance, a tuple of grids of
                     same size and dimensions as this 1-form,
                     or a single grid of scaling function values depending on
                     what form is to be wedged.
@@ -1324,7 +1324,7 @@ class form_1():
         
         Parameters:
         ------------------
-        Vector_field = vector field object of formpy library to do the
+        Vector_field = vector field object of DFormPy library to do the
             derivative with respect to, needs equations to work with
             nuymerical_only being False. Can also supply equations in a tuple:
             (eqn_x, eqn_y). If using numerical only, can supply object or
@@ -1395,7 +1395,7 @@ class form_1():
         
         Parameters:
         --------------
-        Vector_field = vector field object of formpy library to do the
+        Vector_field = vector field object of DFormPy library to do the
             derivative with respect to, needs equations to work with
             nuymerical_only being False. Can also supply equations in a tuple:
             (eqn_x, eqn_y). If using numerical only, can supply object or
@@ -2114,7 +2114,7 @@ class form_2():
         '''
         Computes the interior derivative of the 2-form
         Takes in:
-        -- Vector_field = vector field object of formpy library to do the
+        -- Vector_field = vector field object of DFormPy library to do the
         derivative with respect to, needs equations to work with
         nuymerical_only being False. Can also supply equations in a tuple:
         (eqn_x, eqn_y). If using numerical only, can supply object or
@@ -2184,7 +2184,7 @@ class form_2():
         '''
         Computes the interior derivative of the 2-form
         Takes in:
-        -- Vector_field = vector field object of formpy library to do the
+        -- Vector_field = vector field object of DFormPy library to do the
         derivative with respect to, needs equations to work with
         nuymerical_only being False. Can also supply equations in a tuple:
         (eqn_x, eqn_y). If using numerical only, can supply object or
@@ -2241,7 +2241,7 @@ class form_2():
         Parameters:
         ----------------
         form_second - the form to wedge the 2-form with.
-                    Can be supplied as a FormPy instance, a tuple of equations,
+                    Can be supplied as a DFormPy instance, a tuple of equations,
                     or a single string equation depending on what form is to be
                     wedged.
                     To wedge with 1-form, supply 1-form instance, or tuple of
@@ -2366,7 +2366,7 @@ class form_2():
         Parameters:
         ----------------
         form_second - the form to wedge the 2-form with.
-                    Can be supplied as a FormPy instance, a tuple of component
+                    Can be supplied as a DFormPy instance, a tuple of component
                     grids, or a single string equation depending on what form
                     is to be wedged.
                     To wedge with 1-form, supply 1-form instance, or tuple of
@@ -2926,7 +2926,7 @@ class form_0():
         Parameters:
         ----------------
         form_second - the form to wedge the 0-form with.
-                    Can be supplied as a FormPy instance, a tuple of equations,
+                    Can be supplied as a DFormPy instance, a tuple of equations,
                     or a single string equation depending on what form is to be
                     wedged.
                     To wedge with 1-form, supply 1-form instance, or tuple of
@@ -3093,7 +3093,7 @@ class form_0():
         Parameters:
         ----------------
         form_second - the form to wedge the 0-form with.
-                    Can be supplied as a FormPy instance, a tuple of grids of
+                    Can be supplied as a DFormPy instance, a tuple of grids of
                     same size and dimensions as this 0-form,
                     or a single grid of scaling function values depending on
                     what form is to be wedged.

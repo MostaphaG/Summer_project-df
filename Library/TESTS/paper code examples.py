@@ -1,4 +1,4 @@
-import formpy as fp
+import dformpy as fp
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -37,7 +37,7 @@ zoomed_VF.plot(zoomed_ax)
 
 # %%
 
-import formpy as fp
+import dformpy as fp
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -75,7 +75,7 @@ f_zoom.plot(ax_zoom)
 
 # %%
 
-import formpy as fp
+import dformpy as fp
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -115,7 +115,7 @@ dphi.plot(ax2)
 
 # %%
 
-import formpy as fp
+import dformpy as fp
 import numpy as np
 import matplotlib.pyplot as plt
 

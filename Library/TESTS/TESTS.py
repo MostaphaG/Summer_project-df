@@ -5,7 +5,7 @@ File for testing, separate to any official codes.
 '''
 
 import numpy as np
-import formpy as fp
+import dformpy as fp
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib import patches as patch
@@ -130,7 +130,7 @@ Attempts at optimising stackplot
 '''
 
 # ############################################################################
-# Define stackplot function, equivalently to method in formpy
+# Define stackplot function, equivalently to method in DFormPy
 # ############################################################################
 
 

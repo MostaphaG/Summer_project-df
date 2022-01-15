@@ -4,7 +4,7 @@ Copies of code that produces some figures not used in paper / Wrong
 
 '''
 
-import formpy as fp
+import dformpy as fp
 import numpy as np
 import matplotlib.pyplot as plt
 

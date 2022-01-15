@@ -1,5 +1,5 @@
-# formpy examples
-import formpy as fp
+# dformpy examples
+import dformpy as fp
 import numpy as np
 import matplotlib.pyplot as plt
 import timeit
