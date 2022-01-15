@@ -1762,6 +1762,7 @@ class form_2():
         # Extract L from the x and y grids
         Lx = 0.5*(self.xg[0, -1] - self.xg[0, 0])
         Ly = 0.5*(self.yg[-1, 0] - self.yg[0, 0])
+        L = 0.5*(Lx + Ly)
         x0 = self.xg[0, 0] + Lx
         y0 = self.yg[0, 0] + Ly
         

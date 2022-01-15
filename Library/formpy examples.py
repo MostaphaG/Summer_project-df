@@ -69,7 +69,7 @@ print(tstop-tstart)
 x = np.linspace(-1, 4, 11)
 y = np.linspace(-2, 2, 33)
 xg, yg = np.meshgrid(x, y)
-form_2 = xg*yg
+form_2 = yg/xg
 form_obj = fp.form_2(xg, yg, form_2)
 
 # Create a figure and axis to plot it on
