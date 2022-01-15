@@ -14,9 +14,8 @@ setup(
   name='dformpy',
   version='1.0',
   description='Differential forms and exterior algebra visualizer',
-  Description-Content-Type: text/plain; charset=UTF-8,
   long_description=open('README.txt').read() + '\n\n' + open('CHANGELOG.txt').read(),
-  long_description_content_type='text/plain'
+  long_description_content_type='text/plain',
   url='https://github.com/MostaphaG/Summer_project-df/tree/main/Library',  
   author='Moustafa Gharamti, Maciej Jarema, Samuel Kirwin-Jones',
   author_email='moustafa.gharamti@nottingham.ac.uk, macusjarema@gmail.com, 1999samkj@gmail.com',

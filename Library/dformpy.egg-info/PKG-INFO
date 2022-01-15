@@ -1,4 +1,4 @@
-Metadata-Version: 1.1
+Metadata-Version: 2.1
 Name: dformpy
 Version: 1.0
 Summary: Differential forms and exterior algebra visualizer
@@ -16,9 +16,6 @@ Description: This Python library deals with differential forms. It gives an inte
         ---------------------------------------------------------------
         - First Release
         
-        
-         global-include *.py *.txt
-        
 Keywords: Differential forms,Exterior algebra,Vector fields,Exterior derivative,Interior derivative,Hodge,Wedge,Curl,Gradiant,Divergence,Derivative
 Platform: UNKNOWN
 Classifier: Development Status :: 5 - Production/Stable
@@ -28,3 +25,4 @@ Classifier: Operating System :: MacOS :: MacOS X
 Classifier: Operating System :: Microsoft :: Windows
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Programming Language :: Python :: 3
+Description-Content-Type: text/plain
