@@ -1,0 +1,30 @@
+Metadata-Version: 1.1
+Name: FormPy
+Version: 1.0
+Summary: Differential forms and Exterior Algebra visualizer
+Home-page: https://github.com/MostaphaG/Summer_project-df/tree/main/Library
+Author: Moustafa Gharamti, Maciej Jarema, Samuel Kirwin-Jones
+Author-email: moustafa.gharamti@nottingham.ac.uk, macusjarema@gmail.com, 1999samkj@gmail.com
+License: MIT
+Description: # Python Library for differential forms
+        
+        This Python library deals with differential forms. It gives an interactive visualisation of differential forms and their exterior algebra: exterior derivative, interior derivative, wedge product and the Hodge star operation. The library also plots contravariant vector fields and their different geometric features such as gradient, divergence and curl.
+        
+        
+         Change Log
+         ========
+        
+        1.0 (15/1/2022)
+        ---------------------------------------------------------------
+        - First Release
+        
+Keywords: Differential forms,Exterior algebra,Vector fields,Exterior derivative,Interior derivative,Hodge,Wedge,Curl,Gradiant,Divergence,Derivative
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Education
+Classifier: Intended Audience :: End Users/Desktop
+Classifier: Intended Audience :: Developors
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
