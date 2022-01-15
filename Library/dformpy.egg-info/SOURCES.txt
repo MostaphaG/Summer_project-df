@@ -2,13 +2,6 @@ CHANGELOG.txt
 MANIFEST.in
 README.txt
 setup.py
-TESTS/TESTS.py
-TESTS/dformpy examples.py
-TESTS/dformpy paper figures.py
-TESTS/num ext deriv tests.py
-TESTS/paper code examples.py
-TESTS/sam_examples.py
-TESTS/save code for figures.py
 dformpy/__init__.py
 dformpy/dformpy.py
 dformpy.egg-info/PKG-INFO

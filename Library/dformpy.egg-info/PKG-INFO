@@ -16,6 +16,9 @@ Description: This Python library deals with differential forms. It gives an inte
         ---------------------------------------------------------------
         - First Release
         
+        
+         global-include *.py *.txt
+        
 Keywords: Differential forms,Exterior algebra,Vector fields,Exterior derivative,Interior derivative,Hodge,Wedge,Curl,Gradiant,Divergence,Derivative
 Platform: UNKNOWN
 Classifier: Development Status :: 5 - Production/Stable
