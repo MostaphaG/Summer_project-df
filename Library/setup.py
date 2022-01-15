@@ -4,7 +4,6 @@ classifiers = [
   'Development Status :: 5 - Production/Stable',
   'Intended Audience :: Education',
   'Intended Audience :: End Users/Desktop',
-  'Intended Audience :: Developors',
   'Operating System :: MacOS :: MacOS X',
   'Operating System :: Microsoft :: Windows',
   'License :: OSI Approved :: MIT License',
@@ -12,7 +11,7 @@ classifiers = [
 ]
  
 setup(
-  name='FormPy',
+  name='formpy',
   version='1.0',
   description='Differential forms and Exterior Algebra visualizer',
   long_description=open('README.txt').read() + '\n\n' + open('CHANGELOG.txt').read(),

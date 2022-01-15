@@ -1,5 +1,5 @@
 Metadata-Version: 1.1
-Name: FormPy
+Name: formpy
 Version: 1.0
 Summary: Differential forms and Exterior Algebra visualizer
 Home-page: https://github.com/MostaphaG/Summer_project-df/tree/main/Library
@@ -23,7 +23,6 @@ Platform: UNKNOWN
 Classifier: Development Status :: 5 - Production/Stable
 Classifier: Intended Audience :: Education
 Classifier: Intended Audience :: End Users/Desktop
-Classifier: Intended Audience :: Developors
 Classifier: Operating System :: MacOS :: MacOS X
 Classifier: Operating System :: Microsoft :: Windows
 Classifier: License :: OSI Approved :: MIT License

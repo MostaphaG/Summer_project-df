@@ -15,3 +15,9 @@ TESTS/num ext deriv tests.py
 TESTS/paper code examples.py
 TESTS/sam_examples.py
 TESTS/save code for figures.py
+formpy/__init__.py
+formpy/formpy.py
+formpy.egg-info/PKG-INFO
+formpy.egg-info/SOURCES.txt
+formpy.egg-info/dependency_links.txt
+formpy.egg-info/top_level.txt
