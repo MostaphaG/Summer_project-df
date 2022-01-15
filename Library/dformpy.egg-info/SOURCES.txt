@@ -1,0 +1,20 @@
+CHANGELOG.txt
+MANIFEST.in
+README.txt
+setup.py
+FormPy.egg-info/SOURCES.txt
+FormPy.egg-info/dependency_links.txt
+FormPy.egg-info/top_level.txt
+TESTS/TESTS.py
+TESTS/dformpy examples.py
+TESTS/dformpy paper figures.py
+TESTS/num ext deriv tests.py
+TESTS/paper code examples.py
+TESTS/sam_examples.py
+TESTS/save code for figures.py
+dformpy/__init__.py
+dformpy/dformpy.py
+dformpy.egg-info/PKG-INFO
+dformpy.egg-info/SOURCES.txt
+dformpy.egg-info/dependency_links.txt
+dformpy.egg-info/top_level.txt
