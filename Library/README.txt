@@ -1,3 +1,1 @@
-# Python Library for differential forms
-
-This Python library deals with differential forms. It gives an interactive visualisation of differential forms and their exterior algebra: exterior derivative, interior derivative, wedge product and the Hodge star operation. The library also plots contravariant vector fields and their different geometric features such as gradient, divergence and curl.
+This Python library deals with differential forms. It gives an interactive visualisation of differential forms and their exterior algebra, exterior derivative, interior derivative, wedge product and the Hodge star operation. The library also plots contravariant vector fields and their different geometric features such as gradient, divergence and curl.

@@ -13,7 +13,7 @@ classifiers = [
 setup(
   name='dformpy',
   version='1.0',
-  description='Differential forms and Exterior Algebra visualizer',
+  description='Differential forms and exterior algebra visualizer',
   long_description=open('README.txt').read() + '\n\n' + open('CHANGELOG.txt').read(),
   url='https://github.com/MostaphaG/Summer_project-df/tree/main/Library',  
   author='Moustafa Gharamti, Maciej Jarema, Samuel Kirwin-Jones',
