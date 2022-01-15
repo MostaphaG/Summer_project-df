@@ -26,11 +26,8 @@ x = np.linspace(-2, 2, 42)
 y = np.linspace(-2, 2, 21)
 xg, yg = np.meshgrid(x, y)
 
-F_x = np.ones(np.shape(xg))
-F_y = np.ones(np.shape(yg))
-
-#F_x = 10*xg*yg
-#F_y = 1/(np.sin(yg))
+F_x = 10*xg/yg
+F_y = 1/(np.sin(yg))
 
 # PLOT, note, it will create a figure for user
 # we probably don't want that, otherwise we would have to make this
@@ -61,13 +58,8 @@ print(tstop-tstart)
 # plotting a 2-form
 
 # set up 2-form
-#v = np.linspace(-6, 6, 21)
-#xg, yg = np.meshgrid(v, v)
-#form_2 = xg*yg
-#form_obj = fp.form_2(xg, yg, form_2)
-
-x = np.linspace(-1, 4, 11)
-y = np.linspace(-2, 2, 33)
+x = np.linspace(-1, 1, 11)
+y = np.linspace(-1.5, 1.5, 17)
 xg, yg = np.meshgrid(x, y)
 form_2 = yg/xg
 form_obj = fp.form_2(xg, yg, form_2)
@@ -82,33 +74,30 @@ ax.set_aspect('equal')
 form_obj.plot(ax)
 
 # wait, then change some properties and redraw
-#plt.pause(3)
-#form_obj.give_eqn('x*y')
-#form_obj.set_density(18, 18)
-#ax.clear()
-#ax.set_xlabel(r'$x$')
-#ax.set_ylabel(r'$y$')
-#ax.set_aspect('equal')
-#form_obj.plot(ax)
+plt.pause(3)
+form_obj.give_eqn('x*y')
+form_obj.set_density2(19, 19)
+ax.clear()
+ax.set_xlabel(r'$x$')
+ax.set_ylabel(r'$y$')
+ax.set_aspect('equal')
+form_obj.plot(ax)
 
 # %%
 
 # plotting a 0-form
 
 # set up
-#v = np.linspace(-4.5, 4.5, 11)
-#xg, yg = np.meshgrid(v, v)
-#form_0 = np.cos(xg*yg)
-#form_obj = fp.form_0(xg, yg, form_0)
-#form_obj.levels(4)
-# form_obj.density_increase(20)  # demonstation of an error
-
 x = np.linspace(-2, 4, 17)
-y = np.linspace(-3, 3, 23)
+y = np.linspace(0, 3, 23)
 xg, yg = np.meshgrid(x, y)
-form_0 = np.cos(xg*yg)
+form_0 = np.cos(xg*yg)/np.sqrt(yg)
 form_obj = fp.form_0(xg, yg, form_0)
-form_obj.levels(4)
+
+# customise
+form_obj.give_eqn('cos(x*y)/sqrt(y)')
+form_obj.density_increase(25)
+form_obj.levels(20)
 
 # Create a figure and axis to plot it on
 fig = plt.figure()
@@ -119,25 +108,14 @@ ax.set_aspect('equal')
 
 form_obj.plot(ax)
 
-
-# wait, recustomise and redraw
-plt.pause(2)
-form_obj.give_eqn('cos(x*y)')
-form_obj.density_increase(25)
-form_obj.levels(15)
-ax.clear()
-ax.set_xlabel(r'$x$')
-ax.set_ylabel(r'$y$')
-ax.set_aspect('equal')
-form_obj.plot(ax)
-
 # %%
 
 # Plotting a vector field
 
 # set up needed parameters
-v = np.linspace(-6, 6, 31)
-xg, yg = np.meshgrid(v, v)
+x = np.linspace(-2, 2, 31)
+y = np.linspace(-1, 1, 21)
+xg, yg = np.meshgrid(x, y)
 
 # set up the field grids
 F_x = xg/(xg**2 + yg**2)**1.5
@@ -169,8 +147,9 @@ field_obj.plot(ax2)
 # More complex example of using subplots
 
 # set up grids
-v = np.linspace(-4.5, 4.5, 21)
-xg, yg = np.meshgrid(v, v)
+x = np.linspace(-2, 2, 21)
+y = np.linspace(-2, 2, 22)
+xg, yg = np.meshgrid(x, y)
 
 # set up the 1 form object and plot it
 form_1_x = yg
@@ -197,8 +176,9 @@ star_1_form.plot(ax2)
 # subplots with 2-forms
 
 # set up grids
-v = np.linspace(-4.5, 4.5, 21)
-xg, yg = np.meshgrid(v, v)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 
 
 # set up the 1 form object
@@ -226,8 +206,9 @@ form_2_obj.plot(ax2)
 # Further subplot example
 
 # set up grids
-v = np.linspace(-4.5, 4.5, 11)
-xg, yg = np.meshgrid(v, v)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 
 # set up the 0 form object
 form_0 = xg**2 + 3*yg
@@ -265,8 +246,10 @@ Zooming
 # Vector field set up and zooming example
 
 # set up VF
-r = np.linspace(-4.5, 4.5, 21)
-xg, yg = np.meshgrid(r, r)
+x = np.linspace(-3, 4, 21)
+y = np.linspace(-4, 3, 27)
+xg, yg = np.meshgrid(x, y)
+
 u = xg*np.cos(yg)
 v = -yg*np.sin(xg)
 vf1 = fp.vector_field(xg, yg, u, v)
@@ -288,8 +271,10 @@ zoom_axis, zoom_vf = vf1.zoom((2, 2), mag=3, dpd=9, inset=True, axis=ax)
 # Zooming with inset is false
 
 # set up VF
-r = np.linspace(-5,5,15)
-xg, yg = np.meshgrid(r, r)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
+
 u = xg*np.cos(yg)
 v = yg*np.sin(xg)
 field = fp.vector_field(xg, yg, u, v)
@@ -316,8 +301,9 @@ zoomed_VF.plot(ax2)
 
 # VF zooming more
 
-r = np.linspace(-5, 5, 21)
-xg, yg = np.meshgrid(r, r)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 
 u = yg*np.sin(xg)
 v = -xg*np.cos(yg)
@@ -340,8 +326,9 @@ zoomed_field.plot(zoomed_axis)
 
 # Testing 1-form zooming
 
-r = np.linspace(-5, 5, 21)
-xg, yg = np.meshgrid(r, r)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 
 u = yg*np.sin(xg)
 v = -xg*np.cos(yg)
@@ -366,8 +353,9 @@ zoomed_ax, zoomed_form = form1.zoom(target=[2, 2], mag=10, dpd=7, inset=True, ax
 # Testing 2-form zooming
 
 # set up the 2-form
-v = np.linspace(-6, 6, 31)
-xg, yg = np.meshgrid(v, v)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 #form = -yg*np.sin(xg) * xg*np.cos(yg)
 #form2 = fp.form_2(xg, yg, form)
 #form2.give_eqn('-y*sin(x)*x*cos(y)')
@@ -397,8 +385,9 @@ VF insets with calculus
 # Testing derivative of vector field
 
 # Set up field
-r = np.linspace(-5, 5, 21)
-xg, yg = np.meshgrid(r, r)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 u = yg
 v = -xg
 vf1 = fp.vector_field(xg, yg, u, v)
@@ -422,8 +411,9 @@ D_inset_ax, D_vf1 = vf1.deriv((3, 3), 5, 9, inset=True, axis=ax)
 # Test divergence of vector field with subplot
 
 # Set up fields
-r = np.linspace(-5, 5, 21)
-xg, yg = np.meshgrid(r, r)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 u = yg*np.cos(xg)
 v = -xg
 vf1 = fp.vector_field(xg, yg, u, v)
@@ -449,8 +439,10 @@ div_field.plot(dif_axis)
 # Test curl of vector field with inset
 
 # Set up field
-r = np.linspace(-5, 5, 21)
-xg, yg = np.meshgrid(r, r)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
+
 u = yg*np.cos(xg)
 v = -xg
 
@@ -485,8 +477,9 @@ Exterior Alg.
 # testing 0-form exterior derivative
 
 # set up grids
-v = np.linspace(-4.5, 4.5, 11)
-xg, yg = np.meshgrid(v, v)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 
 # set up the 0 form object
 form_0 = np.cos(xg*yg)
@@ -531,8 +524,8 @@ print(form_1_obj.return_string())
 # Testing ext deriv of 1-form
 
 # set up grids and 1 form object
-x = np.linspace(-3, 2, 21)
-y = np.linspace(-3, 2, 21)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
 xg, yg = np.meshgrid(x, y)
 form_1_x = xg*np.cos(yg)
 form_1_y = yg*np.sin(xg)
@@ -560,7 +553,7 @@ form_2_obj = form_1_obj.ext_d()  # this supplies the 2-form with equations too
 form_2_obj.plot(ax2)
 
 # change its density and plot on last axis set
-form_2_obj.set_density(26)
+form_2_obj.set_density2(26, 27)
 form_2_obj.max_sheets(10)
 form_2_obj.plot(ax3)
 
@@ -573,8 +566,10 @@ print(form_2_obj.return_string())
 # exterior derivaitve of 1-form on subplots
 
 # set up grids and 1-form
-v = np.linspace(-4.5, 4.5, 21)
-xg, yg = np.meshgrid(v, v)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
+
 form_1_x = yg*np.cos(xg)
 form_1_y = -xg
 form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y)
@@ -599,8 +594,9 @@ form_2_obj.plot(ax2)
 # example use of Wedge of two 1-forms, analytically
 
 # set up grids
-v = np.linspace(-4.5, 4.5, 26)
-xg, yg = np.meshgrid(v, v)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 
 # set up the 1 form object
 form_1_x = xg**2
@@ -641,8 +637,10 @@ print(form_wedged_2.return_string())
 # Example of Wedge done numerically
 
 # set up grids and 1-form
-v = np.linspace(-4.5, 4.5, 26)
-xg, yg = np.meshgrid(v, v)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
+
 form_1_x = 2/xg**3
 form_1_y = yg**2
 form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y)
@@ -666,8 +664,10 @@ form_wedged_2.plot(ax2)
 # Testing the hodge of a 1-form
 
 # set up grids and 1-form
-v = np.linspace(-4.5, 4.5, 21)
-xg, yg = np.meshgrid(v, v)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
+
 form_1_x = yg
 form_1_y = -xg
 form_1_obj = fp.form_1(xg, yg, form_1_x, form_1_y)
@@ -710,8 +710,9 @@ form_1_obj_2H.plot(ax)
 # Example of 2-form hodge
 
 # set up 2-form
-v = np.linspace(-6, 6, 21)
-xg, yg = np.meshgrid(v, v)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 form_2 = xg*yg
 form_obj = fp.form_2(xg, yg, form_2)
 
@@ -740,8 +741,10 @@ form_0.plot(ax2)  # should observe no difference (and do)
 # Testing hodge of a 0-form
 
 # set up grids and 0-form
-v = np.linspace(-4.5, 4.5, 11)
-xg, yg = np.meshgrid(v, v)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
+
 form_0 = xg**2 + 3*yg
 form_0_obj = fp.form_0(xg, yg, form_0)
 form_0_obj.give_eqn('x**2 + 3*y')
@@ -771,8 +774,9 @@ form_2_num.plot(ax4)
 # Testing analytical interior derivative of 1-form
 
 # set up needed parameters
-r = np.linspace(-6, 6, 21)
-xg, yg = np.meshgrid(r, r)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 
 # set up form components and the object
 F_x = xg**2
@@ -816,8 +820,9 @@ form_0_i_3.plot(ax5)
 # Testing numerical interior derivative of a 1-form:
 
 # set up needed parameters
-r = np.linspace(-6, 6, 21)
-xg, yg = np.meshgrid(r, r)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 
 # set up form object
 F_x = xg**2
@@ -858,8 +863,9 @@ form_0_i_3.plot(ax5)
 # Testing numerical interior derivative of a 2-form
 
 # set up needed parameters
-r = np.linspace(-6, 6, 21)
-xg, yg = np.meshgrid(r, r)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 
 # set up form
 form2_comp = xg*yg**2
@@ -907,8 +913,9 @@ form_1_i_3.plot(ax5)
 # Testing analytical interior derivative of a 2-form
 
 # set up needed parameters
-r = np.linspace(-6, 6, 21)
-xg, yg = np.meshgrid(r, r)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 
 # set up form
 form2_comp = xg*yg**2
@@ -963,8 +970,9 @@ form_1_i_3.plot(ax5)
 # Analytically
 
 # set up grids
-v = np.linspace(-1, 2, 41)
-xg, yg = np.meshgrid(v, v)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 
 # set up a figure with subplots
 fig = plt.figure()
@@ -1007,8 +1015,9 @@ Curved Spacetime
 
 # Testing conversion form vector field to 1-form with string based metric
 
-r = np.linspace(-4.5, 4.5, 21)
-xg, yg = np.meshgrid(r, r)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 
 # set up the field and vector field objecct
 u = np.ones(np.shape(xg))
@@ -1048,8 +1057,9 @@ form_1_correct.plot(ax3)
 
 # Testing conversion form vector field to 1-form with array based metric
 
-r = np.linspace(-4.5, 4.5, 21)
-xg, yg = np.meshgrid(r, r)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 
 # set up the field and vector field objecct
 u = np.ones(np.shape(xg))
@@ -1094,8 +1104,9 @@ form_1_correct.plot(ax3)
 # ####################################################
 
 # get grids
-r = np.linspace(-4.5, 4.5, 21)
-xg, yg = np.meshgrid(r, r)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 
 # set up figure and subplots:
 fig = plt.figure()
@@ -1164,8 +1175,9 @@ vf_correct.plot(ax4)
 
 # Testing the vector field to 1-form via metric with inetrior derivative (numerically)
 
-r = np.linspace(-4.5, 4.5, 21)
-xg, yg = np.meshgrid(r, r)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 
 # set up figure and subplots
 fig = plt.figure()
@@ -1209,8 +1221,9 @@ zero_form.plot(ax3)
 # Backwards to above, and done analytically.
 
 # set up grids
-r = np.linspace(-4.5, 4.5, 21)
-xg, yg = np.meshgrid(r, r)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 
 # set up figure and subplots
 fig = plt.figure()
@@ -1264,8 +1277,9 @@ Tricky examples - const comps. singularities etc
 # 1-form
 
 # set up needed parameters
-v = np.linspace(-6, 6, 21)
-xg, yg = np.meshgrid(v, v)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 
 # set up subplots
 fig = plt.figure()
@@ -1297,8 +1311,9 @@ form_obj1.plot(ax2)
 # numerically and analytically
 
 # set up grids
-v = np.linspace(-4.5, 4.5, 13)
-xg, yg = np.meshgrid(v, v)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 
 # set up subplots
 fig = plt.figure()
@@ -1332,8 +1347,9 @@ form_1_obj_num.plot(ax3)
 # Testing numerical int deriv with constant fields
 
 # set up needed parameters
-r = np.linspace(-6, 6, 21)
-xg, yg = np.meshgrid(r, r)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 
 # set up subplots
 fig = plt.figure()
@@ -1371,13 +1387,13 @@ vf.plot(ax2)
 
 # complete int deriv. with object, arrays and with no input:
 form_0_i_1 = form_obj1.num_interior_d(vector_field=vf)
-form_0_i_2 = form_obj1.num_interior_d()
-form_0_i_3 = form_obj1.num_interior_d((u, v))
+form_0_i_2 = form_obj1.num_interior_d((u, v))
+form_0_i_3 = form_obj1.num_interior_d()
 
 # plot each
 form_0_i_1.plot(ax3)
-form_0_i_2.plot(ax5)
-form_0_i_3.plot(ax4)
+form_0_i_2.plot(ax4)
+form_0_i_3.plot(ax5)
 
 # NB no contours on plot 4 (form_0_i_2) as 0-form = 4. constant, so no contorus
 
@@ -1386,8 +1402,9 @@ form_0_i_3.plot(ax4)
 # Testing interior derivative of a 2-form with constant 2-form and/or vf
 
 # set up needed parameters
-r = np.linspace(-6, 6, 21)
-xg, yg = np.meshgrid(r, r)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 
 # set up subplots
 fig = plt.figure()
@@ -1445,8 +1462,9 @@ form_1_i_4.plot(ax4)
 # Interior derivative of 2-form in all inputs
 
 # set up needed parameters
-r = np.linspace(-6, 6, 21)
-xg, yg = np.meshgrid(r, r)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 
 # set up subplots
 fig = plt.figure()
@@ -1504,8 +1522,9 @@ form_1_i_4.plot(ax4)
 # analytically
 
 # set up needed parameters
-r = np.linspace(-3, 3, 41)
-xg, yg = np.meshgrid(r, r)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 
 # set up subplots
 fig = plt.figure()
@@ -1555,8 +1574,9 @@ form_1_i_2.plot(ax4)
 # numerical
 
 # set up needed parameters
-r = np.linspace(-3, 3, 41)
-xg, yg = np.meshgrid(r, r)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 
 # set up subplots
 fig = plt.figure()
@@ -1603,8 +1623,9 @@ form_1_i_2.plot(ax4)
 # Wedge a single 1-form into different obnjects, 0-from, 1-form and then 2-form
 
 # grids and initial 0-form
-v = np.linspace(-2, 2, 23)
-xg, yg = np.meshgrid(v, v)
+x = np.linspace(-4.5, 4.5, 21)
+y = np.linspace(-4.5, 4.5, 23)
+xg, yg = np.meshgrid(x, y)
 f0 = fp.form_0(xg, yg, yg*np.sin(xg*yg))
 
 # 1-form 

@@ -1709,7 +1709,7 @@ class form_2():
             y = np.linspace(self.yg[0,0], self.yg[-1,0], points_number_y)
             self.xg, self.yg = np.meshgrid(x, y)
             # based on these change other, dependant variables
-            self.pt_den_x = len(self.xg[:, 0])
+            self.pt_den_x = len(self.xg[0, :])
             self.pt_den_y = len(self.yg[:, 0])
             self.fract_x = 2/(self.pt_den_x - 1)
             self.fract_y = 2/(self.pt_den_y - 1)
@@ -2546,7 +2546,8 @@ class form_0():
         self.xg = xg
         self.yg = yg
         self.form_0 = form_0
-        self.pt_den = len(xg[:, 0])  # + 1  # assume square grids
+        self.pt_den_x = len(xg[0, :])
+        self.pt_den_y = len(xg[:, 0])
         self.delta_factor = 10
         self.denser = 1
         self.lines = 15
@@ -2561,7 +2562,6 @@ class form_0():
         else:
             self.form_0_str = None
         # Note, the string must be given with x and y as variables
-        self.form_0_contour = None  # Initialise with that, will be changed, if user
         # gets contour plot with new density.
         self.cmap = cm.viridis
     
@@ -2698,7 +2698,8 @@ class form_0():
             y = np.linspace(self.yg[0,0], self.yg[-1,0], points_number)
             self.xg, self.yg = np.meshgrid(x,y)
             # based on these change other, dependant variables
-            self.pt_den = len(self.xg[:, 0])
+            self.pt_den_x = len(self.xg[0, :])
+            self.pt_den_y = len(self.yg[:, 0])
             # substitute these into the equation:
             # but keep it local
             str_0 = self.form_0_str + ''
@@ -2726,16 +2727,17 @@ class form_0():
         axis - matplotlib axis that 0-form will be plotted on
         '''
         
-        # find L based on the origin of given grid is
+        # Extract L from the x and y grids
         Lx = 0.5*(self.xg[0, -1] - self.xg[0, 0])
         Ly = 0.5*(self.yg[-1, 0] - self.yg[0, 0])
-        x0 = self.xg[0,0] + Lx
-        y0 = self.yg[0,0] + Ly
+        x0 = self.xg[0, 0] + Lx
+        y0 = self.yg[0, 0] + Ly
         
-        # rescale axis
-        ax_L = Lx + Lx/self.delta_factor
-        axis.set_xlim(-ax_L + x0, ax_L + x0)
-        axis.set_ylim(-ax_L + y0, ax_L + y0)
+        # reset axis limits
+        ax_Lx = Lx + Lx/self.delta_factor
+        ax_Ly = Ly + Ly/self.delta_factor
+        axis.set_xlim(-ax_Lx + x0, ax_Lx + x0)
+        axis.set_ylim(-ax_Ly + y0, ax_Ly + y0)
         
         # cehck requests as to density of lines
         if self.denser != 1:
@@ -2747,7 +2749,7 @@ class form_0():
                 # get the supplied form as a string
                 zero_form_str = str(simplify(self.form_0_str))
                 # set up grids for contours
-                contour_x, contour_y = np.linspace(self.xg[0,0] , self.xg[0,-1] , self.pt_den*self.denser), np.linspace(self.yg[0,0] , self.yg[-1,0], self.pt_den*self.denser)
+                contour_x, contour_y = np.linspace(self.xg[0,0] , self.xg[0,-1] , self.pt_den_x*self.denser), np.linspace(self.yg[0,0] , self.yg[-1,0], self.pt_den_y*self.denser)
                 contour_x_grid, contour_y_grid = np.meshgrid(contour_x, contour_y)
                 # format the given ftring
                 zero_form_str = zero_form_str.replace('x', 'contour_x_grid')
@@ -3452,16 +3454,18 @@ class vector_field():
         x_len = len(self.xg[:, 0])
         y_len = len(self.yg[0, :])
         
-        # Extract L from the x and y grids. Assumes they are square.
+        # Extract L from the x and y grids
         Lx = 0.5*(self.xg[0, -1] - self.xg[0, 0])
         Ly = 0.5*(self.yg[-1, 0] - self.yg[0, 0])
-        x0 = self.xg[0,0] + Lx
-        y0 = self.yg[0,0] + Ly
+        L = 0.5*(Lx + Ly)
+        x0 = self.xg[0, 0] + Lx
+        y0 = self.yg[0, 0] + Ly
         
-        # adjust axis limits based on that.
-        ax_L = Lx + Lx/self.delta_factor
-        axis.set_xlim(-ax_L + x0, ax_L + x0)
-        axis.set_ylim(-ax_L + y0, ax_L + y0)
+        # reset axis limits
+        ax_Lx = Lx + Lx/self.delta_factor
+        ax_Ly = Ly + Ly/self.delta_factor
+        axis.set_xlim(-ax_Lx + x0, ax_Lx + x0)
+        axis.set_ylim(-ax_Ly + y0, ax_Ly + y0)
         
         # for arrows to work, with nan and infs
         # make a local variable of F_x and F_y
