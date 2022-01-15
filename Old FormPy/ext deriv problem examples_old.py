@@ -5,7 +5,7 @@ testing Exterior derivative numerical problems
 '''
 
 
-import formpy1 as fp
+import formpy_old as fp
 import numpy as np
 import matplotlib.pyplot as plt
 import timeit

@@ -1,5 +1,5 @@
-# formpy examples
-import formpy as fp
+# formpy_old examples
+import formpy_old as fp
 import numpy as np
 import matplotlib.pyplot as plt
 import timeit
@@ -1431,7 +1431,7 @@ form_2_an.plot()
 
 #%% Testing numpy exterior derivative
 
-import formpy as fp
+import formpy_old as fp
 import numpy as np
 import matplotlib.pyplot as plt
 
