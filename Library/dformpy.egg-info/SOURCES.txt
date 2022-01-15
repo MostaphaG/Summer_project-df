@@ -2,9 +2,6 @@ CHANGELOG.txt
 MANIFEST.in
 README.txt
 setup.py
-FormPy.egg-info/SOURCES.txt
-FormPy.egg-info/dependency_links.txt
-FormPy.egg-info/top_level.txt
 TESTS/TESTS.py
 TESTS/dformpy examples.py
 TESTS/dformpy paper figures.py
