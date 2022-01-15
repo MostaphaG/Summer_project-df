@@ -307,15 +307,32 @@ import formpy as fp
 import numpy as np
 import matplotlib.pyplot as plt
 
-x = np.linspace(-5, 5, 21)
-y = np.linspace(-3, 5, 19)
-x,y = np.meshgrid(x , y)
+x = np.linspace(-5, 5, 25)
+y = np.linspace(-3, 5, 18)
+xg ,yg  = np.meshgrid(x , y)
 
-u = yg*np.cos(xg)
+u = yg*np.sin(xg)/((xg - 5)*(xg+2))
+v = -xg*np.cos(yg)/(xg)
 
 fig1 = plt.figure(figsize=(10,5))
 ax1 = fig1.add_subplot(121)
 ax2 = fig1.add_subplot(122)
 
-F0 = fp.form_0(xg, yg, u)
+F0 = fp.form_2(xg, yg, u)
 F0.plot(ax1)
+F0.log_scaling()
+F0.plot(ax2)
+
+# %%
+
+import numpy as np
+
+x = 5
+y = 10
+
+A = np.array([[1,2,3],[4,5,6],[7,8,9]])
+
+R = np.zeros(shape=(x,y))
+
+
+

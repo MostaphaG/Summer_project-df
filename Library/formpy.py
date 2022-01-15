@@ -1756,8 +1756,8 @@ class form_2():
         form2[np.abs(form2) < 1e-12] = 0
         
         # get the lengths of x and y from their grids
-        x_len = len(self.xg[:, 0])
-        y_len = len(self.yg[0, :])
+        x_len = len(self.xg[0, :])
+        y_len = len(self.yg[:, 0])
         
         # Extract L from the x and y grids
         Lx = 0.5*(self.xg[0, -1] - self.xg[0, 0])
@@ -1776,7 +1776,7 @@ class form_2():
         form_2_sgn = np.sign(form2)
         
         # define an empty array of magnitudes, to then fill with integer rel. mags
-        R_int = np.zeros(shape=((x_len), (y_len)))
+        R_int = np.zeros(shape=((y_len), (x_len)))
         
         # #########################################################################
         # get variables needed for the initial, simplified stack plot
@@ -1787,8 +1787,8 @@ class form_2():
         
         # deal with sinularities that appear on evaluated points
         isnan_arr = np.isnan(form2)
-        for i in range(x_len):
-            for j in range(y_len):
+        for i in range(y_len):
+            for j in range(x_len):
                 # set to zero points that are not defined or inf
                 if isnan_arr[i, j] or abs(form2[i, j]) == np.inf  or abs(form2[i, j]) > 1e15:
                     # colour this region as a red dot, not square to
@@ -1862,8 +1862,8 @@ class form_2():
                 R_int[R <= t/self.s_max] = t
 
             # loop over each arrow coordinate in x and y
-            for i in range(x_len):
-                for j in range(y_len):
+            for i in range(y_len):
+                for j in range(x_len):
                     # define it for all magnitudes. Separately for odd and even corr. number of sheets:
                     
                     # Label each element with the number of stacks required: linear scaling
