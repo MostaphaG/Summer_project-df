@@ -112,7 +112,7 @@ zoomed_form.plot(zoomed_ax)
 
 # 2-form plot with zoom inset
 
-v = np.linspace(-6, 6, 31)
+v = np.linspace(-5, 5, 31)
 xg, yg = np.meshgrid(v, v)
 zooming = 1.5
 u = yg*np.sin(xg)
