@@ -1133,7 +1133,6 @@ toolbar = NavigationToolbar2Tk(canvas, plot_frame)
 toolbar.update()  # allow the plot to update based on the toolbar
 canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
-
 # track the mouse presses for the toolbar to respond to
 def on_key_press(event):
     global x_pix, y_pix, x_m, y_m
@@ -2020,9 +2019,7 @@ def log_scale_toggle_response():
         logartmic_scale_bool = 0
         logartmic_scale_toggle.configure(image=toggle_image_off)
 
-
 ''' POLAR PLOTS '''
-
 
 # define a function to repond to plotting apolar grid
 # takes the same field, but plots it on a polar grid
