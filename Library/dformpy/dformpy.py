@@ -296,8 +296,8 @@ class form_1():
             str_y = '(' + str(str_y) + ')* np.ones(np.shape(self.yg))'
         
         # re-evaluate the 2-form numerically, warn user if changed
-        if not ((self.F_x is eval(str_x)) and (self.F_y is eval(str_y))):
-            print('Warning: Equations did not exactly match numerical values, and these were change to agree with equations')
+        # if not ((self.F_x is eval(str_x)) and (self.F_y is eval(str_y))):
+        #     print('Warning: Equations did not exactly match numerical values, and these were change to agree with equations')
         
         # evaluate formatted equations and save
         self.F_x = eval(str_x)
@@ -1205,10 +1205,10 @@ class form_1():
             raise ValueError('Variable change during code running, look at \'order\' parameter')
         
     
-    def zoom(self, target=[0, 0], mag=2, dpd=9, inset=False, axis=None, insize=0.3):
+    def zoom(self, target=[0, 0], mag=2, dpd=9, inset=True, axis=None, insize=0.3):
         '''
         
-        zoom(target=[0, 0], mag=2, dpd=9, inset=False, axis=None, insize=0.3)
+        zoom(target=[0, 0], mag=2, dpd=9, inset=True, axis=None, insize=0.3)
         
         Parameters:
         -------------- 
@@ -2015,7 +2015,7 @@ class form_2():
             raise TypeError('You need to supply the 2-form equation to do this, look at \'give_eqn\' method')
 
     # define a method to create a zoomed in 2-form
-    def zoom(self, target=[0, 0], mag=2, dpd=9, inset=False, axis=None, insize=0.3):
+    def zoom(self, target=[0, 0], mag=2, dpd=9, inset=True, axis=None, insize=0.3):
         
         '''
         Creates a new window which displays the 2-form zoomed at a certain point
@@ -2024,7 +2024,7 @@ class form_2():
         mag: +ve float, determines zooming amount
         dpd: +int, determines how many points on each axis
         
-        inset - bool - determies if the zoom is plotted on the given axis
+        inset - bool - determies if the zoom is plotted on the parent axis
         as an inset
         axis - matplotlib axis, only supply if inset is True, plots intset on these
         insize - float - size of inset as fraction of total figure
@@ -3643,7 +3643,7 @@ class vector_field():
                         # inset is false, just return the new zoomed in instance
                         return zoom_vf
         
-    def deriv(self, target=[0, 0], mag=2, dpd=9, inset=False, axis=None, insize=0.3):
+    def deriv(self, target=[0, 0], mag=2, dpd=9, inset=True, axis=None, insize=0.3):
         '''
         Creates new vector field object at a target location, showing the derivative field at this point.
         User gives arguments:
@@ -3750,7 +3750,7 @@ class vector_field():
                         return deriv_vf
     
         
-    def div(self, target=[0,0], mag=2, dpd=9, inset=False, axis=None, insize=0.3):
+    def div(self, target=[0,0], mag=2, dpd=9, inset=True, axis=None, insize=0.3):
         '''
         Creates new vector field object at a target location, showing the Divergence of the field at this point.
         User gives arguments:
@@ -3908,7 +3908,7 @@ class vector_field():
                         # inset is false, just return the new zoomed in instance
                         return div_vf
         
-    def curl(self, target=[0,0], mag=2, dpd=9, inset=False, axis=None, insize=0.3):
+    def curl(self, target=[0,0], mag=2, dpd=9, inset=True, axis=None, insize=0.3):
         '''
         Creates new vector field object at a target location, showing local rotation (Curl)
         User gives arguments:
