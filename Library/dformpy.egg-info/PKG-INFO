@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: dformpy
-Version: 1.0.1
+Version: 1.0.2
 Summary: Differential forms and exterior algebra visualizer
 Home-page: https://github.com/MostaphaG/Summer_project-df/tree/main/Library
 Author: Moustafa Gharamti, Maciej Jarema, Samuel Kirwin-Jones
@@ -8,14 +8,25 @@ Author-email: moustafa.gharamti@nottingham.ac.uk, macusjarema@gmail.com, 1999sam
 License: MIT
 Description: This Python library deals with differential forms. It gives an interactive visualisation of differential forms and their exterior algebra, exterior derivative, interior derivative, wedge product and the Hodge star operation. The library also plots contravariant vector fields and their different geometric features such as gradient, divergence and curl.
         
+        The library has been published via a research paper. The paper gives detailed explanation of the library structure, plenty of examples and potential future implementations to the library ... The publication can be found here https://arxiv.org/abs/2201.10517
+        
         
          Change Log
          ========
         
         1.0 (15/1/2022)
-        ---------------------------------------------------------------
         - First Release
         
+        ---------------------------------------------------------------
+        
+        1.0.1 (15/1/2022)
+        -  Technical fix. Changes to the __init__.py.   No new implementations 
+        
+        
+        ---------------------------------------------------------------
+        
+        1.0.2 (30/1/2022)
+        -  A fix to the zooming insets. The parameters for the boolean 'inset' are now set to True. No new implementations 
 Keywords: Differential forms,Exterior algebra,Vector fields,Exterior derivative,Interior derivative,Hodge,Wedge,Curl,Gradiant,Divergence,Derivative
 Platform: UNKNOWN
 Classifier: Development Status :: 5 - Production/Stable
