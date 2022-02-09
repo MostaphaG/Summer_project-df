@@ -366,12 +366,16 @@ form1.plot(ax2)
 
 # %%
 
+import numpy as np
+import matplotlib.pyplot as plt
+import dformpy as fp
+
 # 2D BH example
 p = np.linspace(-4, 4, 31)
 q = np.linspace(0, 4, 19)
 x, y = np.meshgrid(p, q)
 
-u = np.ones(np.shape(x))
+u = np.zeros(np.shape(x))
 v = np.tanh(x)*(np.cosh(x))**(2/3)
 f1 = fp.form_1(x, y, u, v)
 f1.sheet_size(0.04)
@@ -383,13 +387,13 @@ ax2 = fig.add_subplot(212, adjustable='box')
 ax1.tick_params(labelsize=14)
 #ax1.set_aspect('equal')
 ax1.set_ylabel(r'$t$', rotation=0, labelpad=10, fontsize=16)
-ax1.set_title(r'$2D \ Black \ Hole \ frame \ field \ \omega$', fontsize=16)
+ax1.set_title(r'$2D \ Black \ Hole \ frame \ field \ v$', fontsize=16)
 
 ax2.tick_params(labelsize=14)
 #ax2.set_aspect('equal')
 ax2.set_ylabel(r'$t$', rotation=0, labelpad=10, fontsize=16)
 ax2.set_xlabel(r'$x$', fontsize=16)
-ax2.set_title(r'$\star \omega$', fontsize=16)
+ax2.set_title(r'$\star v$', fontsize=16)
 
 # Hodge the result
 f1_star = f1.num_hodge(keep_object=False)

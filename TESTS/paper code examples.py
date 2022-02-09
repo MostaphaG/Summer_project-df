@@ -127,9 +127,9 @@ t = np.linspace(0, 4, 19)
 xg, tg = np.meshgrid(x, t)
 
 # set up 1-form
-u = np.ones(np.shape(xg))
+zero = np.zeros(np.shape(xg))
 v = np.tanh(xg)*(np.cosh(xg))**(2/3)
-f1 = fp.form_1(xg, tg, u, v)
+f1 = fp.form_1(xg, tg, zero, v)
 
 # set up figure and axis
 fig = plt.figure(figsize=(6, 12))
