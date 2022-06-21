@@ -1,8 +1,15 @@
-# Summer_project-df
-## Python GUI for differential forms
+# Summer_project-df (2020/21 and 2021/22)
+## Python GUI and Library for differential forms
 
 This project aims at building a Python library for differential forms that gives an interactive visualization of the differential forms and their calculus such as exterior derivative, wedge product and Hodge operator, and helps understand their geometric meaning. The library will also be capable of plotting contravariant vector fields and visualizing different geometric structure such as gradient, divergence, curl and inner products between covariant and contravariant vectors. We aim at showing via graphical interface that differential forms are the natural object that should be used to describe fields and visualize their characteristics in different dimensions.
 
-Differential forms are the mathematical language used in most of modern theoretical Physics. Applications such as electromagnetic 2-forms, Lorentz force, Maxwell’s equations and radiation fields will be investigated using the library.
+Some background: During 2020/21 academic year I (Moustafa) ran a Master's project that relied heavily on differential forms. My students struggled getting to grips with differential forms due to the lack of visual facility of differential forms analytically and numerically. Being familiar of a very old JAVA appelet, [vector field analyzer VFAII](https://math.la.asu.edu/~kawski/vfa2/vfa2sample.html), that gives excellent visualization of vectors fields but with very limited 1-forms applications (stacks), I thought about "modernizing" VFAII by writing it in Python with main focus on visualizing and zooming on differential forms and doing their calculus.
 
-This project is mainly computational and requires strong knowledge and experience in Python coding and using Python libraries. The analytical part of the project requires learning about differential forms and some practice with exterior calculus. Building a library for visualizing differential forms will be very useful for the geometrical understanding of the topic and its applications especially in the context of relativity.
+Due to the ongoing pandemic, chances of academic travels are very low. So, I thought about running this idea as a Summer internship project as part of the [School Summer internship projects](https://www.nottingham.ac.uk/physics/currentstudents/ug-summer-scholarships-2021.aspx). That turns out to be a great plan as we managed to hire two excellent students for the project, Maciek and Sam.
+
+The project duration was 10 weeks from Monday 28/6/2021 to 5/9/2021. We met regularly, almost every day sometimes, and we had one long meeting (~ 2.5 hours) a week. The majority of meetings were online, but were very vibrant and productive; we bounced ideas, refined thoughts, optimized and fixed codes, discussed theory and derivations and planned for the next steps. Maciek and Sam did most of the coding in a fantastic fashion. 
+
+This work gave birth to a Python GUI and a library, DFormpy. Both can do visualization and calculus of vector fields on **R**<sup>2</sup> and visualization and calculus of differential forms (0-form, 1-form and 2-form) on **R**<sup>2</sup> 
+
+In Summer 2022, we hired Vladimir as intern to work on my project. The Summer 2022 project aims at extending DFormpy functionality to deal with vectors and differential forms in **R**<sup>3</sup>.
+
