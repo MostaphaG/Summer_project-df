@@ -1,0 +1,86 @@
+--------------------------------------------------------------------------
+22/06/2022 - Week 1
+--------------------------------------------------------------------------
+
+Read the paper "Differential Forms and Electromagnetic Field Theory",
+ got grasps of the concept. 
+
+Last thing to do for today: read through the key parts
+of the paper again to reinforce the concepts.
+
+--------------------------------------------------------------------------
+23/06/2022
+--------------------------------------------------------------------------
+
+
+Attemt to install MayaVi package.
+ =>install anaconda virtual environment
+ =>make it compatible with VS Code
+		
+
+--------------------------------------------------------------------------
+24/06/2022
+--------------------------------------------------------------------------
+
+
+defined three coordinate systems (cart, spher, cyl) in 3d
+but was unable to define vector field yet
+
+
+--------------------------------------------------------------------------
+25/06/2022
+--------------------------------------------------------------------------
+
+
+Defined a vector field function which allows for string input of vector
+components in three dimensions + set of coordinates (grid) and outputs a 
+list of numerical values of the vector field for quiver plot
+
+INPUT only in cartesian coordinates!
+
+
+--------------------------------------------------------------------------
+26/06/2022
+--------------------------------------------------------------------------
+
+
+Defined a curl function which plots curl of a vector field
+for the same set of coordinates (or different with same dimensions)
+
+Started defining Divergence function
+
+
+--------------------------------------------------------------------------
+27/06/2022 - Week 2
+--------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
