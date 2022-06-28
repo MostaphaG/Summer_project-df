@@ -1,5 +1,5 @@
 import numpy as np
-import mayavi.mlab as mlb
+from mayavi import mlab
 import matplotlib.pyplot as plt
 import sympy
 from sympy import sympify
@@ -521,7 +521,46 @@ class vector_field():
 #_______________PLOTTER_________________________________________________________________      
         
         
+    def plot(F, C):
 
+        F_shape = np.shape(F)
+        C_shape = np.shape(C)
+
+        Cart_shape = np.shape(vector_field.CartCoords)
+        Sph_shape = np.shape(vector_field.SphCoords)
+        Cyl_shape = np.shape(vector_field.CylCoords)
+
+        fig = mlab.figure(bgcolor=(1,1,1))
+        
+        if F_shape == Cart_shape:
+            mlab.quiver3d(vector_field.CartCoords[0], vector_field.CartCoords[1],
+                      vector_field.CartCoords[2], F[0], F[1], F[2]
+                    )
+        elif F_shape == Sph_shape:
+            mlab.quiver3d(vector_field.SphCoords[0], vector_field.SphCoords[1],
+                      vector_field.SphCoords[2], F[0], F[1], F[2]
+                    )
+        elif F_shape == Cyl_shape:
+            mlab.quiver3d(vector_field.CylCoords[0], vector_field.CylCoords[1],
+                      vector_field.CylCoords[2], F[0], F[1], F[2]
+                    )
+
+
+
+        if C_shape == Cart_shape:
+            mlab.quiver3d(vector_field.CartCoords[0], vector_field.CartCoords[1],
+                      vector_field.CartCoords[2], C[0], C[1], C[2],
+                    color = (0,0,0))
+        elif C_shape == Sph_shape:
+            mlab.quiver3d(vector_field.SphCoords[0], vector_field.SphCoords[1],
+                      vector_field.SphCoords[2], C[0], C[1], C[2],
+                    color = (0,0,0))
+        elif C_shape == Cyl_shape:
+            mlab.quiver3d(vector_field.CylCoords[0], vector_field.CylCoords[1],
+                      vector_field.CylCoords[2], C[0], C[1], C[2],
+                    color = (0,0,0))
+        
+        mlab.show()
 
         
 
