@@ -35,6 +35,8 @@ class vector_field():
     F = []
     Curl = []
     Div = []
+    Div_at_crd = []
+    crd = []
     
 #________COORDINATE-SYSTEMS_____________________________________________________________
 
@@ -254,6 +256,8 @@ class vector_field():
 
         # evaluate the expressions, creating a list of vector field direction
         # values for x, y and z directions
+
+
         F_x = eval(Fx)
         F_y = eval(Fy)
         F_z = eval(Fz)
@@ -373,57 +377,149 @@ class vector_field():
 
 
     def div(Fx_str, Fy_str, Fz_str, Coord_list, at_x, at_y, at_z):
+        
+        '''
+        defines divergence of a vector field. At each point of a new grid,
+        which is defined using limits of a Coord_list grid but with a specified
+        amount of points so that it does not cause any trouble with overcommit
+        handling of the kernel.
+        this function defines a scalar quantity at every point on the new grid,
+        this quantity is divergence at that point.
 
-        New_grid = np.arange(np.min(Coord_list[0]), np.max(Coord_list[0]), 0.01)
+        .div(Fx_str, Fy_str, Fz_str, Coord_list, at_x, at_y, at_z)
+        
+        Parameters:
+        --------
+        
+        Fx_str - string of x component of the field __;__
+        Fy_str - string of y component of the field __;__
+        Fz_str - string of z component of the field __;__
+        Coord_list - either Cartesian, Spherical or Cylindrical points grid.
+         (defined by functions of this class as well) __;__
+        at_x - x coordinate of the point at which divergence to be calculated __;__
+        at_y - y coordinate of the point at which divergence to be calculated __;__
+        at_z - z coordinate of the point at which divergence to be calculated __;__
 
+        
+        Returns:
+        --------
+        3D array of divergence values at each point in meshgrid,
+        Divergence at specified coordinate
+        The specified coordinate(or meshgrid point which is the closest to the
+        specified coordinate)
+        '''
+
+        # define a new coordinates with higher point density, but same limits as of
+        # the input coordinate grid, also separation of points in the new grid
+        sep = (abs(np.min(Coord_list[0])) + abs(np.max(Coord_list[0])))/100
+
+        New_grid = np.linspace(np.min(Coord_list[0]), np.max(Coord_list[0])+(sep/2), 100)
+
+        # convert separation to string and find the number of decimals in the separation
+        sep_str = str(sep)
+        sep_decimals = sep_str[::-1].find('.')
+
+        # round the input coordinates so that it is easier to relate them to grid points
+        at_x = np.round(at_x, sep_decimals)
+        at_y = np.round(at_y, sep_decimals)
+        at_z = np.round(at_z, sep_decimals)
+
+        #new, denser grid using new coordinates
         xng, yng, zng = np.meshgrid(New_grid, New_grid, New_grid)
 
+
+        # account for user input mistakes,
+        # making sure that input coordinate is within specified range
+        if at_x > np.max(Coord_list[0]) or at_x < np.min(Coord_list[0]):
+            print("Input coordinate has to be within range specified by Coord_list")
+            exit()
+        elif at_y > np.max(Coord_list[0]) or at_y < np.min(Coord_list[0]):
+            print("Input coordinate has to be within range specified by Coord_list")
+            exit()
+        elif at_y > np.max(Coord_list[0]) or at_y < np.min(Coord_list[0]):
+            print("Input coordinate has to be within range specified by Coord_list")
+            exit()
+
+        #Field components into string (simplified expressions)
         Fx = str(simplify(Fx_str))
         Fy = str(simplify(Fy_str))
         Fz = str(simplify(Fz_str))
         
+        # convert string field components into sympy expression
         F_x = parse_expr(Fx)
         F_y = parse_expr(Fy)
         F_z = parse_expr(Fz)        
 
+        # take derivatives of the components to define a dot product 
+        # between del and F
         ddx_Fx = F_x.diff(sympy.symbols('x'))
-        ddy_Fx = F_x.diff(sympy.symbols('y'))
-        ddz_Fx = F_x.diff(sympy.symbols('z'))
 
-        ddx_Fy = F_y.diff(sympy.symbols('x'))
         ddy_Fy = F_y.diff(sympy.symbols('y'))
-        ddz_Fy = F_y.diff(sympy.symbols('z'))
-
-        ddx_Fz = F_z.diff(sympy.symbols('x'))
-        ddy_Fz = F_z.diff(sympy.symbols('y'))
+        
         ddz_Fz = F_z.diff(sympy.symbols('z'))
 
-        DivExpr = str('{'+str(simplify(ddx_Fx))+'}i + {'
-                      +str(simplify(ddy_Fy))+'}j + {'
-                      +str(simplify(ddz_Fz))+'}k')
-                      
+        # string mathematical expression for divergence of the input field
+        ddx_Fx = str(simplify(ddx_Fx))
+        ddy_Fy = str(simplify(ddy_Fy))
+        ddz_Fz = str(simplify(ddz_Fz))
+
+
+        DivExpr = ('('+ddx_Fx+') + ('
+                      +ddy_Fy+') + ('
+                      +ddz_Fz+')')
+
+        # print out the expression              
         print(DivExpr)
 
-        Div = str(simplify(ddx_Fx)) + '+' + str(simplify(ddy_Fy)) + '+' + str(simplify(ddz_Fz))
+        # replace x, y, z with corresponding grid components,
+        # so that the expression can be evaluated
+        DivExpr = DivExpr.replace('x','xng')
+        DivExpr = DivExpr.replace('y','yng')
+        DivExpr = DivExpr.replace('z','zng')
+
         
-        Div = Div.replace('x', 'xng')
-        Div = Div.replace('y', 'yng')
-        Div = Div.replace('z', 'zng')
+        # if no coordinate specified, create a scalar matrix to define field
+        if DivExpr.find('x') & DivExpr.find('y') & DivExpr.find('z') == -1:
+            DivExpr = '(' + str(DivExpr) + ')* np.ones(np.shape(xng))'
 
-        if Div.find('x') & Div.find('y') & Div.find('z') == -1:
-            Div = '(' + str(Div) + ')* np.ones(np.shape(xng))'
+        # evaluate the divergence
+        Div = eval(DivExpr)
 
-        Div_val = eval(Div)
+        # define a list of coordinates for the input point
+        coord = [at_x,at_y,at_z]
 
-        at_x = np.round(at_x, 2)
-        at_y = np.round(at_y, 2)
-        at_z = np.round(at_z, 2)
+        # find index for point in grid which is closest to the input crd
+        coord_idx = np.argwhere((abs((xng)-(coord[0]))<=(sep/2)) &
+                                (abs((yng)-(coord[1]))<=(sep/2)) &
+                                (abs((zng)-(coord[2]))<=(sep/2)))[0]
 
-        for i in range(np.shape(Div_val)):
-            if abs(at_x-xng) & abs(at_y-yng) & abs(at_z-zng) <= 0.01:
-                vector_field.Div.append(Div_val[i])
+        # allocate indices to variables
+        a = coord_idx[0]
+        b = coord_idx[1]
+        c = coord_idx[2]
 
-        return(vector_field.Div)
+        # define grid point whish is closest to the input
+        x = str(np.round(xng[a][b][c],2))
+        y = str(np.round(yng[a][b][c],2))
+        z = str(np.round(zng[a][b][c],2))
+
+        # print out the point and divergence at that point
+        print('Divergence at the grid point closest to the input, ['+x+','+y+','+z+'], = '+str(np.round(Div[a][b][c], 1)))
+
+        # define and return 3D array containing divergences at grid points,
+        # the specified point and Div at that point to class-wide lists
+        vector_field.Div.append(Div)
+        vector_field.Div_at_crd.append(Div[a][b][c])
+
+        vector_field.crd.append(xng[a][b][c])
+        vector_field.crd.append(yng[a][b][c])
+        vector_field.crd.append(zng[a][b][c])
+
+        return(vector_field.Div, vector_field.Div_at_crd, vector_field.crd)
+        
+
+#_______________PLOTTER_________________________________________________________________      
+        
         
 
 
