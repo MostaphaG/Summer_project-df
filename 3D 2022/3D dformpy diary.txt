@@ -55,10 +55,17 @@ Started defining Divergence function
 --------------------------------------------------------------------------
 
 
+- Div function
 
 
+--------------------------------------------------------------------------
+28/06/2022 
+--------------------------------------------------------------------------
 
 
+- Div function continued
+- Defined plot function, which plots Field and Curl of this field (matplotlib)
+- Started working with mayavi, integrating it to plotter function
 
 
 
