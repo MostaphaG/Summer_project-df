@@ -103,83 +103,23 @@ class vector_field3():
 
 
     def plot(self):
-        '''
-        Finilises the plotting
-        Uses the attribues of the object as set originally and as customised
-        with methods to create a plot of the VF
-        Takes in 1 argument:
-        --- axis - matplotlib axes instance, plots on these
+
         
-        No Returns    
+
         
-        '''
-        
-        # get the lengths of x and y from their grids
-        x_len = len(self.xg[:, 0, 0])
-        y_len = len(self.yg[0, :, 0])
-        z_len = len(self.zg[0, 0, :])
-        
-        # Extract L from the x and y grids
-        Lx = 0.5*(self.xg[0, -1, -1] - self.xg[0, 0, 0])
-        Ly = 0.5*(self.yg[-1, 0, -1] - self.yg[0, 0, 0])
-        Lz = 0.5*(self.yg[-1, -1, 0] - self.yg[0, 0, 0])
-        
-        L = 0.5*(Lx + Ly + Lz)
-        x0 = self.xg[0, 0, 0] + Lx
-        y0 = self.yg[0, 0, 0] + Ly
-        z0 = self.zg[0, 0, 0] + Lz
-        
-        # reset axis limits
-        ax_Lx = Lx + Lx/self.delta_factor
-        ax_Ly = Ly + Ly/self.delta_factor
-        ax_Lz = Lz + Lz/self.delta_factor
-        '''
-        axis.set_xlim(-ax_Lx + x0, ax_Lx + x0)
-        axis.set_ylim(-ax_Ly + y0, ax_Ly + y0)
-        axis.set_zlim(-ax_Lz + z0, ax_Lz + z0)
-        '''
+
         # for arrows to work, with nan and infs
         # make a local variable of F_x and F_y
         # so that thye don't alter globally
         F_x_local = self.F_x * 1
         F_y_local = self.F_y * 1
         F_z_local = self.F_z * 1
-        
-        # prevent any magnitudes from being inf or nan
-        # only here, need to do it to u and v not just mag
-        
-        # find the distance between neightbouring points on the grid
-        dist_points = self.xg[0, 1] - self.xg[0, 0]
-        
-        # deal with infs and nans in mag
+
         isnan_arrx = np.isnan(F_x_local)
         isnan_arry = np.isnan(F_y_local)
         isnan_arrz = np.isnan(F_z_local)
-        """
-        for i in range(x_len):
-            for j in range(y_len):
-                for k in range(z_len):
-                    # set to zero points that are not defined or inf
-                    if isnan_arrx[i, j, k] or isnan_arry[i, j, k] or isnan_arrz[i, j, k]:
-                        #colour this region as a shaded square
-                        rect = patch.Rectangle((self.xg[i, j] - dist_points/2, self.yg[i, j]  - dist_points/2), dist_points, dist_points, color='#B5B5B5')
-                        axis.add_patch(rect)
-                        F_x_local[i,j] = F_y_local[i,j] = 0
-                    if abs(F_x_local[i, j]) == np.inf or abs(F_y_local[i, j]) == np.inf or abs(F_y_local[i, j]) > 1e15 or abs(F_x_local[i, j]) > 1e15:
-                        # colour this point as a big red dot
-                        circ = patch.Circle((self.xg[i, j], self.yg[i, j]), Lx*0.05/3, color='red')
-                        axis.add_patch(circ)
-                        F_x_local[i,j] = F_y_local[i,j] = 0
-        """
-#            isnan_arrx = np.isnan(F_x_local)
-#            isnan_arry = np.isnan(F_y_local)
-#            for i in range(x_len):
-#                for j in range(y_len):
-#                    if isnan_arrx[i,j] or isnan_arry[i,j] or abs(F_x_local[i, j]) == np.inf or abs(F_y_local[i, j]) == np.inf or abs(F_y_local[i, j]) > 1e15 or abs(F_x_local[i, j]) > 1e15:
-#                        
-#                        F_x_local[i,j] = F_y_local[i,j] = 0
 
-        # set all insignificant values to zero:
+                # set all insignificant values to zero:
         F_x_local[np.abs(F_x_local) < 1e-15] = 0
         F_y_local[np.abs(F_y_local) < 1e-15] = 0
         F_z_local[np.abs(F_z_local) < 1e-15] = 0
@@ -191,45 +131,48 @@ class vector_field3():
         max_size = np.max(mag)   # careful with singularities, else ---> nan
         
         # Rescale components if log scaling is selected
-        if self.logarithmic_scale_bool:
-            mag1 = mag + 1
-            # min_size = np.min(mag1)
-            
-            unorm = F_x_local/mag1
-            vnorm = F_y_local/mag1
-            wnorm = F_z_local/mag1
-            
-            # logsf = np.log10(mag1/min_size)
-            logmag = np.log10(mag1)
-            F_x_local = unorm*logmag
-            F_y_local = vnorm*logmag
-            F_z_local = wnorm*logmag
-            
-            mag = np.sqrt(F_x_local**2 + F_y_local**2 + F_z_local**2)
-            max_size = np.max(mag)
-            
-        # deal with requested autoscaling
-        if self.scale_bool is False:
-            ScaleFactor = self.scale
-        elif self.scale_bool is True:
-            ScaleFactor = max_size/(0.9*(2*Lx/self.pt_den))
+
+        xmin = int(np.min(self.xg))
+        ymin = int(np.min(self.yg))
+        zmin = int(np.min(self.zg))
+        xmax = int(np.max(self.xg))
+        ymax = int(np.max(self.yg))
+        zmax = int(np.max(self.zg))
+
+
         
-        # plot using matplotlib quiver
         
+
         mlab.figure(bgcolor = (1,1,1), fgcolor = (0,0,0))
         mlab.quiver3d(self.xg, self.yg, self.zg, F_x_local, F_y_local, F_z_local, colormap='jet')
-        cbar = mlab.colorbar(orientation='vertical')
-        axes = mlab.axes(color = (0,0,0), nb_labels = 5)
-        axes.label_text_property.font_family = 'courier'
-        axes.label_text_property.font_size = 1
-        axes.title_text_property.font_family = 'times'
-        axes.title_text_property.font_size = 3
 
-        cbar.label_text_property.font_family = 'courier'
-        cbar.label_text_property.font_size = 1
+        mlab.outline(extent = [xmin,xmax,ymin,ymax,zmin,zmax], line_width=3.0)
+        axes = mlab.axes(color = (0,0,0), nb_labels = 5, extent = [xmin,xmax,ymin,ymax,zmin,zmax], line_width=3.0)
 
+
+
+
+        for i in range(len(self.xg[:,0,0])):
+            for j in range(len(self.yg[0,:,0])):
+                for k in range(len(self.zg[0,0,:])):
+
+                    if isnan_arrx[i][j][k] or isnan_arry[i][j][k] or isnan_arrz[i][j][k]:
+                        F_x_local[i,j,k] = F_y_local[i,j,k] = F_z_local[i,j,k] = 0
+                        sing = [self.xg[i,j,k],self.yg[i,j,k], self.zg[i,j,k]]
+                        
+                        mlab.points3d(sing[0], sing[1], sing[2], color = (1,0,0))
+                        
+
+                    if abs(F_x_local[i,j,k]) == np.inf or abs(F_y_local[i,j,k]) == np.inf or abs(F_z_local[i,j,k]) == np.inf or abs(F_y_local[i,j,k]) > 1e15 or abs(F_x_local[i,j,k]) > 1e15 or abs(F_z_local[i,j,k]) > 1e15:
+                        F_x_local[i,j,k] = F_y_local[i,j,k] = F_z_local[i,j,k] = 0
+                        sing = [self.xg[i,j,k],self.yg[i,j,k], self.zg[i,j,k]]
+
+                        mlab.points3d(sing[0], sing[1], sing[2], color = (0,0,1))
+        
         mlab.show()
         
+
+
 
 
 
