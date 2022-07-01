@@ -25,13 +25,30 @@ Ffy = yg
 Ffz = zg
 
 
+
 f3 = vf_obj.vector_field3(xg, yg, zg, fx, fy, fz)
-F3 = vf_obj.vector_field3(xg, yg, zg, Fx, Fy, Fz)
+f3.give_eqn('x/sqrt(x**2+y**2+z**2)','(-y)/sqrt(x**2+y**2+z**2)','z/sqrt(x**2+y**2+z**2)')
+C3 = f3.curl()
+
+
+f3.plot(add_curl='yeah')
+C3.plot()
+
+
+'''
 Ff3 = vf_obj.vector_field3(xg, yg, zg, Ffx, Ffy, Ffz)
 
+F3 = vf_obj.vector_field3(xg, yg, zg, Fx, Fy, Fz)
+
+
 f3.plot()
-F3.plot()
+
 Ff3.plot()
+
+
+'''
+
+
 
 
 
