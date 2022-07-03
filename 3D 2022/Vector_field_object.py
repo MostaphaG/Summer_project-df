@@ -48,7 +48,6 @@ class vector_field3():
         else:
             self.str_z = None
 
-
     def give_eqn(self, equation_str_x, equation_str_y, equation_str_z):
         '''
         Takes in 1-argument, string
@@ -99,7 +98,6 @@ class vector_field3():
         that got here not by input but by ext. alg.
         '''
         return self.str_x, self.str_y, self.str_z
-
 
     def curl(self):
 
@@ -158,14 +156,113 @@ class vector_field3():
             curl_vf = vector_field3(self.xg, self.yg, self.zg, Curl_X, Curl_Y, Curl_Z, self.str_x, self.str_y, self.str_z)
             return(curl_vf)
 
+    def div(self, at_x=None, at_y=None, at_z=None):
+        if self.str_x == None or self.str_y == None or self.str_z == None:
+            # ERROR
+            raise TypeError('No equation provided')
+        else:
+            sep = (abs(np.min(self.xg)) + abs(np.max(self.xg)))/100
 
+            New_grid = np.linspace(np.min(self.xg), np.max(self.xg), 100)
+
+            # convert separation to string and find the number of decimals in the separation
+            
+            #new, denser grid using new coordinates
+            xng, yng, zng = np.meshgrid(New_grid, New_grid, New_grid)
+
+
+            # account for user input mistakes,
+            # making sure that input coordinate is within specified range
+           
+            #Field components into string (simplified expressions)
+            Fx = str(simplify(self.str_x))
+            Fy = str(simplify(self.str_y))
+            Fz = str(simplify(self.str_z))
+            
+            # convert string field components into sympy expression
+            F_x = parse_expr(Fx)
+            F_y = parse_expr(Fy)
+            F_z = parse_expr(Fz)        
+
+            # take derivatives of the components to define a dot product 
+            # between del and F
+            ddx_Fx = F_x.diff(sympy.symbols('x'))
+
+            ddy_Fy = F_y.diff(sympy.symbols('y'))
+            
+            ddz_Fz = F_z.diff(sympy.symbols('z'))
+
+            # string mathematical expression for divergence of the input field
+            ddx_Fx = str(simplify(ddx_Fx))
+            ddy_Fy = str(simplify(ddy_Fy))
+            ddz_Fz = str(simplify(ddz_Fz))
+
+
+            DivExpr = ('('+ddx_Fx+') + ('
+                        +ddy_Fy+') + ('
+                        +ddz_Fz+')')
+
+            # print out the expression              
+            print(DivExpr)
+
+            if at_x!=None and at_y!=None and at_z!=None:
+                if at_x > np.max(self.xg) or at_x < np.min(self.xg):
+                    print("Input coordinate has to be within range specified by your grid")
+                    exit()
+                elif at_y > np.max(self.xg) or at_y < np.min(self.xg):
+                    print("Input coordinate has to be within range specified by your grid")
+                    exit()
+                elif at_y > np.max(self.xg) or at_y < np.min(self.xg):
+                    print("Input coordinate has to be within range specified by your grid")
+                    exit()
+
+                sep_str = str(sep)
+                sep_decimals = sep_str[::-1].find('.')
+
+                # round the input coordinates so that it is easier to relate them to grid points
+                at_x = np.round(at_x, sep_decimals)
+                at_y = np.round(at_y, sep_decimals)
+                at_z = np.round(at_z, sep_decimals)
+
+                # replace x, y, z with corresponding grid components,
+                # so that the expression can be evaluated
+                DivExpr = DivExpr.replace('x','xng')
+                DivExpr = DivExpr.replace('y','yng')
+                DivExpr = DivExpr.replace('z','zng')
+
+                
+                # if no coordinate specified, create a scalar matrix to define field
+                if DivExpr.find('x') & DivExpr.find('y') & DivExpr.find('z') == -1:
+                    DivExpr = '(' + str(DivExpr) + ')* np.ones(np.shape(xng))'
+
+                # evaluate the divergence
+                Div = eval(DivExpr)
+
+                # define a list of coordinates for the input point
+                coord = [at_x,at_y,at_z]
+
+                # find index for point in grid which is closest to the input crd
+                coord_idx = np.argwhere((abs((xng)-(coord[0]))<=(sep/2)) &
+                                        (abs((yng)-(coord[1]))<=(sep/2)) &
+                                        (abs((zng)-(coord[2]))<=(sep/2)))[0]
+
+                # allocate indices to variables
+                a = coord_idx[0]
+                b = coord_idx[1]
+                c = coord_idx[2]
+
+                # define grid point whish is closest to the input
+                x = str(np.round(xng[a][b][c],2))
+                y = str(np.round(yng[a][b][c],2))
+                z = str(np.round(zng[a][b][c],2))
+
+                # print out the point and divergence at that point
+                print('Divergence at the grid point closest to the input, ['+x+','+y+','+z+'], = '+str(np.round(Div[a][b][c], 1)))
 
 
     def plot(self, add_curl = None):
 
-        
 
-        
 
         # for arrows to work, with nan and infs
         # make a local variable of F_x and F_y
@@ -198,38 +295,15 @@ class vector_field3():
         ymax = int(np.max(self.yg))
         zmax = int(np.max(self.zg))
 
+        mlab.figure(bgcolor = (1,1,1), fgcolor = (0,0,0))
+        mlab.quiver3d(self.xg, self.yg, self.zg, F_x_local, F_y_local, F_z_local, colormap='jet', line_width=3.0)
 
-        if add_curl is None:
+        mlab.outline(extent = [xmin,xmax,ymin,ymax,zmin,zmax], line_width=1.0)
+        axes = mlab.axes(color = (0,0,0), nb_labels = 5, extent = [xmin,xmax,ymin,ymax,zmin,zmax], line_width=3.0)
+
+
+        if add_curl is not None:
         
-
-            mlab.figure(bgcolor = (1,1,1), fgcolor = (0,0,0))
-            mlab.quiver3d(self.xg, self.yg, self.zg, F_x_local, F_y_local, F_z_local, colormap='jet')
-
-            mlab.outline(extent = [xmin,xmax,ymin,ymax,zmin,zmax], line_width=3.0)
-            axes = mlab.axes(color = (0,0,0), nb_labels = 5, extent = [xmin,xmax,ymin,ymax,zmin,zmax], line_width=3.0)
-
-
-
-
-            for i in range(len(self.xg[:,0,0])):
-                for j in range(len(self.yg[0,:,0])):
-                    for k in range(len(self.zg[0,0,:])):
-
-                        if isnan_arrx[i][j][k] or isnan_arry[i][j][k] or isnan_arrz[i][j][k]:
-                            F_x_local[i,j,k] = F_y_local[i,j,k] = F_z_local[i,j,k] = 0
-                            sing = [self.xg[i,j,k],self.yg[i,j,k], self.zg[i,j,k]]
-                            
-                            mlab.points3d(sing[0], sing[1], sing[2], color = (1,0,0))
-                            
-
-                        if abs(F_x_local[i,j,k]) == np.inf or abs(F_y_local[i,j,k]) == np.inf or abs(F_z_local[i,j,k]) == np.inf or abs(F_y_local[i,j,k]) > 1e15 or abs(F_x_local[i,j,k]) > 1e15 or abs(F_z_local[i,j,k]) > 1e15:
-                            F_x_local[i,j,k] = F_y_local[i,j,k] = F_z_local[i,j,k] = 0
-                            sing = [self.xg[i,j,k],self.yg[i,j,k], self.zg[i,j,k]]
-
-                            mlab.points3d(sing[0], sing[1], sing[2], color = (0,0,1))
-            
-            mlab.show()
-        else:
             if self.str_x == None or self.str_y == None or self.str_z == None:
             # ERROR
                 raise TypeError('No equation provided')
@@ -240,17 +314,17 @@ class vector_field3():
                 Fz = parse_expr(self.str_z)        
 
                 # differentiate expressions w.r.t x, y, z.
-                ddx_Fx = Fx.diff(sympy.symbols('x'))
+
                 ddy_Fx = Fx.diff(sympy.symbols('y'))
                 ddz_Fx = Fx.diff(sympy.symbols('z'))
 
                 ddx_Fy = Fy.diff(sympy.symbols('x'))
-                ddy_Fy = Fy.diff(sympy.symbols('y'))
+
                 ddz_Fy = Fy.diff(sympy.symbols('z'))
 
                 ddx_Fz = Fz.diff(sympy.symbols('x'))
                 ddy_Fz = Fz.diff(sympy.symbols('y'))
-                ddz_Fz = Fz.diff(sympy.symbols('z'))
+
                 # Define a string expression for Curl of the input vector field
                 CurlX = (str(simplify(ddy_Fz)) + '-' + str(simplify(ddz_Fy)))
                 CurlY = (str(simplify(ddz_Fx)) + '-' + str(simplify(ddx_Fz)))
@@ -282,34 +356,29 @@ class vector_field3():
                 Curl_Y = eval(CurlY)
                 Curl_Z = eval(CurlZ)
 
-                mlab.figure(bgcolor = (1,1,1), fgcolor = (0,0,0))
-                mlab.quiver3d(self.xg, self.yg, self.zg, F_x_local, F_y_local, F_z_local, colormap='Blues')
-                mlab.quiver3d(self.xg, self.yg, self.zg, Curl_X, Curl_Y, Curl_Z, color=(1.0, 0.0, 1.0))
 
-                mlab.outline(extent = [xmin,xmax,ymin,ymax,zmin,zmax], line_width=3.0)
-                axes = mlab.axes(color = (0,0,0), nb_labels = 5, extent = [xmin,xmax,ymin,ymax,zmin,zmax], line_width=3.0)
+                mlab.quiver3d(self.xg, self.yg, self.zg, Curl_X, Curl_Y, Curl_Z, color=(1.0, 0.0, 1.0), opacity=0.1)
 
 
 
+        
+        for i in range(len(self.xg[:,0,0])):
+            for j in range(len(self.yg[0,:,0])):
+                for k in range(len(self.zg[0,0,:])):
 
-                for i in range(len(self.xg[:,0,0])):
-                    for j in range(len(self.yg[0,:,0])):
-                        for k in range(len(self.zg[0,0,:])):
+                    if isnan_arrx[i][j][k] or isnan_arry[i][j][k] or isnan_arrz[i][j][k]:
+                        F_x_local[i,j,k] = F_y_local[i,j,k] = F_z_local[i,j,k] = 0
+                        sing = [self.xg[i,j,k],self.yg[i,j,k], self.zg[i,j,k]]
+                            
+                        mlab.points3d(sing[0], sing[1], sing[2], color = (1,0,0))
+                            
 
-                            if isnan_arrx[i][j][k] or isnan_arry[i][j][k] or isnan_arrz[i][j][k]:
-                                F_x_local[i,j,k] = F_y_local[i,j,k] = F_z_local[i,j,k] = 0
-                                sing = [self.xg[i,j,k],self.yg[i,j,k], self.zg[i,j,k]]
-                                
-                                mlab.points3d(sing[0], sing[1], sing[2], color = (1,0,0))
-                                
+                    if abs(F_x_local[i,j,k]) == np.inf or abs(F_y_local[i,j,k]) == np.inf or abs(F_z_local[i,j,k]) == np.inf or abs(F_y_local[i,j,k]) > 1e15 or abs(F_x_local[i,j,k]) > 1e15 or abs(F_z_local[i,j,k]) > 1e15:
+                        F_x_local[i,j,k] = F_y_local[i,j,k] = F_z_local[i,j,k] = 0
+                        sing = [self.xg[i,j,k],self.yg[i,j,k], self.zg[i,j,k]]
 
-                            if abs(F_x_local[i,j,k]) == np.inf or abs(F_y_local[i,j,k]) == np.inf or abs(F_z_local[i,j,k]) == np.inf or abs(F_y_local[i,j,k]) > 1e15 or abs(F_x_local[i,j,k]) > 1e15 or abs(F_z_local[i,j,k]) > 1e15:
-                                F_x_local[i,j,k] = F_y_local[i,j,k] = F_z_local[i,j,k] = 0
-                                sing = [self.xg[i,j,k],self.yg[i,j,k], self.zg[i,j,k]]
-
-                                mlab.points3d(sing[0], sing[1], sing[2], color = (0,0,1))
-                mlab.show()
-
+                        mlab.points3d(sing[0], sing[1], sing[2], color = (0,0,1))
+        mlab.show()
 
 
 
