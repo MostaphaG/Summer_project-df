@@ -15,7 +15,7 @@ expr = 'sqrt(x**2 + y**2 + z**2)'
 f0 = vf_obj.form_0_3d(xg, yg, zg, potential, expr)
 f0.set_density(100)
 f0.log_scaling()
-f0.plot(cross_sec_plane='y')
+f0.plot(cross_sec_plane = 'y')
 f0.plot()
 
 
