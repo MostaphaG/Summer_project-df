@@ -12,7 +12,22 @@ from numpy import sinh, cosh, arcsinh, arccosh, arctanh, exp, pi, e
 
 class vector_field3():
     '''
-   
+    The class which creates a vector field object. 
+    Requires grid (3D), field components.
+    in order to calculate  curl and div, it is necessary to
+    provide string expressions for the field component to
+    the object as well
+    .plot() can be used to plot out the vector field and the curl
+    (either on the same axes or different)
+
+    Methods: (applied to the object)
+
+    .give_eqn(equation_str_x, equation_str_y, equation_str_z) 
+    .curl()
+    .div()
+    .plot() - applied to either curl of object
+    [if applied to object can use add_curl ='yes' argument to plot
+    curl and field on the same axes]
     '''
 
     # set up all variables
@@ -382,17 +397,219 @@ class vector_field3():
 
 
 
+class form_0_3d():
+
+    """
+    
+    """
+
+    def __init__(self, xg, yg, zg, form_0, form_0_eqn=None):
+        self.xg = xg
+        self.yg = yg
+        self.zg = zg
+        self.form_0 = form_0
+        self.pt_den_x = len(xg[0, :, :])
+        self.pt_den_y = len(xg[:, 0, :])
+        self.pt_den_z = len(xg[:, :, 0])
+        self.delta_factor = 10
+        self.lines = 15
+        self.fontsize = 7
+        self.inline_bool = True
+        # Log scaling parameters
+        self.logarithmic_scale_bool = 0
+        self.N = 30
+        
+        if form_0_eqn is not None:
+            self.form_0_str = str(simplify(form_0_eqn))  # user must change to access some methods
+        else:
+            self.form_0_str = None
 
 
+    def give_eqn(self, equation_str):
+        '''
+        
+        Allows user to supply equation to instance, if not initially done so
+        
+        Parameters:
+        ------------
+        equation_str - str - equation of the supplied numerical 0-form
+                        It must be in terms of x and y.
+                        Has to be given, for some methods to be calculatable.
+        
+        Returns: None
+        
+        '''
+        self.form_0_str = equation_str
+        
+        # update the numerical values to always match
+        string = self.form_0_str + ''
+        
+        # Check if the equations provided contain x and y terms
+        # and format them to be evaluated
+        if string.find('x') & string.find('y') & string.find('z') == -1:
+            string = '(' + str(string) + ')* np.ones(np.shape(xg))'
+        else:
+            string = string.replace('x', '(self.xg)')
+            string = string.replace('y', '(self.yg)')
+            string = string.replace('z', '(self.zg)')
+        
+
+        self.form_0 = eval(string)
+
+    def return_string(self):
+        '''
+        Takes in no arguments, returns the unformatted string back to user
+        This is done in case user wants to access strings
+        that got here not by input but by ext. alg.
+        '''
+        return self.form_0_str
+
+    def density_increase(self, factor):
+        '''
+        Takes 1 float/int argument
+        sets increase in density between form grids and contour grids
+        needed if this was accessed by other forms via ext.alg methods
+        Note, This cannot be set to anything but 1, if the 0-form
+        equation as string is not also supplied correctly.
+        '''
+        self.denser = factor
+
+    def levels(self, values):
+        '''
+        Takes 1 argument: values - int or list
+        if int: changes number of contour lines that get drawn
+                the values are set automatically by matplotlib
+        if list: sets values to draw level lines (ascending order)
+        
+        supplied to contour plot from matplotlib via levels
+        '''
+        
+        if isinstance(values, int) or isinstance(values, list):
+            self.lines = values
+        else:
+            raise TypeError('Require input to be integer or list, if you used a numpy array try: list(your_array)')
+        
+    def log_scaling(self):
+        '''
+        changes bool for logscaling
+        Default = False
+        changes to the other option each time it is called
+        '''
+        self.logarithmic_scale_bool = not self.logarithmic_scale_bool
+
+    def set_density(self, points_number):
+        '''
+        set_density(points_number)
+        
+        Changes the desnity of points in the same range to the input value
+        requires the string equation to be supplied
+        Only creates grids with same number of points of each axis.
+        
+        Parameters:
+        ---------------
+        points_number -number of points to evaluate on
+        
+        Returns: none
+        '''
+        if self.form_0_str == None:
+            # Error
+            raise TypeError('Error: You need to supply the 0-form equation to do this, look at \'give_eqn\' method')
+        else:
+            # redefine the grids
+            x = np.linspace(self.xg[0,0,0], self.xg[-1,-1,0], points_number)
+            y = np.linspace(self.yg[0,0,0], self.yg[-1,0,-1], points_number)
+            z = np.linspace(self.zg[0,0,0], self.zg[0,-1,-1], points_number)
+            self.xg, self.yg, self.zg= np.meshgrid(x,y,z)
+            # based on these change other, dependant variables
+            self.pt_den_x = len(self.xg[0, :, :])
+            self.pt_den_y = len(self.yg[:, 0, :])
+            self.pt_den_z = len(self.zg[:, :, 0])
+            # substitute these into the equation:
+            # but keep it local
+            str_0 = self.form_0_str + ''
+            str_0 = str_0.replace('x', '(self.xg)')
+            str_0 = str_0.replace('y', '(self.yg)')
+            str_0 = str_0.replace('z', '(self.zg)')
+            # correct for constant forms
+            if str_0.find('x') & str_0.find('y') & str_0.find('z') == -1:
+                str_0 = '(' + str(str_0) + ')* np.ones(np.shape(self.xg))'
+            # re-evaluate the 2-form numerically
+            self.form_0 = eval(str_0)
+
+    def plot(self, cross_sec_plane=None):
 
 
+            
+            form_0 = self.form_0
+            xg = self.xg
+            yg = self.yg
+            zg = self.zg
+            
+            
+            # set all insignificant values to zero:
+            form_0[np.abs(form_0) < 1e-15] = 0
+
+            xmin = int(np.min(self.xg))
+            ymin = int(np.min(self.yg))
+            zmin = int(np.min(self.zg))
+            xmax = int(np.max(self.xg))
+            ymax = int(np.max(self.yg))
+            zmax = int(np.max(self.zg))
+
+            fig = mlab.figure(bgcolor = (1,1,1), fgcolor = (0,0,0))
+
+            # deal with sinularities that appear on evaluated points
+            isnan_arr = np.isnan(form_0)
+            for i in range(len(xg[0, :, :])):
+                for j in range(len(yg[:, 0, :])):
+                    for k in range(len(zg[:, :, 0])):
+                        # set to zero points that are not defined or inf
+                        if isnan_arr[k, j, i] or abs(form_0[k, j, i]) == np.inf or abs(form_0[k, j, i]) > 1e15:
+                            # colour this region as a red dot, not square to
+                            # not confuse with high mag 2-forms in stacks. or worse, in
+                            # blocks
+                            mlab.points3d((xg[k, j, i], yg[k, j, i]), zg[k, j, i], color=(1,0,0))
+                            
+                            form_0[k, j, i] = 0
+            
+            if self.logarithmic_scale_bool:
+                mag1 = np.abs(form_0) + 1
+                form_0_norm = form_0/(mag1)
+                logmag = np.log10(mag1)
+                form_0 = form_0_norm*logmag
+
+            else:
+                pass
+            
+            
+            opac = 0.5
+            colourmap='jet'
+
+            cnt = mlab.contour3d(form_0, colormap=colourmap, opacity = opac, contours=self.lines, figure = fig)
+            mlab.colorbar(object = cnt, orientation='vertical')
+            mlab.outline(line_width=1.0)
+            mlab.axes(color = (0,0,0), ranges = (xmin, xmax, ymin, ymax, zmin, zmax), nb_labels = 5, line_width=3.0)
+
+            if str(cross_sec_plane)=='y':
+                opac=0.05
+                colour=(0.5,0.5,0.5)
+                mlab.clf(fig)
+                cnt = mlab.contour3d(form_0, color=colour, opacity = opac, contours=self.lines, figure = fig)
+                mlab.colorbar(object = cnt, orientation='vertical')
+                mlab.outline(line_width=1.0)
+                mlab.axes(color = (0,0,0), ranges = (xmin, xmax, ymin, ymax, zmin, zmax), nb_labels = 5, line_width=3.0)
+                mlab.pipeline.scalar_cut_plane(cnt)
+            elif str(cross_sec_plane)=='n' or cross_sec_plane==None:
+                pass
+            else:
+                print("please specify cross_sec_plane to be either 'y' or 'n'")
+                exit()
 
 
-
-
-
-
-
+            
+           
+            
+            mlab.show()
 
 
 
