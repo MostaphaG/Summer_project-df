@@ -1,5 +1,5 @@
 from regex import F
-import Vector_field_object as vf_obj
+import dformpy3D as vf_obj
 
 import numpy as np
 import matplotlib.pyplot as plt
