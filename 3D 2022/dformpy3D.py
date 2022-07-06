@@ -372,7 +372,7 @@ class vector_field3():
                 Curl_Z = eval(CurlZ)
 
 
-                mlab.quiver3d(self.xg, self.yg, self.zg, Curl_X, Curl_Y, Curl_Z, color=(1.0, 0.0, 1.0), opacity=0.1)
+                mlab.quiver3d(self.xg, self.yg, self.zg, Curl_X, Curl_Y, Curl_Z, color=(1.0, 0.0, 1.0), opacity=0.4)
 
 
 
@@ -610,6 +610,182 @@ class form_0_3d():
            
             
             mlab.show()
+
+
+
+class form_1_3d():
+
+    def __init__(self, xg, yg, zg, F_x, F_y, F_z, F_x_eqn=None, F_y_eqn=None, F_z_eqn=None):
+        self.xg = xg
+        self.yg = yg
+        self.zg = zg
+        self.F_x = F_x
+        self.F_y = F_y
+        self.F_z = F_z
+        self.s_max = 6
+        self.s_min = 1
+        self.fract = 0.05
+        self.scale = 1
+        self.w_head = 1/8
+        self.h_head = 1/4
+        self.arrowheads = True
+        self.color = (1,0,1)
+        self.logarithmic_scale_bool = 0
+        self.delta_factor = 10
+        # define equations if given:
+        # user must change to access some methods, will indicate when needed
+        # Note, the string must be given with x and y as variables
+        if F_x_eqn is not None:
+            self.form_1_str_x = str(simplify(F_x_eqn))
+        else:
+            self.form_1_str_x = None
+        
+        if F_y_eqn is not None:
+            self.form_1_str_y = str(simplify(F_y_eqn))
+        else:
+            self.form_1_str_y = None
+
+        if F_z_eqn is not None:
+            self.form_1_str_z = str(simplify(F_z_eqn))
+        else:
+            self.form_1_str_z = None
+
+    def give_eqn(self, equation_str_x, equation_str_y, equation_str_z):
+        '''
+
+        '''
+        # set equation parameters to simplified inputs
+        self.form_1_str_x = str(simplify(equation_str_x))
+        self.form_1_str_y = str(simplify(equation_str_y))
+        self.form_1_str_z = str(simplify(equation_str_z))
+        # make the values match automatically to limit how often mismatch occurs
+        # substitute these into the equation, but keep it local: 
+        str_x = self.form_1_str_x + ''
+        str_y = self.form_1_str_y + ''
+        str_z = self.form_1_str_z + ''
+
+        str_x = str_x.replace('x', '(self.xg)')
+        str_x = str_x.replace('y', '(self.yg)')
+        str_x = str_x.replace('z', '(self.zg)')
+
+        str_y = str_y.replace('x', '(self.xg)')
+        str_y = str_y.replace('y', '(self.yg)')
+        str_y = str_y.replace('z', '(self.zg)')
+
+        str_z = str_z.replace('x', '(self.xg)')
+        str_z = str_z.replace('y', '(self.yg)')
+        str_z = str_z.replace('z', '(self.zg)')
+
+        # check against constant forms, to have correct shape
+        if str_x.find('x') & str_x.find('y') & str_x.find('z') == -1:
+            str_x = '(' + str(str_x) + ')* np.ones(np.shape(self.xg))'
+        if str_y.find('x') & str_y.find('y') & str_y.find('z') == -1:
+            str_y = '(' + str(str_y) + ')* np.ones(np.shape(self.yg))'
+        if str_z.find('x') & str_z.find('y') & str_z.find('z') == -1:
+            str_z = '(' + str(str_z) + ')* np.ones(np.shape(self.zg))'
+        
+
+        
+        # evaluate formatted equations and save
+        self.F_x = eval(str_x)
+        self.F_y = eval(str_y)
+        self.F_z = eval(str_z)
+
+    def return_string(self):
+
+        '''
+        Returns unformatted strings for component equations back to user
+        Done in case user wants to access strings that got here by ext. alg.
+        
+        Parmateres: None
+        Returns: None
+        
+        '''
+        return self.form_1_str_x, self.form_1_str_y, self.form_1_str_z
+
+    def head_width(self, wide):
+        '''
+        Sets the width of the arrowhead on a stacks to the desired float
+        as a fraction of the stack length in the direction perp. to form
+        Note, not strictly needed, can change it by instance.w_head(width)
+        
+        Parmaeters:
+        ---------------
+        wide - float/int - Sets the width as a fraction of the stack length
+        
+        Returns: None
+        
+        '''
+        self.w_head = float(wide)
+    
+    # change h_head
+    def head_height(self, high):
+        '''
+        Sets the height of the arrowhead on a stacks to the desired float
+        as a fraction of the stack length in the direction parall. to form
+        Note, not strictly needed, can change it by instance.h_head(height)
+        
+        Parmaeters:
+        ---------------
+        high - float/int - Sets the height as a fraction of the stack length
+        
+        Returns: None
+        
+        '''
+        self.h_head = float(high)
+    
+    # change boolean that det. if to sclae logarithmically
+    def log_scaling(self):
+        '''
+        Changes the boolean that determines if scaling is logarithmic
+        Whenever it is called, it changes that boolean to opposite
+        The form object is initialised with this as False
+        Note, not strictly needed, can change it by instance.logarithmic_scale_bool(bool)
+        
+        Parmaeters: None
+        Returns: None
+        '''
+        self.logarithmic_scale_bool = not self.logarithmic_scale_bool
+        # self.base = base
+    
+    # define methods to change s_max
+    def max_sheets(self, maximum):
+        '''
+        Changes maximum number of sheets to draw on a stack.
+        These still scale relative to max magnitude.
+        Note, not strictly needed, can change it by instance.s_max(maximum)
+        
+        Parmaeters:
+        ---------------
+        maximum - int - Max number of sheets to plot per stack
+        
+        Returns: None
+        
+        '''
+        self.s_max = maximum
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
