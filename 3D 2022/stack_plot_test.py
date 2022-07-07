@@ -3,7 +3,7 @@ import numpy as np
 from tvtk.api import tvtk
 from tvtk.common import configure_input_data
 from tvtk.tools import visual
-import vpython as vp
+
 
 grid = np.linspace(1,5,6)
 xg, yg, zg = np.meshgrid(grid,grid,grid)
