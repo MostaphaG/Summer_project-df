@@ -9,9 +9,9 @@ grid = np.linspace(-5,5,7)
 xg, yg, zg= np.meshgrid(grid, grid, grid)
 pts = np.vstack(list(zip(xg.ravel(), yg.ravel(), zg.ravel())))
 
-Fx = 1/np.sqrt(xg**2-yg**2-zg**2)
-Fy = 1/np.sqrt(xg**2-yg**2-zg**2)
-Fz = 1/np.sqrt(xg**2-yg**2-zg**2)
+Fx = -yg/np.sqrt(xg**2+yg**2-zg**2)
+Fy = xg/np.sqrt(xg**2+yg**2-zg**2)
+Fz = zg/np.sqrt(xg**2+yg**2-zg**2)
 F_list = np.vstack(list(zip(Fx.ravel(), Fy.ravel(), Fz.ravel())))
 
 
@@ -30,16 +30,16 @@ F_new = np.delete(F_list, [Idx[:]], axis=0)
 
 # getting rid of singular points
 
-F_new[F_new==np.inf] = np.nan
+F_new[np.isinf(F_new)] = np.nan
 
 Idx_nan = np.argwhere(np.all(np.isnan(F_new),axis=1))
 
 pts_nan = pts_new[Idx_nan]
 
 
-pts_new = np.delete(pts_new, [Idx_nan[:]], axis=0)
+pts_new = np.delete(pts_new, [Idx_nan], axis=0)
 
-F_new = np.delete(F_new, [Idx_nan[:]], axis=0)
+F_new = np.delete(F_new, [Idx_nan], axis=0)
 
 
 
@@ -62,7 +62,8 @@ Idx3 = np.argwhere(np.all(mag_lst>=(mag_min+(3*sep)),axis=1))
 Idx4 = np.argwhere(np.all(mag_lst>=(mag_min+(4*sep)),axis=1))
 Idx5 = np.argwhere(np.all(mag_lst>=(mag_min+(5*sep)),axis=1))
 
-# points 
+
+
 
 pts1 = pts_new[Idx1]
 pts1 = np.vstack(list(zip(pts1[:,:,0].ravel(),pts1[:,:,1].ravel(),pts1[:,:,2].ravel())))
