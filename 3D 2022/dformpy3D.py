@@ -305,17 +305,23 @@ class vector_field3():
                 # convert all np.inf to np.nan
                 Div_lst[np.isinf(Div_lst)] = np.nan
 
+                
+
                 # calculate magnitude of difference between each point component and the input coordinates
                 # to find points on the grid which are the closest to the input one
+                
                 pts_diff = (pts[:]-[at_x,at_y,at_z])
                 diffmag = np.sqrt(pts_diff[:,0]**2 + pts_diff[:,1]**2 + pts_diff[:,2]**2)
-                
+                diffmag = np.vstack(list(zip(diffmag.ravel())))
+
+
+
                 # index of the point closest to the input
-                a = np.argwhere(diffmag == (np.min(diffmag)))
+                a = np.argwhere(diffmag == (np.nanmin(diffmag)))
+                a = a[:,0]
 
-
-                print('Divergence at the grid point/points closest to the input, '+ str(pts[a]) +', = '+ str(Div_lst[a,0]))
-
+                print('Divergence at the grid point/points closest to the input, '+ str(pts[a]) +', = '+ str(Div_lst[a]))
+                
 
     def log_scaling(self):
         '''
