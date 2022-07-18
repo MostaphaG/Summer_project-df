@@ -1208,7 +1208,7 @@ class form_1_3d():
         m4 = tvtk.PolyDataMapper()
 
         # properties of geometrical objects
-        p1 = tvtk.Property(opacity=opc, color=(1, 0, 1))
+        p1 = tvtk.Property(opacity=opc, color=(0.611, 0.237, 0.79))
 
         # map glyphs(which now represent the geometrical objects)
         # to PolyData sets
