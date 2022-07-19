@@ -1120,7 +1120,8 @@ class form_1_3d():
         cyl1 = tvtk.ConeSource(radius = tp_wdth,
                                 height = tp_hgth,
                                 capping = False,
-                                center = (0.075, 0, 0)
+                                center = (0.075, 0, 0),
+                                resolution=360
                                     )
 
         box = tvtk.CubeSource(x_length=0.01,
@@ -1208,7 +1209,10 @@ class form_1_3d():
         m4 = tvtk.PolyDataMapper()
 
         # properties of geometrical objects
-        p1 = tvtk.Property(opacity=opc, color=(0.565,0.641,0.46))
+
+        #0.565,0.641,0.46
+        pc = tvtk.Property(opacity=opc, color=(0.64,0.008,0.87))
+        p1 = tvtk.Property(opacity=opc, color=(0.64,0.008,0.87), edge_visibility='y', edge_color=(0,0,0))
 
         # map glyphs(which now represent the geometrical objects)
         # to PolyData sets
@@ -1221,7 +1225,7 @@ class form_1_3d():
 
         # Create actors (objects created from the Glyphs and PolyData sets)
         # to be represented on a figure
-        a = tvtk.Actor(mapper=m, property=p1)
+        a = tvtk.Actor(mapper=m, property=pc)
         ab = tvtk.Actor(mapper=mb, property=p1)
         a1 = tvtk.Actor(mapper=m1, property=p1)
         a2 = tvtk.Actor(mapper=m2, property=p1)
