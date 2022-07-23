@@ -5,7 +5,7 @@ import dformpy3D as df3
  
 
 
-grid = np.linspace(-10, 10, 8)
+grid = np.linspace(-2, 2, 8)
 xg, yg, zg = np.meshgrid(grid, grid, grid)
 
 grid_sep = abs(grid[1]-grid[0])
@@ -14,7 +14,7 @@ pts = np.vstack(list(zip(xg.ravel(), yg.ravel(), zg.ravel())))
 
 Fx = 0*xg
 Fy = 0*yg
-Fz = zg
+Fz = zg*np.sin(xg*yg)
 
 zmag_lst = np.vstack(list(zip(Fz.ravel())))
 z_max = np.nanmax(abs(Fz))

@@ -18,8 +18,8 @@ xg, yg, zg = np.meshgrid(grid, grid, grid)
 #fy = xg/np.sqrt(xg**2+yg**2-zg**2)
 #fz = zg/np.sqrt(xg**2+yg**2-zg**2)
 
-fx = -yg
-fy = xg
+fx = xg**2
+fy = yg**2
 fz = np.ones((np.size(xg)))
 
 #potential = np.sqrt(x0**2 + y0**2 - z0**2)
