@@ -579,7 +579,6 @@ class vector_field3():
 
 
 
-
 class form_0_3d():
 
     """
@@ -1121,7 +1120,7 @@ class form_1_3d():
                                 height = tp_hgth,
                                 capping = False,
                                 center = (0.075, 0, 0),
-                                resolution=360
+                                
                                     )
 
         box = tvtk.CubeSource(x_length=0.01,
@@ -1211,7 +1210,7 @@ class form_1_3d():
         # properties of geometrical objects
 
         #0.565,0.641,0.46
-        pc = tvtk.Property(opacity=opc, color=(0.64,0.008,0.87))
+        pc = tvtk.Property(opacity=opc, color=(0.64,0.008,0.87), edge_visibility='y', edge_color=(0,0,0))
         p1 = tvtk.Property(opacity=opc, color=(0.64,0.008,0.87), edge_visibility='y', edge_color=(0,0,0))
 
         # map glyphs(which now represent the geometrical objects)
@@ -1269,7 +1268,463 @@ class form_1_3d():
 
 
 
+class form_2_3d():
 
+    def __init__(self, xg, yg, zg, form2, form_2_eq=None):
+        self.xg = xg
+        self.yg = yg
+        self.zg = zg
+        self.form_2 = form2
+        self.s_max = 6
+        self.s_min = 2
+        self.pt_den_x = len(xg[0, :, :])
+        self.pt_den_y = len(yg[:, 0, :])
+        self.pt_den_z = len(zg[:, :, 0])
+        self.fract_x = 2/((self.pt_den_x - 1))
+        self.fract_y = 2/((self.pt_den_y - 1))
+        self.fract_z = 2/((self.pt_den_z - 1))
+        self.colour_list = [(1,0,0), (0,0,1)]
+        self.logarithmic_scale_bool = 0
+        # self.base = 10
+        self.delta_factor = 10
+        if form_2_eq is not None:
+            self.form_2_str = str(simplify(form_2_eq))  # to start with, user must change to access some methods
+            # Note, the string must be given with x and y as variables
+        else:
+            self.form_2_str = None
+    
+    # #####################################################################
+    # Define basic methods to customise this object
+    # #####################################################################
+    
+    # define a mehtod to allow user to supply the string equation
+    # of the 2-form
+    def give_eqn(self, equation_str):
+        '''
+        Takes in 1-argument, string
+        This must be the equation of the supplied numerical 0-form
+        It must be in terms of x and y.
+        Has to be given, for some methods to be calculatable.
+        '''
+        self.form_2_str = equation_str
+        
+        # update the numerical values to always match
+        string = self.form_2_str + ''
+        string = string.replace('x', '(self.xg)')
+        string = string.replace('y', '(self.yg)')
+        
+        # correct for consatnt form before evaluating
+        if string.find('x') & string.find('y') == -1:
+            string = '(' + str(string) + ')* np.ones(np.shape(self.xg))'
+        else:
+            pass
+        
+        # re-evaluate the 2-form numerically
+        self.form_2 = eval(string)
+    
+    # deifne a function to return the string equation to the user
+    def return_string(self):
+        '''
+        Takes in no arguments, returns the unformatted string back to user
+        This is done in case user wants to access strings
+        that got here not by input but by ext. alg.
+        '''
+        return self.form_2_str
+    
+    # change colour list
+   
+    # change boolean that det. if to sclae logarithmically
+    def log_scaling(self):
+        '''
+        Takes no arguments
+        Changes the boolean that determines if scaling is logarithmic
+        Whenever it is called, it changes that boolean to opposite
+        The form object is initialised with this as False (as 0)
+        '''
+        self.logarithmic_scale_bool = not self.logarithmic_scale_bool
+        # self.base = base
+    
+   
+    
+    
+    # define a method to change the density of grids in same range
+    # requires string input of 1-form:
+    def set_density2(self, points_number_x, points_number_y, points_number_z):
+        '''
+        
+        Changes number of points on grids to given, if equations have been given
+        
+        Parameters:
+        -------------
+        points_number_x - int - number of points to put along the x axis
+        points_number_y - int - number of points to put along the y axis
+        
+        Returns: None
+        '''
+        if self.form_2_str == None:
+            # Error
+            raise TypeError('Error: You need to supply the 2-form equation to do this, look at \'give_eqn\' method')
+        else:
+            # redefine the grids
+            x = np.linspace(self.xg[0,0,0], self.xg[0,-1,0], points_number_x)
+            y = np.linspace(self.yg[0,0,0], self.yg[-1,0,0], points_number_y)
+            z = np.linspace(self.zg[0,0,0], self.zg[0,0,-1], points_number_z)
+            self.xg, self.yg, self.zg = np.meshgrid(x, y, z)
+            # based on these change other, dependant variables
+            self.pt_den_x = len(self.xg[0, :, :])
+            self.pt_den_y = len(self.yg[:, 0, :])
+            self.pt_den_z = len(self.yg[:, :, 0])
+            self.fract_x = 2/(self.pt_den_x - 1)
+            self.fract_y = 2/(self.pt_den_y - 1)
+            self.fract_z = 2/(self.pt_den_z - 1)
+            # substitute these into the equation:
+            # but keep it local
+            str_2 = self.form_2_str + ''
+            str_2 = str_2.replace('x', '(self.xg)')
+            str_2 = str_2.replace('y', '(self.yg)')
+            str_2 = str_2.replace('z', '(self.zg)')
+            
+            # correct for consatnt form before evaluating
+            if str_2.find('x') & str_2.find('y') & str_2.find('z') == -1:
+                str_2 = '(' + str(str_2) + ')* np.ones(np.shape(self.xg))'
+            else:
+                pass
+            # re-evaluate the 2-form numerically
+            self.form_2 = eval(str_2)
+    
+
+    
+
+    def plot(self):
+        
+
+        gr_sep = abs(self.xg[1,1,1]-self.xg[0,0,0])
+
+        pts = np.vstack(list(zip(self.xg.ravel(), self.yg.ravel(), self.zg.ravel())))
+
+
+        Fz = self.form_2
+
+
+        zmag_lst = np.vstack(list(zip(Fz.ravel())))
+
+        Idx_nan = np.argwhere(np.isnan(zmag_lst))
+
+        Idx_nan = Idx_nan[:,0]
+
+        pts_nan = pts[Idx_nan]
+
+        pts = np.delete(pts, [Idx_nan], axis=0)
+        zmag_lst = np.delete(zmag_lst, [Idx_nan], axis=0)
+
+        z_max = np.nanmax(abs(Fz))
+
+
+
+        sep = (z_max)/5
+
+        ### Find points where field has different magnitudes
+
+        Idx1 = np.argwhere(np.all(zmag_lst>(0),axis=1) & np.all(zmag_lst<=(0+sep),axis=1))
+        Idx2 = np.argwhere(np.all(zmag_lst>(0+sep),axis=1) & np.all(zmag_lst<=(0+2*sep),axis=1))
+        Idx3 = np.argwhere(np.all(zmag_lst>(0+2*sep),axis=1) & np.all(zmag_lst<=(0+3*sep),axis=1))
+        Idx4 = np.argwhere(np.all(zmag_lst>(0+3*sep),axis=1) & np.all(zmag_lst<=(0+4*sep),axis=1))
+        Idx5 = np.argwhere(np.all(zmag_lst>(0+4*sep),axis=1))
+
+        Idx_1 = np.argwhere(np.all(zmag_lst<(0),axis=1) & np.all(zmag_lst>=(0-sep),axis=1))
+        Idx_2 = np.argwhere(np.all(zmag_lst<(0-sep),axis=1) & np.all(zmag_lst>=(0-2*sep),axis=1))
+        Idx_3 = np.argwhere(np.all(zmag_lst<(0-2*sep),axis=1) & np.all(zmag_lst>=(0-3*sep),axis=1))
+        Idx_4 = np.argwhere(np.all(zmag_lst<(0-3*sep),axis=1) & np.all(zmag_lst>=(0-4*sep),axis=1))
+        Idx_5 = np.argwhere(np.all(zmag_lst<(0-4*sep),axis=1))
+
+
+        pts1 = pts[Idx1[:,0]]
+        pts_1 = pts[Idx_1[:,0]]
+        pts2 = pts[Idx2[:,0]]
+        pts_2 = pts[Idx_2[:,0]]
+        pts3 = pts[Idx3[:,0]]
+        pts_3 = pts[Idx_3[:,0]]
+        pts4 = pts[Idx4[:,0]]
+        pts_4 = pts[Idx_4[:,0]]
+        pts5 = pts[Idx5[:,0]]
+        pts_5 = pts[Idx_5[:,0]]
+
+        #------1 mag-----------
+
+        lnx1 = pts1+[0,gr_sep/2,gr_sep/2], pts1+[0,gr_sep/2,-gr_sep/2], pts1+[0,-gr_sep/2,gr_sep/2], pts1+[0,-gr_sep/2,-gr_sep/2]
+        lnx1 = np.concatenate(lnx1, axis=0)
+
+        lny1 = pts1+[gr_sep/2,0,gr_sep/2], pts1+[gr_sep/2,0,-gr_sep/2], pts1+[-gr_sep/2,0,gr_sep/2], pts1+[-gr_sep/2,0,-gr_sep/2]
+        lny1 = np.concatenate(lny1, axis=0)
+
+        lnz1 = pts1+[gr_sep/2,gr_sep/2,0], pts1+[gr_sep/2,-gr_sep/2,0], pts1+[-gr_sep/2,gr_sep/2,0], pts1+[-gr_sep/2,-gr_sep/2,0]
+        lnz1 = np.concatenate(lnz1, axis=0)
+
+
+        lnx_1 = pts_1+[0,gr_sep/2,gr_sep/2], pts_1+[0,gr_sep/2,-gr_sep/2], pts_1+[0,-gr_sep/2,gr_sep/2], pts_1+[0,-gr_sep/2,-gr_sep/2]
+        lnx_1 = np.concatenate(lnx_1, axis=0)
+
+        lny_1 = pts_1+[gr_sep/2,0,gr_sep/2], pts_1+[gr_sep/2,0,-gr_sep/2], pts_1+[-gr_sep/2,0,gr_sep/2], pts_1+[-gr_sep/2,0,-gr_sep/2]
+        lny_1 = np.concatenate(lny_1, axis=0)
+
+        lnz_1 = pts_1+[gr_sep/2,gr_sep/2,0], pts_1+[gr_sep/2,-gr_sep/2,0], pts_1+[-gr_sep/2,gr_sep/2,0], pts_1+[-gr_sep/2,-gr_sep/2,0]
+        lnz_1 = np.concatenate(lnz_1, axis=0)
+
+
+        #--------2 mag--------------
+
+
+
+        lnx2 = pts2+[0,gr_sep/2,gr_sep/2], pts2+[0,gr_sep/2,-gr_sep/2], pts2+[0,-gr_sep/2,gr_sep/2], pts2+[0,-gr_sep/2,-gr_sep/2],\
+            pts2+[0,0,gr_sep/2], pts2+[0,0,-gr_sep/2]
+        lnx2 = np.concatenate(lnx2, axis=0)
+
+        lny2 = pts2+[gr_sep/2,0,gr_sep/2], pts2+[gr_sep/2,0,-gr_sep/2], pts2+[-gr_sep/2,0,gr_sep/2], pts2+[-gr_sep/2,0,-gr_sep/2],\
+            pts2+[0,0,gr_sep/2], pts2+[0,0,-gr_sep/2]
+        lny2 = np.concatenate(lny2, axis=0)
+
+        lnz2 = pts2+[gr_sep/2,gr_sep/2,0], pts2+[gr_sep/2,-gr_sep/2,0], pts2+[-gr_sep/2,gr_sep/2,0], pts2+[-gr_sep/2,-gr_sep/2,0],\
+            pts2+[gr_sep/2,0,0], pts2+[-gr_sep/2,0,0], pts2+[0,gr_sep/2,0], pts2+[0,-gr_sep/2,0], pts2+[0,0,0]
+        lnz2 = np.concatenate(lnz2, axis=0)
+
+
+        lnx_2 = pts_2+[0,gr_sep/2,gr_sep/2], pts_2+[0,gr_sep/2,-gr_sep/2], pts_2+[0,-gr_sep/2,gr_sep/2], pts_2+[0,-gr_sep/2,-gr_sep/2],\
+                pts_2+[0,0,gr_sep/2], pts_2+[0,0,-gr_sep/2]
+        lnx_2 = np.concatenate(lnx_2, axis=0)
+
+        lny_2 = pts_2+[gr_sep/2,0,gr_sep/2], pts_2+[gr_sep/2,0,-gr_sep/2], pts_2+[-gr_sep/2,0,gr_sep/2], pts_2+[-gr_sep/2,0,-gr_sep/2],\
+                pts_2+[0,0,gr_sep/2], pts_2+[0,0,-gr_sep/2]
+        lny_2 = np.concatenate(lny_2, axis=0)
+
+        lnz_2 = pts_2+[gr_sep/2,gr_sep/2,0], pts_2+[gr_sep/2,-gr_sep/2,0], pts_2+[-gr_sep/2,gr_sep/2,0], pts_2+[-gr_sep/2,-gr_sep/2,0],\
+                pts_2+[gr_sep/2,0,0], pts_2+[-gr_sep/2,0,0], pts_2+[0,gr_sep/2,0], pts_2+[0,-gr_sep/2,0],\
+                pts_2+[0,0,0]
+        lnz_2 = np.concatenate(lnz_2, axis=0)
+
+
+        #----------3 mag----------------
+
+
+        lnx3 = pts3+[0,gr_sep/2,gr_sep/2], pts3+[0,gr_sep/2,-gr_sep/2], pts3+[0,-gr_sep/2,gr_sep/2], pts3+[0,-gr_sep/2,-gr_sep/2],\
+            pts3+[0,gr_sep/6,gr_sep/2], pts3+[0,gr_sep/6,-gr_sep/2], pts3+[0,-gr_sep/6,gr_sep/2], pts3+[0,-gr_sep/6,-gr_sep/2]
+        lnx3 = np.concatenate(lnx3, axis=0)
+
+        lny3 = pts3+[gr_sep/2,0,gr_sep/2], pts3+[gr_sep/2,0,-gr_sep/2], pts3+[-gr_sep/2,0,gr_sep/2], pts3+[-gr_sep/2,0,-gr_sep/2],\
+            pts3+[gr_sep/6,0,gr_sep/2], pts3+[gr_sep/6,0,-gr_sep/2], pts3+[-gr_sep/6,0,gr_sep/2], pts3+[-gr_sep/6,0,-gr_sep/2]
+        lny3 = np.concatenate(lny3, axis=0)
+
+        lnz3 = pts3+[gr_sep/2,gr_sep/2,0], pts3+[gr_sep/2,-gr_sep/2,0], pts3+[-gr_sep/2,gr_sep/2,0], pts3+[-gr_sep/2,-gr_sep/2,0],\
+            pts3+[-gr_sep/2,gr_sep/6,0],pts3+[-gr_sep/2,-gr_sep/6,0],pts3+[gr_sep/2,gr_sep/6,0],pts3+[gr_sep/2,-gr_sep/6,0],\
+            pts3+[-gr_sep/6,-gr_sep/2,0],pts3+[-gr_sep/6,gr_sep/2,0],pts3+[gr_sep/6,gr_sep/2,0],pts3+[gr_sep/6,-gr_sep/2,0],\
+            pts3+[-gr_sep/6,-gr_sep/6,0],pts3+[-gr_sep/6,gr_sep/6,0],pts3+[gr_sep/6,gr_sep/6,0],pts3+[gr_sep/6,-gr_sep/6,0]
+        lnz3 = np.concatenate(lnz3, axis=0)
+
+
+        lnx_3 = pts_3+[0,gr_sep/2,gr_sep/2], pts_3+[0,gr_sep/2,-gr_sep/2], pts_3+[0,-gr_sep/2,gr_sep/2], pts_3+[0,-gr_sep/2,-gr_sep/2],\
+                pts_3+[0,gr_sep/6,gr_sep/2], pts_3+[0,gr_sep/6,-gr_sep/2], pts_3+[0,-gr_sep/6,gr_sep/2], pts_3+[0,-gr_sep/6,-gr_sep/2]
+        lnx_3 = np.concatenate(lnx_3, axis=0)
+
+        lny_3 = pts_3+[gr_sep/2,0,gr_sep/2], pts_3+[gr_sep/2,0,-gr_sep/2], pts_3+[-gr_sep/2,0,gr_sep/2], pts_3+[-gr_sep/2,0,-gr_sep/2],\
+                pts_3+[gr_sep/6,0,gr_sep/2], pts_3+[gr_sep/6,0,-gr_sep/2], pts_3+[-gr_sep/6,0,gr_sep/2], pts_3+[-gr_sep/6,0,-gr_sep/2]
+        lny_3 = np.concatenate(lny_3, axis=0)
+
+        lnz_3 = pts_3+[gr_sep/2,gr_sep/2,0], pts_3+[gr_sep/2,-gr_sep/2,0], pts_3+[-gr_sep/2,gr_sep/2,0], pts_3+[-gr_sep/2,-gr_sep/2,0],\
+                pts_3+[-gr_sep/2,gr_sep/6,0],pts_3+[-gr_sep/2,-gr_sep/6,0],pts_3+[gr_sep/2,gr_sep/6,0],pts_3+[gr_sep/2,-gr_sep/6,0],\
+                pts_3+[-gr_sep/6,-gr_sep/2,0],pts_3+[-gr_sep/6,gr_sep/2,0],pts_3+[gr_sep/6,gr_sep/2,0],pts_3+[gr_sep/6,-gr_sep/2,0],\
+                pts_3+[-gr_sep/6,-gr_sep/6,0],pts_3+[-gr_sep/6,gr_sep/6,0],pts_3+[gr_sep/6,gr_sep/6,0],pts_3+[gr_sep/6,-gr_sep/6,0]
+        lnz_3 = np.concatenate(lnz_3, axis=0)
+
+
+
+        #----------4 mag----------------
+
+
+        lnx4 = pts4+[0,gr_sep/2,gr_sep/2], pts4+[0,gr_sep/2,-gr_sep/2], pts4+[0,-gr_sep/2,gr_sep/2], pts4+[0,-gr_sep/2,-gr_sep/2],\
+            pts4+[0,0,-gr_sep/2], pts4+[0,-gr_sep/4,-gr_sep/2], pts4+[0,gr_sep/4,-gr_sep/2],\
+            pts4+[0,0,gr_sep/2], pts4+[0,-gr_sep/4,gr_sep/2], pts4+[0,gr_sep/4,gr_sep/2]
+        lnx4 = np.concatenate(lnx4, axis=0)
+
+        lny4 = pts4+[gr_sep/2,0,gr_sep/2], pts4+[gr_sep/2,0,-gr_sep/2], pts4+[-gr_sep/2,0,gr_sep/2], pts4+[-gr_sep/2,0,-gr_sep/2],\
+            pts4+[0,0,-gr_sep/2], pts4+[-gr_sep/4,0,-gr_sep/2], pts4+[gr_sep/4,0,-gr_sep/2],\
+            pts4+[0,0,gr_sep/2], pts4+[-gr_sep/4,0,gr_sep/2], pts4+[gr_sep/4,0,gr_sep/2]
+        lny4 = np.concatenate(lny4, axis=0)
+
+        lnz4 = pts4+[gr_sep/2,gr_sep/2,0], pts4+[gr_sep/2,-gr_sep/2,0], pts4+[-gr_sep/2,gr_sep/2,0], pts4+[-gr_sep/2,-gr_sep/2,0],\
+            pts4+[0,0,0],\
+            pts4+[-gr_sep/4,0,0], pts4+[gr_sep/4,0,0], pts4+[0,-gr_sep/4,0], pts4+[0,gr_sep/4,0],\
+            pts4+[-gr_sep/4,-gr_sep/4,0], pts4+[-gr_sep/4,gr_sep/4,0], pts4+[gr_sep/4,-gr_sep/4,0], pts4+[gr_sep/4,gr_sep/4,0],\
+            pts4+[-gr_sep/2,0,0], pts4+[gr_sep/2,0,0], pts4+[0,-gr_sep/2,0], pts4+[0,gr_sep/2,0],\
+            pts4+[-gr_sep/2,gr_sep/4,0], pts4+[-gr_sep/2,-gr_sep/4,0], pts4+[gr_sep/2,-gr_sep/4,0], pts4+[gr_sep/2,gr_sep/4,0],\
+            pts4+[-gr_sep/4,gr_sep/2,0], pts4+[-gr_sep/4,-gr_sep/2,0], pts4+[gr_sep/4,-gr_sep/2,0], pts4+[gr_sep/4,gr_sep/2,0]
+        lnz4 = np.concatenate(lnz4, axis=0)
+
+
+        lnx_4 = pts_4+[0,gr_sep/2,gr_sep/2], pts_4+[0,gr_sep/2,-gr_sep/2], pts_4+[0,-gr_sep/2,gr_sep/2], pts_4+[0,-gr_sep/2,-gr_sep/2],\
+            pts_4+[0,0,-gr_sep/2], pts_4+[0,-gr_sep/4,-gr_sep/2], pts_4+[0,gr_sep/4,-gr_sep/2],\
+            pts_4+[0,0,gr_sep/2], pts_4+[0,-gr_sep/4,gr_sep/2], pts_4+[0,gr_sep/4,gr_sep/2]
+        lnx_4 = np.concatenate(lnx_4, axis=0)
+
+        lny_4 = pts_4+[gr_sep/2,0,gr_sep/2], pts_4+[gr_sep/2,0,-gr_sep/2], pts_4+[-gr_sep/2,0,gr_sep/2], pts_4+[-gr_sep/2,0,-gr_sep/2],\
+            pts_4+[0,0,-gr_sep/2], pts_4+[-gr_sep/4,0,-gr_sep/2], pts_4+[gr_sep/4,0,-gr_sep/2],\
+            pts_4+[0,0,gr_sep/2], pts_4+[-gr_sep/4,0,gr_sep/2], pts_4+[gr_sep/4,0,gr_sep/2]
+        lny_4 = np.concatenate(lny_4, axis=0)
+
+        lnz_4 = pts_4+[gr_sep/2,gr_sep/2,0], pts_4+[gr_sep/2,-gr_sep/2,0], pts_4+[-gr_sep/2,gr_sep/2,0], pts_4+[-gr_sep/2,-gr_sep/2,0],\
+            pts_4+[0,0,0],\
+            pts_4+[-gr_sep/4,0,0], pts_4+[gr_sep/4,0,0], pts_4+[0,-gr_sep/4,0], pts_4+[0,gr_sep/4,0],\
+            pts_4+[-gr_sep/4,-gr_sep/4,0], pts_4+[-gr_sep/4,gr_sep/4,0], pts_4+[gr_sep/4,-gr_sep/4,0], pts_4+[gr_sep/4,gr_sep/4,0],\
+            pts_4+[-gr_sep/2,0,0], pts_4+[gr_sep/2,0,0], pts_4+[0,-gr_sep/2,0], pts_4+[0,gr_sep/2,0],\
+            pts_4+[-gr_sep/2,gr_sep/4,0], pts_4+[-gr_sep/2,-gr_sep/4,0], pts_4+[gr_sep/2,-gr_sep/4,0], pts_4+[gr_sep/2,gr_sep/4,0],\
+            pts_4+[-gr_sep/4,gr_sep/2,0], pts_4+[-gr_sep/4,-gr_sep/2,0], pts_4+[gr_sep/4,-gr_sep/2,0], pts_4+[gr_sep/4,gr_sep/2,0]
+        lnz_4 = np.concatenate(lnz_4, axis=0)
+
+
+
+        #--------5 mag-------------------
+
+
+        lnx5 = pts5+[0,gr_sep/2,gr_sep/2], pts5+[0,gr_sep/2,-gr_sep/2], pts5+[0,-gr_sep/2,gr_sep/2], pts5+[0,-gr_sep/2,-gr_sep/2],\
+            pts5+[0,-gr_sep/10,-gr_sep/2], pts5+[0,gr_sep/10,-gr_sep/2], pts5+[0,-(3*gr_sep/10),-gr_sep/2], pts5+[0,(3*gr_sep/10),-gr_sep/2],\
+            pts5+[0,-gr_sep/10,gr_sep/2], pts5+[0,gr_sep/10,gr_sep/2], pts5+[0,-(3*gr_sep/10),gr_sep/2], pts5+[0,(3*gr_sep/10),gr_sep/2]
+        lnx5 = np.concatenate(lnx5, axis=0)
+
+        lny5 = pts5+[gr_sep/2,0,gr_sep/2], pts5+[gr_sep/2,0,-gr_sep/2], pts5+[-gr_sep/2,0,gr_sep/2], pts5+[-gr_sep/2,0,-gr_sep/2],\
+            pts5+[-gr_sep/10,0,-gr_sep/2], pts5+[gr_sep/10,0,-gr_sep/2], pts5+[-(3*gr_sep/10),0,-gr_sep/2], pts5+[(3*gr_sep/10),0,-gr_sep/2],\
+            pts5+[-gr_sep/10,0,gr_sep/2], pts5+[gr_sep/10,0,gr_sep/2], pts5+[-(3*gr_sep/10),0,gr_sep/2], pts5+[(3*gr_sep/10),0,gr_sep/2]  
+        lny5 = np.concatenate(lny5, axis=0)
+
+        lnz5 = pts5+[gr_sep/2,gr_sep/2,0], pts5+[gr_sep/2,-gr_sep/2,0], pts5+[-gr_sep/2,gr_sep/2,0], pts5+[-gr_sep/2,-gr_sep/2,0],\
+            pts5+[-gr_sep/10,gr_sep/10,0], pts5+[-gr_sep/10,-gr_sep/10,0], pts5+[gr_sep/10,gr_sep/10,0], pts5+[gr_sep/10,-gr_sep/10,0],\
+            pts5+[-(3*gr_sep/10),gr_sep/10,0],pts5+[-(3*gr_sep/10),-gr_sep/10,0], pts5+[-(3*gr_sep/10),(3*gr_sep/10),0], pts5+[-(3*gr_sep/10),-(3*gr_sep/10),0],\
+            pts5+[(3*gr_sep/10),gr_sep/10,0],pts5+[(3*gr_sep/10),-gr_sep/10,0], pts5+[(3*gr_sep/10),(3*gr_sep/10),0], pts5+[(3*gr_sep/10),-(3*gr_sep/10),0],\
+            pts5+[-(gr_sep/10),(3*gr_sep/10),0], pts5+[-(gr_sep/10),-(3*gr_sep/10),0], pts5+[(gr_sep/10),(3*gr_sep/10),0], pts5+[(gr_sep/10),-(3*gr_sep/10),0],\
+            pts5+[-(gr_sep/2),gr_sep/10,0],pts5+[-(gr_sep/2),-gr_sep/10,0], pts5+[-(gr_sep/2),(3*gr_sep/10),0], pts5+[-(gr_sep/2),-(3*gr_sep/10),0],\
+            pts5+[(gr_sep/2),gr_sep/10,0],pts5+[(gr_sep/2),-gr_sep/10,0], pts5+[(gr_sep/2),(3*gr_sep/10),0], pts5+[(gr_sep/2),-(3*gr_sep/10),0],\
+            pts5+[gr_sep/10,-(gr_sep/2),0],pts5+[-gr_sep/10,-(gr_sep/2),0], pts5+[(3*gr_sep/10),-(gr_sep/2),0], pts5+[-(3*gr_sep/10),-(gr_sep/2),0],\
+            pts5+[gr_sep/10,(gr_sep/2),0],pts5+[-gr_sep/10,(gr_sep/2),0], pts5+[(3*gr_sep/10),(gr_sep/2),0], pts5+[-(3*gr_sep/10),(gr_sep/2),0]
+        lnz5 = np.concatenate(lnz5, axis=0)
+
+
+
+
+        lnx_5 = pts_5+[0,gr_sep/2,gr_sep/2], pts_5+[0,gr_sep/2,-gr_sep/2], pts_5+[0,-gr_sep/2,gr_sep/2], pts_5+[0,-gr_sep/2,-gr_sep/2],\
+            pts_5+[0,-gr_sep/10,-gr_sep/2], pts_5+[0,gr_sep/10,-gr_sep/2], pts_5+[0,-(3*gr_sep/10),-gr_sep/2], pts_5+[0,(3*gr_sep/10),-gr_sep/2],\
+            pts_5+[0,-gr_sep/10,gr_sep/2], pts_5+[0,gr_sep/10,gr_sep/2], pts_5+[0,-(3*gr_sep/10),gr_sep/2], pts_5+[0,(3*gr_sep/10),gr_sep/2]
+        lnx_5 = np.concatenate(lnx_5, axis=0)
+
+        lny_5 = pts_5+[gr_sep/2,0,gr_sep/2], pts_5+[gr_sep/2,0,-gr_sep/2], pts_5+[-gr_sep/2,0,gr_sep/2], pts_5+[-gr_sep/2,0,-gr_sep/2],\
+            pts_5+[-gr_sep/10,0,-gr_sep/2], pts_5+[gr_sep/10,0,-gr_sep/2], pts_5+[-(3*gr_sep/10),0,-gr_sep/2], pts_5+[(3*gr_sep/10),0,-gr_sep/2],\
+            pts_5+[-gr_sep/10,0,gr_sep/2], pts_5+[gr_sep/10,0,gr_sep/2], pts_5+[-(3*gr_sep/10),0,gr_sep/2], pts_5+[(3*gr_sep/10),0,gr_sep/2]  
+        lny_5 = np.concatenate(lny_5, axis=0)
+
+        lnz_5 = pts_5+[gr_sep/2,gr_sep/2,0], pts_5+[gr_sep/2,-gr_sep/2,0], pts_5+[-gr_sep/2,gr_sep/2,0], pts_5+[-gr_sep/2,-gr_sep/2,0],\
+            pts_5+[-gr_sep/10,gr_sep/10,0], pts_5+[-gr_sep/10,-gr_sep/10,0], pts_5+[gr_sep/10,gr_sep/10,0], pts_5+[gr_sep/10,-gr_sep/10,0],\
+            pts_5+[-(3*gr_sep/10),gr_sep/10,0],pts_5+[-(3*gr_sep/10),-gr_sep/10,0], pts_5+[-(3*gr_sep/10),(3*gr_sep/10),0], pts_5+[-(3*gr_sep/10),-(3*gr_sep/10),0],\
+            pts_5+[(3*gr_sep/10),gr_sep/10,0],pts_5+[(3*gr_sep/10),-gr_sep/10,0], pts_5+[(3*gr_sep/10),(3*gr_sep/10),0], pts_5+[(3*gr_sep/10),-(3*gr_sep/10),0],\
+            pts_5+[-(gr_sep/10),(3*gr_sep/10),0], pts_5+[-(gr_sep/10),-(3*gr_sep/10),0], pts_5+[(gr_sep/10),(3*gr_sep/10),0], pts_5+[(gr_sep/10),-(3*gr_sep/10),0],\
+            pts_5+[-(gr_sep/2),gr_sep/10,0],pts_5+[-(gr_sep/2),-gr_sep/10,0], pts_5+[-(gr_sep/2),(3*gr_sep/10),0], pts_5+[-(gr_sep/2),-(3*gr_sep/10),0],\
+            pts_5+[(gr_sep/2),gr_sep/10,0],pts_5+[(gr_sep/2),-gr_sep/10,0], pts_5+[(gr_sep/2),(3*gr_sep/10),0], pts_5+[(gr_sep/2),-(3*gr_sep/10),0],\
+            pts_5+[gr_sep/10,-(gr_sep/2),0],pts_5+[-gr_sep/10,-(gr_sep/2),0], pts_5+[(3*gr_sep/10),-(gr_sep/2),0], pts_5+[-(3*gr_sep/10),-(gr_sep/2),0],\
+            pts_5+[gr_sep/10,(gr_sep/2),0],pts_5+[-gr_sep/10,(gr_sep/2),0], pts_5+[(3*gr_sep/10),(gr_sep/2),0], pts_5+[-(3*gr_sep/10),(gr_sep/2),0]
+        lnz_5 = np.concatenate(lnz_5, axis=0)
+
+
+
+
+        #===============================PLOTTING========================================================================
+
+
+        v = mlab.figure(bgcolor=(1,1,1), fgcolor=(0,0,0))
+
+
+        ###----coord for line centres around each point-----------
+
+        ###-------------------------------------------------------
+
+
+        def plotter(lnx, lny, lnz, clr):
+
+
+
+            line1 = tvtk.LineSource(point1=(-gr_sep/2,0,0), point2=(gr_sep/2,0,0))
+            line2 = tvtk.LineSource(point1=(0,-gr_sep/2,0), point2=(0,gr_sep/2,0))
+            line3 = tvtk.LineSource(point1=(0,0,-gr_sep/2), point2=(0,0,gr_sep/2))
+
+            pd1 = tvtk.PolyData(points=lnx)
+            pd2 = tvtk.PolyData(points=lny)
+            pd3 = tvtk.PolyData(points=lnz)
+
+            g1 = tvtk.Glyph3D(scale_mode='data_scaling_off', vector_mode = 'use_vector')
+            g2 = tvtk.Glyph3D(scale_mode='data_scaling_off', vector_mode = 'use_vector')
+            g3 = tvtk.Glyph3D(scale_mode='data_scaling_off', vector_mode = 'use_vector')
+
+            configure_input_data(g1, pd1)
+            configure_input_data(g2, pd2)
+            configure_input_data(g3, pd3)
+
+            configure_source_data(g1, line1.output)
+            line1.update()
+            g1.update()
+            configure_source_data(g2, line2.output)
+            line2.update()
+            g2.update()
+            configure_source_data(g3, line3.output)
+            line3.update()
+            g3.update()
+
+            m1 = tvtk.PolyDataMapper()
+            m2 = tvtk.PolyDataMapper()
+            m3 = tvtk.PolyDataMapper()
+
+            pc1 = tvtk.Property(opacity=0.9, color=clr)
+
+
+            configure_input_data(m1, g1.output)
+            configure_input_data(m2, g2.output)
+            configure_input_data(m3, g3.output)
+
+            a1 = tvtk.Actor(mapper=m1, property=pc1)
+            a2 = tvtk.Actor(mapper=m2, property=pc1)
+            a3 = tvtk.Actor(mapper=m3, property=pc1)
+
+            v.scene.add_actor(a1)
+            v.scene.add_actor(a2)
+            v.scene.add_actor(a3)
+
+
+        plotter(lnx1, lny1, lnz1, (0.9,0,0))
+        plotter(lnx_1, lny_1, lnz_1, (0,0,0.9))
+
+        plotter(lnx2, lny2, lnz2, (0.9,0,0))
+        plotter(lnx_2, lny_2, lnz_2, (0,0,0.9))
+
+        plotter(lnx3, lny3, lnz3, (0.9,0,0))
+        plotter(lnx_3, lny_3, lnz_3, (0,0,0.9))
+
+        plotter(lnx4, lny4, lnz4, (0.9,0,0))
+        plotter(lnx_4, lny_4, lnz_4, (0,0,0.9))
+
+        plotter(lnx5, lny5, lnz5, (0.9,0,0))
+        plotter(lnx_5, lny_5, lnz_5, (0,0,0.9))
+
+
+        
+
+        xmin = float((np.min(self.xg)) - gr_sep)
+        ymin = float((np.min(self.yg)) - gr_sep)
+        zmin = float((np.min(self.zg)) - gr_sep)
+        xmax = float((np.max(self.xg)) + gr_sep)
+        ymax = float((np.max(self.yg)) + gr_sep)
+        zmax = float((np.max(self.zg)) + gr_sep)
+
+
+        mlab.points3d(([xmin,ymin,zmin],[xmin,ymin,zmax],[xmin,ymax,zmin],[xmin,ymax,zmax],[xmax,ymin,zmin],[xmax,ymin,zmax],[xmax,ymax,zmin],[xmax,ymax,zmax]),opacity=0.0)
+        mlab.points3d(pts_nan[:,0],
+                            pts_nan[:,1],
+                            pts_nan[:,2], color = (1,0,0),scale_factor=gr_sep, resolution=36)
+        mlab.axes(extent = [xmin,xmax,ymin,ymax,zmin,zmax], nb_labels = 5, line_width=3.0, color = (0,0,0))
+        mlab.view(focalpoint=[0,0,0])
+        mlab.show()
 
 
 

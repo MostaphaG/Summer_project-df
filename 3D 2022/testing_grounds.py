@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from mayavi import mlab
 
 #grid = np.linspace(-5,5,11)
-grid = np.linspace(-2,2,9)
+grid = np.linspace(-10,10,17)
 #grid_0 = np.linspace(-150,150,25)
 
 xg, yg, zg = np.meshgrid(grid, grid, grid)
@@ -18,9 +18,9 @@ xg, yg, zg = np.meshgrid(grid, grid, grid)
 #fy = xg/np.sqrt(xg**2+yg**2-zg**2)
 #fz = zg/np.sqrt(xg**2+yg**2-zg**2)
 
-fx = xg**2
-fy = yg**2
-fz = np.ones((np.size(xg)))
+#fx = -yg
+#fy = xg
+#fz = np.ones((np.size(xg)))
 
 #potential = np.sqrt(x0**2 + y0**2 - z0**2)
 
@@ -41,9 +41,13 @@ fz = np.ones((np.size(xg)))
 #f0.plot(cross_sec_plane='n')
 #f0.plot(cross_sec_plane='y')
 
-form_1 = df3.form_1_3d(xg, yg, zg, fx, fy, fz)
-form_1.log_scaling()
-form_1.plot()
+#form_1 = df3.form_1_3d(xg, yg, zg, fx, fy, fz)
+#form_1.log_scaling()
+#form_1.plot()
+
+fz = zg/np.sqrt(xg**2+yg**2+zg**2)
+f2 = df3.form_2_3d(xg, yg, zg, fz)
+f2.plot()
 
 '''
 
