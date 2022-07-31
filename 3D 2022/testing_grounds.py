@@ -45,12 +45,17 @@ xg, yg, zg = np.meshgrid(grid, grid, grid)
 #form_1.log_scaling()
 #form_1.plot()
 
-fz = zg
-fx = xg
-fy = yg
+#fz = zg
+#fx = xg
+#fy = yg
 
-f2 = df3.form_2_3d(xg, yg, zg, Fz=fz, Fx=fx, Fy=fy)
-f2.plot()
+#f2 = df3.form_2_3d(xg, yg, zg, Fz=fx, Fx=fy, Fy=fz)
+#f2.plot()
+
+
+pot = xg/np.sqrt(xg**2 + yg**2 + zg**2)
+f3 = df3.form_3_3d(xg, yg, zg, pot)
+f3.plot()
 
 '''
 
