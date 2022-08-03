@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from mayavi import mlab
 
 #grid = np.linspace(-5,5,11)
-grid = np.linspace(-10,10,10)
+grid = np.linspace(-20,20,50)
 #grid_0 = np.linspace(-150,150,25)
 
 xg, yg, zg = np.meshgrid(grid, grid, grid)
@@ -43,7 +43,7 @@ xg, yg, zg = np.meshgrid(grid, grid, grid)
 
 
 
-fz = zg*np.sin(xg*yg)
+fz = zg**4*np.tan(xg-yg)
 fx = 0*xg
 fy = 0*yg
 
