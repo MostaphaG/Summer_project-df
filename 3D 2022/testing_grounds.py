@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from mayavi import mlab
 
 #grid = np.linspace(-5,5,11)
-grid = np.linspace(-10,10,17)
+grid = np.linspace(-10,10,10)
 #grid_0 = np.linspace(-150,150,25)
 
 xg, yg, zg = np.meshgrid(grid, grid, grid)
@@ -41,21 +41,27 @@ xg, yg, zg = np.meshgrid(grid, grid, grid)
 #f0.plot(cross_sec_plane='n')
 #f0.plot(cross_sec_plane='y')
 
+
+
+fz = zg*np.sin(xg*yg)
+fx = 0*xg
+fy = 0*yg
+
+
 #form_1 = df3.form_1_3d(xg, yg, zg, fx, fy, fz)
 #form_1.log_scaling()
 #form_1.plot()
 
-#fz = zg
-#fx = xg
-#fy = yg
 
-#f2 = df3.form_2_3d(xg, yg, zg, Fz=fx, Fx=fy, Fy=fz)
-#f2.plot()
+f2 = df3.form_2_3d(xg, yg, zg, Fz=fx, Fx=fy, Fy=fz)
 
 
-pot = xg/np.sqrt(xg**2 + yg**2 + zg**2)
-f3 = df3.form_3_3d(xg, yg, zg, pot)
-f3.plot()
+f2.plot()
+
+
+#pot = (xg**2 - yg**2 - zg**2)
+#f3 = df3.form_3_3d(xg, yg, zg, pot)
+#f3.plot()
 
 '''
 
