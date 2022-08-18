@@ -13,6 +13,90 @@ from numpy import matrix, sin, cos, tan, sqrt, log, arctan, arcsin, arccos, tanh
 from numpy import sinh, cosh, arcsinh, arccosh, arctanh, exp, pi, e
 
 
+def find_2_form(expressions, coords, xg, yg, zg=None, m=3):
+    '''
+    find_2_form(expressions, coords, xg, yg, zg=None, m=2)
+    
+    Finds the analytical 2 form using sympy experssion handling.
+    
+    Parameters:
+    ---------------
+    expressions - list of sympy experssions for the 1 form scaling fucntions
+    coords - list of coordinate names as strings, that were used in experssions
+    xg, yg - grids
+    zg - possible grid
+    m - number of dimensions
+    
+    Returns:
+    ---------------
+    result  - analytical, unformatted 2-form equation
+    '''
+    
+    # define a sympy expression for string 0
+    sympy_expr_zero = parse_expr('0*x', evaluate=False)
+    
+    # set up an array to store derrivatives.
+    ext_ds = np.empty((m, m), dtype='object')
+    
+    # set up an array to store the results
+    # in 2D only dx^dy, in 3D (m=3) (in order): dx^dy, dx^dz, dy^dz
+    result = np.empty((int((m-1)*m/2), 1), dtype='object')
+    for i in range(int((m-1)*m/2)):
+        result[i] = str(result[i])
+    
+    # loop over differentiating each, when differentiating w.r.t its coord, set to 0
+    for coord_index in range(len(coords)):
+        # loop over differentiating each component:
+        for comp_index in range(len(expressions)):
+            # when equal set to 0, when not-differentiate:
+            if comp_index == coord_index:
+                ext_ds[comp_index, coord_index] = str(sympy_expr_zero)
+            elif comp_index != coord_index:
+                ext_ds[comp_index, coord_index] = str(diff(expressions[comp_index], coords[coord_index]))
+            # change the signs for wedges in wrong order
+            if comp_index < coord_index:
+                ext_ds[comp_index, coord_index] = ' - (' + str(ext_ds[comp_index, coord_index]) + ')'
+            elif comp_index > coord_index:
+                ext_ds[comp_index, coord_index] = ' + ' + str(ext_ds[comp_index, coord_index])
+    
+    
+    # merge the results into a 2-form (for 2-form on R^2, the result is a single component (dx^xy))
+    # do so by adding opposite elements along the diagonal ( / ) components of ext_ds
+    # this  includes taking elemets with switched i and j
+    
+    
+    # set up a variable to count pairs (pairs because we are forming 2-forms):
+    pair = 0
+    
+    # loop over opposing elements (matching elementary 2-forms)
+    for i in range(1, m):
+        for j in range(i):
+            # initially clear the element from its Nonetype placeholder
+            result[pair, 0] = ''
+            # extract opposing elements
+            temp = ext_ds[i, j]
+            temp1 = ext_ds[j, i]
+            # check these against zero entries:
+            if (temp == '0') or (temp == '-(0)') or (temp == '0*x'):
+                pass
+            else:
+                result[pair, 0] += temp
+            if (temp1 == '0') or (temp1 == '-(0)') or (temp1 == '0*x'):
+                pass
+            else:
+                result[pair, 0] += temp1
+            # update the result row counter
+            pair += 1
+    
+    return result
+
+
+
+
+
+
+
+
 class vector_field3():
     '''
     The class which creates a vector field object. 
@@ -50,6 +134,7 @@ class vector_field3():
         # self.base = 10
         self.scale_bool = True
         self.delta_factor = 10
+
         if F_x_eqn is not None:
             self.str_x = str(simplify(F_x_eqn))  # to start with, user must change to access some methods
             # Note, the string must be given with x, y, z as variables
@@ -65,6 +150,9 @@ class vector_field3():
             self.str_z = str(simplify(F_z_eqn))
         else:
             self.str_z = None
+
+
+
 
     def give_eqn(self, equation_str_x, equation_str_y, equation_str_z):
         '''
@@ -332,6 +420,356 @@ class vector_field3():
         '''
         self.logarithmic_scale_bool = not self.logarithmic_scale_bool
 
+
+    def zoom(self, mag, target, dpd):
+        
+
+        if self.str_x == None or self.str_y == None or self.str_z == None:
+            # ERROR
+            raise TypeError('No equation provided, see \'give_eqn\' method')
+        else:
+             # Zoom must be one or greater
+            if mag < 1:
+                raise ValueError('Mag must be greater than one')
+            else:
+
+                # Target coordinates
+                x_m = target[0]
+                y_m = target[1]
+                z_m = target[2]
+                
+                # Get the size of the original VF
+                Lx = 0.5*(self.xg[-1, -1, -1] - self.xg[0, 0, 0])
+                Ly = 0.5*(self.yg[-1, -1, -1] - self.yg[0, 0, 0])
+                Lz = 0.5*(self.zg[-1, -1, -1] - self.zg[0, 0, 0])
+
+                
+                # Zoom axis range
+                d_range_x = Lx/mag
+                d_range_y = Ly/mag
+                d_range_z = Lz/mag
+                
+                # Set up zoom window grids
+                dx = np.linspace(-d_range_x + x_m, d_range_x + x_m, dpd)
+                dy = np.linspace(-d_range_y + y_m, d_range_y + y_m, dpd)
+                dz = np.linspace(-d_range_z + z_m, d_range_z + z_m, dpd)
+                dxg, dyg, dzg = np.meshgrid(dx, dy, dz)
+                
+                # Create variables for the user provided equation strings
+                u_str = self.str_x
+                v_str = self.str_y
+                k_str = self.str_z
+                
+                # Check if the equations provided contain x and y terms
+                if u_str.find('x') & u_str.find('y') & u_str.find('z')== -1:
+                    u_str = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                else:
+                    u_str = u_str.replace('x', 'dxg')
+                    u_str = u_str.replace('y', 'dyg')
+                    u_str = u_str.replace('z', 'dzg')
+            
+                if v_str.find('x') & v_str.find('y') & v_str.find('z') == -1:
+                    v_str = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
+                else:
+                    v_str = v_str.replace('x', 'dxg')
+                    v_str = v_str.replace('y', 'dyg')
+                    v_str = v_str.replace('z', 'dzg')
+
+                if k_str.find('x') & k_str.find('y') & k_str.find('z') == -1:
+                    k_str = '(' + str(k_str) + ')* np.ones(np.shape(dzg))'
+                else:
+                    k_str = k_str.replace('x', 'dxg')
+                    k_str = k_str.replace('y', 'dyg')
+                    k_str = k_str.replace('z', 'dzg')
+                    
+                # Generate arrays for the components of the zoom field
+                u_zoom = eval(u_str)
+                v_zoom = eval(v_str)
+                k_zoom = eval(k_str)
+                
+                # crate the zoomed in form
+                zoom_form = vector_field3(dxg, dyg, dzg, u_zoom, v_zoom, k_zoom, self.str_x, self.str_y, self.str_z)
+
+                
+                return zoom_form
+            
+    def autoscale(self):
+        '''
+        Takes no arguments
+        Changes the boolean that determines if arrows are autoscaled
+        Whenever it is called, it changes that boolean to opposite
+        The form object is initialised with this as False
+        '''
+        self.scale_bool = not self.scale_bool
+
+    def covariant(self, g=[['1', '0', '0'], ['0', '1', '0'], ['0', '0', '1']]):
+            '''
+            Passes in everything it can (all it has been supplied)
+            to the 1-form object.
+            Works via the metric on R2
+            Can supply the metric in as equations or as evaluated arrays
+            Format of the metric is a list of numpy arrays
+            0th array is the top row, its 0th component is 11, 1st is 12
+            1st array is the botton row, its 0th comp is 21 and 1st is 22.
+            Note, if it is supplied as arrays, they must come from numpy grids
+            via meshgrid, if it is supplied as strings, needs to be in terms of
+            x and y, and contain no special funtions, apart from ones imported
+            here automatically and listed in the documentation #!!!
+            
+            Returns a single object (1-form object)
+            '''
+            
+            # extract what is needed form the metric depending on what the user
+            # supplied
+            # check if its has string components
+            if type(g[0][0]) == str and type(g[0][1]) == str and type(g[0][2]) == str \
+               and type(g[1][0]) == str and type(g[1][1]) == str and type(g[1][2]) == str \
+               and type(g[2][0]) == str and type(g[2][1]) == str and type(g[2][2]) == str:
+                # deal with supplied string metric
+                # need to format it, correct it for constants and evaluate it's numerical equivalent
+                str_comp_00 = g[0][0] + ''
+                str_comp_01 = g[0][1] + ''
+                str_comp_02 = g[0][2] + ''
+                str_comp_10 = g[1][0] + ''
+                str_comp_11 = g[1][1] + ''
+                str_comp_12 = g[1][2] + ''
+                str_comp_20 = g[2][0] + ''
+                str_comp_21 = g[2][1] + ''
+                str_comp_22 = g[2][2] + ''
+
+                str_comp_00 = str_comp_00.replace('x', '(self.xg)')
+                str_comp_00 = str_comp_00.replace('y', '(self.yg)')
+                str_comp_00 = str_comp_00.replace('z', '(self.zg)')
+                str_comp_01 = str_comp_01.replace('x', '(self.xg)')
+                str_comp_01 = str_comp_01.replace('y', '(self.yg)')
+                str_comp_01 = str_comp_01.replace('z', '(self.zg)')
+                str_comp_02 = str_comp_02.replace('x', '(self.xg)')
+                str_comp_02 = str_comp_02.replace('y', '(self.yg)')
+                str_comp_02 = str_comp_02.replace('z', '(self.zg)')
+
+                str_comp_10 = str_comp_10.replace('x', '(self.xg)')
+                str_comp_10 = str_comp_10.replace('y', '(self.yg)')
+                str_comp_10 = str_comp_10.replace('z', '(self.zg)')
+                str_comp_11 = str_comp_11.replace('x', '(self.xg)')
+                str_comp_11 = str_comp_11.replace('y', '(self.yg)')
+                str_comp_11 = str_comp_11.replace('z', '(self.zg)')
+                str_comp_12 = str_comp_12.replace('x', '(self.xg)')
+                str_comp_12 = str_comp_12.replace('y', '(self.yg)')
+                str_comp_12 = str_comp_12.replace('z', '(self.zg)')
+
+                str_comp_20 = str_comp_20.replace('x', '(self.xg)')
+                str_comp_20 = str_comp_20.replace('y', '(self.yg)')
+                str_comp_20 = str_comp_20.replace('z', '(self.zg)')
+                str_comp_21 = str_comp_21.replace('x', '(self.xg)')
+                str_comp_21 = str_comp_21.replace('y', '(self.yg)')
+                str_comp_21 = str_comp_21.replace('z', '(self.zg)')
+                str_comp_22 = str_comp_22.replace('x', '(self.xg)')
+                str_comp_22 = str_comp_22.replace('y', '(self.yg)')
+                str_comp_22 = str_comp_22.replace('z', '(self.zg)')
+
+                # check against constant form components:
+                if str_comp_00.find('x') & str_comp_00.find('y') & str_comp_00.find('z') == -1:
+                    str_comp_00 = '(' + str(str_comp_00) + ')* np.ones(np.shape(self.xg))'
+                if str_comp_01.find('x') & str_comp_01.find('y') & str_comp_01.find('z') == -1:
+                    str_comp_01 = '(' + str(str_comp_01) + ')* np.ones(np.shape(self.xg))'
+                if str_comp_02.find('x') & str_comp_02.find('y') & str_comp_02.find('z') == -1:
+                    str_comp_02 = '(' + str(str_comp_02) + ')* np.ones(np.shape(self.xg))'
+                
+                if str_comp_10.find('x') & str_comp_10.find('y') & str_comp_10.find('z') == -1:
+                    str_comp_10 = '(' + str(str_comp_10) + ')* np.ones(np.shape(self.xg))'
+                if str_comp_11.find('x') & str_comp_11.find('y') & str_comp_11.find('z') == -1:
+                    str_comp_11 = '(' + str(str_comp_11) + ')* np.ones(np.shape(self.xg))'
+                if str_comp_12.find('x') & str_comp_12.find('y') & str_comp_12.find('z') == -1:
+                    str_comp_12 = '(' + str(str_comp_12) + ')* np.ones(np.shape(self.xg))'
+
+                if str_comp_20.find('x') & str_comp_20.find('y') & str_comp_20.find('z') == -1:
+                    str_comp_20 = '(' + str(str_comp_20) + ')* np.ones(np.shape(self.xg))'
+                if str_comp_21.find('x') & str_comp_21.find('y') & str_comp_21.find('z') == -1:
+                    str_comp_21 = '(' + str(str_comp_21) + ')* np.ones(np.shape(self.xg))'
+                if str_comp_22.find('x') & str_comp_22.find('y') & str_comp_22.find('z') == -1:
+                    str_comp_22 = '(' + str(str_comp_22) + ')* np.ones(np.shape(self.xg))'
+
+
+                # evaluate the components numerically, inputting them into a
+                # store numerical metric
+                comp_00 = eval(str_comp_00)
+                comp_01 = eval(str_comp_01)
+                comp_02 = eval(str_comp_02)
+                comp_10 = eval(str_comp_10)
+                comp_11 = eval(str_comp_11)
+                comp_12 = eval(str_comp_12)
+                comp_20 = eval(str_comp_20)
+                comp_21 = eval(str_comp_21)
+                comp_22 = eval(str_comp_22)
+                g_num = [[comp_00, comp_01, comp_02], [comp_10, comp_11, comp_12], [comp_20, comp_21, comp_22]]
+                
+                # set up a dummy variable to store the fact that numericals were given
+                # not to check again later
+                analytics = True
+                
+            elif type(g[0][0]) == np.ndarray and type(g[0][1]) == np.ndarray and type(g[0][2]) == np.ndarray\
+                 and type(g[1][0]) == np.ndarray and type(g[1][1]) == np.ndarray and type(g[1][2]) == np.ndarray\
+                 and type(g[2][0]) == np.ndarray and type(g[2][1]) == np.ndarray and type(g[2][2]) == np.ndarray:
+                # deal with the metric being supplied as components
+                # if the user has vector field equations, warn that these can't
+                # be passed anymore, because we don't have equations for this
+                # metric
+                if self.str_x == None and self.str_y == None and self.str_z == None:
+                    pass
+                else:
+                    print('The Vector field has equations, but the metric does not, these will be lost and the resulting 1-form will only have numerical values, not equations supplied')
+                # No need to do anythng more to the metric, upto the user to make sure its
+                # correctly sized, as with other code in this library
+                # just rename the metric here
+                g_num = g
+                
+                # set up a dummy variable to store the fact that numericals were
+                # not given, not to check again later
+                analytics = False
+                
+            else:
+                # Inconsistant metric components
+                raise TypeError('Metric components are inconsistent')
+            
+            # from vector field components, get 1-form components by the metric
+            # first, do so numerically, as this must always happen
+            form_x = self.F_x * g_num[0][0] + self.F_y * g_num[0][1] + self.F_z * g_num[0][2]
+            form_y = self.F_x * g_num[1][0] + self.F_y * g_num[1][1] + self.F_z * g_num[1][2]
+            form_z = self.F_x * g_num[2][0] + self.F_y * g_num[2][1] + self.F_z * g_num[2][2]
+            
+            # if the equations were given, evaluate these analytically too:
+            # only if vector file doriginally has equations
+            if analytics:
+                if self.str_x == None and self.str_y == None and self.str_z == None:
+                    print('You supplied the metric as equations (or it was default), but did not give VF equations, therefore only numericals will be completed')
+                    analytics = False
+                else:
+                    x_str_form = '(' + self.str_x + ')*(' + g[0][0] + ') + (' + self.str_y + ')*(' + g[0][1] + ') + (' + self.str_z + ')*(' + g[0][2] + ')'
+                    y_str_form = '(' + self.str_x + ')*(' + g[1][0] + ') + (' + self.str_y + ')*(' + g[1][1] + ') + (' + self.str_z + ')*(' + g[1][2] + ')'
+                    z_str_form = '(' + self.str_x + ')*(' + g[2][0] + ') + (' + self.str_y + ')*(' + g[2][1] + ') + (' + self.str_z + ')*(' + g[2][2] + ')'
+                    # simplify them
+                    x_str_form = str(simplify(x_str_form))
+                    y_str_form = str(simplify(y_str_form))
+                    z_str_form = str(simplify(z_str_form))
+            else:
+                pass
+
+            # based on what was given into the Vector field
+            # return a 1-form object with these parameters
+            if analytics:
+                result_form = form_1_3d(self.xg, self.yg, self.zg, form_x, form_y, form_z, x_str_form, y_str_form, z_str_form)
+            elif not analytics:
+                result_form = form_1_3d(self.xg, self.yg, self.zg, form_x, form_y, form_z)
+        
+            # return the found object
+            return result_form
+
+    def deriv(self, target, mag, dpd):
+        '''
+        Creates new vector field object at a target location, showing the derivative field at this point.
+        User gives arguments:
+        Target - derivative plot location
+        mag - Magnification level
+        dpd - New plot point density
+        
+        inset - bool - if true, field deriv is plotted on given axis
+        axis - matplotlib axes instance - axis to plot on if instance it True
+        
+        Returns:
+        --------
+        if inset is False:
+            deriv VF object
+        if inset is True, inset axis and deriv VF object in this order.
+        
+        '''
+        if self.str_x == None or self.str_y == None or self.str_z == None:
+            # ERROR
+            raise TypeError('No equation provided')
+        else:
+             # Zoom must be one or greater
+            if mag < 1:
+                raise ValueError('Zoom must be greater than one')
+            else:
+                
+                
+        
+                # Target coordinates
+                x_m = target[0]
+                y_m = target[1]
+                z_m = target[2]
+                
+                # Get the size of the original VF
+                Lx = 0.5*(self.xg[-1, -1, -1] - self.xg[0, 0, 0])
+                Ly = 0.5*(self.yg[-1, -1, -1] - self.yg[0, 0, 0])
+                Lz = 0.5*(self.zg[-1, -1, -1] - self.zg[0, 0, 0])
+                
+                # Zoom axis range
+                d_range_x = Lx/mag
+                d_range_y = Ly/mag
+                d_range_z = Lz/mag
+                
+                # Set up zoom window grids
+                dx = np.linspace(-d_range_x + x_m, d_range_x + x_m, dpd)
+                dy = np.linspace(-d_range_y + y_m, d_range_y + y_m, dpd)
+                dz = np.linspace(-d_range_z + z_m, d_range_z + z_m, dpd)
+                dxg, dyg, dzg = np.meshgrid(dx, dy, dz)
+                
+                # Create variables for the user provided equation strings
+                u_str = self.str_x
+                v_str = self.str_y
+                k_str = self.str_z
+
+                # Create string to evaluate the field at the target location
+                u_str_point = u_str.replace('x', 'x_m')
+                u_str_point = u_str_point.replace('y', 'y_m')
+                u_str_point = u_str_point.replace('z', 'z_m')
+                
+                v_str_point = v_str.replace('x', 'x_m')
+                v_str_point = v_str_point.replace('y', 'y_m')
+                v_str_point = v_str_point.replace('z', 'z_m')
+
+                k_str_point = k_str.replace('x', 'x_m')
+                k_str_point = k_str_point.replace('y', 'y_m')
+                k_str_point = k_str_point.replace('z', 'z_m')
+                
+                # Check if the equations provided contain x and y terms
+                
+
+
+                if u_str.find('x') & u_str.find('y') & u_str.find('z')== -1:
+                    u_str_grid = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                else:
+                    u_str_grid = u_str.replace('x', 'dxg')
+                    u_str_grid = u_str_grid.replace('y', 'dyg')
+                    u_str_grid = u_str_grid.replace('z', 'dzg')
+            
+                if v_str.find('x') & v_str.find('y') & v_str.find('z') == -1:
+                    v_str_grid = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
+                else:
+                    v_str_grid = v_str.replace('x', 'dxg')
+                    v_str_grid = v_str_grid.replace('y', 'dyg')
+                    v_str_grid = v_str_grid.replace('z', 'dzg')
+
+                if k_str.find('x') & k_str.find('y') & k_str.find('z') == -1:
+                    k_str_grid = '(' + str(k_str) + ')* np.ones(np.shape(dzg))'
+                else:
+                    k_str_grid = k_str.replace('x', 'dxg')
+                    k_str_grid = k_str_grid.replace('y', 'dyg')
+                    k_str_grid = k_str_grid.replace('z', 'dzg') 
+                # Generate arrays for the components of the derivative field          
+                U = eval(u_str_grid) - eval(u_str_point)
+                V = eval(v_str_grid) - eval(v_str_point)
+                K = eval(k_str_grid) - eval(k_str_point)
+                
+                # from that create VF instance
+                deriv_vf = vector_field3(dxg, dyg, dzg, U, V, K, self.str_x, self.str_y, self.str_z)
+                
+                
+                
+                # depending on preferances, return to user and plot
+                
+                return deriv_vf
+
     def plot(self, add_curl = None, arrow_colour = None, arrow_cmap=None, scaling=None, opacity=None, curl_opacity=None):
 
         '''
@@ -356,7 +794,9 @@ class vector_field3():
         # set initial conditions for when the arguments are not supplied
         cmap = 'viridis'
         clr = (0.2,1,0)
+
         scl = 1.0
+        
         opc_crl = 1.0
         opc = 1.0
 
@@ -415,9 +855,9 @@ class vector_field3():
         # for arrows to work, with nan and infs
         # make a local variable of F_x and F_y
         # so that thye don't alter globally
-        F_x_local = self.F_x * 1
-        F_y_local = self.F_y * 1
-        F_z_local = self.F_z * 1
+        F_x_local = self.F_x
+        F_y_local = self.F_y
+        F_z_local = self.F_z
 
 
         # set all insignificant values to zero:
@@ -426,16 +866,19 @@ class vector_field3():
         F_z_local[np.abs(F_z_local) < 1e-15] = 0
         
         # define grid dimension magnitude
-        mag = int(abs(np.min(self.xg))) + int(abs(np.max(self.xg)))
+
+        Lx = (self.xg[-1, -1, -1] - self.xg[0, 0, 0])
+        Ly = (self.yg[-1, -1, -1] - self.yg[0, 0, 0])
+        Lz = (self.zg[-1, -1, -1] - self.zg[0, 0, 0])
 
         # use the magnitude to define min and max values of x, y and z directions
         # these to be used for mlab.axes() plot
-        xmin = int((np.min(self.xg)) - mag/10)
-        ymin = int((np.min(self.yg)) - mag/10)
-        zmin = int((np.min(self.zg)) - mag/10)
-        xmax = int((np.max(self.xg)) + mag/10)
-        ymax = int((np.max(self.yg)) + mag/10)
-        zmax = int((np.max(self.zg)) + mag/10)
+        xmin = int((np.min(self.xg)))
+        ymin = int((np.min(self.yg)))
+        zmin = int((np.min(self.zg)))
+        xmax = int((np.max(self.xg)))
+        ymax = int((np.max(self.yg)))
+        zmax = int((np.max(self.zg)))
 
         # define mlab figure upon which the field will be plotted
         fig = mlab.figure(bgcolor = (1,1,1), fgcolor = (0,0,0))
@@ -477,13 +920,18 @@ class vector_field3():
 
         # Field magnitude at each point
         F = np.sqrt(F_x_local**2+F_y_local**2+F_z_local**2)
+        max_size = np.max(F)
 
+        if self.scale_bool is False:
+            ScaleFactor = scl
+        elif self.scale_bool is True:
+            ScaleFactor = max_size/(0.9*(2*Lx/self.pt_den))
 
         # if magnitude is constant, use color instead of colormap for the quiver
         if abs((np.nanmax(F)-np.nanmin(F)))>=0.001:
-            mlab.quiver3d(self.xg, self.yg, self.zg, F_x_local, F_y_local, F_z_local, colormap=cmap, line_width=3.0, mode='arrow', scale_factor=scl, scale_mode = 'vector', opacity = opc)
+            mlab.quiver3d(self.xg, self.yg, self.zg, F_x_local, F_y_local, F_z_local, colormap=cmap, line_width=3.0, mode='arrow', scale_factor=ScaleFactor, scale_mode = 'vector', opacity = opc)
         else:
-            mlab.quiver3d(self.xg, self.yg, self.zg, F_x_local, F_y_local, F_z_local, color=clr, line_width=3.0, mode='arrow', scale_factor=scl, scale_mode = 'vector', opacity = opc)
+            mlab.quiver3d(self.xg, self.yg, self.zg, F_x_local, F_y_local, F_z_local, color=clr, line_width=3.0, mode='arrow', scale_factor=ScaleFactor, scale_mode = 'vector', opacity = opc)
 
         
         # adds curl plot if the argument is supplied
@@ -555,7 +1003,7 @@ class vector_field3():
                     Curl_Y[np.abs(F_y_local) < 1e-15] = 0
                     Curl_Z[np.abs(F_z_local) < 1e-15] = 0
 
-                    mlab.quiver3d(self.xg, self.yg, self.zg, Curl_X, Curl_Y, Curl_Z, color=(1.0, 0.0, 1.0), opacity=opc_crl, mode='arrow',scale_factor=scl/10, scale_mode = 'vector')
+                    mlab.quiver3d(self.xg, self.yg, self.zg, Curl_X, Curl_Y, Curl_Z, color=(1.0, 0.0, 1.0), opacity=opc_crl, mode='arrow',scale_factor=ScaleFactor/10, scale_mode = 'vector')
             elif str(add_curl)=='n':
                 pass
             else:
@@ -624,6 +1072,7 @@ class form_0_3d():
             self.form_0_str = None
 
 
+
     def give_eqn(self, equation_str):
         '''
         
@@ -655,6 +1104,8 @@ class form_0_3d():
         # evaluate the string equation
         self.form_0 = eval(string)
 
+
+
     def return_string(self):
         '''
         Takes in no arguments, returns the unformatted string back to user
@@ -662,6 +1113,8 @@ class form_0_3d():
         that got here not by input but by ext. alg.
         '''
         return self.form_0_str
+
+
 
     def levels(self, values):
         '''
@@ -677,7 +1130,9 @@ class form_0_3d():
             self.lines = values
         else:
             raise TypeError('Require input to be integer or list, if you used a numpy array try: list(your_array)')
-        
+
+
+
     def log_scaling(self):
         '''
         changes bool for logscaling
@@ -685,6 +1140,8 @@ class form_0_3d():
         changes to the other option each time it is called
         '''
         self.logarithmic_scale_bool = not self.logarithmic_scale_bool
+
+
 
     def set_density(self, points_number):
         '''
@@ -724,6 +1181,70 @@ class form_0_3d():
                 str_0 = '(' + str(str_0) + ')* np.ones(np.shape(self.xg))'
             # re-evaluate the 2-form numerically
             self.form_0 = eval(str_0)
+
+
+
+    def zoom(self, mag, target, dpd):
+        
+
+
+
+        if self.form_0_str == None:
+            # ERROR
+            raise TypeError('No equation provided, see \'give_eqn\' method')
+        else:
+             # Zoom must be one or greater
+            if mag < 1:
+                raise ValueError('Mag must be greater than one')
+            else:
+
+                # Target coordinates
+                x_m = target[0]
+                y_m = target[1]
+                z_m = target[2]
+                
+                # Get the size of the original VF
+                Lx = 0.5*(self.xg[-1, -1, -1] - self.xg[0, 0, 0])
+                Ly = 0.5*(self.yg[-1, -1, -1] - self.yg[0, 0, 0])
+                Lz = 0.5*(self.zg[-1, -1, -1] - self.zg[0, 0, 0])
+
+                
+                # Zoom axis range
+                d_range_x = Lx/mag
+                d_range_y = Ly/mag
+                d_range_z = Lz/mag
+                
+                # Set up zoom window grids
+                dx = np.linspace(-d_range_x + x_m, d_range_x + x_m, dpd)
+                dy = np.linspace(-d_range_y + y_m, d_range_y + y_m, dpd)
+                dz = np.linspace(-d_range_z + z_m, d_range_z + z_m, dpd)
+                dxg, dyg, dzg = np.meshgrid(dx, dy, dz)
+                
+                # Create variables for the user provided equation strings
+                f0_str = self.form_0_str
+
+                
+                # Check if the equations provided contain x and y terms
+                if f0_str.find('x') & f0_str.find('y') & f0_str.find('z')== -1:
+                    f0_str = '(' + str(f0_str) + ')* np.ones(np.shape(dxg))'
+                else:
+                    f0_str = f0_str.replace('x', 'dxg')
+                    f0_str = f0_str.replace('y', 'dyg')
+                    f0_str = f0_str.replace('z', 'dzg')
+            
+
+                    
+                # Generate arrays for the components of the zoom field
+                f0_zoom = eval(f0_str)
+
+                
+                # crate the zoomed in form
+                zoom_form = form_0_3d(dxg, dyg, dzg, f0_zoom, self.form_0_str)
+
+                
+                return zoom_form
+ 
+
 
     def plot(self, cross_sec_plane=None, colormap=None):
 
@@ -812,6 +1333,594 @@ class form_0_3d():
 
 
 
+    def ext_d(self):
+        '''
+        Takes in no argument
+        computes the exterior derivative and returns it as the 1-form object
+        Returns 1 form object
+        '''
+        
+        # first make sure that the string has been supplied
+        if self.form_0_str == None:
+                # ERROR
+                raise TypeError('Error: You need to supply the 0-form equation to do this, look at \'give_eqn\' method')
+        else:
+            # can compute the exterior derivative:
+            form_0_str = str(simplify(self.form_0_str))
+            # from this, need derivatives so set it as a SymPy object
+            sympy_expr_form_0 = parse_expr(form_0_str, evaluate=False)
+            # set up an array of coordinates that need to be used (in standard order)
+            coords = ['x', 'y', 'z']
+            # from these, find the derivatives
+            form_1_x_str = str(diff(sympy_expr_form_0, coords[0]))
+            form_1_y_str = str(diff(sympy_expr_form_0, coords[1]))
+            form_1_z_str = str(diff(sympy_expr_form_0, coords[2]))
+            # need to uspply these unformatted, so save those:
+            form_1_x_unformated, form_1_y_unformated, form_1_z_unformated = form_1_x_str*1, form_1_y_str*1, form_1_z_str*1
+            # from these strings, get the numerical 1-form:
+            form_1_x_str = form_1_x_str.replace('x', '(self.xg)')
+            form_1_x_str = form_1_x_str.replace('y', '(self.yg)')
+            form_1_x_str = form_1_x_str.replace('z', '(self.zg)')
+
+            form_1_y_str = form_1_y_str.replace('x', '(self.xg)')
+            form_1_y_str = form_1_y_str.replace('y', '(self.yg)')
+            form_1_y_str = form_1_y_str.replace('z', '(self.zg)')
+
+            form_1_z_str = form_1_z_str.replace('x', '(self.xg)')
+            form_1_z_str = form_1_z_str.replace('y', '(self.yg)')
+            form_1_z_str = form_1_z_str.replace('z', '(self.zg)')
+
+
+            if form_1_x_str.find('x') & form_1_x_str.find('y') & form_1_x_str.find('z') == -1:
+                form_1_x_str = '(' + str(form_1_x_str) + ')* np.ones(np.shape(self.xg))'
+            if form_1_y_str.find('x') & form_1_y_str.find('y') & form_1_y_str.find('z') == -1:
+                form_1_y_str = '(' + str(form_1_y_str) + ')* np.ones(np.shape(self.yg))'
+            if form_1_z_str.find('x') & form_1_z_str.find('y') & form_1_z_str.find('z') == -1:
+                form_1_z_str = '(' + str(form_1_z_str) + ')* np.ones(np.shape(self.yg))'
+
+
+            form_1_x = eval(form_1_x_str)
+            form_1_y = eval(form_1_y_str)
+            form_1_z = eval(form_1_z_str)
+            
+            # supply these to the 1-form object function and return object
+            result_1_form = form_1_3d(self.xg, self.yg, self.zg, form_1_x, form_1_y, form_1_z, form_1_x_unformated, form_1_y_unformated, form_1_z_unformated)
+
+            return result_1_form
+
+
+
+    def num_ext_d(self, edge_order=1):
+        '''
+        Takes in 1 argument:
+        -- edge_order: determines order same as in numpy gradient {1 or 2}
+        
+        Return 1 object - 1-form
+        computes the exterior derivative numerically only
+        The equations do not need to be given
+        If given, they do not get passed onto the 1-form object anyway
+        NUMERICAL ONLY
+        '''
+        
+        # from numpy gradient, get the gradient array
+        fy, fx, fz= np.gradient(self.form_0, edge_order=edge_order)
+        
+        # supply these to the 1-form object function
+        result_1_form = form_1_3d(self.xg, self.yg, self.zg, fx, fy, fz)
+        
+        # return the new object to user
+        return result_1_form
+
+
+
+    def hodge(self):
+        '''
+        Takes in no arguments
+        
+        It calulates the Hodge on R^2 by the standard definition:
+        1* = (dx^dy)
+        Does so analytically via instance provided equtions
+        changes the equations AND the numerical answers
+        
+        returns a 2-form
+        
+        '''
+        # can only be done if equations have been given, check:
+        if self.form_0_str != None:
+            # some equations are there, compute the Hodge on these:
+            
+            # get numerical solutions, evaulated on local strings
+            # to relate parameter to the self grids and keep strings, because
+            # need to supply these unformatted:
+            form_2_str_unformated = self.form_0_str + '' 
+            string_2_form = self.form_0_str  # to be formated
+            # from these strings, get the numerical 2-form:
+            string_2_form = string_2_form.replace('x', '(self.xg)')
+            string_2_form = string_2_form.replace('y', '(self.yg)')
+            string_2_form = string_2_form.replace('z', '(self.zg)')
+            
+            if string_2_form.find('x') & string_2_form.find('y') & string_2_form.find('z') == -1:
+                string_2_form = '(' + str(string_2_form) + ')* np.ones(np.shape(self.xg))'
+            
+            # evaulated numerically
+            form_2_result = eval(string_2_form)
+            
+            # create and return object
+            new_object = form_2_3d(self.xg, self.yg, self.zg, Fx = form_2_result, Fy = form_2_result, Fz = form_2_result, Fx_eqn=form_2_str_unformated, Fy_eqn=form_2_str_unformated, Fz_eqn=form_2_str_unformated)
+            return new_object
+        else:
+            # ERROR
+            raise TypeError('You need to supply the 2-form equations to do this, look at \'give_eqn\' method')
+
+
+
+    def num_hodge(self):
+        '''
+        Takes in no arguments
+        
+        It calulates the Hodge on R^2 by the standard definition:
+        1* = (dx^dy)
+        Does so numerically via instance provided arrays
+        IF equations were given, this method will lose them
+        
+        returns a 2-form
+        '''
+        # check if equations have been given:
+        # if they have, doing it only numerically would create
+        # a mismatch, avoid that
+        if self.form_0_str != None:
+            print('Warning: You supplied equations, doing it numerically only will lose these')
+        
+        # now complete the process numerically
+        # pass these in to the object to create a new one and return
+        new_object = form_2_3d(self.xg, self.yg, self.zg, Fx = self.form_0, Fy = self.form_0, Fz = self.form_0)  # N.B no equations to supply
+        return new_object
+
+
+
+    def wedge(self, form_second, degree=0, keep_object=False):
+        '''
+        Parameters:
+        ----------------
+        form_second - the form to wedge the 0-form with.
+                    Can be supplied as a DFormPy instance, a tuple of equations,
+                    or a single string equation depending on what form is to be
+                    wedged.
+                    To wedge with 1-form, supply 1-form instance, or tuple of
+                    component equations as strings in terms of x and y.
+                    To wedge with 0-form or 2-form, supply corresponding
+                    instances or a single equation. When using equations,
+                    to distinguish between them, provide parmater 'degree'.
+        degree - default is 0. Only used when a single string is supplied
+                    as form_second, to distinguish betwen 0-form and 2-form
+                    for 0-form, degree=0, for 2-form, degree=2.
+                    Determines what form is to be wegded with the
+                    given 0-form.
+        keep_object - bool -default=False - Only needed when 0-form /\ 0-form 
+                    If False, a new object is created
+                    as a result of the wedge. If True, the 0-form acted on
+                    is modified to be the result of the wedge. 
+        
+        To do so here, strings for the form must be supplied.
+        Computes the Wedge product using strings, ANALYTICALLY
+        
+        Returns:
+        --------------
+        Wedged with 0-form returns a 0-form object if keep_object is False
+                    (default), and returns nothing when it is True
+        Wedged with a 1-form, returns a 1-form instance
+        Wedged with a 2-form, returns a 2-form instance
+        
+        '''
+        
+        # test if equations were given first:
+        if self.form_0_str is None:
+            raise ValueError('Error: You need to supply the 0-form equation to do this, look at \'give_eqn\' method')
+        
+        # set up variable to store order of supplied form, initially assume 1-form
+        order = 0
+        
+        # get needed second obejct strings dep. on input
+        if isinstance(form_second, tuple):
+            # if equations were given here take these, if numerical grids were given - error!
+            # check size , should be a 1-form
+            if len(form_second) == 3:
+                # 0-form/\1-form, check if strings supplied
+                if isinstance(form_second[0], str) and isinstance(form_second[1], str) and isinstance(form_second[2], str):
+                    to_wedge_x_2_str = form_second[0]
+                    to_wedge_y_2_str = form_second[1]
+                    to_wedge_z_2_str = form_second[2]
+                    if degree == 1:
+                        order = 1
+                    elif degree == 2:
+                        order = 2
+                else:
+                    raise ValueError('for analytical calulation, supply 1-form equations as strings')
+            else:
+                raise ValueError('too many or too little equations given in tuple')
+        elif isinstance(form_second, str):
+            # single string, could be 0-form or 2-form, check given degree:
+            if degree == 0:
+                to_wedge_0_form_str = form_second
+                order = 0
+
+            elif degree == 3:
+                to_wedge_3_form_str = form_second
+                order = 3
+            else:
+                raise ValueError('not possible digree given or supplied one string for a 1-form')
+        else:
+            # object supplied, get numericals checking which object is given:
+            if isinstance(form_second, form_1_3d):
+                if form_second.form_1_str_x is None or form_second.form_1_str_y is None or form_second.form_1_str_z is None:
+                     raise ValueError('supplied 1-form instance must contain equations for analytical calculation')
+                else:
+                    to_wedge_x_2_str = form_second.form_1_str_x
+                    to_wedge_y_2_str = form_second.form_1_str_y
+                    to_wedge_z_2_str = form_second.form_1_str_z
+                    order = 1
+            elif isinstance(form_second, form_0_3d):
+                if form_second.form_0_str is None:
+                    raise ValueError('supplied 0-form instance must contain equations for analytical calculation')
+                else:
+                    to_wedge_0_form_str = form_second.form_0_str
+                    order = 0       
+            elif isinstance(form_second, form_2_3d):
+                if form_second.Fx_eqn is None and form_second.Fy_eqn is None and form_second.Fz_eqn is None:
+                    raise ValueError('supplied 2-form instance must contain equations for analytical calculation')
+                else:
+                    to_wedge_2_form_str_x = form_second.Fx_eqn
+                    to_wedge_2_form_str_y = form_second.Fy_eqn
+                    to_wedge_2_form_str_z = form_second.Fz_eqn
+                    order = 2
+            elif isinstance(form_second, form_3_3d):
+                if form_second.form_3_str is None:
+                    raise ValueError('supplied 3-form instance must contain equations for analytical calculation')
+                else:
+                    to_wedge_3_form_str = form_second.form_3_str
+                    order = 3
+            else:
+                raise TypeError('Supplied form to wedge with is not recognised')
+        
+        # Deal with 0-form/\1-form:
+        if order == 1:
+            # first, find the result of the 1-form:
+            new_str_x = str(simplify('(' + self.form_0_str + ')*(' +  to_wedge_x_2_str + ')'))
+            new_str_y = str(simplify('(' + self.form_0_str + ')*(' +  to_wedge_y_2_str + ')'))
+            new_str_z = str(simplify('(' + self.form_0_str + ')*(' +  to_wedge_z_2_str + ')'))
+            # keep it as it is locally to supply it to object maker later
+            form_1_str_x_loc = new_str_x + ''
+            form_1_str_y_loc = new_str_y + ''
+            form_1_str_z_loc = new_str_z + ''
+            # format it to be in terms of grids and:
+            # check against constant and zero 1-forms being supplied
+            # get the numerical evaluation of it
+            new_str_x = new_str_x.replace('x', '(self.xg)')
+            new_str_x = new_str_x.replace('y', '(self.yg)')
+            new_str_x = new_str_x.replace('z', '(self.zg)')
+
+            new_str_y = new_str_y.replace('x', '(self.xg)')
+            new_str_y = new_str_y.replace('y', '(self.yg)')
+            new_str_y = new_str_y.replace('z', '(self.zg)')
+
+            new_str_z = new_str_z.replace('x', '(self.xg)')
+            new_str_z = new_str_z.replace('y', '(self.yg)')
+            new_str_z = new_str_z.replace('z', '(self.zg)')
+            
+            if new_str_x.find('x') & new_str_x.find('y') & new_str_x.find('z')== -1:
+                new_str_x = '(' + str(new_str_x) + ')* np.ones(np.shape(self.xg))'
+            if new_str_y.find('x') & new_str_y.find('y') & new_str_y.find('z') == -1:
+                new_str_y = '(' + str(new_str_y) + ')* np.ones(np.shape(self.yg))'
+            if new_str_z.find('x') & new_str_z.find('y') & new_str_z.find('z') == -1:
+                new_str_z = '(' + str(new_str_z) + ')* np.ones(np.shape(self.zg))'
+            
+            form_1_x = eval(new_str_x)
+            form_1_y = eval(new_str_y)
+            form_1_z = eval(new_str_z)
+
+            # return the new one to the user:
+            new_object = form_1_3d(self.xg, self.yg, self.zg, form_1_x, form_1_y, form_1_z, F_x_eqn=form_1_str_x_loc, F_y_eqn=form_1_str_y_loc, F_z_eqn = form_1_str_z_loc)
+            return new_object
+        
+        elif order == 0:
+            form_0_str = str(simplify( '(' + self.form_0_str + ')*(' +  to_wedge_0_form_str + ')'))
+            # keep it as it is locally to supply it to object maker later
+            form_0_str_loc = form_0_str + ''
+            # format it to be in terms of grids and:
+            # check against constant and zero 2-forms being supplied
+            # get the numerical evaluation of it
+            form_0_str = form_0_str.replace('x', 'self.xg')
+            form_0_str = form_0_str.replace('y', 'self.yg')
+            form_0_str = form_0_str.replace('z', 'self.zg')
+            if form_0_str.find('x') & form_0_str.find('y') & form_0_str.find('z') == -1:
+                form_0_str = '(' + str(form_0_str) + ')* np.ones(np.shape(self.xg))'
+            
+            # evaluate it numerically on the grid supplied
+            form_0_result = eval(form_0_str)
+            
+            # depending on keep_object, return:
+            if keep_object:
+                self.form_0 = form_0_result
+                self.form_0_str = form_0_str_loc
+            elif not keep_object:
+                new_object = form_0_3d(self.xg, self.yg, self.zg, form_0_result, form_0_str_loc)
+                # return the new one to the user:
+                return new_object
+            else:
+                raise ValueError('Error, Invalid input for \'keep_object\'')
+
+        elif order == 2:
+            form_2_str_x = str(simplify( '(' + self.form_0_str + ')*(' +  to_wedge_2_form_str_x + ')'))
+            form_2_str_y = str(simplify( '(' + self.form_0_str + ')*(' +  to_wedge_2_form_str_y + ')'))
+            form_2_str_z = str(simplify( '(' + self.form_0_str + ')*(' +  to_wedge_2_form_str_z + ')'))
+            # keep it as it is locally to supply it to object maker later
+            form_2_str_x_loc = form_2_str_x + ''
+            form_2_str_y_loc = form_2_str_y + ''
+            form_2_str_z_loc = form_2_str_z + ''
+            # format it to be in terms of grids and:
+            # check against constant and zero 2-forms being supplied
+            # get the numerical evaluation of it
+            form_2_str_x = form_2_str_x.replace('x', 'self.xg')
+            form_2_str_x = form_2_str_x.replace('y', 'self.yg')
+            form_2_str_x = form_2_str_x.replace('z', 'self.zg')
+
+            form_2_str_y = form_2_str_y.replace('x', 'self.xg')
+            form_2_str_y = form_2_str_y.replace('y', 'self.yg')
+            form_2_str_y = form_2_str_y.replace('z', 'self.zg')
+
+            form_2_str_z = form_2_str_z.replace('x', 'self.xg')
+            form_2_str_z = form_2_str_z.replace('y', 'self.yg')
+            form_2_str_z = form_2_str_z.replace('z', 'self.zg')
+
+            if form_2_str_x.find('x') & form_2_str_x.find('y') & form_2_str_x.find('z') == -1:
+                form_2_str_x = '(' + str(form_2_str_x) + ')* np.ones(np.shape(self.xg))'
+            if form_2_str_y.find('x') & form_2_str_y.find('y') & form_2_str_y.find('z') == -1:
+                form_2_str_y = '(' + str(form_2_str_y) + ')* np.ones(np.shape(self.yg))'
+            if form_2_str_z.find('x') & form_2_str_z.find('y') & form_2_str_z.find('z') == -1:
+                form_2_str_z = '(' + str(form_2_str_z) + ')* np.ones(np.shape(self.zg))'
+            
+            # evaluate it numerically on the grid supplied
+            form_2_x_result = eval(form_2_str_x)
+            form_2_y_result = eval(form_2_str_y)
+            form_2_z_result = eval(form_2_str_z)
+            
+            # create new instance and return to user
+            new_object = form_2_3d(self.xg, self.yg, self.zg, form_2_x_result, form_2_y_result, form_2_z_result, form_2_str_x_loc, form_2_str_y_loc, form_2_str_z_loc)
+            return new_object
+
+        elif order == 3:
+            form_3_str = str(simplify( '(' + self.form_0_str + ')*(' +  to_wedge_3_form_str + ')'))
+            # keep it as it is locally to supply it to object maker later
+            form_3_str_loc = form_3_str + ''
+            # format it to be in terms of grids and:
+            # check against constant and zero 2-forms being supplied
+            # get the numerical evaluation of it
+            form_3_str = form_3_str.replace('x', 'self.xg')
+            form_3_str = form_3_str.replace('y', 'self.yg')
+            form_3_str = form_3_str.replace('z', 'self.zg')
+            if form_3_str.find('x') & form_3_str.find('y') & form_3_str.find('z') == -1:
+                form_3_str = '(' + str(form_3_str) + ')* np.ones(np.shape(self.xg))'
+            
+            # evaluate it numerically on the grid supplied
+            form_3_result = eval(form_3_str)
+            
+            # depending on keep_object, return:
+            if keep_object:
+                self.form_3 = form_3_result
+                self.form_3_str = form_3_str_loc
+            elif not keep_object:
+                new_object = form_3_3d(self.xg, self.yg, self.zg, form_3_result, form_3_str_loc)
+                # return the new one to the user:
+                return new_object
+            else:
+                raise ValueError('Error, Invalid input for \'keep_object\'')
+
+        else:
+            # should never happen, but in case
+            raise ValueError('Variable change during code running, look at \'order\' parameter')
+    
+
+
+    def num_wedge(self, form_second, degree=0, keep_object=False):
+        '''
+        Parameters:
+        ----------------
+        form_second - the form to wedge the 0-form with.
+                    Can be supplied as a DFormPy instance, a tuple of grids of
+                    same size and dimensions as this 0-form,
+                    or a single grid of scaling function values depending on
+                    what form is to be wedged.
+                    To wedge with 1-form, supply 1-form instance, or tuple of
+                    component grids of same size as 1-form acted on.
+                    To wedge with 0-form or 2-form, supply corresponding
+                    instances or a single grid. When using grids,
+                    to distinguish between them, provide parmater 'degree'.
+        degree - default is 0. Only used when a single grid is supplied
+                    as form_second, to distinguish betwen 0-form and 2-form
+                    for 0-form, degree=0, for 2-form, degree=2.
+                    Determines what form is to be wegded with the
+                    given 0-form.
+        keep_object - bool -default=False - only used when 0-form is wedged
+                    with a 0-form. If False, a new object is created as 
+                    a result of the wedge. If True, the 1-form acted on
+                    is modified to be the result of the wedge. 
+        
+        Computes the Wedge product numerically
+        
+        Returns:
+        --------------
+        Wedged with 0-form returns a 0-form object if keep_object is False
+                    (default), and returns nothing when it is True
+        Wedged with a 1-form, returns a 1-form instance
+        Wedged with a 2-form, returns a 2-form instance
+        
+        '''
+        
+        # test if equations were given first:
+        if self.form_0_str is None:
+            pass
+        else:
+            print('The first 0-form you are completing the wedge with has equations supplied, these will be lost')
+        
+        # set up variable to store order of supplied form, initially assume 0-form
+        order = 0
+        
+        # get needed second obejct grids dep. on input
+        if isinstance(form_second, tuple):
+            # check size to see what it is to be wedged with.
+            # tuple should only be length 2 --> 1-form/\1-form
+            if len(form_second) == 3:
+                # 0-form/\1-form, extract components
+                # if numerical grids were given, take these, if equations, change to values on grids:
+                if isinstance(form_second[0], str) and isinstance(form_second[1], str) and isinstance(form_second[2], str):
+
+                    new_str_x = form_second[0].replace('x', '(self.xg)')
+                    new_str_x = new_str_x.replace('y', '(self.yg)')
+                    new_str_x = new_str_x.replace('z', '(self.zg)')
+
+                    new_str_y = form_second[1].replace('x', '(self.xg)')
+                    new_str_y = new_str_y.replace('y', '(self.yg)')
+                    new_str_y = new_str_y.replace('z', '(self.zg)')
+
+                    new_str_z = form_second[2].replace('x', '(self.xg)')
+                    new_str_z = new_str_z.replace('y', '(self.yg)')
+                    new_str_z = new_str_z.replace('z', '(self.zg)')
+
+
+                    if new_str_x.find('x') & new_str_x.find('y') & new_str_x.find('z')== -1:
+                        new_str_x = '(' + str(new_str_x) + ')* np.ones(np.shape(self.xg))'
+                    if new_str_y.find('x') & new_str_y.find('y') & new_str_y.find('z') == -1:
+                        new_str_y = '(' + str(new_str_y) + ')* np.ones(np.shape(self.yg))'
+                    if new_str_z.find('x') & new_str_z.find('y') & new_str_z.find('z') == -1:
+                        new_str_z = '(' + str(new_str_z) + ')* np.ones(np.shape(self.zg))'
+                    
+                    f12_x = eval(new_str_x)
+                    f12_y = eval(new_str_y)
+                    f12_z = eval(new_str_z)
+                    order = 1
+                elif isinstance(form_second[0], np.ndarray) and isinstance(form_second[1], np.ndarray) and isinstance(form_second[2], np.ndarray):
+                    f12_x = form_second[0]
+                    f12_y = form_second[1]
+                    f12_z = form_second[2]
+                    order = 1
+                else:
+                    raise ValueError('Not recognised input tuple')
+            else:
+                raise ValueError('too many or too little equations given in tuple')
+        
+        elif isinstance(form_second, np.ndarray):
+            # check degree:
+            if degree == 0:
+                to_wedge_0_form = form_second
+                order = 0
+            elif degree == 1:
+                raise ValueError('for degree 1, supply a 1-form, not a single grid')
+            elif degree == 2:
+                raise ValueError('for degree 2, supply a 1-form, not a single grid')
+            elif degree == 3:
+                to_wedge_3_form = form_second
+                order = 3
+        
+        elif isinstance(form_second, str):
+            # single string, could be 0-form or 2-form, check given degree:
+            if degree == 0:
+                    str_0_form = form_second.replace('x', '(self.xg)')
+                    str_0_form = str_0_form.replace('y', '(self.yg)')
+                    str_0_form = str_0_form.replace('z', '(self.zg)')
+                    if str_0_form.find('x') & str_0_form.find('y') & str_0_form.find('z') == -1:
+                        str_0_form = '(' + str(str_0_form) + ')* np.ones(np.shape(self.xg))'
+                    
+                    to_wedge_0_form = eval(str_0_form)
+                    order = 0
+            elif degree == 3:
+                str_3_form = form_second.replace('x', '(self.xg)')
+                str_3_form = str_3_form.replace('y', '(self.yg)')
+                str_3_form = str_3_form.replace('z', '(self.zg)')
+                if str_3_form.find('x') & str_3_form.find('y') & str_3_form.find('z') == -1:
+                    str_3_form = '(' + str(str_3_form) + ')* np.ones(np.shape(self.xg))'
+                
+                to_wedge_2_form = eval(str_3_form)
+                order = 3
+            else:
+                raise ValueError('not possible digree given or supplied one string for a 1-form and/or 2-dorm')
+        
+        # object supplied, get grids checking which object is given:
+        
+        elif isinstance(form_second, form_1_3d):
+            f12_x = form_second.F_x
+            f12_y = form_second.F_y
+            f12_z = form_second.F_z
+            order = 1
+        elif isinstance(form_second, form_0_3d):
+            to_wedge_0_form = form_second.form_0
+            order = 0
+        elif isinstance(form_second, form_2_3d):
+            order = 2
+            to_wedge_2_form_x = form_second.Fx
+            to_wedge_2_form_y = form_second.Fy
+            to_wedge_2_form_z = form_second.Fz
+        elif isinstance(form_second, form_3_3d):
+            to_wedge_3_form = form_second.form_3
+            order = 3
+        else:
+            raise TypeError('Supplied form to wedge with is not recognised')
+        
+        # Use given inputs to evaluate the result:
+        
+        # Deal with 0-form/\1-form:
+        if order == 1:
+            # first, find the result of the 1-form
+            new_form_1_x = self.form_0 * f12_x
+            new_form_1_y = self.form_0 * f12_y
+            new_form_1_z = self.form_0 * f12_z
+            
+            # create instance and return
+            new_object = form_1_3d(self.xg, self.yg, self.zg, new_form_1_x, new_form_1_y, new_form_1_z)
+            return new_object
+        
+        elif order == 0:
+            # from these get the numerical 0-form
+            form_0_result = self.form_0 * to_wedge_0_form
+            
+            # depending on keep_object, return:
+            if keep_object:
+                self.form_0 = form_0_result
+            elif not keep_object:
+                new_object = form_0_3d(self.xg, self.yg, self.zg, form_0_result)
+                # return the new one to the user:
+                return new_object
+            else:
+                raise ValueError('Error, Invalid input for \'keep_object\'')
+
+        elif order == 2:
+            # from these get the numerical 0-form
+            form_2_result_x = self.form_0 * to_wedge_2_form_x
+            form_2_result_y = self.form_0 * to_wedge_2_form_y
+            form_2_result_z = self.form_0 * to_wedge_2_form_z
+            
+            # create instance and return
+            new_object = form_2_3d(self.xg, self.yg, self.zg, form_2_result_x, form_2_result_y, form_2_result_z)
+            return new_object
+        elif order == 3:
+            # from these get the numerical 0-form
+            form_3_result = self.form_0 * to_wedge_3_form
+            
+            # depending on keep_object, return:
+            if keep_object:
+                self.form_0 = form_3_result
+            elif not keep_object:
+                new_object = form_3_3d(self.xg, self.yg, self.zg, form_3_result)
+                # return the new one to the user:
+                return new_object
+            else:
+                raise ValueError('Error, Invalid input for \'keep_object\'')
+
+        else:
+            # should never happen, but in case
+            raise ValueError('Variable change during code running, look at \'order\' parameter')
+
+
+
 class form_1_3d():
 
     """
@@ -862,6 +1971,8 @@ class form_1_3d():
         else:
             self.form_1_str_z = None
 
+
+
     def give_eqn(self, equation_str_x, equation_str_y, equation_str_z):
         '''
 
@@ -903,6 +2014,8 @@ class form_1_3d():
         self.F_y = eval(str_y)
         self.F_z = eval(str_z)
 
+
+
     def return_string(self):
 
         '''
@@ -930,6 +2043,299 @@ class form_1_3d():
         self.logarithmic_scale_bool = not self.logarithmic_scale_bool
         # self.base = base
     
+
+    def zoom(self, mag, target, dpd):
+    
+
+
+        if self.form_1_str_x == None or self.form_1_str_y == None or self.form_1_str_z == None:
+            # ERROR
+            raise TypeError('No equation provided, see \'give_eqn\' method')
+        else:
+             # Zoom must be one or greater
+            if mag < 1:
+                raise ValueError('Mag must be greater than one')
+            else:
+
+                # Target coordinates
+                x_m = target[0]
+                y_m = target[1]
+                z_m = target[2]
+                
+                # Get the size of the original VF
+                Lx = 0.5*(self.xg[-1, -1, -1] - self.xg[0, 0, 0])
+                Ly = 0.5*(self.yg[-1, -1, -1] - self.yg[0, 0, 0])
+                Lz = 0.5*(self.zg[-1, -1, -1] - self.zg[0, 0, 0])
+
+                
+                # Zoom axis range
+                d_range_x = Lx/mag
+                d_range_y = Ly/mag
+                d_range_z = Lz/mag
+                
+                # Set up zoom window grids
+                dx = np.linspace(-d_range_x + x_m, d_range_x + x_m, dpd)
+                dy = np.linspace(-d_range_y + y_m, d_range_y + y_m, dpd)
+                dz = np.linspace(-d_range_z + z_m, d_range_z + z_m, dpd)
+                dxg, dyg, dzg = np.meshgrid(dx, dy, dz)
+                
+                # Create variables for the user provided equation strings
+                u_str = self.form_1_str_x
+                v_str = self.form_1_str_y
+                k_str = self.form_1_str_z
+                
+                # Check if the equations provided contain x and y terms
+                if u_str.find('x') & u_str.find('y') & u_str.find('z')== -1:
+                    u_str = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                else:
+                    u_str = u_str.replace('x', 'dxg')
+                    u_str = u_str.replace('y', 'dyg')
+                    u_str = u_str.replace('z', 'dzg')
+            
+                if v_str.find('x') & v_str.find('y') & v_str.find('z') == -1:
+                    v_str = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
+                else:
+                    v_str = v_str.replace('x', 'dxg')
+                    v_str = v_str.replace('y', 'dyg')
+                    v_str = v_str.replace('z', 'dzg')
+
+                if k_str.find('x') & k_str.find('y') & k_str.find('z') == -1:
+                    k_str = '(' + str(k_str) + ')* np.ones(np.shape(dzg))'
+                else:
+                    k_str = k_str.replace('x', 'dxg')
+                    k_str = k_str.replace('y', 'dyg')
+                    k_str = k_str.replace('z', 'dzg')
+                    
+                # Generate arrays for the components of the zoom field
+                u_zoom = eval(u_str)
+                v_zoom = eval(v_str)
+                k_zoom = eval(k_str)
+                
+                # crate the zoomed in form
+                zoom_form = form_1_3d(dxg, dyg, dzg, u_zoom, v_zoom, k_zoom, self.form_1_str_x, self.form_1_str_y, self.form_1_str_z)
+
+                
+                return zoom_form
+ 
+
+
+    def set_density(self, points_number):
+        '''
+        Changes the desnity of points in the same range to the input value
+        Requires the string equation to be supplied to not 'extrapolate'
+        
+        Only creates 2 axis with same number of points each
+        cannot be used for any custom grids
+        
+        Parameters:
+        --------------
+        points_number - new number of points to use per axis
+        
+        Returns: None
+        '''
+        if self.form_1_str_x == None or self.form_1_str_y == None or self.form_1_str_z == None:
+            # Error
+            raise ValueError('Error: You need to supply the 1-form equation to do this, see \'give_eqn\' method')
+        else:
+            # redefine the grids
+            x = np.linspace(self.xg[0,0,0], self.xg[-1,-1,0], points_number)
+            y = np.linspace(self.yg[0,0,0], self.yg[-1,0,-1], points_number)
+            z = np.linspace(self.zg[0,0,0], self.zg[0,-1,-1], points_number)
+            self.xg, self.yg, self.zg= np.meshgrid(x,y,z)
+            # substitute these into the equation, but keep it local:
+            str_x = self.form_1_str_x + ''
+            str_y = self.form_1_str_y + ''
+            str_z = self.form_1_str_z + ''
+
+            str_x = str_x.replace('x', '(self.xg)')
+            str_x = str_x.replace('y', '(self.yg)')
+            str_x = str_x.replace('z', '(self.zg)')
+
+            str_y = str_y.replace('x', '(self.xg)')
+            str_y = str_y.replace('y', '(self.yg)')
+            str_y = str_y.replace('z', '(self.zg)')
+
+            str_z = str_z.replace('x', '(self.xg)')
+            str_z = str_z.replace('y', '(self.yg)')
+            str_z = str_z.replace('z', '(self.zg)')
+            
+            # check against constant forms, to have correct array shape
+            if str_x.find('x') & str_x.find('y') & str_x.find('z') == -1:
+                str_x = '(' + str(str_x) + ')* np.ones(np.shape(self.xg))'
+            if str_y.find('x') & str_y.find('y') & str_y.find('z') == -1:
+                str_y = '(' + str(str_y) + ')* np.ones(np.shape(self.yg))'
+            if str_z.find('x') & str_z.find('y') & str_z.find('z') == -1:
+                str_z = '(' + str(str_z) + ')* np.ones(np.shape(self.zg))'
+        
+            # re-evaluate the 1-form numerically
+            self.F_x = eval(str_x)
+            self.F_y = eval(str_y)
+            self.F_z = eval(str_z)
+
+
+
+    def contravariant(self, g=[['1', '0', '0'], ['0', '1', '0'], ['0', '0', '1']]):
+            '''
+            Passes in everything it can (all it has been supplied)
+            to the 1-form object.
+            Works via the metric on R2
+            Can supply the metric in as equations or as evaluated arrays
+            Format of the metric is a list of numpy arrays
+            0th array is the top row, its 0th component is 11, 1st is 12
+            1st array is the botton row, its 0th comp is 21 and 1st is 22.
+            Note, if it is supplied as arrays, they must come from numpy grids
+            via meshgrid, if it is supplied as strings, needs to be in terms of
+            x and y, and contain no special funtions, apart from ones imported
+            here automatically and listed in the documentation #!!!
+            
+            Returns a single object (1-form object)
+            '''
+            
+            # extract what is needed form the metric depending on what the user
+            # supplied
+            # check if its has string components
+            if type(g[0][0]) == str and type(g[0][1]) == str and type(g[0][2]) == str \
+               and type(g[1][0]) == str and type(g[1][1]) == str and type(g[1][2]) == str \
+               and type(g[2][0]) == str and type(g[2][1]) == str and type(g[2][2]) == str:
+                # deal with supplied string metric
+                # need to format it, correct it for constants and evaluate it's numerical equivalent
+                str_comp_00 = g[0][0] + ''
+                str_comp_01 = g[0][1] + ''
+                str_comp_02 = g[0][2] + ''
+                str_comp_10 = g[1][0] + ''
+                str_comp_11 = g[1][1] + ''
+                str_comp_12 = g[1][2] + ''
+                str_comp_20 = g[2][0] + ''
+                str_comp_21 = g[2][1] + ''
+                str_comp_22 = g[2][2] + ''
+
+                str_comp_00 = str_comp_00.replace('x', '(self.xg)')
+                str_comp_00 = str_comp_00.replace('y', '(self.yg)')
+                str_comp_00 = str_comp_00.replace('z', '(self.zg)')
+                str_comp_01 = str_comp_01.replace('x', '(self.xg)')
+                str_comp_01 = str_comp_01.replace('y', '(self.yg)')
+                str_comp_01 = str_comp_01.replace('z', '(self.zg)')
+                str_comp_02 = str_comp_02.replace('x', '(self.xg)')
+                str_comp_02 = str_comp_02.replace('y', '(self.yg)')
+                str_comp_02 = str_comp_02.replace('z', '(self.zg)')
+
+                str_comp_10 = str_comp_10.replace('x', '(self.xg)')
+                str_comp_10 = str_comp_10.replace('y', '(self.yg)')
+                str_comp_10 = str_comp_10.replace('z', '(self.zg)')
+                str_comp_11 = str_comp_11.replace('x', '(self.xg)')
+                str_comp_11 = str_comp_11.replace('y', '(self.yg)')
+                str_comp_11 = str_comp_11.replace('z', '(self.zg)')
+                str_comp_12 = str_comp_12.replace('x', '(self.xg)')
+                str_comp_12 = str_comp_12.replace('y', '(self.yg)')
+                str_comp_12 = str_comp_12.replace('z', '(self.zg)')
+
+                str_comp_20 = str_comp_20.replace('x', '(self.xg)')
+                str_comp_20 = str_comp_20.replace('y', '(self.yg)')
+                str_comp_20 = str_comp_20.replace('z', '(self.zg)')
+                str_comp_21 = str_comp_21.replace('x', '(self.xg)')
+                str_comp_21 = str_comp_21.replace('y', '(self.yg)')
+                str_comp_21 = str_comp_21.replace('z', '(self.zg)')
+                str_comp_22 = str_comp_22.replace('x', '(self.xg)')
+                str_comp_22 = str_comp_22.replace('y', '(self.yg)')
+                str_comp_22 = str_comp_22.replace('z', '(self.zg)')
+
+                # check against constant form components:
+                if str_comp_00.find('x') & str_comp_00.find('y') & str_comp_00.find('z') == -1:
+                    str_comp_00 = '(' + str(str_comp_00) + ')* np.ones(np.shape(self.xg))'
+                if str_comp_01.find('x') & str_comp_01.find('y') & str_comp_01.find('z') == -1:
+                    str_comp_01 = '(' + str(str_comp_01) + ')* np.ones(np.shape(self.xg))'
+                if str_comp_02.find('x') & str_comp_02.find('y') & str_comp_02.find('z') == -1:
+                    str_comp_02 = '(' + str(str_comp_02) + ')* np.ones(np.shape(self.xg))'
+                
+                if str_comp_10.find('x') & str_comp_10.find('y') & str_comp_10.find('z') == -1:
+                    str_comp_10 = '(' + str(str_comp_10) + ')* np.ones(np.shape(self.xg))'
+                if str_comp_11.find('x') & str_comp_11.find('y') & str_comp_11.find('z') == -1:
+                    str_comp_11 = '(' + str(str_comp_11) + ')* np.ones(np.shape(self.xg))'
+                if str_comp_12.find('x') & str_comp_12.find('y') & str_comp_12.find('z') == -1:
+                    str_comp_12 = '(' + str(str_comp_12) + ')* np.ones(np.shape(self.xg))'
+
+                if str_comp_20.find('x') & str_comp_20.find('y') & str_comp_20.find('z') == -1:
+                    str_comp_20 = '(' + str(str_comp_20) + ')* np.ones(np.shape(self.xg))'
+                if str_comp_21.find('x') & str_comp_21.find('y') & str_comp_21.find('z') == -1:
+                    str_comp_21 = '(' + str(str_comp_21) + ')* np.ones(np.shape(self.xg))'
+                if str_comp_22.find('x') & str_comp_22.find('y') & str_comp_22.find('z') == -1:
+                    str_comp_22 = '(' + str(str_comp_22) + ')* np.ones(np.shape(self.xg))'
+
+
+                # evaluate the components numerically, inputting them into a
+                # store numerical metric
+                comp_00 = eval(str_comp_00)
+                comp_01 = eval(str_comp_01)
+                comp_02 = eval(str_comp_02)
+                comp_10 = eval(str_comp_10)
+                comp_11 = eval(str_comp_11)
+                comp_12 = eval(str_comp_12)
+                comp_20 = eval(str_comp_20)
+                comp_21 = eval(str_comp_21)
+                comp_22 = eval(str_comp_22)
+                g_num = [[comp_00, comp_01, comp_02], [comp_10, comp_11, comp_12], [comp_20, comp_21, comp_22]]
+                
+                # set up a dummy variable to store the fact that numericals were given
+                # not to check again later
+                analytics = True
+                
+            elif type(g[0][0]) == np.ndarray and type(g[0][1]) == np.ndarray and type(g[0][2]) == np.ndarray\
+                 and type(g[1][0]) == np.ndarray and type(g[1][1]) == np.ndarray and type(g[1][2]) == np.ndarray\
+                 and type(g[2][0]) == np.ndarray and type(g[2][1]) == np.ndarray and type(g[2][2]) == np.ndarray:
+                # deal with the metric being supplied as components
+                # if the user has vector field equations, warn that these can't
+                # be passed anymore, because we don't have equations for this
+                # metric
+                if self.str_x == None and self.str_y == None and self.str_z == None:
+                    pass
+                else:
+                    print('The Vector field has equations, but the metric does not, these will be lost and the resulting 1-form will only have numerical values, not equations supplied')
+                # No need to do anythng more to the metric, upto the user to make sure its
+                # correctly sized, as with other code in this library
+                # just rename the metric here
+                g_num = g
+                
+                # set up a dummy variable to store the fact that numericals were
+                # not given, not to check again later
+                analytics = False
+                
+            else:
+                # Inconsistant metric components
+                raise TypeError('Metric components are inconsistent')
+            
+            # from vector field components, get 1-form components by the metric
+            # first, do so numerically, as this must always happen
+            form_x = self.F_x * g_num[0][0] + self.F_y * g_num[0][1] + self.F_z * g_num[0][2]
+            form_y = self.F_x * g_num[1][0] + self.F_y * g_num[1][1] + self.F_z * g_num[1][2]
+            form_z = self.F_x * g_num[2][0] + self.F_y * g_num[2][1] + self.F_z * g_num[2][2]
+            
+            # if the equations were given, evaluate these analytically too:
+            # only if vector file doriginally has equations
+            if analytics:
+                if self.form_1_str_x == None and self.form_1_str_y == None and self.form_1_str_z == None:
+                    print('You supplied the metric as equations (or it was default), but did not give VF equations, therefore only numericals will be completed')
+                    analytics = False
+                else:
+                    x_str_form = '(' + self.form_1_str_x + ')*(' + g[0][0] + ') + (' + self.form_1_str_y + ')*(' + g[0][1] + ') + (' + self.form_1_str_z + ')*(' + g[0][2] + ')'
+                    y_str_form = '(' + self.form_1_str_x + ')*(' + g[1][0] + ') + (' + self.form_1_str_y + ')*(' + g[1][1] + ') + (' + self.form_1_str_z + ')*(' + g[1][2] + ')'
+                    z_str_form = '(' + self.form_1_str_x + ')*(' + g[2][0] + ') + (' + self.form_1_str_y + ')*(' + g[2][1] + ') + (' + self.form_1_str_z + ')*(' + g[2][2] + ')'
+                    # simplify them
+                    x_str_form = str(simplify(x_str_form))
+                    y_str_form = str(simplify(y_str_form))
+                    z_str_form = str(simplify(z_str_form))
+            else:
+                pass
+
+            # based on what was given into the Vector field
+            # return a 1-form object with these parameters
+            if analytics:
+                result_form = vector_field3(self.xg, self.yg, self.zg, form_x, form_y, form_z, x_str_form, y_str_form, z_str_form)
+            elif not analytics:
+                result_form = vector_field3(self.xg, self.yg, self.zg, form_x, form_y, form_z)
+        
+            # return the found object
+            return result_form
+
 
 
     def plot(self, tip_width = None, tip_height = None, stack_side = None, opacity = None, singularity_size = None):
@@ -1040,6 +2446,25 @@ class form_1_3d():
 
 
         # field_magnitude
+        mag = np.sqrt(F_new[:,0]**2 + F_new[:,1]**2 + F_new[:,2]**2)
+
+
+
+        if self.logarithmic_scale_bool:
+            mag1 = mag + 1
+            # min_size = np.min(mag1)
+            
+            unorm = F_new[:,0]/mag1
+            vnorm = F_new[:,1]/mag1
+            knorm = F_new[:,2]/mag1
+            
+            # logsf = np.log10(mag1/min_size)
+            logmag = np.log10(mag1)
+            F_new[:,0] = unorm*logmag
+            F_new[:,1] = vnorm*logmag
+            F_new[:,2] = knorm*logmag
+
+
         mag = np.sqrt(F_new[:,0]**2 + F_new[:,1]**2 + F_new[:,2]**2)
         mag_lst = np.vstack(list(zip(mag.ravel())))
 
@@ -1268,6 +2693,147 @@ class form_1_3d():
 
 
 
+    def ext_d(self):
+        '''
+        
+        ext_d()
+        
+        Computes the exterior derivative and returns it
+        as the 2-form object
+        '''
+        if self.form_1_str_x == None or self.form_1_str_y == None or self.form_1_str_z == None:
+                # ERROR
+                raise ValueError('Error: You need to supply the 1-form equations to do this, look at \'give_eqn\' method')
+        else:
+            # the strings have been correctly given, compute the
+            # exterior derivative
+            # get the inpus from fields of x and u components
+            x_comp_str = self.form_1_str_x
+            y_comp_str = self.form_1_str_y
+            z_comp_str = self.form_1_str_z
+            # from found u and v in the interior derivative, set up sympy components
+            sympy_expr_x = parse_expr(x_comp_str, evaluate=False)
+            sympy_expr_y = parse_expr(y_comp_str, evaluate=False)
+            sympy_expr_z = parse_expr(z_comp_str, evaluate=False)
+            # combine the 2 into a list:
+            expressions = np.array([sympy_expr_x, sympy_expr_y, sympy_expr_z])
+            # set up an array of coordinates that need to be used (in standard order)
+            coords = ['x', 'y', 'z']
+            # set up dimensionality
+            m = 3
+            
+            # from these get the 2-form
+            result = find_2_form(expressions, coords, self.xg, self.yg, zg=self.zg, m=m)
+            
+            # format, and evaluate
+            
+            # get the string of this new 2-form
+            form_2_str_x = str(simplify(result[0][0]))
+            form_2_str_y = str(simplify(result[1][0]))
+            form_2_str_z = str(simplify(result[2][0]))
+            
+            # keep a local, unformatted version of this
+            # to supply to form_2
+            form_2_str_x_loc = form_2_str_x*1
+            form_2_str_y_loc = form_2_str_y*1
+            form_2_str_z_loc = form_2_str_z*1
+            
+            # numerically evaluate it, careful about constants
+            # to evaluate it, make sure to use grids
+            form_2_str_x = form_2_str_x.replace('x', '(self.xg)')
+            form_2_str_x = form_2_str_x.replace('y', '(self.yg)')
+            form_2_str_x = form_2_str_x.replace('z', '(self.zg)')
+
+            form_2_str_y = form_2_str_y.replace('x', '(self.xg)')
+            form_2_str_y = form_2_str_y.replace('y', '(self.yg)')
+            form_2_str_y = form_2_str_y.replace('z', '(self.zg)')
+
+            form_2_str_z = form_2_str_z.replace('x', '(self.xg)')
+            form_2_str_z = form_2_str_z.replace('y', '(self.yg)')
+            form_2_str_z = form_2_str_z.replace('z', '(self.zg)')
+
+            if form_2_str_x.find('x') & form_2_str_x.find('y') & form_2_str_x.find('z') == -1:
+                form_2_str_x = '(' + str(form_2_str_x) + ')* np.ones(np.shape(self.xg))'
+            if form_2_str_y.find('x') & form_2_str_y.find('y') & form_2_str_y.find('z') == -1:
+                form_2_str_y = '(' + str(form_2_str_y) + ')* np.ones(np.shape(self.yg))'
+            if form_2_str_z.find('x') & form_2_str_z.find('y') & form_2_str_z.find('z') == -1:
+                form_2_str_z = '(' + str(form_2_str_z) + ')* np.ones(np.shape(self.zg))'
+            
+            # evaluate, set up new object and return
+            form_2_result_x = eval(form_2_str_x)
+            form_2_result_y = eval(form_2_str_y)
+            form_2_result_z = eval(form_2_str_z)
+
+            result_form = form_2_3d(self.xg, self.yg, self.zg, form_2_result_x, form_2_result_y, form_2_result_z, form_2_str_x_loc, form_2_str_y_loc, form_2_str_z_loc)
+            
+            # return it to the user
+            return result_form
+
+
+
+    def num_ext_d(self):
+        '''
+        Takes in no arguments
+        
+        computes the exterior derivative numerically only
+        The equations do not need to be given
+        If given, they do not get passed onto the 2-form object anyway
+        NUMERICAL ONLY, they will be lost!
+         
+        returns 2-form object
+        '''
+        
+        # get steps in dx and dy:
+        dx = self.xg[:, 0, 0]
+        dy = self.yg[0, :, 0]
+        dz = self.zg[0, 0, :]
+        
+        # copy F_x and F_y, locally
+        fx = self.F_x + np.zeros(np.shape(self.xg))
+        fy = self.F_y + np.zeros(np.shape(self.yg))
+        fz = self.F_z + np.zeros(np.shape(self.zg))
+        
+        # clean up F_x and F_y from nan etc
+        for i in range(len(self.xg[:, 0, 0])):
+            for j in range(len(self.yg[0, :, 0])):
+                for k in range(len(self.zg[0, 0, :])):
+                # correct for ill defined values
+                    if np.isnan(fx[i, j, k]):
+                        fx[i, j, k] = 0
+                    if np.isnan(fy[i, j, k]):
+                        fy[i, j, k] = 0
+                    if np.isnan(fz[i, j, k]):
+                        fz[i, j, k] = 0
+
+                    if abs(fx[i, j, k]) == np.inf  or abs(fx[i, j, k]) > 1e15:
+                        fx[i, j, k] = 1e10
+                    if abs(fy[i, j, k]) == np.inf  or abs(fy[i, j, k]) > 1e15:
+                        fy[i, j, k] = 1e10
+                    if abs(fz[i, j, k]) == np.inf  or abs(fz[i, j, k]) > 1e15:
+                        fz[i, j, k] = 1e10
+        
+        
+        # Calculate deirvatvies as needed, using numpy gradient.
+        dy_F_x, _, _= np.gradient(fx, dx, dy, dz)
+        _, dx_F_y, _ = np.gradient(fy, dx, dy, dz)
+        _, _, dx_F_z = np.gradient(fz, dx, dy, dz)
+        
+        # from these, get the 2-form
+        form_2_result = dx_F_y - dy_F_x
+        
+        # return 2-form object to user
+        result_form = form_2_3d(self.xg, self.yg, self.zg, form_2_result, form_2_result, form_2_result)
+        
+        # return it to the user
+        return result_form
+
+
+
+
+
+
+
+
 class form_2_3d():
 
     def __init__(self, xg, yg, zg, Fx=None, Fy=None, Fz=None, Fx_eqn=None, Fy_eqn=None, Fz_eqn=None):
@@ -1383,6 +2949,79 @@ class form_2_3d():
     
    
     
+    def zoom(self, mag, target, dpd):
+    
+
+
+        if self.Fx_eqn == None or self.Fy_eqn == None or self.Fz_eqn == None:
+            # ERROR
+            raise TypeError('No equation provided, see \'give_eqn\' method')
+        else:
+             # Zoom must be one or greater
+            if mag < 1:
+                raise ValueError('Mag must be greater than one')
+            else:
+
+                # Target coordinates
+                x_m = target[0]
+                y_m = target[1]
+                z_m = target[2]
+                
+                # Get the size of the original VF
+                Lx = 0.5*(self.xg[-1, -1, -1] - self.xg[0, 0, 0])
+                Ly = 0.5*(self.yg[-1, -1, -1] - self.yg[0, 0, 0])
+                Lz = 0.5*(self.zg[-1, -1, -1] - self.zg[0, 0, 0])
+
+                
+                # Zoom axis range
+                d_range_x = Lx/mag
+                d_range_y = Ly/mag
+                d_range_z = Lz/mag
+                
+                # Set up zoom window grids
+                dx = np.linspace(-d_range_x + x_m, d_range_x + x_m, dpd)
+                dy = np.linspace(-d_range_y + y_m, d_range_y + y_m, dpd)
+                dz = np.linspace(-d_range_z + z_m, d_range_z + z_m, dpd)
+                dxg, dyg, dzg = np.meshgrid(dx, dy, dz)
+                
+                # Create variables for the user provided equation strings
+                u_str = self.Fx_eqn
+                v_str = self.Fy_eqn
+                k_str = self.Fz_eqn
+                
+                # Check if the equations provided contain x and y terms
+                if u_str.find('x') & u_str.find('y') & u_str.find('z')== -1:
+                    u_str = '(' + str(u_str) + ')* np.ones(np.shape(dxg))'
+                else:
+                    u_str = u_str.replace('x', 'dxg')
+                    u_str = u_str.replace('y', 'dyg')
+                    u_str = u_str.replace('z', 'dzg')
+            
+                if v_str.find('x') & v_str.find('y') & v_str.find('z') == -1:
+                    v_str = '(' + str(v_str) + ')* np.ones(np.shape(dyg))'
+                else:
+                    v_str = v_str.replace('x', 'dxg')
+                    v_str = v_str.replace('y', 'dyg')
+                    v_str = v_str.replace('z', 'dzg')
+
+                if k_str.find('x') & k_str.find('y') & k_str.find('z') == -1:
+                    k_str = '(' + str(k_str) + ')* np.ones(np.shape(dzg))'
+                else:
+                    k_str = k_str.replace('x', 'dxg')
+                    k_str = k_str.replace('y', 'dyg')
+                    k_str = k_str.replace('z', 'dzg')
+                    
+                # Generate arrays for the components of the zoom field
+                u_zoom = eval(u_str)
+                v_zoom = eval(v_str)
+                k_zoom = eval(k_str)
+                
+                # crate the zoomed in form
+                zoom_form = form_2_3d(dxg, dyg, dzg, u_zoom, v_zoom, k_zoom, self.Fx_eqn, self.Fy_eqn, self.Fz_eqn)
+
+                
+                return zoom_form
+ 
     
     # define a method to change the density of grids in same range
     # requires string input of 1-form:
@@ -1443,6 +3082,21 @@ class form_2_3d():
         Fx = self.Fx
         Fy = self.Fy
 
+        Fmag = np.sqrt(Fx**2 + Fy**2 + Fz**2)
+
+        if self.logarithmic_scale_bool:
+            mag1 = Fmag + 1
+            # min_size = np.min(mag1)
+            
+            unorm = Fx/mag1
+            vnorm = Fy/mag1
+            knorm = Fz/mag1
+            
+            # logsf = np.log10(mag1/min_size)
+            logmag = np.log10(mag1)
+            Fx = unorm*logmag
+            Fy = vnorm*logmag
+            Fz = knorm*logmag
 
 
 
@@ -2185,17 +3839,23 @@ class form_2_3d():
                                 pts_nan[:,1],
                                 pts_nan[:,2], color = (1,0,0),scale_factor=gr_sep, resolution=36)
             mlab.axes(extent = [xmin,xmax,ymin,ymax,zmin,zmax], nb_labels = 5, line_width=3.0, color = (0,0,0), xlabel=xlab, ylabel=ylab, zlabel=zlab)
-            mlab.view(focalpoint=[0,0,0])
+
+            xfoc = (xmin+xmax)/2
+            yfoc = (ymin+ymax)/2
+            zfoc = (zmin+zmax)/2
+
+
+            mlab.view(focalpoint=[xfoc,yfoc,zfoc])
             mlab.show()
 
 
-        if Fz is not None:
+        if Fz is not None and np.all(Fz) != 0:
             form_2(Fz,'z')
         
-        if Fx is not None:
+        if Fx is not None and np.all(Fx) != 0:
             form_2(Fx,'x')
 
-        if Fy is not None:
+        if Fy is not None and np.all(Fy) != 0:
             form_2(Fy,'y')
        
                                 
@@ -2266,7 +3926,75 @@ class form_3_3d():
         '''
         return self.form_3_str
 
+    def log_scaling(self):
+        '''
+        changes bool for logscaling
+        Default = False
+        changes to the other option each time it is called
+        '''
+        self.logarithmic_scale_bool = not self.logarithmic_scale_bool
 
+    
+    def zoom(self, mag, target, dpd):
+        
+
+
+
+        if self.form_3_str == None:
+            # ERROR
+            raise TypeError('No equation provided, see \'give_eqn\' method')
+        else:
+             # Zoom must be one or greater
+            if mag < 1:
+                raise ValueError('Mag must be greater than one')
+            else:
+
+                # Target coordinates
+                x_m = target[0]
+                y_m = target[1]
+                z_m = target[2]
+                
+                # Get the size of the original VF
+                Lx = 0.5*(self.xg[-1, -1, -1] - self.xg[0, 0, 0])
+                Ly = 0.5*(self.yg[-1, -1, -1] - self.yg[0, 0, 0])
+                Lz = 0.5*(self.zg[-1, -1, -1] - self.zg[0, 0, 0])
+
+                
+                # Zoom axis range
+                d_range_x = Lx/mag
+                d_range_y = Ly/mag
+                d_range_z = Lz/mag
+                
+                # Set up zoom window grids
+                dx = np.linspace(-d_range_x + x_m, d_range_x + x_m, dpd)
+                dy = np.linspace(-d_range_y + y_m, d_range_y + y_m, dpd)
+                dz = np.linspace(-d_range_z + z_m, d_range_z + z_m, dpd)
+                dxg, dyg, dzg = np.meshgrid(dx, dy, dz)
+                
+                # Create variables for the user provided equation strings
+                f3_str = self.form_3_str
+
+                
+                # Check if the equations provided contain x and y terms
+                if f3_str.find('x') & f3_str.find('y') & f3_str.find('z')== -1:
+                    f3_str = '(' + str(f3_str) + ')* np.ones(np.shape(dxg))'
+                else:
+                    f3_str = f3_str.replace('x', 'dxg')
+                    f3_str = f3_str.replace('y', 'dyg')
+                    f3_str = f3_str.replace('z', 'dzg')
+            
+
+                    
+                # Generate arrays for the components of the zoom field
+                f3_zoom = eval(f3_str)
+
+                
+                # crate the zoomed in form
+                zoom_form = form_3_3d(dxg, dyg, dzg, f3_zoom, self.form_3_str)
+
+                
+                return zoom_form
+ 
 
     def plot(self):
 
@@ -2281,7 +4009,13 @@ class form_3_3d():
 
         pts = np.vstack(list(zip(xg.ravel(), yg.ravel(), zg.ravel())))
 
-
+        if self.logarithmic_scale_bool:
+            mag1 = np.abs(form_3) + 1
+            form_3_norm = form_3/(mag1)
+            logmag = np.log10(mag1)
+            form_3 = form_3_norm*logmag
+        else:
+            pass
 
         mag_lst = np.vstack(list(zip(form_3.ravel())))
         mag_lst[np.isinf(mag_lst)] = np.nan
@@ -2662,7 +4396,13 @@ class form_3_3d():
                             pts_nan[:,1],
                             pts_nan[:,2], color = (1,0,0),scale_factor=gr_sep, resolution=36)
         mlab.axes(extent = [xmin,xmax,ymin,ymax,zmin,zmax], nb_labels = 5, line_width=3.0, color = (0,0,0), xlabel=xlab, ylabel=ylab, zlabel=zlab)
-        mlab.view(focalpoint=[0,0,0])
+
+        xfoc = (xmin+xmax)/2
+        yfoc = (ymin+ymax)/2
+        zfoc = (zmin+zmax)/2
+
+
+        mlab.view(focalpoint=[xfoc,yfoc,zfoc])
         mlab.show()
 
 

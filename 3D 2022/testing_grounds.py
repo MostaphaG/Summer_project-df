@@ -7,61 +7,99 @@ import matplotlib.pyplot as plt
 from mayavi import mlab
 
 #grid = np.linspace(-5,5,11)
-grid = np.linspace(-20,20,50)
+grid = np.linspace(-2,2,8)
 #grid_0 = np.linspace(-150,150,25)
 
 xg, yg, zg = np.meshgrid(grid, grid, grid)
 #x0, y0, z0 = np.meshgrid(grid, grid, grid)
 
 
-#fx = -yg/np.sqrt(xg**2+yg**2-zg**2)
-#fy = xg/np.sqrt(xg**2+yg**2-zg**2)
-#fz = zg/np.sqrt(xg**2+yg**2-zg**2)
+#fx = xg**3
+#fy = yg**3
+#fz = zg**3
 
-#fx = -yg
-#fy = xg
-#fz = np.ones((np.size(xg)))
+fx = xg
+fy = yg
+fz = zg/np.sqrt(xg**2 + yg**2 - zg**2)
 
-#potential = np.sqrt(x0**2 + y0**2 - z0**2)
+#potential = np.sqrt(xg**2 + yg**2 - zg**2)
 
-#f3 = df3.vector_field3(xg, yg, zg, fx, fy, fz)
-#f3.give_eqn('-y/sqrt(x**2+y**2-z**2)','x/sqrt(x**2+y**2-z**2)','z/sqrt(x**2+y**2-z**2)')
-#c3 = f3.curl()
-#c3.log_scaling()
-#f3.plot(add_curl='y', scaling=0.3, arrow_colour='c', arrow_cmap='viridis', opacity=1.0, curl_opacity=0.2)
-#c3.plot(scaling=1.0)
+#vf = df3.vector_field3(xg, yg, zg, fx, fy, fz)
+#vf.autoscale()
+#vf.give_eqn('x/sqrt(x**2 + y**2 - z**2)','y/sqrt(x**2 + y**2 - z**2)','z/sqrt(x**2 + y**2 - z**2)')
+#cov_f1 = vf.covariant()
+#vff = vf.zoom(mag = 5, target=[0,0,-8], dpd = 6)
+#cvf = vf.curl()
+#cvf.log_scaling()
+#vf.plot(add_curl='n', scaling=0.1, arrow_colour='c', arrow_cmap='viridis', opacity=1.0, curl_opacity=0.2)
+#cov_f1.plot()
+#cvf.plot(scaling=1.0)
+#deriv_field = vf.deriv(target=[2,2,0], mag=2, dpd=5)
+#deriv_field.plot()
 
 #f3.div(0, -2, 3)
 
 #f0 = df3.form_0_3d(xg, yg, zg, potential)
 #f0.give_eqn('sqrt(x**2 + y**2 - z**2)')
-#f0.set_density(100)
+#f00 = f0.zoom(mag=2, target=[-5,0,0], dpd=100)
+#f0.set_density(10)
 #f0.levels(15)
-#f0.log_scaling()
+#f00.log_scaling()
 #f0.plot(cross_sec_plane='n')
+#f0_ext_d = f0.ext_d()
+#f0_ext_d.set_density(8)
+#f0_ext_d.plot()
 #f0.plot(cross_sec_plane='y')
+#f00.plot(cross_sec_plane='y')
 
-
-
-fz = zg**4*np.tan(xg-yg)
-fx = 0*xg
-fy = 0*yg
-
-
-#form_1 = df3.form_1_3d(xg, yg, zg, fx, fy, fz)
+form_1 = df3.form_1_3d(xg, yg, zg, fx, fy, fz)
+form_1.give_eqn('x','y','z/sqrt(x**2+y**2-z**2)')
+#form_11 = form_1.zoom(mag = 2.8, target=[0,0,10], dpd=4)
 #form_1.log_scaling()
-#form_1.plot()
+#contravariant_field = form_1.contravariant()
+#contravariant_field.plot(scaling=0.1)
+f1_extd = form_1.ext_d()
+
+f1_extd.plot()
 
 
-f2 = df3.form_2_3d(xg, yg, zg, Fz=fx, Fx=fy, Fy=fz)
+#fz = zg
+#fx = xg
+#fy = 0*yg
+
+#f2 = df3.form_2_3d(xg, yg, zg, Fz=fz, Fx=fx, Fy=fy, Fz_eqn='0', Fx_eqn='-y', Fy_eqn='x')
+#f2.give_eqn('x/sqrt(x**2+y**2+z**2)','y/sqrt(x**2+y**2+z**2)','z/sqrt(x**2+y**2+z**2)')
+#f2.log_scaling()
+#f22 = f2.zoom(mag = 5, target=[2,2,2], dpd=8)
+#f22.plot()
 
 
-f2.plot()
+#pot = (xg**2 + yg**2 + zg**2)
+#f3 = df3.form_3_3d(xg, yg, zg, potential)
+#f3.give_eqn('x**2+y**2-z**2')
+#f33 = f3.zoom(mag = 5, target=[2,2,2], dpd=8)
+#f3.log_scaling()
+#f33.plot()
+
+#f0_wedge_f0 = f0.num_wedge(f0)
+#f0_wedge_f0.plot()
+#f0_wedge_f1 = f0.wedge(form_1)
+#f0_wedge_f1.plot()
+#f0_wedge_f2 = f0.wedge(f2)
+#f0_wedge_f2.plot()
+#f0_wedge_f3 = f0.wedge(f3)
+#f0_wedge_f3.plot()
+
+#f0_wedge_f0 = f0.num_wedge(f0)
+#f0_wedge_f0.plot()
+#f0_wedge_f1 = f0.num_wedge(form_1)
+#f0_wedge_f1.plot()
+#f0_wedge_f2 = f0.num_wedge(f2)
+#f0_wedge_f2.plot()
+#f0_wedge_f3 = f0.num_wedge(f3)
+#f0_wedge_f3.plot()
 
 
-#pot = (xg**2 - yg**2 - zg**2)
-#f3 = df3.form_3_3d(xg, yg, zg, pot)
-#f3.plot()
 
 '''
 
