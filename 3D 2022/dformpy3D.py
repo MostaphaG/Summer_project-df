@@ -2716,62 +2716,56 @@ class form_1_3d():
             sympy_expr_y = parse_expr(y_comp_str, evaluate=False)
             sympy_expr_z = parse_expr(z_comp_str, evaluate=False)
             # combine the 2 into a list:
-            expressions = np.array([sympy_expr_x, sympy_expr_y, sympy_expr_z])
-            # set up an array of coordinates that need to be used (in standard order)
+            
             coords = ['x', 'y', 'z']
-            # set up dimensionality
-            m = 3
-            
-            # from these get the 2-form
-            result = find_2_form(expressions, coords, self.xg, self.yg, zg=self.zg, m=m)
+            # from these, find the derivatives
+            ddx_Fx = str(diff(sympy_expr_x, coords[0]))
+            ddy_Fx = str(diff(sympy_expr_x, coords[1]))
+            ddz_Fx = str(diff(sympy_expr_x, coords[2]))
 
-            
-            
-            # format, and evaluate
-            
-            # get the string of this new 2-form
-            form_2_str_x = str(simplify(result[0][0]))
-            form_2_str_y = str(simplify(result[1][0]))
-            form_2_str_z = str(simplify(result[2][0]))
+            ddx_Fy = str(diff(sympy_expr_y, coords[0]))
+            ddy_Fy = str(diff(sympy_expr_y, coords[1]))
+            ddz_Fy = str(diff(sympy_expr_y, coords[2]))
+
+            ddx_Fz = str(diff(sympy_expr_z, coords[0]))
+            ddy_Fz = str(diff(sympy_expr_z, coords[1]))
+            ddz_Fz = str(diff(sympy_expr_z, coords[2]))
+
+            Ex_deriv_x_str = str(simplify('('+ddy_Fz+')-'+'('+ddz_Fy+')'))
+            Ex_deriv_y_str = str(simplify('('+ddz_Fx+')-'+'('+ddx_Fz+')'))
+            Ex_deriv_z_str = str(simplify('('+ddx_Fy+')-'+'('+ddy_Fx+')'))
+            # need to uspply these unformatted, so save those:
+            form_2_x_unformated, form_2_y_unformated, form_2_z_unformated = Ex_deriv_x_str*1, Ex_deriv_y_str*1, Ex_deriv_z_str*1
+            # from these strings, get the numerical 1-form:
+            form_2_x_str = Ex_deriv_x_str.replace('x', '(self.xg)')
+            form_2_x_str = form_2_x_str.replace('y', '(self.yg)')
+            form_2_x_str = form_2_x_str.replace('z', '(self.zg)')
+
+            form_2_y_str = Ex_deriv_y_str.replace('x', '(self.xg)')
+            form_2_y_str = form_2_y_str.replace('y', '(self.yg)')
+            form_2_y_str = form_2_y_str.replace('z', '(self.zg)')
+
+            form_2_z_str = Ex_deriv_z_str.replace('x', '(self.xg)')
+            form_2_z_str = form_2_z_str.replace('y', '(self.yg)')
+            form_2_z_str = form_2_z_str.replace('z', '(self.zg)')
 
 
-            
-            # keep a local, unformatted version of this
-            # to supply to form_2
-            form_2_str_x_loc = form_2_str_x*1
-            form_2_str_y_loc = form_2_str_y*1
-            form_2_str_z_loc = form_2_str_z*1
-            
-            # numerically evaluate it, careful about constants
-            # to evaluate it, make sure to use grids
-            form_2_str_x = form_2_str_x.replace('x', '(self.xg)')
-            form_2_str_x = form_2_str_x.replace('y', '(self.yg)')
-            form_2_str_x = form_2_str_x.replace('z', '(self.zg)')
+            if form_2_x_str.find('x') & form_2_x_str.find('y') & form_2_x_str.find('z') == -1:
+                form_2_x_str = '(' + str(form_2_x_str) + ')* np.ones(np.shape(self.xg))'
+            if form_2_y_str.find('x') & form_2_y_str.find('y') & form_2_y_str.find('z') == -1:
+                form_2_y_str = '(' + str(form_2_y_str) + ')* np.ones(np.shape(self.yg))'
+            if form_2_z_str.find('x') & form_2_z_str.find('y') & form_2_z_str.find('z') == -1:
+                form_2_z_str = '(' + str(form_2_z_str) + ')* np.ones(np.shape(self.yg))'
 
-            form_2_str_y = form_2_str_y.replace('x', '(self.xg)')
-            form_2_str_y = form_2_str_y.replace('y', '(self.yg)')
-            form_2_str_y = form_2_str_y.replace('z', '(self.zg)')
 
-            form_2_str_z = form_2_str_z.replace('x', '(self.xg)')
-            form_2_str_z = form_2_str_z.replace('y', '(self.yg)')
-            form_2_str_z = form_2_str_z.replace('z', '(self.zg)')
-
-            if form_2_str_x.find('x') & form_2_str_x.find('y') & form_2_str_x.find('z') == -1:
-                form_2_str_x = '(' + str(form_2_str_x) + ')* np.ones(np.shape(self.xg))'
-            if form_2_str_y.find('x') & form_2_str_y.find('y') & form_2_str_y.find('z') == -1:
-                form_2_str_y = '(' + str(form_2_str_y) + ')* np.ones(np.shape(self.yg))'
-            if form_2_str_z.find('x') & form_2_str_z.find('y') & form_2_str_z.find('z') == -1:
-                form_2_str_z = '(' + str(form_2_str_z) + ')* np.ones(np.shape(self.zg))'
+            form_2_x = eval(form_2_x_str)
+            form_2_y = eval(form_2_y_str)
+            form_2_z = eval(form_2_z_str)
             
-            # evaluate, set up new object and return
-            form_2_result_x = eval(form_2_str_x)
-            form_2_result_y = eval(form_2_str_y)
-            form_2_result_z = eval(form_2_str_z)
+            # supply these to the 1-form object function and return object
+            result_2_form = form_2_3d(self.xg, self.yg, self.zg, form_2_x, form_2_y, form_2_z, form_2_x_unformated, form_2_y_unformated, form_2_z_unformated)
 
-            result_form = form_2_3d(self.xg, self.yg, self.zg, form_2_result_x, form_2_result_y, form_2_result_z, form_2_str_x_loc, form_2_str_y_loc, form_2_str_z_loc)
-            
-            # return it to the user
-            return result_form
+            return result_2_form
 
 
 
@@ -2794,29 +2788,11 @@ class form_1_3d():
 
         
 
-        # copy F_x and F_y, locally
-        fx = self.F_x + np.zeros(np.shape(self.xg))
-        fy = self.F_y + np.zeros(np.shape(self.yg))
-        fz = self.F_z + np.zeros(np.shape(self.zg))
-        
-        # clean up F_x and F_y from nan etc
-        for i in range(len(self.xg[:, 0, 0])):
-            for j in range(len(self.yg[0, :, 0])):
-                for k in range(len(self.zg[0, 0, :])):
-                # correct for ill defined values
-                    if np.isnan(fx[i, j, k]):
-                        fx[i, j, k] = 0
-                    if np.isnan(fy[i, j, k]):
-                        fy[i, j, k] = 0
-                    if np.isnan(fz[i, j, k]):
-                        fz[i, j, k] = 0
 
-                    if abs(fx[i, j, k]) == np.inf  or abs(fx[i, j, k]) > 1e15:
-                        fx[i, j, k] = 1e10
-                    if abs(fy[i, j, k]) == np.inf  or abs(fy[i, j, k]) > 1e15:
-                        fy[i, j, k] = 1e10
-                    if abs(fz[i, j, k]) == np.inf  or abs(fz[i, j, k]) > 1e15:
-                        fz[i, j, k] = 1e10
+        fx = self.F_x 
+        fy = self.F_y
+        fz = self.F_z
+        
         
         
         # Calculate deirvatvies as needed, using numpy gradient.
@@ -2836,11 +2812,15 @@ class form_1_3d():
         form_2_result_x = dy_Fz - dz_Fy
         form_2_result_y = dz_Fx - dx_Fz
         form_2_result_z = dx_Fy - dy_Fx
+
+        """print(form_2_result_x[0,0])
+        print(form_2_result_y[0,0])
+        print(form_2_result_z[0,0])"""
         
 
 
         # return 2-form object to user
-        result_form = form_2_3d(self.xg, self.yg, self.zg, form_2_result_x, form_2_result_y, form_2_result_z)
+        result_form = form_2_3d(self.xg, self.yg, self.zg, Fx = form_2_result_x, Fy = form_2_result_y, Fz = form_2_result_z)
         
         # return it to the user
         return result_form

@@ -14,12 +14,12 @@ xg, yg, zg = np.meshgrid(grid, grid, grid)
 #x0, y0, z0 = np.meshgrid(grid, grid, grid)
 
 
-fx = xg
-fy = yg
-fz = zg/np.sqrt(xg**2+yg**2+zg**2)
+fx = xg/np.sqrt(xg**2+yg**2-zg**2)
+fy = yg/np.sqrt(xg**2+yg**2-zg**2)
+fz = zg/np.sqrt(xg**2+yg**2-zg**2)
 
 
-#potential = np.sqrt(xg**2 + yg**2 - zg**2)
+potential = np.sqrt(xg**2 + yg**2 - zg**2)
 
 #vf = df3.vector_field3(xg, yg, zg, fx, fy, fz)
 #vf.autoscale()
@@ -44,20 +44,22 @@ fz = zg/np.sqrt(xg**2+yg**2+zg**2)
 #f00.log_scaling()
 #f0.plot(cross_sec_plane='n')
 #f0_ext_d = f0.ext_d()
+#f0_ext_d_num = f0.num_ext_d()
 #f0_ext_d.set_density(8)
 #f0_ext_d.plot()
+#f0_ext_d_num.plot()
 #f0.plot(cross_sec_plane='y')
 #f00.plot(cross_sec_plane='y')
 
 form_1 = df3.form_1_3d(xg, yg, zg, fx, fy, fz)
-#form_1.give_eqn('x/sqrt(x**2+y**2-z**2)','y/sqrt(x**2+y**2-z**2)','z/sqrt(x**2+y**2-z**2)')
+form_1.give_eqn('x/sqrt(x**2+y**2-z**2)','y/sqrt(x**2+y**2-z**2)','z/sqrt(x**2+y**2-z**2)')
 #form_11 = form_1.zoom(mag = 2.8, target=[0,0,10], dpd=4)
 #form_1.log_scaling()
 #contravariant_field = form_1.contravariant()
 #contravariant_field.plot(scaling=0.1)
-#f1_extd = form_1.ext_d()
+f1_extd = form_1.ext_d()
 f1_extd_num = form_1.num_ext_d()
-#f1_extd.plot()
+f1_extd.plot()
 f1_extd_num.plot()
 
 
