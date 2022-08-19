@@ -2724,6 +2724,8 @@ class form_1_3d():
             
             # from these get the 2-form
             result = find_2_form(expressions, coords, self.xg, self.yg, zg=self.zg, m=m)
+
+            
             
             # format, and evaluate
             
@@ -2731,6 +2733,8 @@ class form_1_3d():
             form_2_str_x = str(simplify(result[0][0]))
             form_2_str_y = str(simplify(result[1][0]))
             form_2_str_z = str(simplify(result[2][0]))
+
+
             
             # keep a local, unformatted version of this
             # to supply to form_2
@@ -2784,10 +2788,12 @@ class form_1_3d():
         '''
         
         # get steps in dx and dy:
-        dx = self.xg[:, 0, 0]
-        dy = self.yg[0, :, 0]
+        dx = self.xg[0, :, 0]
+        dy = self.yg[:, 0, 0]
         dz = self.zg[0, 0, :]
+
         
+
         # copy F_x and F_y, locally
         fx = self.F_x + np.zeros(np.shape(self.xg))
         fy = self.F_y + np.zeros(np.shape(self.yg))
@@ -2814,15 +2820,27 @@ class form_1_3d():
         
         
         # Calculate deirvatvies as needed, using numpy gradient.
-        dy_F_x, _, _= np.gradient(fx, dx, dy, dz)
-        _, dx_F_y, _ = np.gradient(fy, dx, dy, dz)
-        _, _, dx_F_z = np.gradient(fz, dx, dy, dz)
+        _, dy_Fx, _= np.gradient(fx, dx, dy, dz)
+        _, _, dz_Fx= np.gradient(fx, dx, dy, dz)
+
+        dx_Fy, _, _ = np.gradient(fy, dx, dy, dz)
+        _, _ ,dz_Fy= np.gradient(fy, dx, dy, dz)
+
+        dx_Fz, _, _= np.gradient(fz, dx, dy, dz)
+        _, dy_Fz,  _= np.gradient(fz, dx, dy, dz)
+
         
+
+
         # from these, get the 2-form
-        form_2_result = dx_F_y - dy_F_x
+        form_2_result_x = dy_Fz - dz_Fy
+        form_2_result_y = dz_Fx - dx_Fz
+        form_2_result_z = dx_Fy - dy_Fx
         
+
+
         # return 2-form object to user
-        result_form = form_2_3d(self.xg, self.yg, self.zg, form_2_result, form_2_result, form_2_result)
+        result_form = form_2_3d(self.xg, self.yg, self.zg, form_2_result_x, form_2_result_y, form_2_result_z)
         
         # return it to the user
         return result_form
