@@ -36,8 +36,8 @@ potential = np.sqrt(xg**2 + yg**2 - zg**2)
 
 #f3.div(0, -2, 3)
 
-#f0 = df3.form_0_3d(xg, yg, zg, potential)
-#f0.give_eqn('sqrt(x**2 + y**2 - z**2)')
+f0 = df3.form_0_3d(xg, yg, zg, potential)
+f0.give_eqn('sqrt(x**2 + y**2 - z**2)')
 #f00 = f0.zoom(mag=2, target=[-5,0,0], dpd=100)
 #f0.set_density(10)
 #f0.levels(15)
@@ -57,27 +57,31 @@ form_1.give_eqn('x/sqrt(x**2+y**2-z**2)','y/sqrt(x**2+y**2-z**2)','z/sqrt(x**2+y
 #form_1.log_scaling()
 #contravariant_field = form_1.contravariant()
 #contravariant_field.plot(scaling=0.1)
-f1_extd = form_1.ext_d()
-f1_extd_num = form_1.num_ext_d()
-f1_extd.plot()
-f1_extd_num.plot()
+#f1_extd = form_1.ext_d()
+#f1_extd_num = form_1.num_ext_d()
+#f1_extd.plot()
+#f1_extd_num.plot()
+#hodged_f1 = form_1.hodge()
+#hodged_f1.plot()
+#hodged_f1_num = form_1.num_hodge()
+#hodged_f1_num.plot()
 
 
-#f2 = df3.form_2_3d(xg, yg, zg, Fz=fz, Fx=fx, Fy=fy)
-#f2.give_eqn('x/sqrt(x**2+y**2+z**2)','y/sqrt(x**2+y**2+z**2)','z/sqrt(x**2+y**2+z**2)')
+f2 = df3.form_2_3d(xg, yg, zg, Fz=fz, Fx=fx, Fy=fy)
+f2.give_eqn('x/sqrt(x**2+y**2+z**2)','y/sqrt(x**2+y**2+z**2)','z/sqrt(x**2+y**2+z**2)')
 #f2.log_scaling()
 #f22 = f2.zoom(mag = 5, target=[2,2,2], dpd=8)
 #f2.plot()
 
 
 #pot = (xg**2 + yg**2 + zg**2)
-#f3 = df3.form_3_3d(xg, yg, zg, potential)
-#f3.give_eqn('x**2+y**2-z**2')
+f3 = df3.form_3_3d(xg, yg, zg, potential)
+f3.give_eqn('x**2+y**2-z**2')
 #f33 = f3.zoom(mag = 5, target=[2,2,2], dpd=8)
 #f3.log_scaling()
 #f33.plot()
 
-#f0_wedge_f0 = f0.num_wedge(f0)
+#f0_wedge_f0 = f0.wedge(f0)
 #f0_wedge_f0.plot()
 #f0_wedge_f1 = f0.wedge(form_1)
 #f0_wedge_f1.plot()
@@ -95,6 +99,15 @@ f1_extd_num.plot()
 #f0_wedge_f3 = f0.num_wedge(f3)
 #f0_wedge_f3.plot()
 
+
+
+#f1_wedge_f0 = form_1.wedge(f0)
+#f1_wedge_f0.plot()
+#f1_wedge_f1 = form_1.wedge(form_1)
+#f1_wedge_f1.plot()
+#f1_wedge_f2 = form_1.wedge(f2)
+#f1_wedge_f2.plot()
+#f1_wedge_f3 = form_1.wedge(f3)
 
 
 '''
