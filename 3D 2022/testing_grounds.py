@@ -76,6 +76,18 @@ f2.give_eqn('x/sqrt(x**2+y**2-z**2)','y/sqrt(x**2+y**2-z**2)','z/sqrt(x**2+y**2-
 #f2.log_scaling()
 #f22 = f2.zoom(mag = 5, target=[2,2,2], dpd=8)
 #f2.plot()
+#f2_ext_d = f2.ext_d()
+#f2_ext_d.plot()
+#f2_num_ext_d = f2.num_ext_d()
+#f2_num_ext_d.plot()
+#hodged_f2 = f2.hodge()
+#hodged_f2.plot()
+#hodged_f2_num = f2.num_hodge()
+#hodged_f2_num.plot()
+#f2_intd = f2.interior_d(vf)
+#f2_intd.plot()
+#f2_intd_num = f2.num_interior_d(vf)
+#f2_intd_num.plot()
 
 
 #pot = (xg**2 + yg**2 + zg**2)
@@ -84,6 +96,10 @@ f3.give_eqn('sqrt(x**2+y**2-z**2)')
 #f33 = f3.zoom(mag = 5, target=[2,2,2], dpd=8)
 #f3.log_scaling()
 #f33.plot()
+#f3_intd = f3.interior_d(vf)
+#f3_intd.plot()
+f3_intd_num = f3.num_interior_d(vf)
+f3_intd_num.plot()
 
 #f0_wedge_f0 = f0.wedge(f0)
 #f0_wedge_f0.plot()
@@ -120,6 +136,37 @@ f3.give_eqn('sqrt(x**2+y**2-z**2)')
 #f1_num_wedge_f2 = form_1.num_wedge(f2)
 #f1_num_wedge_f2.plot()
 #f1_num_wedge_f3 = form_1.num_wedge(f3)
+
+
+
+#f2_wedge_f0 = f2.wedge(f0)
+#f2_wedge_f0.plot()
+#f2_wedge_f1 = f2.wedge(form_1)
+#f2_wedge_f1.plot()
+#f2_wedge_f2 = f2.wedge(f2)
+#f2_wedge_f3 = f2.wedge(f3)
+
+#f2_wedge_f0_num = f2.num_wedge(f0)
+#f2_wedge_f0_num.plot()
+#f2_wedge_f1_num = f2.num_wedge(form_1)
+#f2_wedge_f1_num.plot()
+#f2_wedge_f2_num = f2.num_wedge(f2)
+#f2_wedge_f3_num = f2.num_wedge(f3)
+
+
+
+#f3_wedge_f0 = f3.wedge(f0)
+#f3_wedge_f0.plot()
+#f3_wedge_f1 = f3.wedge(form_1)
+#f3_wedge_f2 = f3.wedge(f2)
+#f3_wedge_f3 = f3.wedge(f3)
+
+#f3_wedge_f0_num = f3.num_wedge(f0)
+#f3_wedge_f0_num.plot()
+#f3_wedge_f1_num = f3.num_wedge(form_1)
+#f3_wedge_f2_num = f3.num_wedge(f2)
+#f3_wedge_f3_num = f3.num_wedge(f3)
+
 
 
 '''

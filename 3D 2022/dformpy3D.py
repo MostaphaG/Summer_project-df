@@ -3247,7 +3247,7 @@ class form_1_3d():
                     new_str_y = new_str_y.replace('y', '(self.yg)')
                     new_str_y = new_str_y.replace('z', '(self.zg)')
 
-                    new_str_z = form_second[1].replace('x', '(self.xg)')
+                    new_str_z = form_second[2].replace('x', '(self.xg)')
                     new_str_z = new_str_z.replace('y', '(self.yg)')
                     new_str_z = new_str_z.replace('z', '(self.zg)')
 
@@ -4571,12 +4571,806 @@ class form_2_3d():
        
 
 
+    def ext_d(self):
+        '''
+        
+        ext_d()
+        
+        Computes the exterior derivative and returns it
+        as the 3-form object
+        '''
+        if self.Fx_eqn == None or self.Fy_eqn == None or self.Fz_eqn == None:
+                # ERROR
+                raise ValueError('Error: You need to supply the 1-form equations to do this, look at \'give_eqn\' method')
+        else:
+            # the strings have been correctly given, compute the
+            # exterior derivative
+            # get the inpus from fields of x and u components
+            x_comp_str = self.Fx_eqn
+            y_comp_str = self.Fy_eqn
+            z_comp_str = self.Fz_eqn
+            # from found u and v in the interior derivative, set up sympy components
+            sympy_expr_x = parse_expr(x_comp_str, evaluate=False)
+            sympy_expr_y = parse_expr(y_comp_str, evaluate=False)
+            sympy_expr_z = parse_expr(z_comp_str, evaluate=False)
+            # combine the 2 into a list:
+            
+            coords = ['x', 'y', 'z']
+            # from these, find the derivatives
+            ddx_Fx = str(diff(sympy_expr_x, coords[0]))
+            ddy_Fy = str(diff(sympy_expr_y, coords[1]))
+            ddz_Fz = str(diff(sympy_expr_z, coords[2]))
+
+            Ex_deriv_str = str(simplify('('+ddx_Fx+')+'+'('+ddy_Fy+')+'+'('+ddz_Fz+')'))
+            
+            # need to uspply these unformatted, so save those:
+            form_3_unformated = Ex_deriv_str*1
+            # from these strings, get the numerical 1-form:
+            form_3_str = Ex_deriv_str.replace('x', '(self.xg)')
+            form_3_str = form_3_str.replace('y', '(self.yg)')
+            form_3_str = form_3_str.replace('z', '(self.zg)')
 
 
+            if form_3_str.find('x') & form_3_str.find('y') & form_3_str.find('z') == -1:
+                form_3_str = '(' + str(form_3_str) + ')* np.ones(np.shape(self.xg))'
+
+
+            form_3_res = eval(form_3_str)
+
+            
+            # supply these to the 1-form object function and return object
+            result_3_form = form_3_3d(self.xg, self.yg, self.zg, form_3_res, form_3_unformated)
+
+            return result_3_form
+
+
+
+    def num_ext_d(self):
+        '''
+        Takes in no arguments
+        
+        computes the exterior derivative numerically only
+        The equations do not need to be given
+        If given, they do not get passed onto the 2-form object anyway
+        NUMERICAL ONLY, they will be lost!
+         
+        returns 2-form object
+        '''
+        
+        # get steps in dx and dy:
+        dx = self.xg[0, :, 0]
+        dy = self.yg[:, 0, 0]
+        dz = self.zg[0, 0, :]
+
+        
+
+
+        fx = self.Fx 
+        fy = self.Fy
+        fz = self.Fz
+        
+        
+        
+        # Calculate deirvatvies as needed, using numpy gradient.
+        dx_Fx, _, _ = np.gradient(fx, dx, dy, dz)
+        _, dy_Fy, _ = np.gradient(fy, dx, dy, dz)
+        _, _, dz_Fz = np.gradient(fz, dx, dy, dz)
+
+
+        # from these, get the 2-form
+        form_3_result = dx_Fx + dy_Fy + dz_Fz
+
+
+        
+
+
+        # return 2-form object to user
+        result_form = form_3_3d(self.xg, self.yg, self.zg, form_3 = form_3_result)
+        
+        # return it to the user
+        return result_form
+
+
+
+    def hodge(self, keep_object=False):
+        '''
+        
+        hodge(keep_object=False)
+        
+        Parameters:
+        -------------
+        keep_object - determines if the result should be returned as a new
+                      1-form or if current one need to be changed.
+                      Default is False. When False, a new object is created
+                      When true, the acted on is modified.
+        
+        It calulates the Hodge on R^3 by the standard definition:
+        dy/\dz -> dx ; dx/\dz -> -dy ; dx/\dy -> dz
+        Does so analytically using the equations provided in the instance
+        
+        returns: 1-form if keep_object is False, else returns nothing
+        '''
+        
+        # check for equations:
+        if self.Fx_eqn == None or self.Fy_eqn == None or self.Fz_eqn == None:
+            # ERROR
+            raise TypeError('Error: You need to supply the 1-form equations to do this, look at \'give_eqn\' method')
+        else:
+            # some equations are there, compute the Hodge on these:
+            new_str_x = self.Fx_eqn
+            new_str_y = '-(' + self.Fy_eqn + ')'
+            new_str_z = self.Fz_eqn
+            # from these, get numerical solutions, evaulated on local
+            # strings changed to relate to the self grids
+            # need to supply these unformatted, so save those:
+            form_2_x_unformated, form_2_y_unformated, form_2_z_unformated = new_str_x*1, new_str_y*1, new_str_z*1
+            # from these strings, get the numerical 1-form:
+            new_str_x = new_str_x.replace('x', '(self.xg)')
+            new_str_x = new_str_x.replace('y', '(self.yg)')
+            new_str_x = new_str_x.replace('z', '(self.zg)')
+
+            new_str_y = new_str_y.replace('x', '(self.xg)')
+            new_str_y = new_str_y.replace('y', '(self.yg)')
+            new_str_y = new_str_y.replace('z', '(self.zg)')
+
+            new_str_z = new_str_z.replace('x', '(self.xg)')
+            new_str_z = new_str_z.replace('y', '(self.yg)')
+            new_str_z = new_str_z.replace('z', '(self.zg)')
+            # correct for constants
+            if new_str_x.find('x') & new_str_x.find('y') & new_str_x.find('z') == -1:
+                new_str_x = '(' + str(new_str_x) + ')* np.ones(np.shape(self.xg))'
+            if new_str_y.find('x') & new_str_y.find('y') & new_str_y.find('z') == -1:
+                new_str_y = '(' + str(new_str_y) + ')* np.ones(np.shape(self.yg))'
+            if new_str_z.find('x') & new_str_z.find('y') & new_str_z.find('z') == -1:
+                new_str_z = '(' + str(new_str_z) + ')* np.ones(np.shape(self.zg))'
+            
+            # evaluate
+            form_2_x = eval(new_str_x)
+            form_2_y = eval(new_str_y)
+            form_2_z = eval(new_str_z)
+            
+            # depending on keep_object, return:
+            if keep_object:
+                self.Fx = form_2_x
+                self.Fy = form_2_y
+                self.Fz = form_2_z
+                self.Fx_eqn = form_2_x_unformated
+                self.Fy_eqn = form_2_y_unformated
+                self.Fz_eqn = form_2_z_unformated
+            elif not keep_object:
+                new_object = form_1_3d(self.xg, self.yg, self.zg, form_2_x, form_2_y, form_2_z, form_2_x_unformated, form_2_y_unformated, form_2_z_unformated)
+                return new_object
+            else:
+                raise ValueError('Error, Invalid input for \'keep_object\'')
     
-                                
+
+
+    def num_hodge(self, keep_object=False):
+        '''
+        
+        num_hodge(keep_object=False)
+        
+        Parameters:
+        -------------
+        keep_object - determines if the result should be returned as a new
+                      1-form or if current one need to be changed.
+                      Default is False. When False, a new object is created
+                      When true, the acted on is modified.
+        
+        It calulates the Hodge on R^3 by the standard definition:
+        dy/\dz -> dx ; dx/\dz -> -dy ; dx/\dy -> dz
+        
+        Does no numerically using only component arrays.
+        If equations have been previously provided, this method will
+        loose them
+        
+        returns: 1-form if keep_object is False, else returns nothing
+        '''
+        # check if equations have been given:
+        # if they have, doing it only numerically would create
+        # a mismatch, warn user
+        if self.Fx_eqn != None or self.Fy_eqn != None or self.Fz_eqn != None:
+            print('Warning: You supplied equations, doing it numerically only will result in a mismacth between numerical values and equations')
+        
+        # now complete the process numerically save as instructed
+        # check keep_object:
+        if keep_object:
+            # change the object self properties accoringly
+            new_x = self.Fx
+            new_y = -self.Fy
+            new_z = self.Fz
+            self.Fx = new_x
+            self.Fy = new_y
+            self.Fz = new_z
+        elif not keep_object:
+            # pass these in to the object to create a new one:
+            # N.B no equations to supply
+            new_object = form_1_3d(self.xg, self.yg, self.zg, self.Fx, -self.Fy, self.Fz)
+            # return the new one to the user:
+            return new_object
+        else:
+            raise ValueError('Error, Invalid input for \'keep_object\'')
+
+
+
+    def wedge(self, form_second, degree=2, keep_object=False):
+        '''
+        
+        wedge(form_second, degree=1, keep_object=False)
+        
+        Parameters:
+        ----------------
+        form_second - the form to wedge the 2-form with.
+                    Can be supplied as a DFormPy instance, a tuple of equations,
+                    or a single string equation depending on what form is to be
+                    wedged.
+                    To wedge with 1-form, supply 1-form instance, or tuple of
+                    component equations as strings in terms of x and y.
+                    To wedge with 0-form or 2-form, supply corresponding
+                    instances or a single equation. When using equations,
+                    to distinguish between them, provide parmater 'degree'.
+        degree - default is 1. Only used when a single string is supplied
+                    as form_second, to distinguish betwen 0-form and 2-form
+                    for 0-form, degree=0, for 2-form, degree=2.
+                    Determines what form is to be wegded with the
+                    given 1-form.
+        keep_object - bool -default=False - only used when 1-form is wedged
+                    with a 0-form. If False, a new object is created as 
+                    a result of the wedge. If True, the 1-form acted on
+                    is modified to be the result of the wedge. 
+        
+        To do so here, strings for the form must be supplied.
+        Computes the Wedge product using strings, ANALYTICALLY
+        
+        Returns:
+        --------------
+        Wedged with 0-form returns a 1-form object if keep_object is False
+                    (default), and returns nothing when it is True
+        Wedged with a 1-form, returns a 2-form instance
+        Wedged with a 2-form, operation makes a 3-form, which on R^2 is
+                    always = zero, only message displays.
+        
+        '''
+        
+        # test if equations were given first:
+        if self.Fx_eqn == None or self.Fy_eqn == None or self.Fz_eqn == None:
+            raise ValueError('Error: You need to supply the 2-form equations to do this, look at \'give_eqn\' method')
+        
+        # set up variable to store order of supplied form, initially assume 1-form
+        order = 2
+        
+        # get needed second obejct strings dep. on input
+        if isinstance(form_second, tuple):
+            # if equations were given here take these, if numerical grids were given - error!
+            # check size , should be a 1-form
+            if len(form_second) == 3:
+                # 2-form/\1-form or 2-form/\2-form check if strings supplied
+                if isinstance(form_second[0], str) and isinstance(form_second[1], str) and isinstance(form_second[2], str):
+                    to_wedge_x_2_str = form_second[0]
+                    to_wedge_y_2_str = form_second[1]
+                    to_wedge_z_2_str = form_second[2]
+
+                    if degree == 1:
+                        order = 1
+                    elif degree == 2:
+                        order = 2
+
+                else:
+                    raise ValueError('for analytical calulation, supply 1-form or 2-form equations as strings')
+            else:
+                raise ValueError('too many or too little equations given in tuple')
+        elif isinstance(form_second, str):
+            # single string, could be 0-form or 3-form, check given degree:
+            if degree == 0:
+                to_wedge_0_form_str = form_second
+                order = 0
+            elif degree == 3:
+                to_wedge_3_form_str = form_second
+                order = 3
+            else:
+                raise ValueError('not possible digree given or supplied one string for a 1-form')
+        else:
+            # object supplied, get numericals checking which object is given:
+            if isinstance(form_second, form_1_3d):
+                if form_second.form_1_str_x is None or form_second.form_1_str_y is None or form_second.form_1_str_z is None:
+                     raise ValueError('supplied 1-form instance must contain equations for analytical calculation')
+                else:
+                    to_wedge_x_2_str = form_second.form_1_str_x
+                    to_wedge_y_2_str = form_second.form_1_str_y
+                    to_wedge_z_2_str = form_second.form_1_str_z
+                    order = 1
+            elif isinstance(form_second, form_0_3d):
+                if form_second.form_0_str is None:
+                    raise ValueError('supplied 0-form instance must contain equations for analytical calculation')
+                else:
+                    to_wedge_0_form_str = form_second.form_0_str
+                    order = 0       
+            elif isinstance(form_second, form_2_3d):
+                order=None
+                print('This operation makes a 4-form, which are 0 in R^3')
+            elif isinstance(form_second, form_3_3d):
+                order=None
+                print('This operation makes a 5-form, , which are 0 in R^3')
+            else:
+                raise TypeError('Supplied form to wedge with is not recognised')
+        
+        # Deal with 2-form/\1-form:
+        if order == 1:
+            # form-2 /\ form-1
+            form_3_str = str(simplify( '(((' + self.Fx_eqn + ')*(' +  to_wedge_x_2_str + ')) + (('+self.Fy_eqn+')*('+ to_wedge_y_2_str+')) + (('+self.Fz_eqn+')*('+ to_wedge_z_2_str+')))'))
+            
+            # keep it as it is locally to supply it to object maker later
+            form_3_str_loc = form_3_str + ''
+
+            # format it to be in terms of grids and:
+            # check against constant and zero 2-forms being supplied
+            # get the numerical evaluation of it
+            form_3_str = form_3_str.replace('x', 'self.xg')
+            form_3_str = form_3_str.replace('y', 'self.yg')
+            form_3_str = form_3_str.replace('z', 'self.zg')
+
+
+            if form_3_str.find('x') & form_3_str.find('y') & form_3_str.find('z') == -1:
+                form_3_str = '(' + str(form_3_str) + ')* np.ones(np.shape(self.xg))'
+
+            
+            # evaluate it numerically on the grid supplied
+            form_3_result = eval(form_3_str)
+
+            
+            # create a 2-form object from this; to return and do so
+            ret_object = form_3_3d(self.xg, self.yg, self.zg, form_3_result, form_3_str_loc)
+            return ret_object
+        
+        elif order == 0:
+            # form-2 /\ form-0
+            # first, find the result of the 1-form:
+            new_str_x = str(simplify('(' + self.Fx_eqn + ')*(' +  to_wedge_0_form_str + ')'))
+            new_str_y = str(simplify('(' + self.Fy_eqn + ')*(' +  to_wedge_0_form_str + ')'))
+            new_str_z = str(simplify('(' + self.Fz_eqn + ')*(' +  to_wedge_0_form_str + ')'))
+            # keep it as it is locally to supply it to object maker later
+            form_2_str_x_loc = new_str_x + ''
+            form_2_str_y_loc = new_str_y + ''
+            form_2_str_z_loc = new_str_z + ''
+            # format it to be in terms of grids and:
+            # check against constant and zero 1-forms being supplied
+            # get the numerical evaluation of it
+            new_str_x = new_str_x.replace('x', '(self.xg)')
+            new_str_x = new_str_x.replace('y', '(self.yg)')
+            new_str_x = new_str_x.replace('z', '(self.zg)')
+
+            new_str_y = new_str_y.replace('x', '(self.xg)')
+            new_str_y = new_str_y.replace('y', '(self.yg)')
+            new_str_y = new_str_y.replace('z', '(self.zg)')
+
+            new_str_z = new_str_z.replace('x', '(self.xg)')
+            new_str_z = new_str_z.replace('y', '(self.yg)')
+            new_str_z = new_str_z.replace('z', '(self.zg)')
+            
+            if new_str_x.find('x') & new_str_x.find('y') & new_str_x.find('z') == -1:
+                new_str_x = '(' + str(new_str_x) + ')* np.ones(np.shape(self.xg))'
+            if new_str_y.find('x') & new_str_y.find('y') & new_str_y.find('z') == -1:
+                new_str_y = '(' + str(new_str_y) + ')* np.ones(np.shape(self.yg))'
+            if new_str_z.find('x') & new_str_z.find('y') & new_str_z.find('z') == -1:
+                new_str_z = '(' + str(new_str_z) + ')* np.ones(np.shape(self.zg))'
+            
+            form_2_x = eval(new_str_x)
+            form_2_y = eval(new_str_y)
+            form_2_z = eval(new_str_z)
+            
+            # depending on keep_object, return:
+            if keep_object:
+                self.Fx = form_2_x
+                self.Fy = form_2_y
+                self.Fz = form_2_z
+                self.Fx_eqn = form_2_str_x_loc
+                self.Fy_eqn = form_2_str_y_loc
+                self.Fz_eqn = form_2_str_z_loc
+            elif not keep_object:
+                new_object = form_2_3d(self.xg, self.yg, self.zg, form_2_x, form_2_y, form_2_z, Fx_eqn=form_2_str_x_loc, Fy_eqn=form_2_str_y_loc, Fz_eqn=form_2_str_z_loc)
+                # return the new one to the user:
+                return new_object
+            else:
+                raise ValueError('Error, Invalid input for \'keep_object\'')
+
+
+        elif order is None:
+            # made a form that is always zero on R2, no need to make it
+            # Warning already shown, when degree was set
+            pass
+        else:
+            # should never happen, but in case
+            raise ValueError('Variable change during code running, look at \'order\' parameter')
+
+
+
+    def num_wedge(self, form_second, degree=2, keep_object=False):
+        '''
+        
+        num_wedge(form_second, degree=1, keep_object=False)
+        
+        Parameters:
+        ----------------
+        form_second - the form to wedge the 1-form with.
+                    Can be supplied as a DFormPy instance, a tuple of grids of
+                    same size and dimensions as this 1-form,
+                    or a single grid of scaling function values depending on
+                    what form is to be wedged.
+                    To wedge with 1-form, supply 1-form instance, or tuple of
+                    component grids of same size as 1-form acted on.
+                    To wedge with 0-form or 2-form, supply corresponding
+                    instances or a single grid. When using grids,
+                    to distinguish between them, provide parmater 'degree'.
+        degree - default is 1. Only used when a single grid is supplied
+                    as form_second, to distinguish betwen 0-form and 2-form
+                    for 0-form, degree=0, for 2-form, degree=2.
+                    Determines what form is to be wegded with the
+                    given 1-form.
+        keep_object - bool -default=False - only used when 1-form is wedged
+                    with a 0-form. If False, a new object is created as 
+                    a result of the wedge. If True, the 1-form acted on
+                    is modified to be the result of the wedge. 
+        
+        Computes the Wedge product numerically
+        
+        Returns:
+        --------------
+        Wedged with 0-form returns a 1-form object if keep_object is False
+                    (default), and returns nothing when it is True
+        Wedged with a 1-form, returns a 2-form instance
+        Wedged with a 2-form, operation makes a 3-form, which on R^2 is
+                    always = zero, only message displays.
+        
+        '''
+        
+        # test if equations were given first:
+        if isinstance(self.Fx_eqn, str) or isinstance(self.Fy_eqn, str) or isinstance(self.Fz_eqn, str):
+            print('The first 2-form you are completing the wedge with has equations supplied, these will be lost')
+        
+        # set up variable to store order of supplied form, initially assume 1-form
+        order = 2
+        
+        # get needed second obejct grids dep. on input
+        if isinstance(form_second, tuple):
+            # check size to see what it is to be wedged with.
+            # tuple should only be length 3 --> 1-form/\1-form or 1-form/\2-form
+            if len(form_second) == 3:
+                # 1-form/\1-form, extract components
+                # if numerical grids were given, take these, if equations, change to values on grids:
+                if isinstance(form_second[0], str) and isinstance(form_second[1], str) and isinstance(form_second[2], str):
+
+                    new_str_x = form_second[0].replace('x', '(self.xg)')
+                    new_str_x = new_str_x.replace('y', '(self.yg)')
+                    new_str_x = new_str_x.replace('z', '(self.zg)')
+
+                    new_str_y = form_second[1].replace('x', '(self.xg)')
+                    new_str_y = new_str_y.replace('y', '(self.yg)')
+                    new_str_y = new_str_y.replace('z', '(self.zg)')
+
+                    new_str_z = form_second[2].replace('x', '(self.xg)')
+                    new_str_z = new_str_z.replace('y', '(self.yg)')
+                    new_str_z = new_str_z.replace('z', '(self.zg)')
+
+                    if new_str_x.find('x') & new_str_x.find('y') & new_str_x.find('z') == -1:
+                        new_str_x = '(' + str(new_str_x) + ')* np.ones(np.shape(self.xg))'
+                    if new_str_y.find('x') & new_str_y.find('y') & new_str_y.find('z') == -1:
+                        new_str_y = '(' + str(new_str_y) + ')* np.ones(np.shape(self.yg))'
+                    if new_str_z.find('x') & new_str_z.find('y') & new_str_z.find('z') == -1:
+                        new_str_z = '(' + str(new_str_z) + ')* np.ones(np.shape(self.zg))'
+
+                    f12_x = eval(new_str_x)
+                    f12_y = eval(new_str_y)
+                    f12_z = eval(new_str_z)
+
+                    if degree==1:
+                        order = 1
+                    elif degree==2:
+                        order = 2
+
+                elif isinstance(form_second[0], np.ndarray) and isinstance(form_second[1], np.ndarray) and isinstance(form_second[2], np.ndarray):
+                    f12_x = form_second[0]
+                    f12_y = form_second[1]
+                    f12_z = form_second[2]
+
+                    if degree==1:
+                        order = 1
+                    elif degree==2:
+                        order = 2
+
+                else:
+                    raise ValueError('Not recognised input tuple')
+            else:
+                raise ValueError('too many or too little equations given in tuple')
+        
+        elif isinstance(form_second, np.ndarray):
+            # check degree:
+            if degree == 0:
+                to_wedge_0_form = form_second
+                order = 0
+            elif degree == 1:
+                raise ValueError('for degree 1, supply a 1-form, not a single grid')
+            elif degree == 2:
+                raise ValueError('for degree 2, supply a 2-form, not a single grid')
+            elif degree == 3:
+                
+                order = 3
+                
+        
+        elif isinstance(form_second, str):
+            # single string, could be 0-form or 3-form, check given degree:
+            if degree == 0:
+                    str_0_form = form_second.replace('x', '(self.xg)')
+                    str_0_form = str_0_form.replace('y', '(self.yg)')
+                    str_0_form = str_0_form.replace('z', '(self.zg)')
+                    if str_0_form.find('x') & str_0_form.find('y') & str_0_form.find('z') == -1:
+                        str_0_form = '(' + str(str_0_form) + ')* np.ones(np.shape(self.xg))'
+                    
+                    to_wedge_0_form = eval(str_0_form)
+                    order = 0
+            elif degree == 3:
+                    str_3_form = form_second.replace('x', '(self.xg)')
+                    str_3_form = str_3_form.replace('y', '(self.yg)')
+                    str_3_form = str_3_form.replace('z', '(self.zg)')
+                    if str_3_form.find('x') & str_3_form.find('y') & str_3_form.find('z') == -1:
+                        str_3_form = '(' + str(str_3_form) + ')* np.ones(np.shape(self.xg))'
+                    
+                    form_3_result = eval(str_3_form)
+                    order = 3
+            else:
+                raise ValueError('not possible degree given or supplied one string for a 1-form')
+        
+        # object supplied, get grids checking which object is given:
+        
+        elif isinstance(form_second, form_1_3d):
+            f12_x = form_second.F_x
+            f12_y = form_second.F_y
+            f12_z = form_second.F_z
+            order = 1
+        elif isinstance(form_second, form_0_3d):
+            to_wedge_0_form = form_second.form_0
+            order = 0
+        elif isinstance(form_second, form_2_3d):
+            order = None
+            print('This operation makes a 4-form, , which are 0 in R^3')
+        elif isinstance(form_second, form_3_3d):
+            order = None
+            print('This operation makes a 5-form, , which are 0 in R^3')
+        else:
+            raise TypeError('Supplied form to wedge with is not recognised')
+        
+        # USe given inputs to evaluate the result:
+        
+        # Deal with 2-form/\1-form:
+        if order == 1:
+            # from these get the numerical 2-form
+            
+
+            form_3_res = self.Fx * f12_x + self.Fy * f12_y + self.Fz * f12_z
+            
+            # return it to user:
+            ret_object = form_3_3d(self.xg, self.yg, self.zg, form_3_res)
+            return ret_object
+        
+        elif order == 0:
+            # 2-form/\0-form
+            new_form_2_x =  self.Fx * to_wedge_0_form
+            new_form_2_y =  self.Fy * to_wedge_0_form 
+            new_form_2_z =  self.Fz * to_wedge_0_form
+            
+            # depending on keep_object, return:
+            if keep_object:
+                self.Fx = new_form_2_x
+                self.Fy = new_form_2_y
+                self.Fz = new_form_2_z
+            elif not keep_object:
+                new_object = form_2_3d(self.xg, self.yg, self.zg, new_form_2_x, new_form_2_y, new_form_2_z)
+                # return the new one to the user:
+                return new_object
+            else:
+                raise ValueError('Error, Invalid input for \'keep_object\'')
+
+
+
+        elif order is None:
+            # made a form that is always zero on R2, no need to make it
+            # Warning already shown, when degree was set
+            pass
+        else:
+            # should never happen, but in case
+            raise ValueError('Variable change during code running, look at \'order\' parameter')
+
+
+
+    def interior_d(self, vector_field=None):
+        '''
+        
+        interior_d(vector_field=None)
+        
+        Computes the interior derivative of the 2-form
+        
+        Parameters:
+        ------------------
+        Vector_field = vector field object of DFormPy library to do the
+            derivative with respect to, needs equations to work with
+            nuymerical_only being False. Can also supply equations in a tuple:
+            (eqn_x, eqn_y). If using numerical only, can supply object or
+            tuple of numpy arrays (array_x, atrray_y). If nothing is supplied
+            for it, it assumes F_x = 1 and F_y = 1, with correct form and shape
+        
+        Does no analytically using equations provided in instance
+        
+        Returns 0-form object
+        '''
+        # test if equations were given first:
+        if self.Fx_eqn == None or self.Fy_eqn == None or self.Fz_eqn == None:
+            # ERROR
+            raise ValueError('Error: You need to supply the 2-form equations to do this, look at \'give_eqn\' method')
+        # if the vector field was supplied, extract its equations, if possible
+        if vector_field is None:
+            # if none was given, do it with respect to uniform 1, 1
+            vf_x_str = '1'
+            vf_y_str = '1'
+            vf_z_str = '1'
+        elif type(vector_field) == tuple:
+            # if equations were given, take these, is numericals were given here, break!
+            if type(vector_field[0]) == str:
+                vf_x_str = vector_field[0]
+                vf_y_str = vector_field[1]
+                vf_z_str = vector_field[2]
+            else:
+                raise ValueError('for analytical result, supply VF equations')
+        else:
+            if vector_field.str_x == None or vector_field.str_y == None or vector_field.str_y == None:
+                # ERROR
+                raise ValueError('Error: You need to supply the VF equations to do this, look at \'give_eqn\' method')
+            else:
+                vf_x_str = str(simplify(vector_field.str_x))
+                vf_y_str = str(simplify(vector_field.str_y))
+                vf_z_str = str(simplify(vector_field.str_z))
+        
+        # combine them correctly with the 2-form strings:
+        one_form_str_x = str(simplify('(' + self.Fx_eqn + ')*(' + vf_x_str + ')'))
+        one_form_str_y = str(simplify('(' + self.Fy_eqn + ')*(' + vf_y_str + ')'))
+        one_form_str_z = str(simplify('(' + self.Fz_eqn + ')*(' + vf_z_str + ')'))
+        
+        # keep an unformatted version to supply to the 0-form
+        one_form_str_x_unformatted = one_form_str_x + ''
+        one_form_str_y_unformatted = one_form_str_y + ''
+        one_form_str_z_unformatted = one_form_str_z + ''
+        
+        # format the expression to be evluated
+        one_form_str_x = one_form_str_x.replace('x', 'self.xg')
+        one_form_str_x = one_form_str_x.replace('y', 'self.yg')
+        one_form_str_x = one_form_str_x.replace('z', 'self.zg')
+
+        one_form_str_y = one_form_str_y.replace('x', 'self.xg')
+        one_form_str_y = one_form_str_y.replace('y', 'self.yg')
+        one_form_str_y = one_form_str_y.replace('z', 'self.zg')
+
+        one_form_str_z = one_form_str_z.replace('x', 'self.xg')
+        one_form_str_z = one_form_str_z.replace('y', 'self.yg')
+        one_form_str_z = one_form_str_z.replace('z', 'self.zg')
+        
+        # check against constants in the expression to be evaluated
+        if one_form_str_x.find('x') & one_form_str_x.find('y') & one_form_str_x.find('z') == -1:
+            one_form_str_x = '(' + str(one_form_str_x) + ')* np.ones(np.shape(self.xg))'
+        else:
+            pass
+
+        if one_form_str_y.find('x') & one_form_str_y.find('y') & one_form_str_y.find('z') == -1:
+            one_form_str_y = '(' + str(one_form_str_y) + ')* np.ones(np.shape(self.yg))'
+        else:
+            pass
+
+        if one_form_str_z.find('x') & one_form_str_z.find('y') & one_form_str_z.find('z') == -1:
+            one_form_str_z = '(' + str(one_form_str_z) + ')* np.ones(np.shape(self.zg))'
+        else:
+            pass
+        
+        # evaulate the numerical zero form:
+        one_form_x_result = eval(one_form_str_x)
+        one_form_y_result = eval(one_form_str_y)
+        one_form_z_result = eval(one_form_str_z)
+        
+        # return it, with equations, to user, depending on their figure
+        # preferances
+        result_form = form_1_3d(self.xg, self.yg, self.zg, one_form_x_result, one_form_y_result, one_form_z_result, one_form_str_x_unformatted, one_form_str_y_unformatted, one_form_str_z_unformatted)
+        
+        # return it to the user
+        return result_form
+
+
+
+    def num_interior_d(self, vector_field=None):
+        '''
+        
+        num_interior_d(self, vector_field=None)
+        
+        Computes the interior derivative of the 1-form
+        
+        Parameters:
+        --------------
+        Vector_field = vector field object of DFormPy library to do the
+            derivative with respect to, needs equations to work with
+            nuymerical_only being False. Can also supply equations in a tuple:
+            (eqn_x, eqn_y). If using numerical only, can supply object or
+            tuple of numpy arrays (array_x, atrray_y). If nothing is supplied
+            for it, it assumes F_x = 1 and F_y = 1, with correct form and shape
+        
+        Does no numerically using arrays provided in instance
+        If equations were proivided, this method will lose them
+        
+        Returns 0-form object
+        '''
+        # check if equations have been given:
+        # if they have, doing it only numerically would create
+        # a mismatch, Warn user
+        if self.Fx_eqn == None or self.Fy_eqn == None or self.Fz_eqn == None:
+            pass
+        else:
+            # equations have been given, a mismatch may occur
+            # warn the user
+            print('Warning: You supplied equations, doing it numerically only will not pass equations to the 0-form and these will be lost')
+        
+        # Take the vector field components, checking what was input
+        if vector_field is None:
+            # if none was given, do it with respect to uniform 1, 1
+            vf_x = np.ones(np.shape(self.xg))
+            vf_y = np.ones(np.shape(self.yg))
+            vf_z = np.ones(np.shape(self.zg))
+        elif type(vector_field) == tuple:
+            # if numerical grids were given, take these
+            # if equations were given here, evaulate them to grids
+            if type(vector_field[0]) == str:
+                new_str_x = vector_field[0].replace('x', '(self.xg)')
+                new_str_x = new_str_x.replace('y', '(self.yg)')
+                new_str_x = new_str_x.replace('z', '(self.zg)')
+
+                new_str_y = vector_field[1].replace('x', '(self.xg)')
+                new_str_y = new_str_y.replace('y', '(self.yg)')
+                new_str_y = new_str_y.replace('z', '(self.zg)')
+
+                new_str_z = vector_field[2].replace('x', '(self.xg)')
+                new_str_z = new_str_z.replace('y', '(self.yg)')
+                new_str_z = new_str_z.replace('z', '(self.zg)')
+
+                if new_str_x.find('x') & new_str_x.find('y') & new_str_x.find('z') == -1:
+                    new_str_x = '(' + str(new_str_x) + ')* np.ones(np.shape(self.xg))'
+                if new_str_y.find('x') & new_str_y.find('y') & new_str_y.find('z') == -1:
+                    new_str_y = '(' + str(new_str_y) + ')* np.ones(np.shape(self.yg))'
+                if new_str_z.find('x') & new_str_z.find('y') & new_str_z.find('z') == -1:
+                    new_str_z = '(' + str(new_str_z) + ')* np.ones(np.shape(self.zg))'
+
+                vf_x = eval(new_str_x)
+                vf_y = eval(new_str_y)
+                vf_z = eval(new_str_z)
+
+            else:
+                vf_x = vector_field[0]
+                vf_y = vector_field[1]
+                vf_z = vector_field[2]
+        else:
+            # extract needed properties from the object supplied
+            vf_x = vector_field.F_x
+            vf_y = vector_field.F_y
+            vf_z = vector_field.F_z
+        
+        # Complete the interior derivative 1-form --> 0-form:
+        one_form_x_result = self.Fx * vf_x
+        one_form_y_result = self.Fy * vf_y 
+        one_form_z_result = self.Fz * vf_z 
+        
+        # supply these to the 0-form object creator
+        result_form = form_1_3d(self.xg, self.yg, self.zg, one_form_x_result, one_form_y_result, one_form_z_result)
+        
+        # return it to the user
+        return result_form
+
+
 
 class form_3_3d():
+
+
 
     def __init__(self, xg, yg, zg, form_3, form_3_eqn=None):
         self.xg = xg
@@ -4615,7 +5409,7 @@ class form_3_3d():
         Returns: None
         
         '''
-        self.form_3_str = equation_str
+        self.form_3_str = str(simplify(equation_str))
         
         # update the numerical values to always match
         string = self.form_3_str + ''
@@ -4642,6 +5436,8 @@ class form_3_3d():
         '''
         return self.form_3_str
 
+
+
     def log_scaling(self):
         '''
         changes bool for logscaling
@@ -4650,7 +5446,8 @@ class form_3_3d():
         '''
         self.logarithmic_scale_bool = not self.logarithmic_scale_bool
 
-    
+
+
     def zoom(self, mag, target, dpd):
         
 
@@ -4711,6 +5508,7 @@ class form_3_3d():
                 
                 return zoom_form
  
+
 
     def plot(self):
 
@@ -5122,6 +5920,491 @@ class form_3_3d():
         mlab.show()
 
 
+
+    def wedge(self, form_second, degree=3, keep_object=False):
+        '''
+        Parameters:
+        ----------------
+        form_second - the form to wedge the 3-form with.
+                    Can be supplied as a DFormPy instance, a tuple of equations,
+                    or a single string equation depending on what form is to be
+                    wedged.
+                    To wedge with 1-form, supply 1-form instance, or tuple of
+                    component equations as strings in terms of x and y.
+                    To wedge with 0-form or 2-form, supply corresponding
+                    instances or a single equation. When using equations,
+                    to distinguish between them, provide parmater 'degree'.
+        degree - default is 0. Only used when a single string is supplied
+                    as form_second, to distinguish betwen 0-form and 2-form
+                    for 0-form, degree=0, for 2-form, degree=2.
+                    Determines what form is to be wegded with the
+                    given 0-form.
+        keep_object - bool -default=False - Only needed when 0-form /\ 0-form 
+                    If False, a new object is created
+                    as a result of the wedge. If True, the 0-form acted on
+                    is modified to be the result of the wedge. 
+        
+        To do so here, strings for the form must be supplied.
+        Computes the Wedge product using strings, ANALYTICALLY
+        
+        Returns:
+        --------------
+        Wedged with 0-form returns a 0-form object if keep_object is False
+                    (default), and returns nothing when it is True
+        Wedged with a 1-form, returns a 1-form instance
+        Wedged with a 2-form, returns a 2-form instance
+        
+        '''
+        
+        # test if equations were given first:
+        if self.form_3_str is None:
+            raise ValueError('Error: You need to supply the 3-form equation to do this, look at \'give_eqn\' method')
+        
+        # set up variable to store order of supplied form, initially assume 1-form
+        order = 3
+        
+        # get needed second obejct strings dep. on input
+        if isinstance(form_second, tuple):
+            # if equations were given here take these, if numerical grids were given - error!
+            # check size , should be a 1-form
+            if len(form_second) == 3:
+                # 0-form/\1-form, check if strings supplied
+                if isinstance(form_second[0], str) and isinstance(form_second[1], str) and isinstance(form_second[2], str):
+                    to_wedge_x_2_str = form_second[0]
+                    to_wedge_y_2_str = form_second[1]
+                    to_wedge_z_2_str = form_second[2]
+                    if degree == 1:
+                        order = 1
+                    elif degree == 2:
+                        order = 2
+                else:
+                    raise ValueError('for analytical calulation, supply 1-form equations as strings')
+            else:
+                raise ValueError('too many or too little equations given in tuple')
+        elif isinstance(form_second, str):
+            # single string, could be 0-form or 2-form, check given degree:
+            if degree == 0:
+                to_wedge_0_form_str = form_second
+                order = 0
+
+            elif degree == 3:
+                to_wedge_3_form_str = form_second
+                order = 3
+            else:
+                raise ValueError('not possible digree given or supplied one string for a 1-form')
+        else:
+            # object supplied, get numericals checking which object is given:
+            if isinstance(form_second, form_1_3d):
+                order=None
+                print('This operation makes a 4-form, which are 0 in R^3')
+            elif isinstance(form_second, form_0_3d):
+                if form_second.form_0_str is None:
+                    raise ValueError('supplied 0-form instance must contain equations for analytical calculation')
+                else:
+                    to_wedge_0_form_str = form_second.form_0_str
+                    order = 0       
+            elif isinstance(form_second, form_2_3d):
+                order=None
+                print('This operation makes a 5-form, which are 0 in R^3')
+            elif isinstance(form_second, form_3_3d):
+                order=None
+                print('This operation makes a 6-form, which are 0 in R^3')
+            else:
+                raise TypeError('Supplied form to wedge with is not recognised')
+        
+        # Deal with 3-form/\1-form:
+        
+        if order == 0:
+            form_3_str = str(simplify( '(' + self.form_3_str + ')*(' +  to_wedge_0_form_str + ')'))
+            # keep it as it is locally to supply it to object maker later
+            form_3_str_loc = form_3_str + ''
+            # format it to be in terms of grids and:
+            # check against constant and zero 2-forms being supplied
+            # get the numerical evaluation of it
+            form_3_str = form_3_str.replace('x', 'self.xg')
+            form_3_str = form_3_str.replace('y', 'self.yg')
+            form_3_str = form_3_str.replace('z', 'self.zg')
+            if form_3_str.find('x') & form_3_str.find('y') & form_3_str.find('z') == -1:
+                form_3_str = '(' + str(form_3_str) + ')* np.ones(np.shape(self.xg))'
+            
+            # evaluate it numerically on the grid supplied
+            form_3_result = eval(form_3_str)
+            
+            # depending on keep_object, return:
+            if keep_object:
+                self.form_0 = form_3_result
+                self.form_0_str = form_3_str_loc
+            elif not keep_object:
+                new_object = form_3_3d(self.xg, self.yg, self.zg, form_3_result, form_3_str_loc)
+                # return the new one to the user:
+                return new_object
+            else:
+                raise ValueError('Error, Invalid input for \'keep_object\'')
+
+        elif order is None:
+            # made a form that is always zero on R2, no need to make it
+            # Warning already shown, when degree was set
+            pass
+
+        else:
+            # should never happen, but in case
+            raise ValueError('Variable change during code running, look at \'order\' parameter')
+    
+
+
+    def num_wedge(self, form_second, degree=0, keep_object=False):
+        '''
+        Parameters:
+        ----------------
+        form_second - the form to wedge the 0-form with.
+                    Can be supplied as a DFormPy instance, a tuple of grids of
+                    same size and dimensions as this 0-form,
+                    or a single grid of scaling function values depending on
+                    what form is to be wedged.
+                    To wedge with 1-form, supply 1-form instance, or tuple of
+                    component grids of same size as 1-form acted on.
+                    To wedge with 0-form or 2-form, supply corresponding
+                    instances or a single grid. When using grids,
+                    to distinguish between them, provide parmater 'degree'.
+        degree - default is 0. Only used when a single grid is supplied
+                    as form_second, to distinguish betwen 0-form and 2-form
+                    for 0-form, degree=0, for 2-form, degree=2.
+                    Determines what form is to be wegded with the
+                    given 0-form.
+        keep_object - bool -default=False - only used when 0-form is wedged
+                    with a 0-form. If False, a new object is created as 
+                    a result of the wedge. If True, the 1-form acted on
+                    is modified to be the result of the wedge. 
+        
+        Computes the Wedge product numerically
+        
+        Returns:
+        --------------
+        Wedged with 0-form returns a 0-form object if keep_object is False
+                    (default), and returns nothing when it is True
+        Wedged with a 1-form, returns a 1-form instance
+        Wedged with a 2-form, returns a 2-form instance
+        
+        '''
+        
+        # test if equations were given first:
+        if self.form_3_str is None:
+            pass
+        else:
+            print('The first 3-form you are completing the wedge with has equations supplied, these will be lost')
+        
+        # set up variable to store order of supplied form, initially assume 0-form
+        order = 3
+        
+        # get needed second obejct grids dep. on input
+        if isinstance(form_second, tuple):
+            # check size to see what it is to be wedged with.
+            # tuple should only be length 2 --> 1-form/\1-form
+            if len(form_second) == 3:
+                # 0-form/\1-form, extract components
+                # if numerical grids were given, take these, if equations, change to values on grids:
+                if isinstance(form_second[0], str) and isinstance(form_second[1], str) and isinstance(form_second[2], str):
+
+                    new_str_x = form_second[0].replace('x', '(self.xg)')
+                    new_str_x = new_str_x.replace('y', '(self.yg)')
+                    new_str_x = new_str_x.replace('z', '(self.zg)')
+
+                    new_str_y = form_second[1].replace('x', '(self.xg)')
+                    new_str_y = new_str_y.replace('y', '(self.yg)')
+                    new_str_y = new_str_y.replace('z', '(self.zg)')
+
+                    new_str_z = form_second[2].replace('x', '(self.xg)')
+                    new_str_z = new_str_z.replace('y', '(self.yg)')
+                    new_str_z = new_str_z.replace('z', '(self.zg)')
+
+
+                    if new_str_x.find('x') & new_str_x.find('y') & new_str_x.find('z')== -1:
+                        new_str_x = '(' + str(new_str_x) + ')* np.ones(np.shape(self.xg))'
+                    if new_str_y.find('x') & new_str_y.find('y') & new_str_y.find('z') == -1:
+                        new_str_y = '(' + str(new_str_y) + ')* np.ones(np.shape(self.yg))'
+                    if new_str_z.find('x') & new_str_z.find('y') & new_str_z.find('z') == -1:
+                        new_str_z = '(' + str(new_str_z) + ')* np.ones(np.shape(self.zg))'
+                    
+                    f12_x = eval(new_str_x)
+                    f12_y = eval(new_str_y)
+                    f12_z = eval(new_str_z)
+                    order = 1
+                elif isinstance(form_second[0], np.ndarray) and isinstance(form_second[1], np.ndarray) and isinstance(form_second[2], np.ndarray):
+                    f12_x = form_second[0]
+                    f12_y = form_second[1]
+                    f12_z = form_second[2]
+                    order = 1
+                else:
+                    raise ValueError('Not recognised input tuple')
+            else:
+                raise ValueError('too many or too little equations given in tuple')
+        
+        elif isinstance(form_second, np.ndarray):
+            # check degree:
+            if degree == 0:
+                to_wedge_0_form = form_second
+                order = 0
+            elif degree == 1:
+                raise ValueError('for degree 1, supply a 1-form, not a single grid')
+            elif degree == 2:
+                raise ValueError('for degree 2, supply a 1-form, not a single grid')
+            elif degree == 3:
+                to_wedge_3_form = form_second
+                order = 3
+        
+        elif isinstance(form_second, str):
+            # single string, could be 0-form or 2-form, check given degree:
+            if degree == 0:
+                    str_0_form = form_second.replace('x', '(self.xg)')
+                    str_0_form = str_0_form.replace('y', '(self.yg)')
+                    str_0_form = str_0_form.replace('z', '(self.zg)')
+                    if str_0_form.find('x') & str_0_form.find('y') & str_0_form.find('z') == -1:
+                        str_0_form = '(' + str(str_0_form) + ')* np.ones(np.shape(self.xg))'
+                    
+                    to_wedge_0_form = eval(str_0_form)
+                    order = 0
+            elif degree == 3:
+                str_3_form = form_second.replace('x', '(self.xg)')
+                str_3_form = str_3_form.replace('y', '(self.yg)')
+                str_3_form = str_3_form.replace('z', '(self.zg)')
+                if str_3_form.find('x') & str_3_form.find('y') & str_3_form.find('z') == -1:
+                    str_3_form = '(' + str(str_3_form) + ')* np.ones(np.shape(self.xg))'
+                
+                to_wedge_2_form = eval(str_3_form)
+                order = 3
+            else:
+                raise ValueError('not possible digree given or supplied one string for a 1-form and/or 2-dorm')
+        
+        # object supplied, get grids checking which object is given:
+        
+        elif isinstance(form_second, form_1_3d):
+            order=None
+            print('This operation makes a 4-form, which are 0 in R^3')
+        elif isinstance(form_second, form_0_3d):
+            to_wedge_0_form = form_second.form_0
+            order = 0
+        elif isinstance(form_second, form_2_3d):
+            order=None
+            print('This operation makes a 5-form, which are 0 in R^3')
+        elif isinstance(form_second, form_3_3d):
+            order=None
+            print('This operation makes a 6-form, which are 0 in R^3')
+        else:
+            raise TypeError('Supplied form to wedge with is not recognised')
+        
+        # Use given inputs to evaluate the result:
+        
+        # Deal with 0-form/\1-form:
+        
+        if order == 0:
+            # from these get the numerical 0-form
+            form_3_result = self.form_3 * to_wedge_0_form
+            
+            # depending on keep_object, return:
+            if keep_object:
+                self.form_3 = form_3_result
+            elif not keep_object:
+                new_object = form_3_3d(self.xg, self.yg, self.zg, form_3_result)
+                # return the new one to the user:
+                return new_object
+            else:
+                raise ValueError('Error, Invalid input for \'keep_object\'')
+
+        elif order is None:
+            # made a form that is always zero on R2, no need to make it
+            # Warning already shown, when degree was set
+            pass
+
+        else:
+            # should never happen, but in case
+            raise ValueError('Variable change during code running, look at \'order\' parameter')
+
+
+
+    def interior_d(self, vector_field=None):
+        '''
+        
+        interior_d(vector_field=None)
+        
+        Computes the interior derivative of the 3-form
+        
+        Parameters:
+        ------------------
+        Vector_field = vector field object of DFormPy library to do the
+            derivative with respect to, needs equations to work with
+            nuymerical_only being False. Can also supply equations in a tuple:
+            (eqn_x, eqn_y). If using numerical only, can supply object or
+            tuple of numpy arrays (array_x, atrray_y). If nothing is supplied
+            for it, it assumes F_x = 1 and F_y = 1, with correct form and shape
+        
+        Does no analytically using equations provided in instance
+        
+        Returns 0-form object
+        '''
+        # test if equations were given first:
+        if self.form_3_str==None:
+            # ERROR
+            raise ValueError('Error: You need to supply the 3-form equations to do this, look at \'give_eqn\' method')
+        # if the vector field was supplied, extract its equations, if possible
+        if vector_field is None:
+            # if none was given, do it with respect to uniform 1, 1
+            vf_x_str = '1'
+            vf_y_str = '1'
+            vf_z_str = '1'
+        elif type(vector_field) == tuple:
+            # if equations were given, take these, is numericals were given here, break!
+            if type(vector_field[0]) == str:
+                vf_x_str = vector_field[0]
+                vf_y_str = vector_field[1]
+                vf_z_str = vector_field[2]
+            else:
+                raise ValueError('for analytical result, supply VF equations')
+        else:
+            if vector_field.str_x == None or vector_field.str_y == None or vector_field.str_y == None:
+                # ERROR
+                raise ValueError('Error: You need to supply the VF equations to do this, look at \'give_eqn\' method')
+            else:
+                vf_x_str = str(simplify(vector_field.str_x))
+                vf_y_str = str(simplify(vector_field.str_y))
+                vf_z_str = str(simplify(vector_field.str_z))
+        
+        # combine them correctly with the 2-form strings:
+        two_form_str_x = str(simplify('(' + self.form_3_str + ')*(' + vf_x_str + ')'))
+        two_form_str_y = str(simplify('(' + self.form_3_str + ')*(' + vf_y_str + ')'))
+        two_form_str_z = str(simplify('(' + self.form_3_str + ')*(' + vf_z_str + ')'))
+        
+        # keep an unformatted version to supply to the 0-form
+        two_form_str_x_unformatted = two_form_str_x + ''
+        two_form_str_y_unformatted = two_form_str_y + ''
+        two_form_str_z_unformatted = two_form_str_z + ''
+        
+        # format the expression to be evluated
+        two_form_str_x = two_form_str_x.replace('x', 'self.xg')
+        two_form_str_x = two_form_str_x.replace('y', 'self.yg')
+        two_form_str_x = two_form_str_x.replace('z', 'self.zg')
+
+        two_form_str_y = two_form_str_y.replace('x', 'self.xg')
+        two_form_str_y = two_form_str_y.replace('y', 'self.yg')
+        two_form_str_y = two_form_str_y.replace('z', 'self.zg')
+
+        two_form_str_z = two_form_str_z.replace('x', 'self.xg')
+        two_form_str_z = two_form_str_z.replace('y', 'self.yg')
+        two_form_str_z = two_form_str_z.replace('z', 'self.zg')
+        
+        # check against constants in the expression to be evaluated
+        if two_form_str_x.find('x') & two_form_str_x.find('y') & two_form_str_x.find('z') == -1:
+            two_form_str_x = '(' + str(two_form_str_x) + ')* np.ones(np.shape(self.xg))'
+        else:
+            pass
+
+        if two_form_str_y.find('x') & two_form_str_y.find('y') & two_form_str_y.find('z') == -1:
+            two_form_str_y = '(' + str(two_form_str_y) + ')* np.ones(np.shape(self.yg))'
+        else:
+            pass
+
+        if two_form_str_z.find('x') & two_form_str_z.find('y') & two_form_str_z.find('z') == -1:
+            two_form_str_z = '(' + str(two_form_str_z) + ')* np.ones(np.shape(self.zg))'
+        else:
+            pass
+        
+        # evaulate the numerical zero form:
+        two_form_x_result = eval(two_form_str_x)
+        two_form_y_result = eval(two_form_str_y)
+        two_form_z_result = eval(two_form_str_z)
+        
+        # return it, with equations, to user, depending on their figure
+        # preferances
+        result_form = form_2_3d(self.xg, self.yg, self.zg, two_form_x_result, two_form_y_result, two_form_z_result, two_form_str_x_unformatted, two_form_str_y_unformatted, two_form_str_z_unformatted)
+        
+        # return it to the user
+        return result_form
+
+
+
+    def num_interior_d(self, vector_field=None):
+        '''
+        
+        num_interior_d(self, vector_field=None)
+        
+        Computes the interior derivative of the 3-form
+        
+        Parameters:
+        --------------
+        Vector_field = vector field object of DFormPy library to do the
+            derivative with respect to, needs equations to work with
+            nuymerical_only being False. Can also supply equations in a tuple:
+            (eqn_x, eqn_y). If using numerical only, can supply object or
+            tuple of numpy arrays (array_x, atrray_y). If nothing is supplied
+            for it, it assumes F_x = 1 and F_y = 1, with correct form and shape
+        
+        Does no numerically using arrays provided in instance
+        If equations were proivided, this method will lose them
+        
+        Returns 0-form object
+        '''
+        # check if equations have been given:
+        # if they have, doing it only numerically would create
+        # a mismatch, Warn user
+        if self.form_3_str == None:
+            pass
+        else:
+            # equations have been given, a mismatch may occur
+            # warn the user
+            print('Warning: You supplied equations, doing it numerically only will not pass equations to the 0-form and these will be lost')
+        
+        # Take the vector field components, checking what was input
+        if vector_field is None:
+            # if none was given, do it with respect to uniform 1, 1
+            vf_x = np.ones(np.shape(self.xg))
+            vf_y = np.ones(np.shape(self.yg))
+            vf_z = np.ones(np.shape(self.zg))
+        elif type(vector_field) == tuple:
+            # if numerical grids were given, take these
+            # if equations were given here, evaulate them to grids
+            if type(vector_field[0]) == str:
+                new_str_x = vector_field[0].replace('x', '(self.xg)')
+                new_str_x = new_str_x.replace('y', '(self.yg)')
+                new_str_x = new_str_x.replace('z', '(self.zg)')
+
+                new_str_y = vector_field[1].replace('x', '(self.xg)')
+                new_str_y = new_str_y.replace('y', '(self.yg)')
+                new_str_y = new_str_y.replace('z', '(self.zg)')
+
+                new_str_z = vector_field[2].replace('x', '(self.xg)')
+                new_str_z = new_str_z.replace('y', '(self.yg)')
+                new_str_z = new_str_z.replace('z', '(self.zg)')
+
+                if new_str_x.find('x') & new_str_x.find('y') & new_str_x.find('z') == -1:
+                    new_str_x = '(' + str(new_str_x) + ')* np.ones(np.shape(self.xg))'
+                if new_str_y.find('x') & new_str_y.find('y') & new_str_y.find('z') == -1:
+                    new_str_y = '(' + str(new_str_y) + ')* np.ones(np.shape(self.yg))'
+                if new_str_z.find('x') & new_str_z.find('y') & new_str_z.find('z') == -1:
+                    new_str_z = '(' + str(new_str_z) + ')* np.ones(np.shape(self.zg))'
+
+                vf_x = eval(new_str_x)
+                vf_y = eval(new_str_y)
+                vf_z = eval(new_str_z)
+
+            else:
+                vf_x = vector_field[0]
+                vf_y = vector_field[1]
+                vf_z = vector_field[2]
+        else:
+            # extract needed properties from the object supplied
+            vf_x = vector_field.F_x
+            vf_y = vector_field.F_y
+            vf_z = vector_field.F_z
+        
+        # Complete the interior derivative 1-form --> 0-form:
+        two_form_x_result = self.form_3 * vf_x
+        two_form_y_result = self.form_3 * vf_y 
+        two_form_z_result = self.form_3 * vf_z 
+        
+        # supply these to the 0-form object creator
+        result_form = form_2_3d(self.xg, self.yg, self.zg, two_form_x_result, two_form_y_result, two_form_z_result)
+        
+        # return it to the user
+        return result_form
 
 
     
