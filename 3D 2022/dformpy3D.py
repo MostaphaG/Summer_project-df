@@ -2,136 +2,60 @@ import numpy as np
 from mayavi import mlab
 import matplotlib.pyplot as plt
 import sympy
-from sympy import sympify
 from sympy import diff, simplify
 from sympy.parsing.sympy_parser import parse_expr
 
 from tvtk.api import tvtk
 from tvtk.common import configure_input_data, configure_source_data
 
-from numpy import matrix, sin, cos, tan, sqrt, log, arctan, arcsin, arccos, tanh
+from numpy import sin, cos, tan, sqrt, log, arctan, arcsin, arccos, tanh
 from numpy import sinh, cosh, arcsinh, arccosh, arctanh, exp, pi, e
-
-
-def find_2_form(expressions, coords, xg, yg, zg=None, m=3):
-    '''
-    find_2_form(expressions, coords, xg, yg, zg=None, m=2)
-    
-    Finds the analytical 2 form using sympy experssion handling.
-    
-    Parameters:
-    ---------------
-    expressions - list of sympy experssions for the 1 form scaling fucntions
-    coords - list of coordinate names as strings, that were used in experssions
-    xg, yg - grids
-    zg - possible grid
-    m - number of dimensions
-    
-    Returns:
-    ---------------
-    result  - analytical, unformatted 2-form equation
-    '''
-    
-    # define a sympy expression for string 0
-    sympy_expr_zero = parse_expr('0*x', evaluate=False)
-    
-    # set up an array to store derrivatives.
-    ext_ds = np.empty((m, m), dtype='object')
-    
-    # set up an array to store the results
-    # in 2D only dx^dy, in 3D (m=3) (in order): dx^dy, dx^dz, dy^dz
-    result = np.empty((int((m-1)*m/2), 1), dtype='object')
-    for i in range(int((m-1)*m/2)):
-        result[i] = str(result[i])
-    
-    # loop over differentiating each, when differentiating w.r.t its coord, set to 0
-    for coord_index in range(len(coords)):
-        # loop over differentiating each component:
-        for comp_index in range(len(expressions)):
-            # when equal set to 0, when not-differentiate:
-            if comp_index == coord_index:
-                ext_ds[comp_index, coord_index] = str(sympy_expr_zero)
-            elif comp_index != coord_index:
-                ext_ds[comp_index, coord_index] = str(diff(expressions[comp_index], coords[coord_index]))
-            # change the signs for wedges in wrong order
-            if comp_index < coord_index:
-                ext_ds[comp_index, coord_index] = ' - (' + str(ext_ds[comp_index, coord_index]) + ')'
-            elif comp_index > coord_index:
-                ext_ds[comp_index, coord_index] = ' + ' + str(ext_ds[comp_index, coord_index])
-    
-    
-    # merge the results into a 2-form (for 2-form on R^2, the result is a single component (dx^xy))
-    # do so by adding opposite elements along the diagonal ( / ) components of ext_ds
-    # this  includes taking elemets with switched i and j
-    
-    
-    # set up a variable to count pairs (pairs because we are forming 2-forms):
-    pair = 0
-    
-    # loop over opposing elements (matching elementary 2-forms)
-    for i in range(1, m):
-        for j in range(i):
-            # initially clear the element from its Nonetype placeholder
-            result[pair, 0] = ''
-            # extract opposing elements
-            temp = ext_ds[i, j]
-            temp1 = ext_ds[j, i]
-            # check these against zero entries:
-            if (temp == '0') or (temp == '-(0)') or (temp == '0*x'):
-                pass
-            else:
-                result[pair, 0] += temp
-            if (temp1 == '0') or (temp1 == '-(0)') or (temp1 == '0*x'):
-                pass
-            else:
-                result[pair, 0] += temp1
-            # update the result row counter
-            pair += 1
-    
-    return result
-
-
-
-
 
 
 
 
 class vector_field3():
+
     '''
     The class which creates a vector field object. 
     Requires grid (3D), field components.
-    in order to calculate  curl and div, it is necessary to
+    in order to calculate  curl, div, zoomed field, covariant vector object or derivative field,
+    it is necessary to
     provide string expressions for the field component to
     the object as well
-    .plot() can be used to plot out the vector field and the curl
-    (either on the same axes or different)
+    .plot() can be used to plot out the vector field and the curl (either on the same axes or different)
+
 
     Methods: (applied to the object)
 
-    .give_eqn(equation_str_x, equation_str_y, equation_str_z) 
-    .curl()
-    .div()
-    .plot() - applied to either curl of object
+    .give_eqn(equation_str_x, equation_str_y, equation_str_z) - provides equations ; 
+    .curl() - creates a separate curl object ; 
+    .div(at_x=None, at_y=None, at_z=None) [if coordinates provided, gives divergence at the point] ;
+    .log_scaling() - scales the field logarithmycally; 
+    .zoom(magnitude, target, point_density) - creates a zoomed in field object ; 
+    .autoscale() - automatic scale for better visuals ;
+    .covariant() - creates a covariant vector field object (1-form) ;
+    .deriv(target, magnitude, point_density) - creates a derivative field object at the target location ;
+    .plot() - applied to either curl of object, plots an object of teh .vector_field3() class
     [if applied to object can use add_curl ='y' argument to plot
-    curl and field on the same axes]
+    curl and field on the same axes] ;
     '''
 
-    # set up all variables
-    def __init__(self, xg, yg, zg, F_x, F_y, F_z, F_x_eqn=None, F_y_eqn=None, F_z_eqn=None):
 
-        self.xg = xg
+    def __init__(self, xg, yg, zg, F_x, F_y, F_z, F_x_eqn=None, F_y_eqn=None, F_z_eqn=None):
+        # Define initial variables supplied to the object
+
+        self.xg = xg # coordinate grid
         self.yg = yg
         self.zg = zg
-        self.F_x = F_x
+        self.F_x = F_x # field magnitude at the grid points
         self.F_y = F_y
         self.F_z = F_z
-        self.pt_den = len(xg[:, 0])  # + 1 , assume square grids
+        self.pt_den = len(xg[0, :, 0]) # amount of points in a grid
         self.orientation = 'mid'
         self.scale = 1
-        self.color = 'black'
         self.logarithmic_scale_bool = 0
-        # self.base = 10
+
         self.scale_bool = True
         self.delta_factor = 10
 
@@ -153,24 +77,23 @@ class vector_field3():
 
 
 
-
     def give_eqn(self, equation_str_x, equation_str_y, equation_str_z):
         '''
-        Takes in 1-argument, string
+        Takes in 3 arguments (x, y & z components), string
         It must be in terms of x, y and z.
-        Has to be given, for curl and div to be calculatable.
+        Has to be given, for curl, div and some other methods to be calculatable.
         '''
         # set equation parameters to simplified inputs
         self.str_x = str(simplify(equation_str_x))
         self.str_y = str(simplify(equation_str_y))
         self.str_z = str(simplify(equation_str_z))
-        # make the values match automatically to limit how often mismatch occurs
-        # substitute these into the equation:
-        # but keep it local
+
+        # keep the equations local
         str_x = self.str_x + ''
         str_y = self.str_y + ''
         str_z = self.str_z + ''
 
+        # replace coordinates in the strings with coordinate grid arrays
         str_x = str_x.replace('x', '(self.xg)')
         str_x = str_x.replace('y', '(self.yg)')
         str_x = str_x.replace('z', '(self.zg)')
@@ -192,11 +115,13 @@ class vector_field3():
             str_z = '(' + str(str_z) + ')* np.ones(np.shape(self.zg))'
         
         
-        # re-evaluate the 2-form numerically
+        # re-evaluate the field components numerically
         self.F_x = eval(str_x)
         self.F_y = eval(str_y)
         self.F_z = eval(str_z)
         
+
+
     def return_string(self):
         '''
         Takes in no arguments, returns the unformatted strings back to user
@@ -204,6 +129,8 @@ class vector_field3():
         that got here not by input but by ext. alg.
         '''
         return self.str_x, self.str_y, self.str_z
+
+
 
     def curl(self):
         '''
@@ -272,8 +199,11 @@ class vector_field3():
             Curl_Y = eval(CurlY)
             Curl_Z = eval(CurlZ)
 
+            # create a vf object
             curl_vf = vector_field3(self.xg, self.yg, self.zg, Curl_X, Curl_Y, Curl_Z, self.str_x, self.str_y, self.str_z)
             return(curl_vf)
+
+
 
     def div(self, at_x=None, at_y=None, at_z=None):
         '''
@@ -409,7 +339,8 @@ class vector_field3():
                 a = a[:,0]
 
                 print('Divergence at the grid point/points closest to the input, '+ str(pts[a]) +', = '+ str(Div_lst[a]))
-                
+
+
 
     def log_scaling(self):
         '''
@@ -421,8 +352,19 @@ class vector_field3():
         self.logarithmic_scale_bool = not self.logarithmic_scale_bool
 
 
+
     def zoom(self, mag, target, dpd):
         
+        """
+        Redefines a new, zoomed in grid on which a new VF is calculated.
+        Takes in three arguments:
+
+        mag - magnitude of zoom ; 
+        target - target point [x, y, z] ;
+        dpd - points amount in the new grid ; 
+
+        Returns a new, zoomed in vector field 
+        """
 
         if self.str_x == None or self.str_y == None or self.str_z == None:
             # ERROR
@@ -492,7 +434,9 @@ class vector_field3():
 
                 
                 return zoom_form
-            
+
+
+
     def autoscale(self):
         '''
         Takes no arguments
@@ -502,19 +446,21 @@ class vector_field3():
         '''
         self.scale_bool = not self.scale_bool
 
+
+
     def covariant(self, g=[['1', '0', '0'], ['0', '1', '0'], ['0', '0', '1']]):
             '''
             Passes in everything it can (all it has been supplied)
             to the 1-form object.
-            Works via the metric on R2
+            Works via the metric on R3
             Can supply the metric in as equations or as evaluated arrays
             Format of the metric is a list of numpy arrays
-            0th array is the top row, its 0th component is 11, 1st is 12
-            1st array is the botton row, its 0th comp is 21 and 1st is 22.
+            0th array is the top row, its 0th component is 00, 1st is 01, 2nd is 02
+            1st array is the middle row, its 0th comp is 10, 1st is 11, 2nd is 12.
+            2nd array is the bottom row, its 0th comp is 20, 1st is 21, 2nd is 22.
             Note, if it is supplied as arrays, they must come from numpy grids
             via meshgrid, if it is supplied as strings, needs to be in terms of
-            x and y, and contain no special funtions, apart from ones imported
-            here automatically and listed in the documentation #!!!
+            x, y, z, and contain no special funtions
             
             Returns a single object (1-form object)
             '''
@@ -590,7 +536,7 @@ class vector_field3():
                     str_comp_22 = '(' + str(str_comp_22) + ')* np.ones(np.shape(self.xg))'
 
 
-                # evaluate the components numerically, inputting them into a
+                # evaluate the components numerically
                 # store numerical metric
                 comp_00 = eval(str_comp_00)
                 comp_01 = eval(str_comp_01)
@@ -601,6 +547,7 @@ class vector_field3():
                 comp_20 = eval(str_comp_20)
                 comp_21 = eval(str_comp_21)
                 comp_22 = eval(str_comp_22)
+
                 g_num = [[comp_00, comp_01, comp_02], [comp_10, comp_11, comp_12], [comp_20, comp_21, comp_22]]
                 
                 # set up a dummy variable to store the fact that numericals were given
@@ -664,7 +611,10 @@ class vector_field3():
             # return the found object
             return result_form
 
+
+
     def deriv(self, target, mag, dpd):
+
         '''
         Creates new vector field object at a target location, showing the derivative field at this point.
         User gives arguments:
@@ -672,16 +622,16 @@ class vector_field3():
         mag - Magnification level
         dpd - New plot point density
         
-        inset - bool - if true, field deriv is plotted on given axis
-        axis - matplotlib axes instance - axis to plot on if instance it True
+        
         
         Returns:
         --------
-        if inset is False:
-            deriv VF object
-        if inset is True, inset axis and deriv VF object in this order.
+    
+        deriv VF object
+
         
         '''
+        
         if self.str_x == None or self.str_y == None or self.str_z == None:
             # ERROR
             raise TypeError('No equation provided')
@@ -732,7 +682,7 @@ class vector_field3():
                 k_str_point = k_str_point.replace('y', 'y_m')
                 k_str_point = k_str_point.replace('z', 'z_m')
                 
-                # Check if the equations provided contain x and y terms
+                # Check if the equations provided contain x, y, z terms
                 
 
 
@@ -769,6 +719,8 @@ class vector_field3():
                 # depending on preferances, return to user and plot
                 
                 return deriv_vf
+
+
 
     def plot(self, add_curl = None, arrow_colour = None, arrow_cmap=None, scaling=None, opacity=None, curl_opacity=None):
 
@@ -1041,10 +993,18 @@ class form_0_3d():
 
     Methods: (applied to the object)
 
-    .give_eqn(equation_str_x, equation_str_y, equation_str_z) 
-    .levels()
-    .set_density()
-    .log_scaling()
+    .give_eqn(equation_str_x, equation_str_y, equation_str_z) - provides equation for the 0-form; 
+    .return_string() - returns string to the user ;
+    .levels() - amunt of levels in surface plot ; 
+    .log_scaling() - scales 0-form logarithmically ; 
+    .set_density() - sets density of grid points ; 
+    .zoom() - creates a zoomed in 0-form ; 
+    .ext_d() - takes exterior derivative of 0-form, creates 1-form object ; 
+    .num_ext_d() - takes numerical exterior derivative of 0-form, creates 1-form object ; 
+    .hodge() - applies hodge star operator to the 0-form ; 
+    .num_hodge() - applies hodge star operator to the 0-form numerically ; 
+    .wedge(...) - wedges 0-form with another p-form ; 
+    .num_wedge(...) - wedges 0-form with another p-form numerically ;  
     .plot()
     [if applied to object can use cross_sec_plane ='y' argument to plot
     the cut plane and see the colormesh of the potential]
@@ -1092,7 +1052,7 @@ class form_0_3d():
         # update the numerical values to always match
         string = self.form_0_str + ''
         
-        # Check if the equations provided contain x and y terms
+        # Check if the equations provided contain x, y, z terms
         # and format them to be evaluated
         if string.find('x') & string.find('y') & string.find('z') == -1:
             string = '(' + str(string) + ')* np.ones(np.shape(xg))'
@@ -1179,14 +1139,23 @@ class form_0_3d():
             # correct for constant forms
             if str_0.find('x') & str_0.find('y') & str_0.find('z') == -1:
                 str_0 = '(' + str(str_0) + ')* np.ones(np.shape(self.xg))'
-            # re-evaluate the 2-form numerically
+            # re-evaluate the 0-form numerically
             self.form_0 = eval(str_0)
 
 
 
     def zoom(self, mag, target, dpd):
         
+        """
+        Redefines a new, zoomed in grid on which a new 0-form is calculated.
+        Takes in three arguments:
 
+        mag - magnitude of zoom ; 
+        target - target point [x, y, z] ;
+        dpd - points amount in the new grid ; 
+
+        Returns a new, zoomed in 0-form 
+        """
 
 
         if self.form_0_str == None:
@@ -1224,7 +1193,7 @@ class form_0_3d():
                 f0_str = self.form_0_str
 
                 
-                # Check if the equations provided contain x and y terms
+                # Check if the equations provided contain x, y, z terms
                 if f0_str.find('x') & f0_str.find('y') & f0_str.find('z')== -1:
                     f0_str = '(' + str(f0_str) + ')* np.ones(np.shape(dxg))'
                 else:
@@ -1403,7 +1372,7 @@ class form_0_3d():
         '''
         
         # from numpy gradient, get the gradient array
-        fy, fx, fz= np.gradient(self.form_0, edge_order=edge_order)
+        fy, fx, fz= np.gradient(self.form_0, edge_order = edge_order)
         
         # supply these to the 1-form object function
         result_1_form = form_1_3d(self.xg, self.yg, self.zg, fx, fy, fz)
@@ -1417,8 +1386,8 @@ class form_0_3d():
         '''
         Takes in no arguments
         
-        It calulates the Hodge on R^2 by the standard definition:
-        1* = (dx^dy)
+        It calulates the Hodge on R^3:
+        1* = (dx^dy^dz)
         Does so analytically via instance provided equtions
         changes the equations AND the numerical answers
         
@@ -1446,7 +1415,7 @@ class form_0_3d():
             form_2_result = eval(string_2_form)
             
             # create and return object
-            new_object = form_2_3d(self.xg, self.yg, self.zg, Fx = form_2_result, Fy = form_2_result, Fz = form_2_result, Fx_eqn=form_2_str_unformated, Fy_eqn=form_2_str_unformated, Fz_eqn=form_2_str_unformated)
+            new_object = form_3_3d(self.xg, self.yg, self.zg, form_3 = form_2_result, form_3_eqn = form_2_str_unformated)
             return new_object
         else:
             # ERROR
@@ -1459,7 +1428,7 @@ class form_0_3d():
         Takes in no arguments
         
         It calulates the Hodge on R^2 by the standard definition:
-        1* = (dx^dy)
+        1* = (dx^dy^dz)
         Does so numerically via instance provided arrays
         IF equations were given, this method will lose them
         
@@ -1473,7 +1442,7 @@ class form_0_3d():
         
         # now complete the process numerically
         # pass these in to the object to create a new one and return
-        new_object = form_2_3d(self.xg, self.yg, self.zg, Fx = self.form_0, Fy = self.form_0, Fz = self.form_0)  # N.B no equations to supply
+        new_object = form_3_3d(self.xg, self.yg, self.zg, form_3 = self.form_0)  # N.B no equations to supply
         return new_object
 
 
@@ -1487,13 +1456,13 @@ class form_0_3d():
                     or a single string equation depending on what form is to be
                     wedged.
                     To wedge with 1-form, supply 1-form instance, or tuple of
-                    component equations as strings in terms of x and y.
+                    component equations as strings in terms of x, y, z.
                     To wedge with 0-form or 2-form, supply corresponding
                     instances or a single equation. When using equations,
                     to distinguish between them, provide parmater 'degree'.
         degree - default is 0. Only used when a single string is supplied
                     as form_second, to distinguish betwen 0-form and 2-form
-                    for 0-form, degree=0, for 2-form, degree=2.
+                    for 0-form, degree=0, for 2-form, degree=2, for 3-form, degree=3.
                     Determines what form is to be wegded with the
                     given 0-form.
         keep_object - bool -default=False - Only needed when 0-form /\ 0-form 
@@ -1510,6 +1479,7 @@ class form_0_3d():
                     (default), and returns nothing when it is True
         Wedged with a 1-form, returns a 1-form instance
         Wedged with a 2-form, returns a 2-form instance
+        Wedged with a 3-form, returns a 3-form instance
         
         '''
         
@@ -1523,13 +1493,15 @@ class form_0_3d():
         # get needed second obejct strings dep. on input
         if isinstance(form_second, tuple):
             # if equations were given here take these, if numerical grids were given - error!
-            # check size , should be a 1-form
+            # check size , should be a 1-form or 2-form
             if len(form_second) == 3:
                 # 0-form/\1-form, check if strings supplied
                 if isinstance(form_second[0], str) and isinstance(form_second[1], str) and isinstance(form_second[2], str):
                     to_wedge_x_2_str = form_second[0]
                     to_wedge_y_2_str = form_second[1]
                     to_wedge_z_2_str = form_second[2]
+
+                    # set corresponding order for either 1 or 2 form
                     if degree == 1:
                         order = 1
                     elif degree == 2:
@@ -1539,7 +1511,7 @@ class form_0_3d():
             else:
                 raise ValueError('too many or too little equations given in tuple')
         elif isinstance(form_second, str):
-            # single string, could be 0-form or 2-form, check given degree:
+            # single string, could be 0-form or 3-form, check given degree:
             if degree == 0:
                 to_wedge_0_form_str = form_second
                 order = 0
@@ -1623,6 +1595,9 @@ class form_0_3d():
             return new_object
         
         elif order == 0:
+
+            # 0-form/\0-form
+
             form_0_str = str(simplify( '(' + self.form_0_str + ')*(' +  to_wedge_0_form_str + ')'))
             # keep it as it is locally to supply it to object maker later
             form_0_str_loc = form_0_str + ''
@@ -1650,6 +1625,9 @@ class form_0_3d():
                 raise ValueError('Error, Invalid input for \'keep_object\'')
 
         elif order == 2:
+
+            # 0-form /\ 2-form
+
             form_2_str_x = str(simplify( '(' + self.form_0_str + ')*(' +  to_wedge_2_form_str_x + ')'))
             form_2_str_y = str(simplify( '(' + self.form_0_str + ')*(' +  to_wedge_2_form_str_y + ')'))
             form_2_str_z = str(simplify( '(' + self.form_0_str + ')*(' +  to_wedge_2_form_str_z + ')'))
@@ -1689,6 +1667,9 @@ class form_0_3d():
             return new_object
 
         elif order == 3:
+
+            # 0-form /\ 3-form
+
             form_3_str = str(simplify( '(' + self.form_0_str + ')*(' +  to_wedge_3_form_str + ')'))
             # keep it as it is locally to supply it to object maker later
             form_3_str_loc = form_3_str + ''
@@ -1726,26 +1707,26 @@ class form_0_3d():
         Parameters:
         ----------------
         form_second - the form to wedge the 0-form with.
-                    Can be supplied as a DFormPy instance, a tuple of grids of
-                    same size and dimensions as this 0-form,
-                    or a single grid of scaling function values depending on
-                    what form is to be wedged.
+                    Can be supplied as a DFormPy instance, a tuple of equations,
+                    or a single string equation depending on what form is to be
+                    wedged.
                     To wedge with 1-form, supply 1-form instance, or tuple of
-                    component grids of same size as 1-form acted on.
+                    component equations as strings in terms of x, y, z.
                     To wedge with 0-form or 2-form, supply corresponding
-                    instances or a single grid. When using grids,
+                    instances or a single equation. When using equations,
                     to distinguish between them, provide parmater 'degree'.
-        degree - default is 0. Only used when a single grid is supplied
+        degree - default is 0. Only used when a single string is supplied
                     as form_second, to distinguish betwen 0-form and 2-form
-                    for 0-form, degree=0, for 2-form, degree=2.
+                    for 0-form, degree=0, for 2-form, degree=2, for 3-form, degree=3.
                     Determines what form is to be wegded with the
                     given 0-form.
-        keep_object - bool -default=False - only used when 0-form is wedged
-                    with a 0-form. If False, a new object is created as 
-                    a result of the wedge. If True, the 1-form acted on
+        keep_object - bool -default=False - Only needed when 0-form /\ 0-form 
+                    If False, a new object is created
+                    as a result of the wedge. If True, the 0-form acted on
                     is modified to be the result of the wedge. 
         
-        Computes the Wedge product numerically
+        To do so here, strings for the form must be supplied.
+        Computes the Wedge product using strings, ANALYTICALLY
         
         Returns:
         --------------
@@ -1753,6 +1734,7 @@ class form_0_3d():
                     (default), and returns nothing when it is True
         Wedged with a 1-form, returns a 1-form instance
         Wedged with a 2-form, returns a 2-form instance
+        Wedged with a 3-form, returns a 3-form instance
         
         '''
         
@@ -1879,6 +1861,9 @@ class form_0_3d():
             return new_object
         
         elif order == 0:
+
+            # Deal with 0-form/\0-form:
+
             # from these get the numerical 0-form
             form_0_result = self.form_0 * to_wedge_0_form
             
@@ -1893,7 +1878,9 @@ class form_0_3d():
                 raise ValueError('Error, Invalid input for \'keep_object\'')
 
         elif order == 2:
-            # from these get the numerical 0-form
+
+            # Deal with 0-form/\2-form:
+
             form_2_result_x = self.form_0 * to_wedge_2_form_x
             form_2_result_y = self.form_0 * to_wedge_2_form_y
             form_2_result_z = self.form_0 * to_wedge_2_form_z
@@ -1902,7 +1889,9 @@ class form_0_3d():
             new_object = form_2_3d(self.xg, self.yg, self.zg, form_2_result_x, form_2_result_y, form_2_result_z)
             return new_object
         elif order == 3:
-            # from these get the numerical 0-form
+
+            # Deal with 0-form/\3-form:
+
             form_3_result = self.form_0 * to_wedge_3_form
             
             # depending on keep_object, return:
@@ -1931,9 +1920,23 @@ class form_1_3d():
 
     Methods: (applied to the object)
 
-    .give_eqn(equation_str_x, equation_str_y, equation_str_z) 
-    .log_scaling()
+    .give_eqn(equation_str_x, equation_str_y, equation_str_z) - provides equation for the 0-form; 
+    .return_string() - returns strings to the user ;
+    .log_scaling() - scales 1-form logarithmically ; 
+    .set_density() - sets density of grid points ; 
+    .zoom() - creates a zoomed in 1-form ; 
+    .contravariant() - creates a contravariant vector field object
+    .ext_d() - takes exterior derivative of 1-form, creates 2-form object ; 
+    .num_ext_d() - takes numerical exterior derivative of 1-form, creates 2-form object ; 
+    .hodge() - applies hodge star operator to the 1-form ; 
+    .num_hodge() - applies hodge star operator to the 1-form numerically ; 
+    .wedge(...) - wedges 1-form with another p-form ; 
+    .num_wedge(...) - wedges 1-form with another p-form numerically ; 
+    .interior_d() - takes interior derivative of 1-form, creates 0-form object ; 
+    .num_interior_d() - takes interior derivative of 1-form numerically, creates 0-form object ; 
     .plot()
+    [if applied to object can use cross_sec_plane ='y' argument to plot
+    the cut plane and see the colormesh of the potential]
     """
 
     def __init__(self, xg, yg, zg, F_x, F_y, F_z, F_x_eqn=None, F_y_eqn=None, F_z_eqn=None):
@@ -2046,7 +2049,16 @@ class form_1_3d():
 
     def zoom(self, mag, target, dpd):
     
+        """
+        Redefines a new, zoomed in grid on which a new 1-form is calculated.
+        Takes in three arguments:
 
+        mag - magnitude of zoom ; 
+        target - target point [x, y, z] ;
+        dpd - points amount in the new grid ; 
+
+        Returns a new, zoomed in 1-form 
+        """
 
         if self.form_1_str_x == None or self.form_1_str_y == None or self.form_1_str_z == None:
             # ERROR
@@ -2124,8 +2136,8 @@ class form_1_3d():
         Changes the desnity of points in the same range to the input value
         Requires the string equation to be supplied to not 'extrapolate'
         
-        Only creates 2 axis with same number of points each
-        cannot be used for any custom grids
+        Only creates grid with same number of points in each
+        direction. Cannot be used for any custom grids
         
         Parameters:
         --------------
@@ -2177,18 +2189,18 @@ class form_1_3d():
     def contravariant(self, g=[['1', '0', '0'], ['0', '1', '0'], ['0', '0', '1']]):
             '''
             Passes in everything it can (all it has been supplied)
-            to the 1-form object.
-            Works via the metric on R2
+            to the VF object.
+            Works via the metric on R3
             Can supply the metric in as equations or as evaluated arrays
             Format of the metric is a list of numpy arrays
-            0th array is the top row, its 0th component is 11, 1st is 12
-            1st array is the botton row, its 0th comp is 21 and 1st is 22.
+            0th array is the top row, its 0th component is 00, 1st is 01, 2nd is 02
+            1st array is the middle row, its 0th comp is 10, 1st is 11, 2nd is 12.
+            2nd array is the bottom row, its 0th comp is 20, 1st is 21, 2nd is 22.
             Note, if it is supplied as arrays, they must come from numpy grids
             via meshgrid, if it is supplied as strings, needs to be in terms of
-            x and y, and contain no special funtions, apart from ones imported
-            here automatically and listed in the documentation #!!!
+            x, y, z, and contain no special funtions.
             
-            Returns a single object (1-form object)
+            Returns a single object (VF object)
             '''
             
             # extract what is needed form the metric depending on what the user
@@ -2960,13 +2972,13 @@ class form_1_3d():
                     or a single string equation depending on what form is to be
                     wedged.
                     To wedge with 1-form, supply 1-form instance, or tuple of
-                    component equations as strings in terms of x and y.
-                    To wedge with 0-form or 2-form, supply corresponding
+                    component equations as strings in terms of x, y & z.
+                    To wedge with 0-form or 3-form, supply corresponding
                     instances or a single equation. When using equations,
                     to distinguish between them, provide parmater 'degree'.
         degree - default is 1. Only used when a single string is supplied
                     as form_second, to distinguish betwen 0-form and 2-form
-                    for 0-form, degree=0, for 2-form, degree=2.
+                    for 0-form, degree=0, for 2-form, degree=2, for 3-form, degree=3.
                     Determines what form is to be wegded with the
                     given 1-form.
         keep_object - bool -default=False - only used when 1-form is wedged
@@ -2982,7 +2994,8 @@ class form_1_3d():
         Wedged with 0-form returns a 1-form object if keep_object is False
                     (default), and returns nothing when it is True
         Wedged with a 1-form, returns a 2-form instance
-        Wedged with a 2-form, operation makes a 3-form, which on R^2 is
+        Wedged with a 2-form, returns a 3-form instance
+        Wedged with a 3-form, operation makes a 4-form, which on R^3 is
                     always = zero, only message displays.
         
         '''
