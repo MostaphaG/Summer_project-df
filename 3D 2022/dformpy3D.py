@@ -1391,7 +1391,7 @@ class form_0_3d():
         Does so analytically via instance provided equtions
         changes the equations AND the numerical answers
         
-        returns a 2-form
+        returns a 3-form
         
         '''
         # can only be done if equations have been given, check:
@@ -2793,7 +2793,7 @@ class form_1_3d():
         returns 2-form object
         '''
         
-        # get steps in dx and dy:
+        # get steps in dx, dy, dz:
         dx = self.xg[0, :, 0]
         dy = self.yg[:, 0, 0]
         dz = self.zg[0, 0, :]
@@ -6231,6 +6231,73 @@ class form_3_3d():
         else:
             # should never happen, but in case
             raise ValueError('Variable change during code running, look at \'order\' parameter')
+
+
+
+    def hodge(self):
+        '''
+        Takes in no arguments
+        
+        It calulates the Hodge on R^3:
+        1 = (dx^dy^dz)*
+        Does so analytically via instance provided equtions
+        changes the equations AND the numerical answers
+        
+        returns a 0-form
+        
+        '''
+        # can only be done if equations have been given, check:
+        if self.form_3_str != None:
+            # some equations are there, compute the Hodge on these:
+            
+            # get numerical solutions, evaulated on local strings
+            # to relate parameter to the self grids and keep strings, because
+            # need to supply these unformatted:
+            form_2_str_unformated = self.form_3_str + '' 
+            string_2_form = self.form_3_str  # to be formated
+            # from these strings, get the numerical 2-form:
+            string_2_form = string_2_form.replace('x', '(self.xg)')
+            string_2_form = string_2_form.replace('y', '(self.yg)')
+            string_2_form = string_2_form.replace('z', '(self.zg)')
+            
+            if string_2_form.find('x') & string_2_form.find('y') & string_2_form.find('z') == -1:
+                string_2_form = '(' + str(string_2_form) + ')* np.ones(np.shape(self.xg))'
+            
+            # evaulated numerically
+            form_2_result = eval(string_2_form)
+            
+            # create and return object
+            new_object = form_0_3d(self.xg, self.yg, self.zg, form_0 = form_2_result, form_0_eqn = form_2_str_unformated)
+            return new_object
+        else:
+            # ERROR
+            raise TypeError('You need to supply the 3-form equations to do this, look at \'give_eqn\' method')
+
+
+
+    def num_hodge(self):
+        '''
+        Takes in no arguments
+        
+        It calulates the Hodge on R^2 by the standard definition:
+        1* = (dx^dy^dz)
+        Does so numerically via instance provided arrays
+        IF equations were given, this method will lose them
+        
+        returns a 2-form
+        '''
+        # check if equations have been given:
+        # if they have, doing it only numerically would create
+        # a mismatch, avoid that
+        if self.form_3_str != None:
+            print('Warning: You supplied equations, doing it numerically only will lose these')
+        
+        # now complete the process numerically
+        # pass these in to the object to create a new one and return
+        new_object = form_0_3d(self.xg, self.yg, self.zg, form_0 = self.form_3)  # N.B no equations to supply
+        return new_object
+
+
 
 
 
