@@ -1978,7 +1978,15 @@ class form_1_3d():
 
     def give_eqn(self, equation_str_x, equation_str_y, equation_str_z):
         '''
-
+        Allows user to supply equations to instance, if not initially done so
+        
+        Parameters:
+        ------------
+        equation_str_x/y/z - str - equation of the supplied numerical 1-form component x/y/z
+                        It must be in terms of x, y, z.
+                        Has to be given, for some methods to be calculatable.
+        
+        Returns: None
         '''
         # set equation parameters to simplified inputs
         self.form_1_str_x = str(simplify(equation_str_x))
@@ -2708,7 +2716,7 @@ class form_1_3d():
     def ext_d(self):
         '''
         
-        ext_d()
+        .ext_d()
         
         Computes the exterior derivative and returns it
         as the 2-form object
@@ -3567,6 +3575,30 @@ class form_1_3d():
 
 class form_2_3d():
 
+
+    '''
+    defines a 2-form object and returns it to user
+    Takes 6 arguments basic, these are the 3 grids in 3D, which muse be square
+    and of equal sizes. Then 3 arguments for the dx^dy ; dx^dz ; dy^dz components
+    based on the same grids. Also takes in equations which are needed for some
+    operaions.
+
+    Methods: (applied to the object)
+
+    .give_eqn(equation_str_x, equation_str_y, equation_str_z) - provides equations ; 
+    .return_string() - returns equations as strings of a 2-form. ;
+    .log_scaling() - scales the field logarithmycally ; 
+    .zoom(magnitude, target, point_density) - creates a zoomed in field object ; 
+    .set_density2() - sets density of grid points for the 2-form ;
+    .plot() - applied to the 2-form object, gives out a plot of non-zero components ;
+    .ext_d() - takes exterior derivative of the 2-form ;
+    .hodge() - applies hodge star operator to the 2-form ; 
+    .wedge() - wedges the 2-form with another p-form object ;
+    .interior_d() - takes the interior derivative of the form
+
+    '''
+
+
     def __init__(self, xg, yg, zg, Fx=None, Fy=None, Fz=None, Fx_eqn=None, Fy_eqn=None, Fz_eqn=None):
         self.xg = xg
         self.yg = yg
@@ -3660,7 +3692,7 @@ class form_2_3d():
         This is done in case user wants to access strings
         that got here not by input but by ext. alg.
         '''
-        return self.Fx_eqn_str, self.Fy_eqn_str, self.Fz_eqn_str
+        return self.Fx_eqn, self.Fy_eqn, self.Fz_eqn
     
     
 
@@ -3677,7 +3709,16 @@ class form_2_3d():
     
     def zoom(self, mag, target, dpd):
     
+        """
+        Redefines a new, zoomed in grid on which a new 2-form is calculated.
+        Takes in three arguments:
 
+        mag - magnitude of zoom ; 
+        target - target point [x, y, z] ;
+        dpd - points amount in the new grid ; 
+
+        Returns a new, zoomed in 2-form 
+        """
 
         if self.Fx_eqn == None or self.Fy_eqn == None or self.Fz_eqn == None:
             # ERROR
@@ -3759,6 +3800,7 @@ class form_2_3d():
         -------------
         points_number_x - int - number of points to put along the x axis
         points_number_y - int - number of points to put along the y axis
+        points_number_z - int - number of points to put along the z axis
         
         Returns: None
         '''
@@ -3797,7 +3839,9 @@ class form_2_3d():
 
     def plot(self):
         
-  
+        """
+        Plots the 2-form. Retunrs nothing, takes in no arguments
+        """
 
         if self.Fx is None and self.Fy is None and self.Fz is None:
             print('Please, provide at least one component of the field')
@@ -4647,7 +4691,7 @@ class form_2_3d():
         If given, they do not get passed onto the 2-form object anyway
         NUMERICAL ONLY, they will be lost!
          
-        returns 2-form object
+        returns 3-form object
         '''
         
         # get steps in dx and dy:
@@ -4809,39 +4853,41 @@ class form_2_3d():
     def wedge(self, form_second, degree=2, keep_object=False):
         '''
         
-        wedge(form_second, degree=1, keep_object=False)
+        wedge(form_second, degree=2, keep_object=False)
         
         Parameters:
         ----------------
         form_second - the form to wedge the 2-form with.
-                    Can be supplied as a DFormPy instance, a tuple of equations,
-                    or a single string equation depending on what form is to be
-                    wedged.
-                    To wedge with 1-form, supply 1-form instance, or tuple of
-                    component equations as strings in terms of x and y.
-                    To wedge with 0-form or 2-form, supply corresponding
-                    instances or a single equation. When using equations,
+                    Can be supplied as a DFormPy instance, a tuple of grids of
+                    same size and dimensions as this 2-form,
+                    or a single grid of scaling function values depending on
+                    what form is to be wedged.
+                    To wedge with 1-form/2-form, supply 1-form/2-form instance, or tuple of
+                    component grids of same size as 1-form/2-form acted on.
+                    To wedge with 0-form or 3-form, supply corresponding
+                    instances or a single grid. When using grids,
                     to distinguish between them, provide parmater 'degree'.
-        degree - default is 1. Only used when a single string is supplied
-                    as form_second, to distinguish betwen 0-form and 2-form
-                    for 0-form, degree=0, for 2-form, degree=2.
+        degree - default is 2. Only used when a single grid is supplied
+                    as form_second, to distinguish betwen 0-form, 3-form and 2-form
+                    for 0-form, degree=0, for 2-form, degree=2 ,for 3-form, degre=3.
                     Determines what form is to be wegded with the
-                    given 1-form.
-        keep_object - bool -default=False - only used when 1-form is wedged
+                    given 2-form.
+        keep_object - bool -default=False - only used when 2-form is wedged
                     with a 0-form. If False, a new object is created as 
-                    a result of the wedge. If True, the 1-form acted on
+                    a result of the wedge. If True, the 2-form acted on
                     is modified to be the result of the wedge. 
         
-        To do so here, strings for the form must be supplied.
-        Computes the Wedge product using strings, ANALYTICALLY
+        Computes the Wedge product analytically
         
         Returns:
         --------------
-        Wedged with 0-form returns a 1-form object if keep_object is False
+        Wedged with 0-form returns a 2-form object if keep_object is False
                     (default), and returns nothing when it is True
-        Wedged with a 1-form, returns a 2-form instance
-        Wedged with a 2-form, operation makes a 3-form, which on R^2 is
-                    always = zero, only message displays.
+        Wedged with a 1-form, returns a 3-form instance
+        Wedged with a 2-form, operation makes a 4-form, which on R^3 is
+                    always = zero.
+        Wedged with a 3-form, operation makes a 5-form, which on R^3 is
+                    always = zero.
         
         '''
         
@@ -5000,39 +5046,41 @@ class form_2_3d():
     def num_wedge(self, form_second, degree=2, keep_object=False):
         '''
         
-        num_wedge(form_second, degree=1, keep_object=False)
+        num_wedge(form_second, degree=2, keep_object=False)
         
         Parameters:
         ----------------
-        form_second - the form to wedge the 1-form with.
+        form_second - the form to wedge the 2-form with.
                     Can be supplied as a DFormPy instance, a tuple of grids of
-                    same size and dimensions as this 1-form,
+                    same size and dimensions as this 2-form,
                     or a single grid of scaling function values depending on
                     what form is to be wedged.
-                    To wedge with 1-form, supply 1-form instance, or tuple of
-                    component grids of same size as 1-form acted on.
-                    To wedge with 0-form or 2-form, supply corresponding
+                    To wedge with 1-form/2-form, supply 1-form/2-form instance, or tuple of
+                    component grids of same size as 1-form/2-form acted on.
+                    To wedge with 0-form or 3-form, supply corresponding
                     instances or a single grid. When using grids,
                     to distinguish between them, provide parmater 'degree'.
-        degree - default is 1. Only used when a single grid is supplied
+        degree - default is 2. Only used when a single grid is supplied
                     as form_second, to distinguish betwen 0-form and 2-form
                     for 0-form, degree=0, for 2-form, degree=2.
                     Determines what form is to be wegded with the
-                    given 1-form.
-        keep_object - bool -default=False - only used when 1-form is wedged
+                    given 2-form.
+        keep_object - bool -default=False - only used when 2-form is wedged
                     with a 0-form. If False, a new object is created as 
-                    a result of the wedge. If True, the 1-form acted on
+                    a result of the wedge. If True, the 2-form acted on
                     is modified to be the result of the wedge. 
         
         Computes the Wedge product numerically
         
         Returns:
         --------------
-        Wedged with 0-form returns a 1-form object if keep_object is False
+        Wedged with 0-form returns a 2-form object if keep_object is False
                     (default), and returns nothing when it is True
-        Wedged with a 1-form, returns a 2-form instance
-        Wedged with a 2-form, operation makes a 3-form, which on R^2 is
-                    always = zero, only message displays.
+        Wedged with a 1-form, returns a 3-form instance
+        Wedged with a 2-form, operation makes a 4-form, which on R^3 is
+                    always = zero.
+        Wedged with a 3-form, operation makes a 5-form, which on R^3 is
+                    always = zero.
         
         '''
         
@@ -5206,13 +5254,13 @@ class form_2_3d():
         Vector_field = vector field object of DFormPy library to do the
             derivative with respect to, needs equations to work with
             nuymerical_only being False. Can also supply equations in a tuple:
-            (eqn_x, eqn_y). If using numerical only, can supply object or
-            tuple of numpy arrays (array_x, atrray_y). If nothing is supplied
-            for it, it assumes F_x = 1 and F_y = 1, with correct form and shape
+            (eqn_x, eqn_y, eqn_z). If using numerical only, can supply object or
+            tuple of numpy arrays (array_x, atrray_y, array_z). If nothing is supplied
+            for it, it assumes F_x = 1 and F_y = 1 and F_z = 1, with correct form and shape
         
         Does no analytically using equations provided in instance
         
-        Returns 0-form object
+        Returns 1-form object
         '''
         # test if equations were given first:
         if self.Fx_eqn == None or self.Fy_eqn == None or self.Fz_eqn == None:
@@ -5297,23 +5345,22 @@ class form_2_3d():
     def num_interior_d(self, vector_field=None):
         '''
         
-        num_interior_d(self, vector_field=None)
+        interior_d(vector_field=None)
         
-        Computes the interior derivative of the 1-form
+        Computes the interior derivative of the 2-form
         
         Parameters:
-        --------------
+        ------------------
         Vector_field = vector field object of DFormPy library to do the
             derivative with respect to, needs equations to work with
             nuymerical_only being False. Can also supply equations in a tuple:
-            (eqn_x, eqn_y). If using numerical only, can supply object or
-            tuple of numpy arrays (array_x, atrray_y). If nothing is supplied
-            for it, it assumes F_x = 1 and F_y = 1, with correct form and shape
+            (eqn_x, eqn_y, eqn_z). If using numerical only, can supply object or
+            tuple of numpy arrays (array_x, atrray_y, array_z). If nothing is supplied
+            for it, it assumes F_x = 1 and F_y = 1 and F_z = 1, with correct form and shape
         
-        Does no numerically using arrays provided in instance
-        If equations were proivided, this method will lose them
+        Does no analytically using equations provided in instance
         
-        Returns 0-form object
+        Returns 1-form object
         '''
         # check if equations have been given:
         # if they have, doing it only numerically would create
@@ -5383,7 +5430,25 @@ class form_2_3d():
 
 class form_3_3d():
 
+    '''
+    defines a 3-form object and returns it to user
+    Takes 4 arguments basic, these are the 3 grids in 3D, which muse be square
+    and of equal sizes. Then 1 argument for the dx^dy^dz component
+    based on the same grids. Also takes in equation which is needed for some
+    operaions.
 
+    Methods: (applied to the object)
+
+    .give_eqn(equation_str_x, equation_str_y, equation_str_z) - provides equations ; 
+    .return_string() - returns equations as strings of a 2-form. ;
+    .log_scaling() - scales the field logarithmycally ; 
+    .zoom(magnitude, target, point_density) - creates a zoomed in field object ; 
+    .plot() - applied to the 3-form object, gives out a plot of non-zero components ;
+    .hodge() - applies hodge star operator to the 3-form ; 
+    .wedge() - wedges the 3-form with another p-form object ;
+    .interior_d() - takes the interior derivative of the form
+
+    '''
 
     def __init__(self, xg, yg, zg, form_3, form_3_eqn=None):
         self.xg = xg
@@ -5463,7 +5528,16 @@ class form_3_3d():
 
     def zoom(self, mag, target, dpd):
         
+        """
+        Redefines a new, zoomed in grid on which a new 2-form is calculated.
+        Takes in three arguments:
 
+        mag - magnitude of zoom ; 
+        target - target point [x, y, z] ;
+        dpd - points amount in the new grid ; 
+
+        Returns a new, zoomed in 3-form 
+        """
 
 
         if self.form_3_str == None:
@@ -5525,7 +5599,9 @@ class form_3_3d():
 
     def plot(self):
 
-
+        """
+        Plots the 3-form. Takes in no arguments, returns nothing.
+        """
 
         xg = self.xg
         yg = self.yg
@@ -5947,12 +6023,12 @@ class form_3_3d():
                     To wedge with 0-form or 2-form, supply corresponding
                     instances or a single equation. When using equations,
                     to distinguish between them, provide parmater 'degree'.
-        degree - default is 0. Only used when a single string is supplied
+        degree - default is 3. Only used when a single string is supplied
                     as form_second, to distinguish betwen 0-form and 2-form
-                    for 0-form, degree=0, for 2-form, degree=2.
+                    for 0-form, degree=0, for 2-form, degree=2, for 3-form, degree=3.
                     Determines what form is to be wegded with the
                     given 0-form.
-        keep_object - bool -default=False - Only needed when 0-form /\ 0-form 
+        keep_object - bool -default=False - Only needed when 3-form /\ 0-form 
                     If False, a new object is created
                     as a result of the wedge. If True, the 0-form acted on
                     is modified to be the result of the wedge. 
@@ -5962,10 +6038,11 @@ class form_3_3d():
         
         Returns:
         --------------
-        Wedged with 0-form returns a 0-form object if keep_object is False
+        Wedged with 0-form returns a 3-form object if keep_object is False
                     (default), and returns nothing when it is True
-        Wedged with a 1-form, returns a 1-form instance
-        Wedged with a 2-form, returns a 2-form instance
+        Wedged with a 1-form, returns a 4-form instance, =0
+        Wedged with a 2-form, returns a 5-form instance, =0
+        Wedged with a 3-form, returns a 5-form instance, =0
         
         '''
         
@@ -6069,35 +6146,35 @@ class form_3_3d():
         '''
         Parameters:
         ----------------
-        form_second - the form to wedge the 0-form with.
-                    Can be supplied as a DFormPy instance, a tuple of grids of
-                    same size and dimensions as this 0-form,
-                    or a single grid of scaling function values depending on
-                    what form is to be wedged.
+        form_second - the form to wedge the 3-form with.
+                    Can be supplied as a DFormPy instance, a tuple of equations,
+                    or a single string equation depending on what form is to be
+                    wedged.
                     To wedge with 1-form, supply 1-form instance, or tuple of
-                    component grids of same size as 1-form acted on.
+                    component equations as strings in terms of x and y.
                     To wedge with 0-form or 2-form, supply corresponding
-                    instances or a single grid. When using grids,
+                    instances or a single equation. When using equations,
                     to distinguish between them, provide parmater 'degree'.
-        degree - default is 0. Only used when a single grid is supplied
+        degree - default is 3. Only used when a single string is supplied
                     as form_second, to distinguish betwen 0-form and 2-form
-                    for 0-form, degree=0, for 2-form, degree=2.
+                    for 0-form, degree=0, for 2-form, degree=2, for 3-form, degree=3.
                     Determines what form is to be wegded with the
                     given 0-form.
-        keep_object - bool -default=False - only used when 0-form is wedged
-                    with a 0-form. If False, a new object is created as 
-                    a result of the wedge. If True, the 1-form acted on
+        keep_object - bool -default=False - Only needed when 3-form /\ 0-form 
+                    If False, a new object is created
+                    as a result of the wedge. If True, the 0-form acted on
                     is modified to be the result of the wedge. 
         
-        Computes the Wedge product numerically
+        To do so here, strings for the form must be supplied.
+        Computes the Wedge product using strings, ANALYTICALLY
         
         Returns:
         --------------
-        Wedged with 0-form returns a 0-form object if keep_object is False
+        Wedged with 0-form returns a 3-form object if keep_object is False
                     (default), and returns nothing when it is True
-        Wedged with a 1-form, returns a 1-form instance
-        Wedged with a 2-form, returns a 2-form instance
-        
+        Wedged with a 1-form, returns a 4-form instance, =0
+        Wedged with a 2-form, returns a 5-form instance, =0
+        Wedged with a 3-form, returns a 5-form instance, =0
         '''
         
         # test if equations were given first:
@@ -6299,8 +6376,6 @@ class form_3_3d():
 
 
 
-
-
     def interior_d(self, vector_field=None):
         '''
         
@@ -6313,13 +6388,13 @@ class form_3_3d():
         Vector_field = vector field object of DFormPy library to do the
             derivative with respect to, needs equations to work with
             nuymerical_only being False. Can also supply equations in a tuple:
-            (eqn_x, eqn_y). If using numerical only, can supply object or
-            tuple of numpy arrays (array_x, atrray_y). If nothing is supplied
-            for it, it assumes F_x = 1 and F_y = 1, with correct form and shape
+            (eqn_x, eqn_y, eqn_z). If using numerical only, can supply object or
+            tuple of numpy arrays (array_x, atrray_y, atrray_z). If nothing is supplied
+            for it, it assumes F_x = 1 and F_y = 1 and F_z = 1, with correct form and shape
         
         Does no analytically using equations provided in instance
         
-        Returns 0-form object
+        Returns 2-form object
         '''
         # test if equations were given first:
         if self.form_3_str==None:
@@ -6404,23 +6479,22 @@ class form_3_3d():
     def num_interior_d(self, vector_field=None):
         '''
         
-        num_interior_d(self, vector_field=None)
+        num_interior_d(vector_field=None)
         
         Computes the interior derivative of the 3-form
         
         Parameters:
-        --------------
+        ------------------
         Vector_field = vector field object of DFormPy library to do the
             derivative with respect to, needs equations to work with
             nuymerical_only being False. Can also supply equations in a tuple:
-            (eqn_x, eqn_y). If using numerical only, can supply object or
-            tuple of numpy arrays (array_x, atrray_y). If nothing is supplied
-            for it, it assumes F_x = 1 and F_y = 1, with correct form and shape
+            (eqn_x, eqn_y, eqn_z). If using numerical only, can supply object or
+            tuple of numpy arrays (array_x, atrray_y, atrray_z). If nothing is supplied
+            for it, it assumes F_x = 1 and F_y = 1 and F_z = 1, with correct form and shape
         
-        Does no numerically using arrays provided in instance
-        If equations were proivided, this method will lose them
+        Does no analytically using equations provided in instance
         
-        Returns 0-form object
+        Returns 2-form object
         '''
         # check if equations have been given:
         # if they have, doing it only numerically would create
