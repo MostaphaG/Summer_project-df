@@ -9,7 +9,7 @@ Due to the ongoing pandemic, chances of academic travels are very low. So, I tho
 
 The Summer 2021 project duration was 10 weeks from Monday 28/6/2021 to 5/9/2021. We met regularly, almost every day sometimes, and we had one long meeting (~ 2.5 hours) a week. The majority of meetings were online, but were very vibrant and productive; we bounced ideas, refined thoughts, optimised and fixed codes, discussed theory and derivations and planned for the next steps. Maciek and Sam did most of the coding in a fantastic fashion. 
 
-This work gave birth to a Python GUI and a library, DFormpy. Both can do visualisation and calculus of vector fields on **R**<sup>2</sup> and visualisation and calculus of differential forms (0-form, 1-form and 2-form) on **R**<sup>2</sup> 
+This work gave birth to a Python GUI and a library, DFormpy. Both can do visualisation and calculus of vector fields on **R**<sup>2</sup> and visualisation and calculus of differential forms (0-form, 1-form and 2-form) on **R**<sup>2</sup>. The library has been published via a research paper. The paper gives detailed explanation of the library structure, plenty of examples and potential future implementations to the library. The publication can be found [here](https://arxiv.org/abs/2201.10517).
 
 In Summer 2022, we hired Vladimir as intern to work on my project. The Summer 2022 project aims at extending DFormpy functionality to deal with vectors and differential forms in **R**<sup>3</sup>.
 
