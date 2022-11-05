@@ -14,9 +14,9 @@ xg, yg, zg = np.meshgrid(grid, grid, grid)
 #x0, y0, z0 = np.meshgrid(grid, grid, grid)
 
 
-fx = xg/np.sqrt(xg**2+yg**2-zg**2)
-fy = yg/np.sqrt(xg**2+yg**2-zg**2)
-fz = zg/np.sqrt(xg**2+yg**2-zg**2)
+fx = yg
+fy = -xg
+fz = 0*grid
 
 
 potential = np.sqrt(xg**2 + yg**2 - zg**2)
@@ -53,7 +53,7 @@ f0.give_eqn('sqrt(x**2 + y**2 - z**2)')
 f0.plot()
 
 form_1 = df3.form_1_3d(xg, yg, zg, fx, fy, fz)
-form_1.give_eqn('x/sqrt(x**2+y**2-z**2)','y/sqrt(x**2+y**2-z**2)','z/sqrt(x**2+y**2-z**2)')
+form_1.give_eqn('y','-x','0')
 #form_11 = form_1.zoom(mag = 2.8, target=[0,0,10], dpd=4)
 #form_1.log_scaling()
 #contravariant_field = form_1.contravariant()
@@ -70,10 +70,11 @@ form_1.give_eqn('x/sqrt(x**2+y**2-z**2)','y/sqrt(x**2+y**2-z**2)','z/sqrt(x**2+y
 #f1_intd.plot()
 #f1_intd_num = form_1.num_interior_d(vf)
 #f1_intd_num.plot()
+form_1.plot()
 
 
 f2 = df3.form_2_3d(xg, yg, zg, Fz=fz, Fx=fx, Fy=fy)
-f2.give_eqn('x/sqrt(x**2+y**2-z**2)','y/sqrt(x**2+y**2-z**2)','z/sqrt(x**2+y**2-z**2)')
+f2.give_eqn('y','-x','0')
 #f2.log_scaling()
 #f22 = f2.zoom(mag = 5, target=[2,2,2], dpd=8)
 #f2.plot()
