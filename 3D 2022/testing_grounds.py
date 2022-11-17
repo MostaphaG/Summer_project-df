@@ -13,22 +13,16 @@ grid = np.linspace(-1,1,3)
 
 xg, yg, zg = np.meshgrid(grid, grid, grid)
 xg2, yg2= np.meshgrid(grid, grid)
-#x0, y0, z0 = np.meshgrid(grid, grid, grid)
 
 
-<<<<<<< HEAD
-fx = yg
-fy = -xg
-fz = 0*grid
-=======
-fx = -yg/np.sqrt(xg**2+yg**2)
-fy = xg/np.sqrt(xg**2+yg**2)
-fz = 0*zg
->>>>>>> 57b8fb158805cdaaeb9a3cbb055e80519de7fd2f
+
+fx = xg/np.sqrt(xg**2+yg**2 - zg**2)
+fy = yg/np.sqrt(xg**2+yg**2- zg**2)
+fz = yg/np.sqrt(xg**2+yg**2- zg**2)
 
 
-fx2 = -yg2/np.sqrt(xg2**2+yg2**2)
-fy2 = xg2/np.sqrt(xg2**2+yg2**2)
+fx2 = xg2/np.sqrt(xg2**2+yg2**2)
+fy2 = yg2/np.sqrt(xg2**2+yg2**2)
 
 
 potential = np.sqrt(xg**2 + yg**2 + zg**2)
@@ -70,10 +64,7 @@ potential2 = np.sqrt(xg2**2 + yg2**2)
 #f0.plot(cross_sec_plane='y')
 #f00.plot(cross_sec_plane='y')
 
-<<<<<<< HEAD
-form_1 = df3.form_1_3d(xg, yg, zg, fx, fy, fz)
-form_1.give_eqn('y','-x','0')
-=======
+
 #----compare difference between analytic/num 2d & 3d-----------------------
 
 #f0_2d = df.form_0(xg2, yg2, potential2)
@@ -98,11 +89,8 @@ form_1.give_eqn('y','-x','0')
 
 
 
-
-
 #form_1 = df3.form_1_3d(xg, yg, zg, fx, fy, fz)
-#form_1.give_eqn('-y/sqrt(x**2+y**2)','x/sqrt(x**2+y**2)','0')
->>>>>>> 57b8fb158805cdaaeb9a3cbb055e80519de7fd2f
+#form_1.give_eqn('x/sqrt(x**2+y**2-z**2)','y/sqrt(x**2+y**2-z**2)','z/sqrt(x**2+y**2-z**2)')
 #form_11 = form_1.zoom(mag = 2.8, target=[0,0,10], dpd=4)
 #form_1.log_scaling()
 #contravariant_field = form_1.contravariant()
@@ -119,13 +107,6 @@ form_1.give_eqn('y','-x','0')
 #f1_intd.plot()
 #f1_intd_num = form_1.num_interior_d(vf)
 #f1_intd_num.plot()
-<<<<<<< HEAD
-form_1.plot()
-
-
-f2 = df3.form_2_3d(xg, yg, zg, Fz=fz, Fx=fx, Fy=fy)
-f2.give_eqn('y','-x','0')
-=======
 #form_1.plot()
 
 #----compare difference between analytic/num 2d & 3d-----------------------
@@ -162,7 +143,6 @@ f2.give_eqn('y','-x','0')
 
 #f2 = df3.form_2_3d(xg, yg, zg, Fz=fz, Fx=fx, Fy=fy)
 #f2.give_eqn('x/sqrt(x**2+y**2-z**2)','y/sqrt(x**2+y**2-z**2)','z/sqrt(x**2+y**2-z**2)')
->>>>>>> 57b8fb158805cdaaeb9a3cbb055e80519de7fd2f
 #f2.log_scaling()
 #f22 = f2.zoom(mag = 5, target=[2,2,2], dpd=8)
 #f2.plot()
@@ -180,9 +160,9 @@ f2.give_eqn('y','-x','0')
 #f2_intd_num.plot()
 
 
-pot = (xg**2 + yg**2 + zg**2)
-f3 = df3.form_3_3d(xg, yg, zg, potential)
-f3.give_eqn('sqrt(x**2+y**2-z**2)')
+
+#f3 = df3.form_3_3d(xg, yg, zg, potential)
+#f3.give_eqn('sqrt(x**2+y**2+z**2)')
 #f33 = f3.zoom(mag = 5, target=[2,2,2], dpd=8)
 #f3.log_scaling()
 #f33.plot()
@@ -190,8 +170,8 @@ f3.give_eqn('sqrt(x**2+y**2-z**2)')
 #f3_intd.plot()
 #f3_intd_num = f3.num_interior_d(vf)
 #f3_intd_num.plot()
-f3_f0 = f3.hodge()
-f3_f0.plot()
+#f3_f0 = f3.hodge()
+#f3_f0.plot()
 
 
 #f0_wedge_f0 = f0.wedge(f0)
