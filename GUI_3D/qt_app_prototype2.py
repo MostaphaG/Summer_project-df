@@ -333,7 +333,116 @@ class MayaviQWidget(QtGui.QWidget):
         
         
 
+
+
+
+
+
+
+        self.groupbox_ax_param = QGroupBox("Axes parameters")
+        self.grpbox_host_layout = QVBoxLayout()
         
+
+        self.left_lim_layout = QtGui.QHBoxLayout()
+        self.left_lim = QtGui.QLineEdit("-5")
+        self.left_lim_label = QtGui.QLabel('Left limit')
+        self.left_lim_layout.addWidget(self.left_lim, alignment=Qt.AlignRight)
+        self.left_lim_layout.addWidget(self.left_lim_label, alignment=Qt.AlignLeft)
+
+        self.right_lim_layout = QtGui.QHBoxLayout()
+        self.right_lim = QtGui.QLineEdit("5")
+        self.right_lim_label = QtGui.QLabel('Right limit')
+        self.right_lim_layout.addWidget(self.right_lim, alignment=Qt.AlignRight)
+        self.right_lim_layout.addWidget(self.right_lim_label, alignment=Qt.AlignLeft)
+
+        self.pts_layout = QtGui.QHBoxLayout()
+        self.pts = QtGui.QLineEdit("10")
+        self.pts_label = QtGui.QLabel('Number of points')
+        self.pts_layout.addWidget(self.pts, alignment=Qt.AlignRight)
+        self.pts_layout.addWidget(self.pts_label, alignment=Qt.AlignLeft)
+
+        self.grpbox_host_layout.addLayout(self.left_lim_layout)
+        self.grpbox_host_layout.addLayout(self.right_lim_layout)
+        self.grpbox_host_layout.addLayout(self.pts_layout)
+
+        self.groupbox_ax_param.setLayout(self.grpbox_host_layout)
+
+
+
+
+#-------------------------------- Scaling dials -----------------------------------------------------------
+
+        self.groupbox_scaling = QGroupBox("Scaling")
+        self.dial_host_layout = QtGui.QHBoxLayout()
+        
+
+        self.dial_stack = QDial()
+        self.dial_stack.setMaximum(1000)
+        self.dial_stack.setMinimum(0)
+        self.dial_stack.setValue(100)
+        self.dial_redball = QDial()
+        self.dial_redball.setMaximum(1000)
+        self.dial_redball.setMinimum(0)
+        self.dial_redball.setValue(100)
+
+        self.dial_stack_label = QLabel("Stacks")
+        self.dial_redball_label = QLabel("Singularities")
+
+        self.stack_dial_val = QLabel("1.0")
+        self.redball_dial_val = QLabel("1.0")
+
+        self.dial_stack_layout = QVBoxLayout()
+        self.dial_stack_layout.setSpacing(1)
+        self.dial_redball_layout = QVBoxLayout()
+        self.dial_redball_layout.setSpacing(1)
+
+        def dial_method():
+            value_stck = self.dial_stack.value()
+            self.stack_dial_val.setText("x{}".format(str(value_stck/100)))
+
+            value_rdbll = self.dial_redball.value()
+            self.redball_dial_val.setText("x{}".format(str(value_rdbll/100)))
+
+        self.dial_stack.valueChanged.connect(lambda: dial_method())
+        #self.dial_stack.valueChanged.connect(lambda: self.create_df3_plot())
+        self.dial_redball.valueChanged.connect(lambda: dial_method())
+        #self.dial_redball.valueChanged.connect(lambda: self.create_df3_plot())
+
+        self.dial_stack_layout.addWidget(self.stack_dial_val, alignment=Qt.AlignCenter)
+        self.dial_stack_layout.addWidget(self.dial_stack)
+        self.dial_stack_layout.addWidget(self.dial_stack_label, alignment=Qt.AlignCenter)
+        self.dial_redball_layout.addWidget(self.redball_dial_val, alignment=Qt.AlignCenter)
+        self.dial_redball_layout.addWidget(self.dial_redball)
+        self.dial_redball_layout.addWidget(self.dial_redball_label, alignment=Qt.AlignCenter)
+
+        self.dial_host_layout.addLayout(self.dial_stack_layout)
+        self.dial_host_layout.addLayout(self.dial_redball_layout)
+
+        self.groupbox_scaling.setLayout(self.dial_host_layout)
+
+#-----------------------------------------------------------------------------------------------------------------
+
+
+        self.groupbox_cosmetic = QGroupBox("Cosmetics")
+        self.groupbox_cosmetic.setLayout(QHBoxLayout())
+
+    
+
+
+
+        self.groupbox = QGroupBox("Algebra")
+        self.groupbox.setLayout(QHBoxLayout())
+       
+
+
+
+
+
+
+
+
+
+
 
         def disableWidget():
             if self.combobox1.currentIndex() == 0:
@@ -448,8 +557,13 @@ class MayaviQWidget(QtGui.QWidget):
         layout.addWidget(self.label3, 7, 0)
         layout.addLayout(self.sublayout3, 8, 0)
 
+        layout.addWidget(self.groupbox, 0, 1, 1,3)
+        layout.addWidget(self.groupbox_ax_param, 1, 1, 8, 1)
+        layout.addWidget(self.groupbox_scaling, 1, 2, 8, 1)
+        layout.addWidget(self.groupbox_cosmetic, 1, 3, 8, 1)
 
 
+        layout.setHorizontalSpacing(20)
         
 
         self.ui.setParent(self)
@@ -485,7 +599,7 @@ class MayaviQWidget(QtGui.QWidget):
 
     def createForm1(self):
 
-        grid = np.linspace(lft, rght, pts)
+        grid = np.linspace(int(self.left_lim.text()), int(self.right_lim.text()), int(self.pts.text()))
 
         xg, yg, zg = np.meshgrid(grid, grid, grid)
 
@@ -498,7 +612,7 @@ class MayaviQWidget(QtGui.QWidget):
         fy_eqn = self.line_edit2.text()
         fz_eqn = self.line_edit3.text()
 
-        form_1 = df3.form_1_3d(xg, yg, zg, fx, fy, fz)
+        form_1 = df3.form_1_3d(xg, yg, zg, fx, fy, fz, scaling=self.dial_stack.value()/100, sng_scl=self.dial_redball.value()/100)
 
         form_1.give_eqn(fx_eqn, fy_eqn, fz_eqn)
 
@@ -511,7 +625,7 @@ class MayaviQWidget(QtGui.QWidget):
 
     def createForm0(self):
 
-        grid = np.linspace(lft, rght, pts)
+        grid = np.linspace(int(self.left_lim.text()), int(self.right_lim.text()), int(self.pts.text()))
 
         xg, yg, zg = np.meshgrid(grid, grid, grid)
 
@@ -532,7 +646,7 @@ class MayaviQWidget(QtGui.QWidget):
 
     def createVF(self):
 
-        grid = np.linspace(lft, rght, pts)
+        grid = np.linspace(int(self.left_lim.text()), int(self.right_lim.text()), int(self.pts.text()))
 
         xg, yg, zg = np.meshgrid(grid, grid, grid)
 
@@ -558,7 +672,7 @@ class MayaviQWidget(QtGui.QWidget):
     
     def createForm2(self):
 
-        grid = np.linspace(lft, rght, pts)
+        grid = np.linspace(int(self.left_lim.text()), int(self.right_lim.text()), int(self.pts.text()))
 
         xg, yg, zg = np.meshgrid(grid, grid, grid)
 
@@ -601,7 +715,7 @@ class MayaviQWidget(QtGui.QWidget):
     
     def createForm3(self):
 
-        grid = np.linspace(lft, rght, pts)
+        grid = np.linspace(int(self.left_lim.text()), int(self.right_lim.text()), int(self.pts.text()))
 
         xg, yg, zg = np.meshgrid(grid, grid, grid)
 
@@ -647,7 +761,7 @@ if __name__ == "__main__":
     button2.move(100,0)
     button2.clicked.connect(mayavi_widget.clear)
     overlayout.addLayout(layout)
-    overlayout.addWidget(button2)
+    #overlayout.addWidget(button2)
     
  
     container.show()

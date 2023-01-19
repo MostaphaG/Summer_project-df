@@ -1227,7 +1227,7 @@ class form_1_3d():
     the cut plane and see the colormesh of the potential]
     """
 
-    def __init__(self, xg, yg, zg, F_x, F_y, F_z, F_x_eqn=None, F_y_eqn=None, F_z_eqn=None):
+    def __init__(self, xg, yg, zg, F_x, F_y, F_z, F_x_eqn=None, F_y_eqn=None, F_z_eqn=None, scaling=None, sng_scl=None):
         
         self.xg = xg
         self.yg = yg
@@ -1262,6 +1262,16 @@ class form_1_3d():
             self.form_1_str_z = str(simplify(F_z_eqn))
         else:
             self.form_1_str_z = None
+
+        if scaling is not None:
+            self.scaling = float(scaling)
+        else:
+            self.scaling = 1.0
+
+        if sng_scl is not None:
+            self.sng_scl = float(sng_scl)
+        else:
+            self.sng_scl = 1.0
 
 
 
@@ -1509,7 +1519,7 @@ class form_1_3d():
         tp_hgth = 0.15
         side = 0.5
         opc = 1.0
-        sng_size = 0.5
+        sng_size = 0.5*self.sng_scl
 
         # check for user input
         if tip_height != None:
@@ -1686,34 +1696,34 @@ class form_1_3d():
         # Define glyphs (Cone for tip, shrinked in x direction box for stack plane)
         # Each consequent box is shifted along the unit vector (initially x direction)
         # to not overlap with previous plane => create a stack of increased density
-        cyl1 = tvtk.ConeSource(radius = tp_wdth,
-                                height = tp_hgth,
+        cyl1 = tvtk.ConeSource(radius = tp_wdth*self.scaling,
+                                height = tp_hgth*self.scaling,
                                 capping = False,
-                                center = (0.075, 0, 0),
+                                center = (0.075*self.scaling, 0, 0),
                                     )
 
         box = tvtk.CubeSource(x_length=0.01,
-                            y_length = side,
-                            z_length = side)
+                            y_length = side*self.scaling,
+                            z_length = side*self.scaling)
 
         box1 = tvtk.CubeSource(x_length=0.01,
-                            y_length = side,
-                            z_length = side,
+                            y_length = side*self.scaling,
+                            z_length = side*self.scaling,
                             center = (-0.04, 0, 0))
 
         box2 = tvtk.CubeSource(x_length=0.01,
-                            y_length = side,
-                            z_length = side,
+                            y_length = side*self.scaling,
+                            z_length = side*self.scaling,
                             center = (-0.08, 0, 0))
 
         box3 = tvtk.CubeSource(x_length=0.01,
-                            y_length = side,
-                            z_length = side,
+                            y_length = side*self.scaling,
+                            z_length = side*self.scaling,
                             center = (-0.12, 0, 0))
 
         box4 = tvtk.CubeSource(x_length=0.01,
-                            y_length = side,
-                            z_length = side,
+                            y_length = side*self.scaling,
+                            z_length = side*self.scaling,
                             center = (-0.16, 0, 0))
 
 
