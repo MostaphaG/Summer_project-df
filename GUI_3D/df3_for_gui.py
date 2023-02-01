@@ -44,7 +44,7 @@ class vector_field3():
     '''
 
 
-    def __init__(self, xg, yg, zg, F_x, F_y, F_z, F_x_eqn=None, F_y_eqn=None, F_z_eqn=None):
+    def __init__(self, xg, yg, zg, F_x, F_y, F_z, scaling, sing_scl, F_x_eqn=None, F_y_eqn=None, F_z_eqn=None):
         # Define initial variables supplied to the object
 
         self.xg = xg # coordinate grid
@@ -55,7 +55,8 @@ class vector_field3():
         self.F_z = F_z
         self.pt_den = len(xg[0, :, 0]) # amount of points in a grid
         self.orientation = 'mid'
-        self.scale = 1
+        self.scale = scaling
+        self.sing_scl = sing_scl
         self.logarithmic_scale_bool = 0
 
         self.scale_bool = True
@@ -207,28 +208,8 @@ class vector_field3():
 
 
 
-    def div(self, at_x=None, at_y=None, at_z=None):
-        '''
-        When applied to a vector field object, prints out
-        the total divergence equation for the field.
+    def div(self, at_x, at_y, at_z):
 
-        If three coordinates for a point (x, y, z) are supplied,
-        also prints out approximate divergence of the field
-        at that points
-
-        --------------------------------------------------------
-        Returns:
-
-        Nothing
-
-        --------------------------------------------------------
-        Arguments:
-
-        *Optional:
-            at_x - x coordinate of the point
-            at_y -  ...
-            at_z -  ...
-        '''
 
         # Check whether the string equations are supplied
         if self.str_x == None or self.str_y == None or self.str_z == None:
@@ -236,21 +217,13 @@ class vector_field3():
             raise TypeError('No equation provided')
         else:
 
-            # define separation between points to define a new grid with boundaries of the input
-            # grid but with pre-defined point density
-            sep = (abs(np.min(self.xg)) + abs(np.max(self.xg)))/100
 
-            # define the new grid spacing
-            New_grid = np.linspace(np.min(self.xg), np.max(self.xg), 100)
-            
-            #new, denser grid using new coordinates
-            xng, yng, zng = np.meshgrid(New_grid, New_grid, New_grid)
-
-            # convert the x, y, g coordinate list into a 2D array containing
-            # x, y and z coordinates within one list (i.e. list defining each point of the grid)
-            pts = np.vstack(list(zip(xng.ravel(), yng.ravel(), zng.ravel())))
-
-
+            if at_x==0:
+                at_x = 1e-15
+            if at_y==0:
+                at_y = 1e-15
+            if at_z==0:
+                at_z = 1e-15
            
             #Field components into string (simplified expressions)
             Fx = str(simplify(self.str_x))
@@ -280,67 +253,24 @@ class vector_field3():
 
             # print out the expression              
 
-            print(DivExpr)
+            DivExpr = DivExpr.replace('x', str(at_x))
+            DivExpr = DivExpr.replace('y', str(at_y))
+            DivExpr = DivExpr.replace('z', str(at_z))
 
 
-            # Check whether supplied coordinates are within the grid boundaries
-            if at_x!=None and at_y!=None and at_z!=None:
-                if at_x > np.max(self.xg) or at_x < np.min(self.xg):
-                    print("Input coordinate has to be within range specified by your grid")
-                    exit()
-                elif at_y > np.max(self.xg) or at_y < np.min(self.xg):
-                    print("Input coordinate has to be within range specified by your grid")
-                    exit()
-                elif at_y > np.max(self.xg) or at_y < np.min(self.xg):
-                    print("Input coordinate has to be within range specified by your grid")
-                    exit()
-
-                # turn the separation into a string to find decimal points
-                sep_str = str(sep)
-                sep_decimals = sep_str[::-1].find('.')
-
-                # round the input coordinates so that it is easier to relate them to grid points
-                at_x = np.round(at_x, sep_decimals)
-                at_y = np.round(at_y, sep_decimals)
-                at_z = np.round(at_z, sep_decimals)
-
-                # replace x, y, z with corresponding grid components,
-                # so that the expression can be evaluated
-                DivExpr = DivExpr.replace('x','xng')
-                DivExpr = DivExpr.replace('y','yng')
-                DivExpr = DivExpr.replace('z','zng')
-
-                
-                # if no coordinate specified, create a scalar matrix to define field
-                if DivExpr.find('x') & DivExpr.find('y') & DivExpr.find('z') == -1:
-                    DivExpr = '(' + str(DivExpr) + ')* np.ones(np.shape(xng))'
+            
+            if DivExpr.find('x') & DivExpr.find('y') & DivExpr.find('z') == -1:
+                DivExpr = '(' + str(DivExpr) + ')* 1'
 
                 # evaluate the divergence
-                Div = eval(DivExpr)
+            Div = eval(DivExpr)
 
-                # convert the divergence value list into a 2D array containing
-                # div at each point within one list
-                Div_lst = np.vstack(list(zip(Div.ravel())))
-
-                # convert all np.inf to np.nan
-                Div_lst[np.isinf(Div_lst)] = np.nan
-
+            if Div >1e+15:
+                Div = "+inf"
+            elif Div <-1e+15:
+                Div = "-inf"
                 
-
-                # calculate magnitude of difference between each point component and the input coordinates
-                # to find points on the grid which are the closest to the input one
-                
-                pts_diff = (pts[:]-[at_x,at_y,at_z])
-                diffmag = np.sqrt(pts_diff[:,0]**2 + pts_diff[:,1]**2 + pts_diff[:,2]**2)
-                diffmag = np.vstack(list(zip(diffmag.ravel())))
-
-
-
-                # index of the point closest to the input
-                a = np.argwhere(diffmag == (np.nanmin(diffmag)))
-                a = a[:,0]
-
-                print('Divergence at the grid point/points closest to the input, '+ str(pts[a]) +', = '+ str(Div_lst[a]))
+            return Div
 
 
 
@@ -724,61 +654,17 @@ class vector_field3():
 
 
 
-    def plot(self, arrow_colour = None, arrow_cmap=None, scaling=None, opacity=None, sng_size=None):
+    def plot(self, scaling=None, sng_size=None):
 
         
 
-        # set initial conditions for when the arguments are not supplied
-        cmap = 'viridis'
-        clr = (0.2,1,0)
-
-        scl = 1.0
-        
-        opc_crl = 1.0
-        opc = 1.0
-
-        # check for color input and set the corresponding RGB triplet
-        if arrow_colour=='red' or arrow_colour=='r' or arrow_colour=='Red':
-            clr = (1,0,0)
-        elif arrow_colour=='black' or arrow_colour=='k' or arrow_colour=='Black':
-            clr = (0,0,0)
-        elif arrow_colour=='green' or arrow_colour=='g' or arrow_colour=='Green':
-            clr = (0,1,0)
-        elif arrow_colour=='blue' or arrow_colour=='b' or arrow_colour=='Blue':
-            clr = (0,0,1)
-        elif arrow_colour=='magenta' or arrow_colour=='m' or arrow_colour=='Magenta':
-            clr = (1,0,1)
-        elif arrow_colour=='yellow' or arrow_colour=='y' or arrow_colour=='Yellow':
-            clr = (1,1,0)
-        elif arrow_colour=='cyan' or arrow_colour=='c' or arrow_colour=='Cyan':
-            clr = (0,1,1)
-        else:
-            pass
-        
-        # Set colormap to the user input (no need to check for errors since)
-        # the Mayavi package will give out an error if invalid cmap name will be supplied
-        if arrow_cmap != None:
-            cmap = arrow_cmap
-        else:
-            pass
 
         # Check whether the scaling input is float and > 0.0
-        if scaling != None:
-            if isinstance(scaling, float)==True and scaling>=0.0:
-                scl = scaling       
-            else:
-                scl=1.0
-                print('The scaling factor has to be a float (0.0 < scaling)')
-                exit()
+        scaling = self.scale
+        redball_scaling = self.sing_scl
 
         # Check whether the opacity input is float and 0.0 > opac > 1.0
-        if opacity != None:
-            if isinstance(opacity, float)==True and opacity<=1.0 and opacity>=0.0:   
-                opc = opacity
-            else:
 
-                print('The opacity has to be a float (0.0 < opacity < 1.0)')
-                exit()
 
 
         # for arrows to work, with nan and infs
@@ -796,12 +682,6 @@ class vector_field3():
         
         # define grid dimension magnitude
 
-        Lx = (self.xg[-1, -1, -1] - self.xg[0, 0, 0])
-        Ly = (self.yg[-1, -1, -1] - self.yg[0, 0, 0])
-        Lz = (self.zg[-1, -1, -1] - self.zg[0, 0, 0])
-
-        # use the magnitude to define min and max values of x, y and z directions
-        # these to be used for mlab.axes() plot
         xmin = int((np.min(self.xg))-1)
         ymin = int((np.min(self.yg))-1)
         zmin = int((np.min(self.zg))-1)
@@ -825,30 +705,13 @@ class vector_field3():
         Idx = np.argwhere(np.isnan(F))
 
         # Set all NaN values to zero so that it does not disturb the plotting
-        F_x_local[np.isnan(F_x_local)] = 0
-        F_y_local[np.isnan(F_y_local)] = 0
-        F_z_local[np.isnan(F_z_local)] = 0
+        F[np.isnan(F)] = 0
+        #F_y_local[np.isnan(F_y_local)] = 0
+        #F_z_local[np.isnan(F_z_local)] = 0
 
 
-        # convert to log scale if method applied to the vf object 
-        if self.logarithmic_scale_bool:
-            mag1 = F + 1
-            # min_size = np.min(mag1)
-            
-            unorm = F_x_local/mag1
-            vnorm = F_y_local/mag1
-            knorm = F_z_local/mag1
-            
-            # logsf = np.log10(mag1/min_size)
-            logmag = np.log10(mag1)
-            F_x_local = unorm*logmag
-            F_y_local = vnorm*logmag
-            F_z_local = knorm*logmag
 
 
-        # Field magnitude at each point
-        F = np.sqrt(F_x_local**2+F_y_local**2+F_z_local**2)
-        max_size = np.max(F)
 
 
 
@@ -857,8 +720,8 @@ class vector_field3():
         else:
             pass
 
-        stck_coords = [self.xg, F_x_local, self.yg, F_y_local, self.zg, F_z_local]
-        red_balls_data = [self.xg[Idx[:,0],Idx[:,1],Idx[:,2]] , self.yg[Idx[:,0],Idx[:,1],Idx[:,2]], self.zg[Idx[:,0],Idx[:,1],Idx[:,2]], sng_size]
+        stck_coords = [self.xg, F_x_local*scaling, self.yg, F_y_local*scaling, self.zg, F_z_local*scaling]
+        red_balls_data = [self.xg[Idx[:,0],Idx[:,1],Idx[:,2]] , self.yg[Idx[:,0],Idx[:,1],Idx[:,2]], self.zg[Idx[:,0],Idx[:,1],Idx[:,2]], sng_size*redball_scaling]
         axes_limits = [xmin,xmax,ymin,ymax,zmin,zmax]
 
         return stck_coords, red_balls_data, axes_limits
@@ -1134,12 +997,12 @@ class form_0_3d():
 
 
             # set boundaries for plotting axes and outline box
-            xmin = int(np.min(self.xg))
-            ymin = int(np.min(self.yg))
-            zmin = int(np.min(self.zg))
-            xmax = int(np.max(self.xg))
-            ymax = int(np.max(self.yg))
-            zmax = int(np.max(self.zg))
+            xmin = float(np.min(self.xg))
+            ymin = float(np.min(self.yg))
+            zmin = float(np.min(self.zg))
+            xmax = float(np.max(self.xg))
+            ymax = float(np.max(self.yg))
+            zmax = float(np.max(self.zg))
 
 
 
@@ -1815,12 +1678,12 @@ class form_1_3d():
 
 
         # axes boundaries
-        xmin = int((np.min(self.xg)) - 1)
-        ymin = int((np.min(self.yg)) - 1)
-        zmin = int((np.min(self.zg)) - 1)
-        xmax = int((np.max(self.xg)) + 1)
-        ymax = int((np.max(self.yg)) + 1)
-        zmax = int((np.max(self.zg)) + 1)
+        xmin = float((np.min(self.xg)) - 1)
+        ymin = float((np.min(self.yg)) - 1)
+        zmin = float((np.min(self.zg)) - 1)
+        xmax = float((np.max(self.xg)) + 1)
+        ymax = float((np.max(self.yg)) + 1)
+        zmax = float((np.max(self.zg)) + 1)
 
         #----------------------------------------
         """
