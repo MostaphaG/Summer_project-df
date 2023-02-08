@@ -1730,27 +1730,7 @@ class form_1_3d():
 class form_2_3d():
 
 
-    '''
-    defines a 2-form object and returns it to user
-    Takes 6 arguments basic, these are the 3 grids in 3D, which muse be square
-    and of equal sizes. Then 3 arguments for the dx^dy ; dx^dz ; dy^dz components
-    based on the same grids. Also takes in equations which are needed for some
-    operaions.
-
-    Methods: (applied to the object)
-
-    .give_eqn(equation_str_x, equation_str_y, equation_str_z) - provides equations ; 
-    .return_string() - returns equations as strings of a 2-form. ;
-    .log_scaling() - scales the field logarithmycally ; 
-    .zoom(magnitude, target, point_density) - creates a zoomed in field object ; 
-    .set_density2() - sets density of grid points for the 2-form ;
-    .plot() - applied to the 2-form object, gives out a plot of non-zero components ;
-    .ext_d() - takes exterior derivative of the 2-form ;
-    .hodge() - applies hodge star operator to the 2-form ; 
-    .wedge() - wedges the 2-form with another p-form object ;
-    .interior_d() - takes the interior derivative of the form
-
-    '''
+   
 
 
     def __init__(self, xg, yg, zg, Fx=None, Fy=None, Fz=None, Fx_eqn=None, Fy_eqn=None, Fz_eqn=None):
@@ -2005,20 +1985,6 @@ class form_2_3d():
         Fy = self.Fy
 
         Fmag = np.sqrt(Fx**2 + Fy**2 + Fz**2)
-
-        if self.logarithmic_scale_bool:
-            mag1 = Fmag + 1
-            # min_size = np.min(mag1)
-            
-            unorm = Fx/mag1
-            vnorm = Fy/mag1
-            knorm = Fz/mag1
-            
-            # logsf = np.log10(mag1/min_size)
-            logmag = np.log10(mag1)
-            Fx = unorm*logmag
-            Fy = vnorm*logmag
-            Fz = knorm*logmag
 
 
 
@@ -2771,13 +2737,15 @@ class form_2_3d():
             scn.mlab.show()
 
 
-        if Fz is not None and np.all(Fz) != 0:
+
+
+        if Fz is not None and np.count_nonzero(Fz) != 0:
             form_2(Fz,'z')
         
-        if Fx is not None and np.all(Fx) != 0:
+        if Fx is not None and np.count_nonzero(Fx) != 0:
             form_2(Fx,'x')
 
-        if Fy is not None and np.all(Fy) != 0:
+        if Fy is not None and np.count_nonzero(Fy) != 0:
             form_2(Fy,'y')
        
 
