@@ -4617,13 +4617,13 @@ class form_2_3d():
             mlab.show()
 
 
-        if Fz is not None and np.all(Fz) != 0:
+        if Fz is not None and np.count_nonzero(Fz) != 0:
             form_2(Fz,'z')
         
-        if Fx is not None and np.all(Fx) != 0:
+        if Fx is not None and np.count_nonzero(Fx) != 0:
             form_2(Fx,'x')
 
-        if Fy is not None and np.all(Fy) != 0:
+        if Fy is not None and np.count_nonzero(Fy) != 0:
             form_2(Fy,'y')
        
 
