@@ -406,11 +406,11 @@ class MayaviQWidget(QtGui.QWidget):
         
 
         self.dial_stack = QDial()
-        self.dial_stack.setMaximum(2000)
+        self.dial_stack.setMaximum(10000)
         self.dial_stack.setMinimum(0)
         self.dial_stack.setValue(1000)
         self.dial_redball = QDial()
-        self.dial_redball.setMaximum(2000)
+        self.dial_redball.setMaximum(10000)
         self.dial_redball.setMinimum(0)
         self.dial_redball.setValue(1000)
 
@@ -555,7 +555,9 @@ class MayaviQWidget(QtGui.QWidget):
 
         self.groupbox = QGroupBox()
 
-        self.df3_host_layout = QGridLayout()
+        self.df3_host_layout = QVBoxLayout()
+
+        # -=-=-=-=-=-=- Div -=-=-=-=-=-=-
 
         self.divrgence_lout = QHBoxLayout()
         self.div_lbl = QLabel("Divergence at ({}, {}, {}): ".format(self.foc_pt_x.text(), self.foc_pt_y.text(), self.foc_pt_z.text()))
@@ -564,9 +566,43 @@ class MayaviQWidget(QtGui.QWidget):
 
         self.divrgence_lout.addWidget(self.div_lbl, alignment=Qt.AlignLeft)
         self.divrgence_lout.addWidget(self.div_val, alignment=Qt.AlignLeft)
+        self.divrgence_lout.addWidget(QLabel(" "))
+        self.divrgence_lout.addWidget(QLabel(" "))
         self.divrgence_lout.setSpacing(10)
 
-        self.df3_host_layout.addLayout(self.divrgence_lout, 0, 0)
+        # -=-=-=-=-=-=- Curl -=-=-=-=-=-=-
+
+        self.curl_lout = QHBoxLayout()
+        self.curl_btn_lout = QVBoxLayout()
+        self.curl_btn_lout.setSpacing(5)
+        self.preserve_fld_lout = QHBoxLayout()
+        self.fld_inc_chckbx = QCheckBox()
+        self.preserve_fld_lout.addWidget(QLabel("include field"), alignment=Qt.AlignRight)
+        self.preserve_fld_lout.addWidget(self.fld_inc_chckbx)
+        self.curl_button = QPushButton("Curl")
+        self.curl_btn_lout.addWidget(self.curl_button)
+        self.curl_btn_lout.addLayout(self.preserve_fld_lout)
+
+        self.curl_lout.addLayout(self.curl_btn_lout)
+        self.curl_lout.addWidget(QLabel(" "))
+        self.curl_lout.addWidget(QLabel("Cosmetics"), alignment=Qt.AlignCenter)
+        self.curl_lout.addWidget(QLabel(" "))
+
+
+        # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+        self.df3_host_layout.addLayout(self.divrgence_lout)
+        self.df3_host_layout.addWidget(QLabel(" "))
+        self.df3_host_layout.addLayout(self.curl_lout)
+        self.df3_host_layout.addWidget(QLabel(" "))
+        self.df3_host_layout.addWidget(QLabel(" "))
+        self.df3_host_layout.addWidget(QLabel(" "))
+        self.df3_host_layout.addWidget(QLabel(" "))
+        self.df3_host_layout.addWidget(QLabel(" "))
+        self.df3_host_layout.addWidget(QLabel(" "))
+        self.df3_host_layout.addWidget(QLabel(" "))
+        self.df3_host_layout.addWidget(QLabel(" "))
+        self.df3_host_layout.addWidget(QLabel(" "))
 
         self.groupbox.setLayout(self.df3_host_layout)
        
@@ -848,7 +884,7 @@ class MayaviQWidget(QtGui.QWidget):
         return sc_field, axes_limits
 
 
-    def createVF(self):
+    def createVF(self, curl_idx = None):
 
         gridx = np.linspace((float(self.foc_pt_x.text())-float(self.range.text())/2),\
                             (float(self.foc_pt_x.text())+float(self.range.text())/2),\
@@ -890,7 +926,7 @@ class MayaviQWidget(QtGui.QWidget):
         if self.vec_clr_chckbox.isChecked()==True:
             cmap_vs_clr_idx = 1
 
-
+       
 
         return fld_comps, red_balls_data, axes_limits, cmap_vs_clr_idx, self.cmap_list.currentText(), self.rgb_vec, self.rgb_sng
 
