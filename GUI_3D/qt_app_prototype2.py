@@ -67,17 +67,16 @@ class Visualization(HasTraits):
  
         self.update_plot_f1()
 
-    def takePlotParametresVF(self, fld_comps, red_balls_data_vf, axes_limits_vf, cmap_vs_clr_idx, clrmap, vecclr, sngclr):
+    def takePlotParametresVF(self, vf_obj, cmap_vs_clr_idx, clrmap, vecclr, sngclr, scl_fctrs):
 
         self.scene.mlab.clf()
         self.scene.renderer.remove_all_view_props()
-        self.fld_comps = fld_comps
-        self.red_balls_data_vf = red_balls_data_vf
-        self.axes_limits_vf = axes_limits_vf
+        self.vf_obj = vf_obj
         self.cmap_vs_clr_idx = cmap_vs_clr_idx
         self.clrmap = clrmap
         self.vecclr = vecclr
         self.sngclr = sngclr
+        self.scl_fctrs = scl_fctrs
 
         self.needUpdate = True
  
@@ -181,6 +180,7 @@ class Visualization(HasTraits):
 
         else:
 
+            """
             self.scene.mlab.points3d(self.red_balls_data_vf[0],
                                     self.red_balls_data_vf[1],
                                     self.red_balls_data_vf[2], color = (self.sngclr[0]/255, self.sngclr[1]/255, self.sngclr[2]/255),scale_factor=self.red_balls_data_vf[3], resolution=36)
@@ -205,6 +205,9 @@ class Visualization(HasTraits):
 
             self.ax = self.scene.mlab.axes(color = (0,0,0), nb_labels = 5, line_width=1.0)
             self.ax.axes.font_factor = 0.5
+            """
+
+            self.vf_obj.plot(cmap_idx=self.cmap_vs_clr_idx, cmap=self.clrmap, clr=self.vecclr, sing_clr=self.sngclr, scaling_fctrs = self.scl_fctrs)
 
         self.scene.background = (1, 1, 1)
         self.scene.foreground = (0, 0, 0)
@@ -462,8 +465,8 @@ class MayaviQWidget(QtGui.QWidget):
         self.rgb_sng = [255, 0, 0]
         self.clr_vs_cmap_idx = [0, 1] # 0 for cmap, 1 for clr
 
-        def idx(val):
-            print(self.clr_vs_cmap_idx[val])
+        #def idx(val):
+        #    print(self.clr_vs_cmap_idx[val])
 
         def VecClrToggled():
             col = QColorDialog.getColor()
@@ -530,14 +533,14 @@ class MayaviQWidget(QtGui.QWidget):
         self.vec_clr_chckbox.toggled.connect(self.vec_cmap_lbl.setDisabled)
         self.vec_clr_chckbox.toggled.connect(lambda: self.frame.setStyleSheet("background-color : rgba({}, {}, {}, 255)".format(self.rgb_vec[0],self.rgb_vec[1],self.rgb_vec[2])))
         self.vec_clr_chckbox.toggled.connect(lambda: self.vec_clr_lbl.setDisabled(False))
-        self.vec_clr_chckbox.toggled.connect(lambda: idx(1))
+        #self.vec_clr_chckbox.toggled.connect(lambda: idx(1))
         #self.vec_clr_chckbox.toggled.connect(lambda: print(self.clr_vs_cmap_idx))
 
         self.vec_cmap_chckbox.toggled.connect(lambda: self.vec_clr_chckbox.setChecked(False))
         self.vec_cmap_chckbox.toggled.connect(self.frame.setDisabled)
         self.vec_cmap_chckbox.toggled.connect(lambda: self.frame.setStyleSheet("background-color : rgba({}, {}, {}, 50)".format(self.rgb_vec[0],self.rgb_vec[1],self.rgb_vec[2])))
         self.vec_cmap_chckbox.toggled.connect(lambda: self.vec_clr_lbl.setDisabled(True))
-        self.vec_cmap_chckbox.toggled.connect(lambda: idx(0))
+        #self.vec_cmap_chckbox.toggled.connect(lambda: idx(0))
         #self.vec_cmap_chckbox.toggled.connect(lambda: print(self.clr_vs_cmap_idx))
 
 
@@ -805,8 +808,8 @@ class MayaviQWidget(QtGui.QWidget):
             stck_coords, red_balls_data, axes_limits = self.createForm1()
             self.visualization.takePlotParametresF1(stck_coords, red_balls_data, axes_limits)
         elif self.combobox1.currentIndex()==0:
-            fld_copms, red_balls_data1, axes_limits1, cmap_vs_clr_idx, clrmap, vecclr, sngclr = self.createVF()
-            self.visualization.takePlotParametresVF(fld_copms, red_balls_data1, axes_limits1, cmap_vs_clr_idx, clrmap, vecclr, sngclr)
+            vf_obj, cmap_vs_clr_idx, clrmap, vecclr, sngclr, scl_fctrs = self.createVF()
+            self.visualization.takePlotParametresVF(vf_obj, cmap_vs_clr_idx, clrmap, vecclr, sngclr, scl_fctrs)
         elif self.combobox1.currentIndex()==1:
             sc_fld, axes_limits_f0 = self.createForm0()
             self.visualization.takePlotParametresF0(sc_fld, axes_limits_f0)
@@ -911,15 +914,20 @@ class MayaviQWidget(QtGui.QWidget):
 
         vf.give_eqn(fx_eqn, fy_eqn, fz_eqn)
 
-        fld_comps, red_balls_data, axes_limits = vf.plot()
+        
 
-        div = vf.div(at_x = 0, at_y = 0, at_z = 0)
+
+        div = vf.div(at_x = float(self.foc_pt_x.text()),
+                     at_y = float(self.foc_pt_y.text()),
+                     at_z = float(self.foc_pt_z.text()))
+      
         if type(div) == str:
             self.div_val.setText(str(div))
         else:
             self.div_val.setText('{0:.2f}'.format(div))
 
         self.div_lbl.setText("Divergence at ({}, {}, {}): ".format(self.foc_pt_x.text(), self.foc_pt_y.text(), self.foc_pt_z.text()))
+        
 
         if self.vec_cmap_chckbox.isChecked()==True:
             cmap_vs_clr_idx = 0
@@ -928,7 +936,7 @@ class MayaviQWidget(QtGui.QWidget):
 
        
 
-        return fld_comps, red_balls_data, axes_limits, cmap_vs_clr_idx, self.cmap_list.currentText(), self.rgb_vec, self.rgb_sng
+        return vf, cmap_vs_clr_idx, self.cmap_list.currentText(), self.rgb_vec, self.rgb_sng, [self.dial_stack.value()/1000, self.dial_redball.value()/1000]
 
     
     def createForm2(self):
