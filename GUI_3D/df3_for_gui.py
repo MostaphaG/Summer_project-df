@@ -595,6 +595,17 @@ class vector_field3():
                 dy = np.linspace(-d_range_y + y_m, d_range_y + y_m, dpd)
                 dz = np.linspace(-d_range_z + z_m, d_range_z + z_m, dpd)
                 dxg, dyg, dzg = np.meshgrid(dx, dy, dz)
+
+                dxg[dxg==0]=1e-15
+                dyg[dyg==0]=1e-15
+                dzg[dzg==0]=1e-15
+
+                if x_m==0:
+                    x_m=1e-15
+                if y_m==0:
+                    y_m=1e-15
+                if z_m==0:
+                    z_m=1e-15
                 
                 # Create variables for the user provided equation strings
                 u_str = self.str_x
@@ -638,11 +649,19 @@ class vector_field3():
                     k_str_grid = k_str.replace('x', 'dxg')
                     k_str_grid = k_str_grid.replace('y', 'dyg')
                     k_str_grid = k_str_grid.replace('z', 'dzg') 
-                # Generate arrays for the components of the derivative field          
+                # Generate arrays for the components of the derivative field     
+                
+                
+
+
                 U = eval(u_str_grid) - eval(u_str_point)
                 V = eval(v_str_grid) - eval(v_str_point)
                 K = eval(k_str_grid) - eval(k_str_point)
                 
+
+
+
+
                 # from that create VF instance
                 deriv_vf = vector_field3(dxg, dyg, dzg, U, V, K, self.str_x, self.str_y, self.str_z)
                 
@@ -654,7 +673,7 @@ class vector_field3():
 
 
 
-    def plot(self, scaling=None, sng_size=None):
+    def plot(self, cmap, cmap_idx, clr, sing_clr, scaling_fctrs, opacity):
 
         
 
@@ -674,11 +693,16 @@ class vector_field3():
         F_y_local = self.F_y
         F_z_local = self.F_z
 
+        
 
         # set all insignificant values to zero:
         F_x_local[np.abs(F_x_local) < 1e-15] = 0
         F_y_local[np.abs(F_y_local) < 1e-15] = 0
         F_z_local[np.abs(F_z_local) < 1e-15] = 0
+
+        F_x_local[np.abs(F_x_local) > 1e+15] = np.inf
+        F_y_local[np.abs(F_y_local) > 1e+15] = np.inf
+        F_z_local[np.abs(F_z_local) > 1e+15] = np.inf
         
         # define grid dimension magnitude
 
@@ -689,6 +713,7 @@ class vector_field3():
         ymax = int((np.max(self.yg))+1)
         zmax = int((np.max(self.zg))+1)
 
+        
 
 
         # all np.inf -> np.nan for convenience purposes
@@ -696,25 +721,38 @@ class vector_field3():
         F_y_local[np.isinf(F_y_local)] = np.nan
         F_z_local[np.isinf(F_z_local)] = np.nan
 
+        
         # Field magnitude at each point
         F = np.sqrt(F_x_local**2+F_y_local**2+F_z_local**2)
 
-
+        #if self.logarithmic_scale_bool==True:
+        #F = np.log(F)
 
         # Indices where field is not defined (Field. mag. = np.nan)
         Idx = np.argwhere(np.isnan(F))
 
         # Set all NaN values to zero so that it does not disturb the plotting
         F[np.isnan(F)] = 0
-        #F_y_local[np.isnan(F_y_local)] = 0
-        #F_z_local[np.isnan(F_z_local)] = 0
+        F_x_local[np.isnan(F_x_local)] = 0
+        F_y_local[np.isnan(F_y_local)] = 0
+        F_z_local[np.isnan(F_z_local)] = 0
 
 
+        if self.logarithmic_scale_bool==True:
+            mag1 = F + 1
+            # min_size = np.min(mag1)
+            
+            unorm = F_x_local/mag1
+            vnorm = F_y_local/mag1
+            knorm = F_z_local/mag1
+            
+            # logsf = np.log10(mag1/min_size)
+            logmag = np.log10(mag1)
+            F_x_local = unorm*logmag
+            F_y_local = vnorm*logmag
+            F_z_local = knorm*logmag
 
-
-
-
-
+        """
         if sng_size==None:
             sng_size=0.5
         else:
@@ -725,6 +763,36 @@ class vector_field3():
         axes_limits = [xmin,xmax,ymin,ymax,zmin,zmax]
 
         return stck_coords, red_balls_data, axes_limits
+        """
+
+        # Plot red spheres at singular points
+        mlab.points3d(self.xg[Idx[:,0],Idx[:,1],Idx[:,2]],
+                      self.yg[Idx[:,0],Idx[:,1],Idx[:,2]],
+                      self.zg[Idx[:,0],Idx[:,1],Idx[:,2]],
+                      color = (sing_clr[0]/255, sing_clr[1]/255, sing_clr[2]/255),scale_factor=scaling_fctrs[1], resolution=100)
+    
+        if cmap_idx==0:
+            qivfld=mlab.quiver3d(self.xg, self.yg, self.zg, F_x_local, F_y_local, F_z_local, scale_factor=scaling_fctrs[0], 
+                                 colormap=cmap, line_width=1.0, mode='arrow', scale_mode = 'vector', opacity=opacity)
+        if cmap_idx==1:
+            qivfld=mlab.quiver3d(self.xg, self.yg, self.zg, F_x_local, F_y_local, F_z_local, scale_factor=scaling_fctrs[0],
+                                 line_width=1.0, mode='arrow', scale_mode = 'vector', color=(clr[0]/255, clr[1]/255, clr[2]/255), opacity=opacity)
+            
+        cbar = mlab.vectorbar(object=qivfld)
+        cbar.scalar_bar.unconstrained_font_size = True
+        cbar.label_text_property.font_size=10
+        cbar.scalar_bar_representation.orientation=1
+        cbar.scalar_bar_representation.position = [0.05, 0.05]
+        cbar.scalar_bar_representation.position2 = [0.05, 0.85]
+
+
+        # add outline box and axes
+        mlab.outline(extent = [xmin,xmax,ymin,ymax,zmin,zmax], line_width=1.0)
+        axes = mlab.axes(color = (0,0,0), nb_labels = 5, extent = [xmin,xmax,ymin,ymax,zmin,zmax], line_width=3.0)
+        axes.axes.font_factor = 0.8
+
+        # show yhe plot on the figure
+        mlab.show()
 
 
 

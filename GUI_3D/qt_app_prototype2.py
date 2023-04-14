@@ -67,7 +67,7 @@ class Visualization(HasTraits):
  
         self.update_plot_f1()
 
-    def takePlotParametresVF(self, vf_obj, cmap_vs_clr_idx, clrmap, vecclr, sngclr, scl_fctrs):
+    def takePlotParametresVF(self, vf_obj, cmap_vs_clr_idx, clrmap, vecclr, sngclr, scl_fctrs, add_fld=None, secondary_object=None):
 
         self.scene.mlab.clf()
         self.scene.renderer.remove_all_view_props()
@@ -77,6 +77,9 @@ class Visualization(HasTraits):
         self.vecclr = vecclr
         self.sngclr = sngclr
         self.scl_fctrs = scl_fctrs
+        self.add_fld = add_fld
+        self.sec_obj = secondary_object
+
 
         self.needUpdate = True
  
@@ -206,8 +209,13 @@ class Visualization(HasTraits):
             self.ax = self.scene.mlab.axes(color = (0,0,0), nb_labels = 5, line_width=1.0)
             self.ax.axes.font_factor = 0.5
             """
+            if self.sec_obj==None:
+                self.vf_obj.plot(cmap_idx=self.cmap_vs_clr_idx, cmap=self.clrmap, clr=self.vecclr, sing_clr=self.sngclr, scaling_fctrs = self.scl_fctrs, opacity = 1.0)
+            else:
+                if self.add_fld==1:
+                    self.vf_obj.plot(cmap_idx=1, cmap=self.clrmap, clr=(255,255,255), sing_clr=self.sngclr, scaling_fctrs = self.scl_fctrs, opacity = 0.3)
+                self.sec_obj.plot(cmap_idx=0, cmap=self.clrmap, clr=self.vecclr, sing_clr=self.sngclr, scaling_fctrs = self.scl_fctrs, opacity = 1.0)
 
-            self.vf_obj.plot(cmap_idx=self.cmap_vs_clr_idx, cmap=self.clrmap, clr=self.vecclr, sing_clr=self.sngclr, scaling_fctrs = self.scl_fctrs)
 
         self.scene.background = (1, 1, 1)
         self.scene.foreground = (0, 0, 0)
@@ -558,7 +566,13 @@ class MayaviQWidget(QtGui.QWidget):
 
         self.groupbox = QGroupBox()
 
-        self.df3_host_layout = QVBoxLayout()
+        self.vf_host_layout = QVBoxLayout()
+
+        def to_f1():
+            self.combobox1.setCurrentIndex(2)
+
+        def to_vf():
+            self.combobox1.setCurrentIndex(0)
 
         # -=-=-=-=-=-=- Div -=-=-=-=-=-=-
 
@@ -583,31 +597,77 @@ class MayaviQWidget(QtGui.QWidget):
         self.preserve_fld_lout.addWidget(QLabel("include field"), alignment=Qt.AlignRight)
         self.preserve_fld_lout.addWidget(self.fld_inc_chckbx)
         self.curl_button = QPushButton("Curl")
+        self.curl_button.clicked.connect(to_vf)
+        self.curl_button.clicked.connect(self.create_curl_plot)
         self.curl_btn_lout.addWidget(self.curl_button)
         self.curl_btn_lout.addLayout(self.preserve_fld_lout)
-
         self.curl_lout.addLayout(self.curl_btn_lout)
         self.curl_lout.addWidget(QLabel(" "))
-        self.curl_lout.addWidget(QLabel("Cosmetics"), alignment=Qt.AlignCenter)
+        self.curl_lout.addWidget(QLabel("TBA"), alignment=Qt.AlignCenter)
         self.curl_lout.addWidget(QLabel(" "))
+
+
+        # -=-=-=-=-=-=- Derivative Field -=-=-=-=-=-=-
+
+        self.deriv_lout = QHBoxLayout()
+        self.deriv_btn_lout = QVBoxLayout()
+        self.deriv_btn_lout.setSpacing(5)
+        self.preserve_fld_lout1 = QHBoxLayout()
+        self.fld_inc_chckbx1 = QCheckBox()
+        self.preserve_fld_lout1.addWidget(QLabel("include field"), alignment=Qt.AlignRight)
+        self.preserve_fld_lout1.addWidget(self.fld_inc_chckbx1)
+        self.deriv_button = QPushButton("Derivative Field")
+        self.deriv_button.clicked.connect(to_vf)
+        self.deriv_button.clicked.connect(self.create_deriv_plot)
+        self.deriv_btn_lout.addWidget(self.deriv_button)
+        self.deriv_btn_lout.addLayout(self.preserve_fld_lout1)
+        self.deriv_lout.addLayout(self.deriv_btn_lout)
+        self.deriv_lout.addWidget(QLabel(" "))
+        self.deriv_lout.addWidget(QLabel("TBA"), alignment=Qt.AlignCenter)
+        self.deriv_lout.addWidget(QLabel(" "))
+
+
+        # -=-=-=-=-=-=- Covariant Field -=-=-=-=-=-=-
+
+        self.cov_lout = QHBoxLayout()
+        self.cov_btn_lout = QVBoxLayout()
+        self.cov_btn_lout.setSpacing(5)
+        self.cov_button = QPushButton("Covariant Field")
+        self.cov_button.clicked.connect(to_f1)
+        self.cov_button.clicked.connect(self.create_df3_plot)
+        self.cov_btn_lout.addWidget(self.cov_button)
+        self.cov_lout.addLayout(self.cov_btn_lout)
+        self.cov_lout.addWidget(QLabel(" "))
+        self.cov_lout.addWidget(QLabel("TBA"), alignment=Qt.AlignCenter)
+        self.cov_lout.addWidget(QLabel(" "))
+
+
+        # -=-=-=-=-=-=- Log scaling -=-=-=-=-=-=-
+
+        self.log_lout = QHBoxLayout()
+        self.log_chckbx1 = QCheckBox()
+        self.log_lout.addWidget(QLabel("log scaling"), alignment=Qt.AlignRight)
+        self.log_lout.addWidget(self.log_chckbx1)
+
 
 
         # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-        self.df3_host_layout.addLayout(self.divrgence_lout)
-        self.df3_host_layout.addWidget(QLabel(" "))
-        self.df3_host_layout.addLayout(self.curl_lout)
-        self.df3_host_layout.addWidget(QLabel(" "))
-        self.df3_host_layout.addWidget(QLabel(" "))
-        self.df3_host_layout.addWidget(QLabel(" "))
-        self.df3_host_layout.addWidget(QLabel(" "))
-        self.df3_host_layout.addWidget(QLabel(" "))
-        self.df3_host_layout.addWidget(QLabel(" "))
-        self.df3_host_layout.addWidget(QLabel(" "))
-        self.df3_host_layout.addWidget(QLabel(" "))
-        self.df3_host_layout.addWidget(QLabel(" "))
+        self.vf_host_layout.addLayout(self.divrgence_lout)
+        self.vf_host_layout.addWidget(QLabel(" "))
+        self.vf_host_layout.addLayout(self.curl_lout)
+        self.vf_host_layout.addWidget(QLabel(" "))
+        self.vf_host_layout.addLayout(self.deriv_lout)
+        self.vf_host_layout.addWidget(QLabel(" "))
+        self.vf_host_layout.addLayout(self.cov_lout)
+        self.vf_host_layout.addWidget(QLabel(" "))
+        self.vf_host_layout.addLayout(self.log_lout)
+        self.vf_host_layout.addWidget(QLabel(" "))
 
-        self.groupbox.setLayout(self.df3_host_layout)
+
+        self.groupbox.setLayout(self.vf_host_layout)
+        
+
        
 
 #==========================================================================================================
@@ -634,6 +694,9 @@ class MayaviQWidget(QtGui.QWidget):
                 self.box2.setChecked(False)
                 self.box3.setChecked(False)
 
+                self.groupbox.setVisible(True)
+
+
             if self.combobox1.currentIndex() == 1:
                 self.label1.setText('Field')
                 self.label2.setText(' ')
@@ -650,6 +713,8 @@ class MayaviQWidget(QtGui.QWidget):
                 self.box1.setChecked(False)
                 self.box2.setChecked(False)
                 self.box3.setChecked(False)
+
+                self.groupbox.setVisible(False)
 
             
             if self.combobox1.currentIndex() == 2:
@@ -669,6 +734,9 @@ class MayaviQWidget(QtGui.QWidget):
                 self.box2.setChecked(False)
                 self.box3.setChecked(False)
 
+                self.groupbox.setVisible(False)
+
+
             if self.combobox1.currentIndex() == 3:
                 self.label1.setText('dy ∧ dz')
                 self.label2.setText('dz ∧ dx')
@@ -683,6 +751,9 @@ class MayaviQWidget(QtGui.QWidget):
                 self.box2.setEnabled(True)
                 self.box3.setEnabled(True)
                 self.box1.setChecked(True)
+
+                self.groupbox.setVisible(False)
+
 
             if self.combobox1.currentIndex() == 4:
                 self.label1.setText('dx ∧ dy ∧ dz')
@@ -700,6 +771,8 @@ class MayaviQWidget(QtGui.QWidget):
                 self.box1.setChecked(False)
                 self.box2.setChecked(False)
                 self.box3.setChecked(False)
+
+                self.groupbox.setVisible(False)
 
 
 
@@ -720,6 +793,7 @@ class MayaviQWidget(QtGui.QWidget):
                 self.line_edit1.setEnabled(True)
                 self.line_edit2.setEnabled(False)
                 self.line_edit3.setEnabled(False)
+                
             if self.box2.isChecked()==True:
                 self.box1.setChecked(False)
                 self.box3.setChecked(False)
@@ -799,8 +873,13 @@ class MayaviQWidget(QtGui.QWidget):
 
 
 
+    def create_curl_plot(self):
+        vf_obj, curl_obj, cmap_vs_clr_idx, clrmap, vecclr, sngclr, scl_fctrs, add_fld = self.createVFcurl()
+        self.visualization.takePlotParametresVF(vf_obj, cmap_vs_clr_idx, clrmap, vecclr, sngclr, scl_fctrs, add_fld, secondary_object=curl_obj)
 
-
+    def create_deriv_plot(self):
+        vf_obj, deriv_obj, cmap_vs_clr_idx, clrmap, vecclr, sngclr, scl_fctrs, add_fld = self.createVFderiv()
+        self.visualization.takePlotParametresVF(vf_obj, cmap_vs_clr_idx, clrmap, vecclr, sngclr, scl_fctrs, add_fld, secondary_object=deriv_obj)
 
     def create_df3_plot(self):
 
@@ -886,8 +965,9 @@ class MayaviQWidget(QtGui.QWidget):
 
         return sc_field, axes_limits
 
+#---------------VF stuff------------------------------
 
-    def createVF(self, curl_idx = None):
+    def createVF(self):
 
         gridx = np.linspace((float(self.foc_pt_x.text())-float(self.range.text())/2),\
                             (float(self.foc_pt_x.text())+float(self.range.text())/2),\
@@ -915,11 +995,15 @@ class MayaviQWidget(QtGui.QWidget):
         vf.give_eqn(fx_eqn, fy_eqn, fz_eqn)
 
         
+        if self.log_chckbx1.isChecked()==True:
+            vf.log_scaling()
 
 
         div = vf.div(at_x = float(self.foc_pt_x.text()),
                      at_y = float(self.foc_pt_y.text()),
                      at_z = float(self.foc_pt_z.text()))
+        
+
       
         if type(div) == str:
             self.div_val.setText(str(div))
@@ -938,7 +1022,90 @@ class MayaviQWidget(QtGui.QWidget):
 
         return vf, cmap_vs_clr_idx, self.cmap_list.currentText(), self.rgb_vec, self.rgb_sng, [self.dial_stack.value()/1000, self.dial_redball.value()/1000]
 
-    
+    def createVFcurl(self):
+
+        gridx = np.linspace((float(self.foc_pt_x.text())-float(self.range.text())/2),\
+                            (float(self.foc_pt_x.text())+float(self.range.text())/2),\
+                             int(self.pts.text()))
+        gridy = np.linspace((float(self.foc_pt_y.text())-float(self.range.text())/2),\
+                            (float(self.foc_pt_y.text())+float(self.range.text())/2),\
+                             int(self.pts.text()))
+        gridz = np.linspace((float(self.foc_pt_z.text())-float(self.range.text())/2),\
+                            (float(self.foc_pt_z.text())+float(self.range.text())/2),\
+                             int(self.pts.text()))
+
+        xg, yg, zg = np.meshgrid(gridx, gridy, gridz)
+
+        fx = 1
+        fy = 1
+        fz = 1
+        
+
+        fx_eqn = self.line_edit1.text()
+        fy_eqn = self.line_edit2.text()
+        fz_eqn = self.line_edit3.text()
+
+        vf = df3.vector_field3(xg, yg, zg, fx, fy, fz, scaling=self.dial_stack.value()/1000, sing_scl=self.dial_redball.value()/1000)
+
+        vf.give_eqn(fx_eqn, fy_eqn, fz_eqn)
+
+        curl_obj = vf.curl()
+
+        if self.log_chckbx1.isChecked()==True:
+            vf.log_scaling()
+            curl_obj.log_scaling()
+
+
+        if self.fld_inc_chckbx.isChecked()==True:
+            add_fld=1
+        else:
+            add_fld=0
+       
+        return vf, curl_obj, 1, self.cmap_list.currentText(), self.rgb_vec, self.rgb_sng, [self.dial_stack.value()/1000, self.dial_redball.value()/1000], add_fld
+
+    def createVFderiv(self):
+
+        gridx = np.linspace((float(self.foc_pt_x.text())-float(self.range.text())/2),\
+                            (float(self.foc_pt_x.text())+float(self.range.text())/2),\
+                             int(self.pts.text()))
+        gridy = np.linspace((float(self.foc_pt_y.text())-float(self.range.text())/2),\
+                            (float(self.foc_pt_y.text())+float(self.range.text())/2),\
+                             int(self.pts.text()))
+        gridz = np.linspace((float(self.foc_pt_z.text())-float(self.range.text())/2),\
+                            (float(self.foc_pt_z.text())+float(self.range.text())/2),\
+                             int(self.pts.text()))
+
+        xg, yg, zg = np.meshgrid(gridx, gridy, gridz)
+
+        fx = 1
+        fy = 1
+        fz = 1
+        
+
+        fx_eqn = self.line_edit1.text()
+        fy_eqn = self.line_edit2.text()
+        fz_eqn = self.line_edit3.text()
+
+        vf = df3.vector_field3(xg, yg, zg, fx, fy, fz, scaling=self.dial_stack.value()/1000, sing_scl=self.dial_redball.value()/1000)
+
+        vf.give_eqn(fx_eqn, fy_eqn, fz_eqn)
+
+        deriv_obj = vf.deriv(target=[float(self.foc_pt_x.text()), float(self.foc_pt_y.text()), float(self.foc_pt_z.text())], mag=1, dpd=int(self.pts.text()))
+
+        if self.log_chckbx1.isChecked()==True:
+            vf.log_scaling()
+            deriv_obj.log_scaling()
+
+
+        if self.fld_inc_chckbx.isChecked()==True:
+            add_fld=1
+        else:
+            add_fld=0
+       
+        return vf, deriv_obj, 1, self.cmap_list.currentText(), self.rgb_vec, self.rgb_sng, [self.dial_stack.value()/1000, self.dial_redball.value()/1000], add_fld
+
+#-----------------------------------------------------
+
     def createForm2(self):
 
         gridx = np.linspace((float(self.foc_pt_x.text())-float(self.range.text())/2),\
@@ -980,7 +1147,6 @@ class MayaviQWidget(QtGui.QWidget):
 
 
         return xg, yg, zg, fx, fy, fz, fx_eqn, fy_eqn, fz_eqn
-
 
     
     def createForm3(self):
