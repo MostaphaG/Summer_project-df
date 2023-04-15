@@ -564,15 +564,32 @@ class MayaviQWidget(QtGui.QWidget):
 
 #---------------------------------------- DFormPy 3D methods -----------------------------------------------------
 
-        self.groupbox = QGroupBox()
 
-        self.vf_host_layout = QVBoxLayout()
+        def to_vf():
+            self.combobox1.setCurrentIndex(0)
+        
+        def to_f0():
+            self.combobox1.setCurrentIndex(1)
 
         def to_f1():
             self.combobox1.setCurrentIndex(2)
 
-        def to_vf():
-            self.combobox1.setCurrentIndex(0)
+        def to_f2():
+            self.combobox1.setCurrentIndex(3)
+
+        def to_f3():
+            self.combobox1.setCurrentIndex(4)
+
+
+#================================================================================
+#=====================              VF             ==============================
+#================================================================================
+
+        self.groupbox = QGroupBox()
+
+        self.vf_host_layout = QVBoxLayout()
+
+        
 
         # -=-=-=-=-=-=- Div -=-=-=-=-=-=-
 
@@ -668,7 +685,54 @@ class MayaviQWidget(QtGui.QWidget):
         self.groupbox.setLayout(self.vf_host_layout)
         
 
-       
+#================================================================================
+#==========================        F0        ====================================
+#================================================================================      
+
+
+        """
+
+    
+        What do I even add here?
+
+
+        """
+
+        self.groupbox_f0 = QGroupBox()
+
+        self.f0_host_layout = QVBoxLayout()
+
+
+#================================================================================
+#==========================        F1        ====================================
+#================================================================================      
+
+
+        self.groupbox_f1 = QGroupBox()
+
+        self.f1_host_layout = QVBoxLayout()
+
+#================================================================================
+#==========================        F2        ====================================
+#================================================================================      
+
+
+        self.groupbox_f2 = QGroupBox()
+
+        self.f2_host_layout = QVBoxLayout()
+
+
+#================================================================================
+#==========================        F3        ====================================
+#================================================================================      
+
+
+        self.groupbox_f3 = QGroupBox()
+
+        self.f3_host_layout = QVBoxLayout()
+
+
+
 
 #==========================================================================================================
 #================================= ================= ======================================================
@@ -695,6 +759,10 @@ class MayaviQWidget(QtGui.QWidget):
                 self.box3.setChecked(False)
 
                 self.groupbox.setVisible(True)
+                self.groupbox_f0.setVisible(False)
+                self.groupbox_f1.setVisible(False)
+                self.groupbox_f2.setVisible(False)
+                self.groupbox_f3.setVisible(False)
 
 
             if self.combobox1.currentIndex() == 1:
@@ -715,6 +783,10 @@ class MayaviQWidget(QtGui.QWidget):
                 self.box3.setChecked(False)
 
                 self.groupbox.setVisible(False)
+                self.groupbox_f0.setVisible(True)
+                self.groupbox_f1.setVisible(False)
+                self.groupbox_f2.setVisible(False)
+                self.groupbox_f3.setVisible(False)
 
             
             if self.combobox1.currentIndex() == 2:
@@ -735,6 +807,10 @@ class MayaviQWidget(QtGui.QWidget):
                 self.box3.setChecked(False)
 
                 self.groupbox.setVisible(False)
+                self.groupbox_f0.setVisible(False)
+                self.groupbox_f1.setVisible(True)
+                self.groupbox_f2.setVisible(False)
+                self.groupbox_f3.setVisible(False)
 
 
             if self.combobox1.currentIndex() == 3:
@@ -753,6 +829,10 @@ class MayaviQWidget(QtGui.QWidget):
                 self.box1.setChecked(True)
 
                 self.groupbox.setVisible(False)
+                self.groupbox_f0.setVisible(False)
+                self.groupbox_f1.setVisible(False)
+                self.groupbox_f2.setVisible(True)
+                self.groupbox_f3.setVisible(False)
 
 
             if self.combobox1.currentIndex() == 4:
@@ -773,6 +853,10 @@ class MayaviQWidget(QtGui.QWidget):
                 self.box3.setChecked(False)
 
                 self.groupbox.setVisible(False)
+                self.groupbox_f0.setVisible(False)
+                self.groupbox_f1.setVisible(False)
+                self.groupbox_f2.setVisible(False)
+                self.groupbox_f3.setVisible(True)
 
 
 
@@ -838,6 +922,11 @@ class MayaviQWidget(QtGui.QWidget):
         layout.addWidget(self.label3, 7, 0)
         layout.addLayout(self.sublayout3, 8, 0)
 
+        
+        layout.addWidget(self.groupbox_f0, 0, 2, 1,2)
+        layout.addWidget(self.groupbox_f1, 0, 2, 1,2)
+        layout.addWidget(self.groupbox_f2, 0, 2, 1,2)
+        layout.addWidget(self.groupbox_f3, 0, 2, 1,2)
         layout.addWidget(self.groupbox, 0, 2, 1,2)
         layout.addWidget(self.groupbox_ax_param, 1, 1, 8, 1)
         layout.addWidget(self.groupbox_scaling, 1, 2, 8, 1)
