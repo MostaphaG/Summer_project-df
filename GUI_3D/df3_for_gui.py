@@ -1425,7 +1425,7 @@ class form_1_3d():
 
 
 
-    def plot(self, tip_width = None, tip_height = None, stack_side = None, opacity = None, singularity_size = None):
+    def plot(self, figure, tip_width = None, tip_height = None, stack_side = None, opacity = None, singularity_size = None):
 
         '''
         plots the 1 form
@@ -1559,8 +1559,10 @@ class form_1_3d():
         mag_max = np.nanmax(mag)
         mag_min = np.nanmin(mag)
 
+        max_stack = 5
+
         # divide the magnitude range into five parts (to scale stacks between 1-stack and 5-stack)
-        sep = (mag_max-mag_min)/5
+        sep = (mag_max-mag_min)/max_stack
 
         # indices where magnitude of the field is
         # larger that (mag_min + (N)*sep)
@@ -1755,7 +1757,7 @@ class form_1_3d():
         zmax = float((np.max(self.zg)) + 1)
 
         #----------------------------------------
-        """
+        
         v = figure
 
         if (mag_max-mag_min)<=0.05:
@@ -1781,14 +1783,14 @@ class form_1_3d():
         
 
         mlab.show()
-        """
+        
         #--------------------------------------------
 
-        stck_coords = [a, ab, a1, a2, a3, a4]
+        """stck_coords = [a, ab, a1, a2, a3, a4]
         red_balls_data = [pts_nan[:,0], pts_nan[:,1], pts_nan[:,2], sng_size]
         axes_limits = [xmin,xmax,ymin,ymax,zmin,zmax]
 
-        return stck_coords, red_balls_data, axes_limits
+        return stck_coords, red_balls_data, axes_limits"""
 
 
 

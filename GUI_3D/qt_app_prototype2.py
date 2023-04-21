@@ -55,13 +55,11 @@ class Visualization(HasTraits):
 
 
  
-    def takePlotParametresF1(self, stck_coords, red_balls_data_f1, axes_limits_f1):
+    def takePlotParametresF1(self, f1):
 
         self.scene.mlab.clf()
         self.scene.renderer.remove_all_view_props()
-        self.stck_coords = stck_coords
-        self.red_balls_data_f1 = red_balls_data_f1
-        self.axes_limits_f1 = axes_limits_f1
+        self.f1 = f1
 
         self.needUpdate = True
  
@@ -149,20 +147,7 @@ class Visualization(HasTraits):
 
         else:
 
-            self.scene.add_actor(self.stck_coords[0])
-            self.scene.add_actor(self.stck_coords[1])
-            self.scene.add_actor(self.stck_coords[2])
-            self.scene.add_actor(self.stck_coords[3])
-            self.scene.add_actor(self.stck_coords[4])
-            self.scene.add_actor(self.stck_coords[5])
-
-            self.scene.mlab.points3d(self.red_balls_data_f1[0],
-                                    self.red_balls_data_f1[1],
-                                    self.red_balls_data_f1[2], color = (1,0,0),scale_factor=self.red_balls_data_f1[3], resolution=36)
-
-
-            self.ax = self.scene.mlab.axes(color = (0,0,0), nb_labels = 5, extent = self.axes_limits_f1, line_width=1.0)
-            self.ax.axes.font_factor = 0.5
+            self.f1.plot(figure = self.scene)
 
 
         self.scene.background = (1, 1, 1)
@@ -1078,8 +1063,8 @@ class MayaviQWidget(QtGui.QWidget):
     def create_df3_plot(self):
 
         if self.combobox1.currentIndex()==2:
-            stck_coords, red_balls_data, axes_limits = self.createForm1()
-            self.visualization.takePlotParametresF1(stck_coords, red_balls_data, axes_limits)
+            f1 = self.createForm1()
+            self.visualization.takePlotParametresF1(f1)
         elif self.combobox1.currentIndex()==0:
             vf_obj, cmap_vs_clr_idx, clrmap, vecclr, sngclr, scl_fctrs = self.createVF()
             self.visualization.takePlotParametresVF(vf_obj, cmap_vs_clr_idx, clrmap, vecclr, sngclr, scl_fctrs)
@@ -1124,11 +1109,9 @@ class MayaviQWidget(QtGui.QWidget):
 
         form_1.give_eqn(fx_eqn, fy_eqn, fz_eqn)
 
-        stck_coords, red_balls_data, axes_limits = form_1.plot()
 
 
-
-        return stck_coords, red_balls_data, axes_limits
+        return form_1
  
 
     def createForm0(self):
