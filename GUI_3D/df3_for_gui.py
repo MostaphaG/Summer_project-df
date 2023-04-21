@@ -1092,37 +1092,38 @@ class form_0_3d():
             else:
                 pass
 
-            # plot the 0 form contours, add colorbar, axes and an outline
-            #cnt = mlab.contour3d(form_0, colormap=colourmap, opacity = opac, contours=self.lines, figure = fig)
-            #mlab.colorbar(object = cnt, orientation='vertical')
-            #mlab.outline(line_width=1.0)
-            #mlab.axes(color = (0,0,0), ranges = (xmin, xmax, ymin, ymax, zmin, zmax), nb_labels = 5, line_width=3.0)
+            
+            
 
-            """            
+                       
             # if the argument is 'y',  make the contours transparent and add the slider to view scalar cross section
             if str(cross_sec_plane)=='y':
 
                 opac=0.05
                 colour=(0.5,0.5,0.5)
                 # clear figure from previous plot
-                mlab.clf(fig)
-                cnt = mlab.contour3d(form_0, color=colour, opacity = opac, contours=self.lines, figure = fig)
+                cnt = mlab.contour3d(form_0, color=colour, opacity = opac, contours=self.lines)
                 mlab.colorbar(object = cnt, orientation='vertical')
-                mlab.outline(line_width=1.0)
-                mlab.axes(color = (0,0,0), ranges = (xmin, xmax, ymin, ymax, zmin, zmax), nb_labels = 5, line_width=3.0)
+
+                mlab.axes(color = (0,0,0), ranges = (xmin, xmax, ymin, ymax, zmin, zmax), nb_labels = 5, line_width=1.0)
                 mlab.pipeline.scalar_cut_plane(cnt)
             elif str(cross_sec_plane)=='n' or cross_sec_plane==None:
                 pass
             else:
                 print("please specify cross_sec_plane to be either 'y' or 'n'")
                 exit()
-            """
+            
 
      
             axes_limits = [xmin,xmax,ymin,ymax,zmin,zmax]
+
+            # plot the 0 form contours, add colorbar, axes and an outline
+            cnt = mlab.contour3d(form_0, colormap=colourmap, opacity = opac, contours=self.lines)
+            mlab.colorbar(object = cnt, orientation='vertical')
+            mlab.outline(line_width=1.0)
+            mlab.axes(color = (0,0,0), ranges = [xmin, xmax, ymin, ymax, zmin, zmax], nb_labels = 5, line_width=3.0)
             
 
-            return form_0, axes_limits
 
 
 

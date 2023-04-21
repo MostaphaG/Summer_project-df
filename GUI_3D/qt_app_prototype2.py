@@ -85,12 +85,13 @@ class Visualization(HasTraits):
  
         self.update_plot_vf()
 
-    def takePlotParametresF0(self, sc_fld, axes_limits_f0):
+    def takePlotParametresF0(self, sc_fld, cmap, cross_plane_coeff):
 
         self.scene.mlab.clf()
         self.scene.renderer.remove_all_view_props()
-        self.sc_fld = sc_fld
-        self.axes_limits_f0 = axes_limits_f0
+        self.form_0 = sc_fld
+        self.cmap = cmap
+        self.cross_plane_coeff = cross_plane_coeff
         
         self.needUpdate = True
  
@@ -236,13 +237,7 @@ class Visualization(HasTraits):
 
         else:
 
-            cnt = self.scene.mlab.contour3d(self.sc_fld, colormap='jet', opacity = 0.5, contours=7)
-            
-            self.scene.mlab.colorbar(object = cnt, orientation='vertical')
-
-            self.scene.mlab.outline(line_width=1.0)
-            self.ax = self.scene.mlab.axes(color = (0,0,0), ranges=(lft,rght,lft,rght,lft,rght), nb_labels = 5, line_width=1.0)
-            self.ax.axes.font_factor = 0.5
+            self.form_0.plot(cross_sec_plane=self.cross_plane_coeff, colormap=self.cmap)
 
         self.scene.background = (1, 1, 1)
         self.scene.foreground = (0, 0, 0)
@@ -410,7 +405,11 @@ class MayaviQWidget(QtGui.QWidget):
 
 #----------------------------------------------------------------------------------------------------------
 
-#-------------------------------- Scaling dials -----------------------------------------------------------
+#-------------------------------- Scaling -----------------------------------------------------------------
+
+#====================================================================================================
+#================================= VF ===============================================================
+#====================================================================================================
 
         self.groupbox_scaling = QGroupBox("Scaling")
         self.dial_host_layout = QtGui.QHBoxLayout()
@@ -462,12 +461,52 @@ class MayaviQWidget(QtGui.QWidget):
 
 #-----------------------------------------------------------------------------------------------------------------
 
+        self.groupbox_scaling_empty = QGroupBox("Scaling")
+        
+#====================================================================================================
+#================================= F0 ===============================================================
+#====================================================================================================
+
+        self.groupbox_scaling_f0 = QGroupBox("Scaling")
+        self.scaling_host_layout = QtGui.QVBoxLayout()
+
+        self.level_slider_f0 = QSlider(Qt.Horizontal)
+        self.level_slider_f0.setMinimum(2)
+        self.level_slider_f0.setMaximum(30)
+        self.level_slider_f0.setSingleStep(1)
+        self.level_slider_f0.setTickInterval(1)
+        self.level_slider_f0.setTickPosition(QSlider.TicksBothSides)
+        self.level_slider_f0.setMaximumWidth(200)
+        self.level_slider_f0.setValue(12)
+
+        self.amnt_of_lvls = QLabel("Number of levels: 12")
+
+        def f0_lvl_slider_method():
+            value_slider_f0 = self.level_slider_f0.value()
+            self.amnt_of_lvls.setText("Number of levels: {}".format(str(value_slider_f0)))
+
+        self.level_slider_f0.valueChanged.connect(lambda: f0_lvl_slider_method())
+
+        self.scaling_host_layout.addWidget(self.amnt_of_lvls)
+        self.scaling_host_layout.addWidget(self.level_slider_f0)
+
+        self.groupbox_scaling_f0.setLayout(self.scaling_host_layout)
+        self.groupbox_scaling_f0.setMaximumWidth(220)
+        self.groupbox_scaling_f0.setVisible(False)
+
+
+
 #-------------------------------- Cosmetics ----------------------------------------------------------------------
 
 
 
+#====================================================================================================
+#================================= VF ===============================================================
+#====================================================================================================
+
         self.groupbox_cosmetic = QGroupBox("Cosmetics")
         self.cosmetics_host_layout = QtGui.QVBoxLayout()
+
 
         self.rgb_vec = [255, 0, 0]
         self.rgb_sng = [255, 0, 0]
@@ -491,7 +530,7 @@ class MayaviQWidget(QtGui.QWidget):
             self.rgb_sng = rgb
 
         self.vector_colourmap_layout = QtGui.QHBoxLayout()
-        self.vec_cmap_lbl = QLabel("V. colourmap")
+        self.vec_cmap_lbl = QLabel("Colourmap")
         self.vec_cmap_chckbox = QRadioButton()
         self.vec_cmap_chckbox.setChecked(True)
         self.vector_colourmap_layout.addWidget(self.vec_cmap_chckbox, alignment=Qt.AlignLeft)
@@ -505,7 +544,7 @@ class MayaviQWidget(QtGui.QWidget):
         self.vector_colourmap_layout.setAlignment(Qt.AlignLeft)
 
         self.vector_colour_layout = QtGui.QHBoxLayout()
-        self.vec_clr_lbl = QLabel("Vector colour")
+        self.vec_clr_lbl = QLabel("Colour")
         self.vec_clr_lbl.setDisabled(True)
         self.vec_clr_chckbox = QRadioButton()
         self.vector_colour_layout.addWidget(self.vec_clr_chckbox, alignment=Qt.AlignLeft)
@@ -526,7 +565,8 @@ class MayaviQWidget(QtGui.QWidget):
         self.cmap_layout.addWidget(self.cmap, alignment=Qt.AlignRight)
 
         self.sing_colour_layout = QtGui.QHBoxLayout()
-        self.sing_colour_layout.addWidget(QLabel("Singularity colour"), alignment=Qt.AlignLeft)
+        self.sng_clr_lbl = QLabel("Singularity colour")
+        self.sing_colour_layout.addWidget(self.sng_clr_lbl, alignment=Qt.AlignLeft)
         self.frame_sing = QPushButton(" ")
         self.frame_sing.clicked.connect(lambda: SingClr())
         self.frame_sing.setStyleSheet("background-color: rgb(255, 0, 0)")
@@ -559,6 +599,12 @@ class MayaviQWidget(QtGui.QWidget):
 
         self.groupbox_cosmetic.setLayout(self.cosmetics_host_layout)
 
+#====================================================================================================
+#================================= F0 ===============================================================
+#====================================================================================================
+
+        self.groupbox_cosmetic_empty = QGroupBox("Cosmetics")
+        self.cosmetics_host_layout = QtGui.QVBoxLayout()
     
 #-----------------------------------------------------------------------------------------------------------------
 
@@ -690,17 +736,29 @@ class MayaviQWidget(QtGui.QWidget):
 #================================================================================      
 
 
-        """
-
-    
-        What do I even add here?
-
-
-        """
 
         self.groupbox_f0 = QGroupBox()
 
         self.f0_host_layout = QVBoxLayout()
+
+        self.log_lout_f0 = QHBoxLayout()
+        self.log_chckbx_f0 = QCheckBox()
+        self.log_lout_f0.addWidget(QLabel("log scaling"), alignment=Qt.AlignRight)
+        self.log_lout_f0.addWidget(self.log_chckbx_f0)
+
+        self.cross_sec_f0 = QHBoxLayout()
+        self.cross_sec_chckbx_f0 = QCheckBox()
+        self.cross_sec_f0.addWidget(QLabel("2D cross-section plane"), alignment=Qt.AlignRight)
+        self.cross_sec_f0.addWidget(self.cross_sec_chckbx_f0)
+
+        self.f0_host_layout.addWidget(QLabel(" "))
+        self.f0_host_layout.addLayout(self.cross_sec_f0)
+        self.f0_host_layout.addWidget(QLabel(" "))
+        self.f0_host_layout.addLayout(self.log_lout_f0)
+        self.f0_host_layout.addWidget(QLabel(" "))
+
+        self.groupbox_f0.setLayout(self.f0_host_layout)
+        self.groupbox_f0.setVisible(False)
 
 
 #================================================================================
@@ -764,6 +822,13 @@ class MayaviQWidget(QtGui.QWidget):
                 self.groupbox_f2.setVisible(False)
                 self.groupbox_f3.setVisible(False)
 
+                self.groupbox_cosmetic.setVisible(True)
+                self.groupbox_cosmetic_empty.setVisible(False)
+
+                self.groupbox_scaling.setVisible(True)
+                self.groupbox_scaling_f0.setVisible(False)
+                self.groupbox_scaling_empty.setVisible(False)
+
 
             if self.combobox1.currentIndex() == 1:
                 self.label1.setText('Field')
@@ -787,6 +852,18 @@ class MayaviQWidget(QtGui.QWidget):
                 self.groupbox_f1.setVisible(False)
                 self.groupbox_f2.setVisible(False)
                 self.groupbox_f3.setVisible(False)
+
+                self.vec_clr_lbl.setVisible(False)
+                self.vec_clr_chckbox.setVisible(False)
+                self.sng_clr_lbl.setVisible(False)
+                self.frame_sing.setVisible(False)
+                self.frame.setVisible(False)
+                self.vec_cmap_chckbox.setVisible(False)
+
+                self.groupbox_scaling.setVisible(False)
+                self.groupbox_scaling_f0.setVisible(True)
+                self.groupbox_scaling_empty.setVisible(False)
+
 
             
             if self.combobox1.currentIndex() == 2:
@@ -812,6 +889,13 @@ class MayaviQWidget(QtGui.QWidget):
                 self.groupbox_f2.setVisible(False)
                 self.groupbox_f3.setVisible(False)
 
+                self.groupbox_cosmetic.setVisible(False)
+                self.groupbox_cosmetic_empty.setVisible(True)
+
+                self.groupbox_scaling.setVisible(True)
+                self.groupbox_scaling_f0.setVisible(False)
+                self.groupbox_scaling_empty.setVisible(False)
+
 
             if self.combobox1.currentIndex() == 3:
                 self.label1.setText('dy ∧ dz')
@@ -833,6 +917,13 @@ class MayaviQWidget(QtGui.QWidget):
                 self.groupbox_f1.setVisible(False)
                 self.groupbox_f2.setVisible(True)
                 self.groupbox_f3.setVisible(False)
+
+                self.groupbox_cosmetic.setVisible(False)
+                self.groupbox_cosmetic_empty.setVisible(True)
+
+                self.groupbox_scaling.setVisible(False)
+                self.groupbox_scaling_f0.setVisible(False)
+                self.groupbox_scaling_empty.setVisible(True)
 
 
             if self.combobox1.currentIndex() == 4:
@@ -857,6 +948,13 @@ class MayaviQWidget(QtGui.QWidget):
                 self.groupbox_f1.setVisible(False)
                 self.groupbox_f2.setVisible(False)
                 self.groupbox_f3.setVisible(True)
+
+                self.groupbox_cosmetic.setVisible(False)
+                self.groupbox_cosmetic_empty.setVisible(True)
+
+                self.groupbox_scaling.setVisible(False)
+                self.groupbox_scaling_f0.setVisible(False)
+                self.groupbox_scaling_empty.setVisible(True)
 
 
 
@@ -928,9 +1026,16 @@ class MayaviQWidget(QtGui.QWidget):
         layout.addWidget(self.groupbox_f2, 0, 2, 1,2)
         layout.addWidget(self.groupbox_f3, 0, 2, 1,2)
         layout.addWidget(self.groupbox, 0, 2, 1,2)
+
         layout.addWidget(self.groupbox_ax_param, 1, 1, 8, 1)
+
+        layout.addWidget(self.groupbox_scaling_f0, 1, 2, 8, 1)
+        layout.addWidget(self.groupbox_scaling_empty, 1, 2, 8, 1)
         layout.addWidget(self.groupbox_scaling, 1, 2, 8, 1)
+
+        layout.addWidget(self.groupbox_cosmetic_empty, 1, 3, 8, 1)
         layout.addWidget(self.groupbox_cosmetic, 1, 3, 8, 1)
+
 
 
         layout.setHorizontalSpacing(20)
@@ -979,8 +1084,8 @@ class MayaviQWidget(QtGui.QWidget):
             vf_obj, cmap_vs_clr_idx, clrmap, vecclr, sngclr, scl_fctrs = self.createVF()
             self.visualization.takePlotParametresVF(vf_obj, cmap_vs_clr_idx, clrmap, vecclr, sngclr, scl_fctrs)
         elif self.combobox1.currentIndex()==1:
-            sc_fld, axes_limits_f0 = self.createForm0()
-            self.visualization.takePlotParametresF0(sc_fld, axes_limits_f0)
+            sc_fld, cmap, cross_plane_coeff = self.createForm0()
+            self.visualization.takePlotParametresF0(sc_fld, cmap, cross_plane_coeff)
         elif self.combobox1.currentIndex()==3:
             xg, yg, zg, fx, fy, fz, fx_eqn, fy_eqn, fz_eqn = self.createForm2()
             self.visualization.takePlotParametresF2(xg, yg, zg, fx, fy, fz, fx_eqn, fy_eqn, fz_eqn)
@@ -1044,15 +1149,23 @@ class MayaviQWidget(QtGui.QWidget):
 
         f0_eqn = self.line_edit1.text()
 
+        lvlz = self.level_slider_f0.value()+1
+
         form_0 = df3.form_0_3d(xg, yg, zg, f0)
+        form_0.levels(lvlz)
 
         form_0.give_eqn(f0_eqn)
 
-        sc_field, axes_limits = form_0.plot()
+        if self.log_chckbx_f0.isChecked()==True:
+            form_0.log_scaling()
+
+        if self.cross_sec_chckbx_f0.isChecked()==True:
+            cross_plane_coeff ='y'
+        else:
+            cross_plane_coeff ='n'
 
 
-
-        return sc_field, axes_limits
+        return form_0, self.cmap_list.currentText(), cross_plane_coeff
 
 #---------------VF stuff------------------------------
 
