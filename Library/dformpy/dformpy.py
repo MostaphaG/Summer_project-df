@@ -2136,9 +2136,9 @@ class form_2():
             # if none was given, do it with respect to uniform 1, 1
             vf_x_str = '1'
             vf_y_str = '1'
-        elif type(vector_field) == tuple:
+        elif isinstance(vector_field, tuple):
             # if equations were given, take these, is numericals were given here, break!
-            if type(vector_field[0]) == str:
+            if isinstance(vector_field[0], str):
                 vf_x_str = vector_field[0]
                 vf_y_str = vector_field[1]
             else:
