@@ -1344,9 +1344,9 @@ class form_1():
             # if none was given, do it with respect to uniform 1, 1
             vf_x_str = '1'
             vf_y_str = '1'
-        elif type(vector_field) == tuple:
+        elif isinstance(vector_field, tuple):
             # if equations were given, take these, is numericals were given here, break!
-            if type(vector_field[0]) == str:
+            if isinstance(vector_field[0], str):
                 vf_x_str = vector_field[0]
                 vf_y_str = vector_field[1]
             else:
@@ -1422,10 +1422,10 @@ class form_1():
             # if none was given, do it with respect to uniform 1, 1
             vf_x = np.ones(np.shape(self.xg))
             vf_y = np.ones(np.shape(self.yg))
-        elif type(vector_field) == tuple:
+        elif isinstance(vector_field, tuple):
             # if numerical grids were given, take these
             # if equations were given here, evaulate them to grids
-            if type(vector_field[0]) == str:
+            if isinstance(vector_field[0], str):
                 new_str_x = vector_field[0].replace('x', '(self.xg)')
                 new_str_x = new_str_x.replace('y', '(self.yg)')
                 new_str_y = vector_field[1].replace('x', '(self.xg)')
@@ -2213,9 +2213,9 @@ class form_2():
             # if none was given, do it with respect to uniform 1, 1
             vf_x = np.ones(np.shape(self.xg))
             vf_y = np.ones(np.shape(self.xg))
-        elif type(vector_field) == tuple:
+        elif isinstance(vector_field, tuple):
             # if equations were given, take these, is numericals were given here, break!
-            if type(vector_field[0]) == str:
+            if isinstance(vector_field[0], str):
                 raise ValueError('for numerical calulation, supply VF arrays, not equations')
             else:
                 vf_x = vector_field[0]
