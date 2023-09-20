@@ -1529,8 +1529,8 @@ class form_1():
             # set up the dummy variable
             analytics = False
         else:
-            # Inconsistant metric components
-            raise TypeError('Metric components are inconcisstant')
+            # Inconsistent metric components
+            raise TypeError('Metric components are inconsistent')
         
         # from 1-form components, get VF components by the metric
         # first, do so numerically, as this must always happen
