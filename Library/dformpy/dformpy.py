@@ -4142,7 +4142,7 @@ class vector_field():
             analytics = False
             
         else:
-            # Inconsistant metric components
+            # Inconsistent metric components
             raise TypeError('Metric components are inconsistent')
         
         # from vector field components, get 1-form components by the metric
