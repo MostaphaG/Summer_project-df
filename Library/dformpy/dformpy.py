@@ -3065,7 +3065,7 @@ class form_0():
             else:
                 raise ValueError('Error, Invalid input for \'keep_object\'')
 
-        elif order is 2:
+        elif order == 2:
             form_2_str = str(simplify( '(' + self.form_0_str + ')*(' +  to_wedge_2_form_str + ')'))
             # keep it as it is locally to supply it to object maker later
             form_2_str_loc = form_2_str + ''
