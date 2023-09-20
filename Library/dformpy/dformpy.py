@@ -1477,7 +1477,7 @@ class form_1():
         # extract what is needed form the metric depending on what the user
         # supplied
         # check if it has string components
-        if type(g[0][0]) == str and type(g[0][1]) == str and type(g[1][0]) == str and type(g[1][1]) == str:
+        if all(isinstance(g[j][i], str) for j in [0, 1] for i in [0, 1]):
             # deal with supplied string metric
             # need to format it, correct it for constants and evaluate it's numerical equivalent
             str_comp_00 = g[0][0] + ''
