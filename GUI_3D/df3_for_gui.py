@@ -1559,6 +1559,10 @@ class form_1_3d():
         mag_max = np.nanmax(mag)
         mag_min = np.nanmin(mag)
 
+
+        #---------------------------------------------------------------------------------------------------
+
+
         max_stack = 5
 
         # divide the magnitude range into five parts (to scale stacks between 1-stack and 5-stack)
@@ -1570,6 +1574,11 @@ class form_1_3d():
         Idx2 = np.argwhere(np.all(mag_lst>=(mag_min+(2*sep)),axis=1))
         Idx3 = np.argwhere(np.all(mag_lst>=(mag_min+(3*sep)),axis=1))
         Idx4 = np.argwhere(np.all(mag_lst>=(mag_min+(4*sep)),axis=1))
+
+        print(Idx1)
+        print(Idx2)
+        print(Idx3)
+        print(Idx4)
 
 
 
