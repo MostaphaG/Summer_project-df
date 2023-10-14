@@ -1645,29 +1645,31 @@ class form_1_3d():
                                 center = (0.075*self.scaling, 0, 0),
                                     )
 
-        box = tvtk.CubeSource(x_length=0.01,
+        bdist = 0.07
+
+        box = tvtk.CubeSource(x_length=0.04,
                             y_length = side*self.scaling,
                             z_length = side*self.scaling)
 
-        box1 = tvtk.CubeSource(x_length=0.01,
+        box1 = tvtk.CubeSource(x_length=0.04,
                             y_length = side*self.scaling,
                             z_length = side*self.scaling,
-                            center = (-0.04, 0, 0))
+                            center = (-bdist, 0, 0))
 
-        box2 = tvtk.CubeSource(x_length=0.01,
+        box2 = tvtk.CubeSource(x_length=0.04,
                             y_length = side*self.scaling,
                             z_length = side*self.scaling,
-                            center = (-0.08, 0, 0))
+                            center = (-bdist*2, 0, 0))
 
-        box3 = tvtk.CubeSource(x_length=0.01,
+        box3 = tvtk.CubeSource(x_length=0.04,
                             y_length = side*self.scaling,
                             z_length = side*self.scaling,
-                            center = (-0.12, 0, 0))
+                            center = (-bdist*3, 0, 0))
 
-        box4 = tvtk.CubeSource(x_length=0.01,
+        box4 = tvtk.CubeSource(x_length=0.04,
                             y_length = side*self.scaling,
                             z_length = side*self.scaling,
-                            center = (-0.16, 0, 0))
+                            center = (-bdist*4, 0, 0))
 
 
         # Create input for the glyph -- the sources are placed at these input
@@ -1731,9 +1733,13 @@ class form_1_3d():
 
         # properties of geometrical objects
 
-        #0.565,0.641,0.46
-        pc = tvtk.Property(opacity=opc, color=(0.64,0.008,0.87), edge_visibility='y', edge_color=(0,0,0))
-        p1 = tvtk.Property(opacity=opc, color=(0.64,0.008,0.87), edge_visibility='y', edge_color=(0,0,0))
+        #0.64, 0.008, 0.87
+        pc = tvtk.Property(opacity=opc, color=(0.5,0.008,0.87), edge_visibility='y', edge_color=(0,0,0))
+        p1 = tvtk.Property(opacity=opc, color=(0.5,0.008,0.87), edge_visibility='y', edge_color=(0,0,0))
+        p2 = tvtk.Property(opacity=opc, color=(0.6,0.008,0.87), edge_visibility='y', edge_color=(0,0,0))
+        p3 = tvtk.Property(opacity=opc, color=(0.7,0.008,0.87), edge_visibility='y', edge_color=(0,0,0))
+        p4 = tvtk.Property(opacity=opc, color=(0.8,0.008,0.87), edge_visibility='y', edge_color=(0,0,0))
+        p5 = tvtk.Property(opacity=opc, color=(0.99,0.008,0.87), edge_visibility='y', edge_color=(0,0,0))
 
         # map glyphs(which now represent the geometrical objects)
         # to PolyData sets
@@ -1748,10 +1754,10 @@ class form_1_3d():
         # to be represented on a figure
         a = tvtk.Actor(mapper=m, property=pc)
         ab = tvtk.Actor(mapper=mb, property=p1)
-        a1 = tvtk.Actor(mapper=m1, property=p1)
-        a2 = tvtk.Actor(mapper=m2, property=p1)
-        a3 = tvtk.Actor(mapper=m3, property=p1)
-        a4 = tvtk.Actor(mapper=m4, property=p1)
+        a1 = tvtk.Actor(mapper=m1, property=p2)
+        a2 = tvtk.Actor(mapper=m2, property=p3)
+        a3 = tvtk.Actor(mapper=m3, property=p4)
+        a4 = tvtk.Actor(mapper=m4, property=p5)
 
         # add actors to the figure
         # only add 1-stack for constant fields
