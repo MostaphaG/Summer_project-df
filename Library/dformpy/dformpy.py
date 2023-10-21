@@ -1,6 +1,8 @@
 # Differential form python module attempt - 1
 
 # import needed modules
+import numbers
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -1513,8 +1515,11 @@ class form_1():
             # set up a dummy variable to store the fact that numericals were given
             # not to check again later
             analytics = True
-            
-        elif type(g[0][0]) == np.ndarray and type(g[0][1]) == np.ndarray and type(g[1][0]) == np.ndarray and type(g[1][1]) == np.ndarray:
+
+        elif all(
+            isinstance(g[j][i], (np.ndarray, numbers.Number))
+            for j in [0, 1] for i in [0, 1]
+        ):
             # deal with the metric being supplied as components
             # if the user has 1-form equations, warn that these 
             # will be lost, due to numerical calculations
@@ -4123,7 +4128,10 @@ class vector_field():
             # not to check again later
             analytics = True
             
-        elif type(g[0][0]) == np.ndarray and type(g[0][1]) == np.ndarray and type(g[1][0]) == np.ndarray and type(g[1][1]) == np.ndarray:
+        elif all(
+            isinstance(g[j][i], (np.ndarray, numbers.Number))
+            for j in [0, 1] for i in [0, 1]
+        ):
             # deal with the metric being supplied as components
             # if the user has vector field equations, warn that these can't
             # be passed anymore, because we don't have equations for this
